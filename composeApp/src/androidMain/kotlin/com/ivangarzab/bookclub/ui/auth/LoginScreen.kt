@@ -62,35 +62,3 @@ fun LoginScreen(
         }
     }
 }
-
-@Composable
-fun TextDivider(
-    modifier: Modifier = Modifier,
-    text: String,
-    color: Color = Color.Gray,
-    thickness: Dp = 1.dp
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = color,
-            thickness = thickness
-        )
-
-        Text(
-            text = text,
-            color = color,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = color,
-            thickness = thickness
-        )
-    }
-}

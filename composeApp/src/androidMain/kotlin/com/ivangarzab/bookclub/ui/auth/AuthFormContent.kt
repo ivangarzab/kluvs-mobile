@@ -14,13 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -28,7 +23,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -39,20 +33,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ivangarzab.bookclub.R
+import com.ivangarzab.bookclub.domain.models.AuthProvider
 import com.ivangarzab.bookclub.presentation.viewmodels.auth.AuthMode
 import com.ivangarzab.bookclub.presentation.viewmodels.auth.AuthUiState
 import com.ivangarzab.bookclub.presentation.viewmodels.auth.LoginNavigation
-import com.ivangarzab.bookclub.presentation.viewmodels.auth.OAuthProvider
 import com.ivangarzab.bookclub.theme.KluvsTheme
 import com.ivangarzab.bookclub.theme.signInDiscord
 import com.ivangarzab.bookclub.theme.signInGoogle
+import com.ivangarzab.bookclub.ui.components.InputField
 import com.ivangarzab.bookclub.ui.components.SocialButton
+import com.ivangarzab.bookclub.ui.components.TextDivider
 
 @Composable
 fun AuthFormContent(
@@ -64,7 +59,7 @@ fun AuthFormContent(
     onPasswordFieldChange: (String) -> Unit,
     onConfirmPasswordFieldChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    onOAuthSignIn: (OAuthProvider) -> Unit,
+    onOAuthSignIn: (AuthProvider) -> Unit,
     onNavigate: (LoginNavigation) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -126,7 +121,7 @@ fun AuthFormContent(
                 iconSize = 20.dp,
                 backgroundColor = signInDiscord,
                 textColor = Color(0xFFFFFFFF),
-                onClick = { onOAuthSignIn(OAuthProvider.DISCORD) }
+                onClick = { onOAuthSignIn(AuthProvider.DISCORD) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -137,7 +132,7 @@ fun AuthFormContent(
                 iconSize = 40.dp,
                 backgroundColor = signInGoogle,
                 textColor = Color(0xFF1F1F1F),
-                onClick = { onOAuthSignIn(OAuthProvider.GOOGLE) }
+                onClick = { onOAuthSignIn(AuthProvider.GOOGLE) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -146,43 +141,41 @@ fun AuthFormContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            InputField(
                 modifier = Modifier.fillMaxWidth(),
+                label = "Email",
                 value = state.emailField,
                 onValueChange = onEmailFieldChange,
-                singleLine = true,
-                label = { Text("Email") },
+                iconRes = R.drawable.ic_email,
+                iconDescription = "Email text field icon",
+                supportingText = state.emailError ?: "Enter valid email address",
+                supportingTextColor = if (state.emailError != null) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    Color.Gray
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 ),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_email),
-                        contentDescription = "Email text field icon"
-                    )
-                },
-                supportingText = {
-                    Text(
-                        text = state.emailError ?: "Enter valid email address",
-                        color = if (state.emailError != null) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                },
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            InputField(
                 modifier = Modifier.fillMaxWidth(),
+                isPassword = true,
+                label = "Password",
                 value = state.passwordField,
                 onValueChange = onPasswordFieldChange,
-                singleLine = true,
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
+                iconRes = R.drawable.ic_password,
+                iconDescription = "Password text field icon",
+                supportingText = state.passwordError ?: "Minimum 8 characters",
+                supportingTextColor = if (state.emailError != null) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    Color.Gray
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = if (mode == AuthMode.LOGIN) {
@@ -194,57 +187,32 @@ fun AuthFormContent(
                 keyboardActions = KeyboardActions(
                     onGo = { onSubmit()}
                 ),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_password),
-                        contentDescription = "Password text field icon"
-                    )
-                },
-                supportingText = {
-                    Text(
-                        text = state.passwordError ?: "Minimum 8 characters",
-                        color = if (state.passwordError != null) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                },
             )
 
             if (mode == AuthMode.SIGNUP) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
+                InputField(
                     modifier = Modifier.fillMaxWidth(),
+                    isPassword = true,
+                    label = "Confirm Password",
                     value = state.confirmPasswordField,
                     onValueChange = onConfirmPasswordFieldChange,
-                    singleLine = true,
-                    label = { Text("Confirm Password") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    iconRes = R.drawable.ic_password,
+                    iconDescription = "Confirm password text field icon",
+                    supportingText = state.confirmPasswordError ?: "Must match password above",
+                    supportingTextColor = if (state.emailError != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        Color.Gray
+                    },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Go
                     ),
                     keyboardActions = KeyboardActions(
-                        onGo = { onSubmit()}
+                        onGo = { onSubmit() }
                     ),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_password),
-                            contentDescription = "Confirm password text field icon"
-                        )
-                    },
-                    supportingText = {
-                        Text(
-                            text = state.confirmPasswordError ?: "Must match password above",
-                            color = if (state.confirmPasswordError != null) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        )
-                    },
                 )
             }
 

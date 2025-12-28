@@ -6,7 +6,7 @@ import com.ivangarzab.bookclub.domain.models.Club
 /**
  * UseCase for fetching the current user's [Club] list for the MainScreen.
  *
- * Extract list of clubs form the [Member] model into a UI-friend list.
+ * Extract list of clubs form the Member model into a UI-friendly list.
  *
  * @param memberRepository Repository for member data
  */

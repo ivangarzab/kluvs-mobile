@@ -68,7 +68,7 @@ fun MeScreen(
         onSettingsClick = { /* TODO() */ },
         onHelpClick = { /* TODO() */ },
         onSignOutClick = {
-            viewModel::signOut
+            viewModel.signOut()
             onNavigateToLogin()
         },
     )
