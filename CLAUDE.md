@@ -190,6 +190,15 @@ Supabase credentials are managed via BuildKonfig:
 
 These must be set in `~/.gradle/gradle.properties` or as environment variables. See `shared/build.gradle.kts:87-122` for the configuration logic.
 
+## Navigation Architecture
+
+The app uses a hybrid navigation approach with two layers:
+
+- **App-Level Navigation (Shared):** `AppCoordinator` handles authentication state and determines which major section of the app to show (login vs main app). This logic is shared across Android and iOS.
+- **Feature Navigation (Platform-Specific):** Platform NavHost/NavigationStack handles user-driven flows like browsing clubs, viewing details, editing profile, etc.
+
+See `docs/NAVIGATION.md` for detailed navigation architecture documentation.
+
 ## Testing Strategy
 
 ### Test Organization
