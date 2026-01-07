@@ -53,7 +53,6 @@ fun MeScreen(
     modifier: Modifier = Modifier,
     userId: String,
     viewModel: MeViewModel = koinViewModel(),
-    onNavigateToLogin: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -67,10 +66,7 @@ fun MeScreen(
         onRetry = viewModel::refresh,
         onSettingsClick = { /* TODO() */ },
         onHelpClick = { /* TODO() */ },
-        onSignOutClick = {
-            viewModel.signOut()
-            onNavigateToLogin()
-        },
+        onSignOutClick = viewModel::signOut,
     )
 }
 

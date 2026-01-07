@@ -9,14 +9,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ivangarzab.bookclub.app.AppCoordinator
+import com.ivangarzab.bookclub.app.NavigationState
 import com.ivangarzab.bookclub.theme.KluvsTheme
 import com.ivangarzab.bookclub.ui.auth.LoginScreen
 import com.ivangarzab.bookclub.ui.auth.SignupScreen
+import com.ivangarzab.bookclub.ui.components.LoadingScreen
+import org.koin.compose.viewmodel.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +48,34 @@ fun MainNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
+    val appCoordinator: AppCoordinator = koinViewModel()
+    val navState by appCoordinator.navigationState.collectAsState()
+
+    // Navigate based on app-level state
+    LaunchedEffect(navState) {
+        when (navState) {
+            is NavigationState.Unauthenticated -> {
+                // Only navigate if not already on login
+                if (navController.currentDestination?.route != NavDestinations.LOGIN) {
+                    navController.navigate(NavDestinations.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
+            is NavigationState.Authenticated -> {
+                // Only navigate if not already on main
+                if (navController.currentDestination?.route != NavDestinations.MAIN) {
+                    navController.navigate(NavDestinations.MAIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
+            NavigationState.Initializing -> {
+                // Do nothing - show splash/loading
+            }
+        }
+    }
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -55,9 +90,7 @@ fun MainNavHost(
                     navController.navigate(NavDestinations.FORGOT_PASSWORD)
                 },
                 onNavigateToMain = {
-                    navController.navigate(NavDestinations.MAIN) {
-                        popUpTo(NavDestinations.LOGIN) { inclusive = true }
-                    }
+                    // Navigation handled by AppCoordinator - no-op
                 },
             )
         }
@@ -70,9 +103,7 @@ fun MainNavHost(
                     navController.navigate(NavDestinations.FORGOT_PASSWORD)
                 },
                 onNavigateToMain = {
-                    navController.navigate(NavDestinations.MAIN) {
-                        popUpTo(NavDestinations.LOGIN) { inclusive = true }
-                    }
+                    // Navigation handled by AppCoordinator - no-op
                 },
             )
         }
@@ -80,13 +111,10 @@ fun MainNavHost(
             Text("Coming Soon...")
         }
         composable(NavDestinations.MAIN) {
-            MainScreen(
-                onNavigateToLogin = {
-                    navController.navigate(NavDestinations.LOGIN) {
-                        popUpTo(NavDestinations.MAIN) { inclusive = true }
-                    }
-                }
-            )
+            val userId = (navState as? NavigationState.Authenticated)?.userId
+            if (userId != null) {
+                MainScreen(userId = userId)
+            }
         }
     }
 }

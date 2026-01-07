@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,19 +44,22 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
+    userId: String,
     viewModel: MainViewModel = koinViewModel(),
-    onNavigateToLogin: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
 
-    if (state.clubId == null || state.userId == null) {
+    LaunchedEffect(userId) {
+        viewModel.loadUserClub(userId)
+    }
+
+    if (state.clubId == null) {
         LoadingScreen()
     } else {
         MainScreenContent(
             modifier = modifier,
-            userId = state.userId!!,
+            userId = userId,
             clubId = state.clubId!!,
-            onNavigateToLogin = onNavigateToLogin
         )
     }
 }
@@ -66,7 +70,6 @@ fun MainScreenContent(
     modifier: Modifier = Modifier,
     userId: String,
     clubId: String,
-    onNavigateToLogin: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -184,7 +187,6 @@ fun MainScreenContent(
                 2 ->*/ MeScreen(
                     modifier = contentModifier,
                     userId = userId,
-                    onNavigateToLogin = onNavigateToLogin
                 )
             }
         }
@@ -197,5 +199,5 @@ fun Preview_MainScreen() = KluvsTheme {
     MainScreenContent(
         userId = "",
         clubId = ""
-    ) { }
+    )
 }

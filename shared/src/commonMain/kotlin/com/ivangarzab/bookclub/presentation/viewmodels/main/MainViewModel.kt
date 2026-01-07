@@ -3,7 +3,6 @@ package com.ivangarzab.bookclub.presentation.viewmodels.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
-import com.ivangarzab.bookclub.data.auth.AuthRepository
 import com.ivangarzab.bookclub.domain.usecases.member.GetMemberClubsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,25 +11,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val authRepository: AuthRepository,
     private val getMemberClubsUseCase: GetMemberClubsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
     val state: StateFlow<MainState> = _state.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            authRepository.currentUser.collect { user ->
-                user?.let {
-                    _state.update { it.copy(userId = user.id) }
-                    loadUserClub(user.id)
-                }
-            }
-        }
-    }
-
-    private fun loadUserClub(userId: String) = viewModelScope.launch {
+    fun loadUserClub(userId: String) = viewModelScope.launch {
         getMemberClubsUseCase(userId)
             .onSuccess { clubs ->
                 if (clubs.isNotEmpty()) {
@@ -50,6 +37,5 @@ class MainViewModel(
 }
 
 data class MainState(
-    val userId: String? = null,
     val clubId: String? = null,
 )
