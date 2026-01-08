@@ -22,8 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -33,35 +31,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.bookclub.R
-import com.ivangarzab.bookclub.presentation.viewmodels.main.MainViewModel
 import com.ivangarzab.bookclub.theme.KluvsTheme
 import com.ivangarzab.bookclub.ui.clubs.ClubsScreen
-import com.ivangarzab.bookclub.ui.components.LoadingScreen
 import com.ivangarzab.bookclub.ui.me.MeScreen
 import kotlinx.coroutines.launch
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
     userId: String,
-    viewModel: MainViewModel = koinViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
-
-    LaunchedEffect(userId) {
-        viewModel.loadUserClub(userId)
-    }
-
-    if (state.clubId == null) {
-        LoadingScreen()
-    } else {
-        MainScreenContent(
-            modifier = modifier,
-            userId = userId,
-            clubId = state.clubId!!,
-        )
-    }
+    MainScreenContent(
+        modifier = modifier,
+        userId = userId,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +52,6 @@ fun MainScreen(
 fun MainScreenContent(
     modifier: Modifier = Modifier,
     userId: String,
-    clubId: String,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -82,7 +64,6 @@ fun MainScreenContent(
         stringResource(R.string.clubs),
         stringResource(R.string.me)
     )
-
 
     Scaffold(
         modifier = modifier,
@@ -181,7 +162,7 @@ fun MainScreenContent(
             when (page) {
                 0 -> ClubsScreen(
                     modifier = contentModifier,
-                    clubId = clubId,
+                    userId = userId,
                 )
                 1 -> /*HomeScreen(contentModifier)
                 2 ->*/ MeScreen(
@@ -197,7 +178,6 @@ fun MainScreenContent(
 @Composable
 fun Preview_MainScreen() = KluvsTheme {
     MainScreenContent(
-        userId = "",
-        clubId = ""
+        userId = ""
     )
 }

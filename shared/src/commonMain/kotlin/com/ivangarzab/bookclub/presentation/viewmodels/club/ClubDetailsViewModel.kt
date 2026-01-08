@@ -6,6 +6,8 @@ import com.ivangarzab.bark.Bark
 import com.ivangarzab.bookclub.domain.usecases.club.GetActiveSessionUseCase
 import com.ivangarzab.bookclub.domain.usecases.club.GetClubDetailsUseCase
 import com.ivangarzab.bookclub.domain.usecases.club.GetClubMembersUseCase
+import com.ivangarzab.bookclub.domain.usecases.member.GetMemberClubsUseCase
+import com.ivangarzab.bookclub.presentation.models.ClubListItem
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,13 +21,59 @@ import kotlinx.coroutines.launch
 class ClubDetailsViewModel(
     private val getClubDetails: GetClubDetailsUseCase,
     private val getActiveSession: GetActiveSessionUseCase,
-    private val getClubMembers: GetClubMembersUseCase
+    private val getClubMembers: GetClubMembersUseCase,
+    private val getMemberClubsUseCase: GetMemberClubsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ClubDetailsState())
     val state: StateFlow<ClubDetailsState> = _state.asStateFlow()
 
     private var currentClubId: String? = null
+
+    /**
+     * Loads the user's clubs and displays the first club.
+     * If the user has no clubs, sets state to show empty state.
+     */
+    fun loadUserClubs(userId: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+
+            getMemberClubsUseCase(userId)
+                .onSuccess { clubs ->
+                    // Map domain clubs to lightweight presentation model
+                    // TODO: Move mapping to UseCase?
+                    val clubListItems = clubs.map { club ->
+                        ClubListItem(
+                            id = club.id,
+                            name = club.name
+                        )
+                    }
+
+                    // Store available clubs
+                    _state.update { it.copy(availableClubs = clubListItems) }
+
+                    if (clubListItems.isNotEmpty()) {
+                        Bark.i("User has ${clubListItems.size} club(s), loading first club details")
+                        // Load full details for the first club only
+                        loadClubData(clubListItems.first().id)
+                    } else {
+                        Bark.i("User has no clubs, showing empty state")
+                        _state.update {
+                            it.copy(isLoading = false)
+                        }
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Failed to load member clubs", error)
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message ?: "Failed to load clubs"
+                        )
+                    }
+                }
+        }
+    }
 
     fun loadClubData(clubId: String) {
         currentClubId = clubId
@@ -63,7 +111,7 @@ class ClubDetailsViewModel(
                 it.copy(
                     isLoading = false,
                     error = error,
-                    clubDetails = detailsResult.getOrNull(),
+                    currentClubDetails = detailsResult.getOrNull(),
                     activeSession = sessionResult.getOrNull(),
                     members = membersResult.getOrNull() ?: emptyList()
                 )

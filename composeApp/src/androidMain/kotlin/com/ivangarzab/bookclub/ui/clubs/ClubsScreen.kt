@@ -5,10 +5,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -36,13 +39,13 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ClubsScreen(
     modifier: Modifier = Modifier,
-    clubId: String,
+    userId: String,
     viewModel: ClubDetailsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(clubId) {
-        viewModel.loadClubData(clubId)
+    LaunchedEffect(userId) {
+        viewModel.loadUserClubs(userId)
     }
 
     ClubsScreenContent(
@@ -61,6 +64,7 @@ fun ClubsScreenContent(
     val screenState = when {
         state.isLoading -> ScreenState.Loading
         state.error != null -> ScreenState.Error(state.error!!)
+        state.availableClubs.isEmpty() -> ScreenState.Empty
         else -> ScreenState.Content
     }
 
@@ -77,6 +81,28 @@ fun ClubsScreenContent(
                 message = targetState.message,
                 onRetry = onRetry
             )
+            is ScreenState.Empty -> {
+                Box(
+                    modifier = modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "No clubs yet",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Join a club to get started",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
             is ScreenState.Content -> {
                 var selectedTabIndex by remember { mutableIntStateOf(0) }
                 val tabs = listOf(
@@ -105,7 +131,7 @@ fun ClubsScreenContent(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                     // Tab content
                     when (selectedTabIndex) {
-                        0 -> GeneralTab(tabModifier, state.clubDetails)
+                        0 -> GeneralTab(tabModifier, state.currentClubDetails)
                         1 -> ActiveSessionTab(tabModifier, state.activeSession)
                         2 -> MembersTab(tabModifier, state.members)
                     }
