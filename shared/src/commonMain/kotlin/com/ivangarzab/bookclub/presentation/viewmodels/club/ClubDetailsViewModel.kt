@@ -39,17 +39,7 @@ class ClubDetailsViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
 
             getMemberClubsUseCase(userId)
-                .onSuccess { clubs ->
-                    // Map domain clubs to lightweight presentation model
-                    // TODO: Move mapping to UseCase?
-                    val clubListItems = clubs.map { club ->
-                        ClubListItem(
-                            id = club.id,
-                            name = club.name
-                        )
-                    }
-
-                    // Store available clubs
+                .onSuccess { clubListItems ->
                     _state.update { it.copy(availableClubs = clubListItems) }
 
                     if (clubListItems.isNotEmpty()) {

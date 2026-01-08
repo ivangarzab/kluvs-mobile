@@ -98,7 +98,7 @@ fun MeScreenContent(
                 message = targetState.message,
                 onRetry = onRetry
             )
-            is ScreenState.Content -> {
+            else -> {
                 Column(
                     modifier = modifier
                         .fillMaxSize()
