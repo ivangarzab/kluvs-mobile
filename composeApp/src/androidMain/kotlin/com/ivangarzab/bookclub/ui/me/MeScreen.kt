@@ -98,7 +98,8 @@ fun MeScreenContent(
                 message = targetState.message,
                 onRetry = onRetry
             )
-            else -> {
+            is ScreenState.Empty,
+            is ScreenState.Content -> {
                 Column(
                     modifier = modifier
                         .fillMaxSize()
@@ -210,7 +211,7 @@ private fun FooterSection(
                 .padding(vertical = 16.dp)
         ) {
             FooterItem(
-                label = "Settings",
+                label = stringResource(R.string.settings),
                 icon = R.drawable.ic_settings,
                 onClick = onSettingsClick
             )
@@ -221,7 +222,7 @@ private fun FooterSection(
             )
 
             FooterItem(
-                label = "Help & Support",
+                label = stringResource(R.string.help_and_support),
                 icon = R.drawable.ic_help,
                 onClick = onHelpClick
             )
@@ -232,7 +233,7 @@ private fun FooterSection(
             )
 
             FooterItem(
-                label = "Sign Out",
+                label = stringResource(R.string.sign_out),
                 icon = R.drawable.ic_signout,
                 iconColor = MaterialTheme.colorScheme.error,
                 onClick = onSignOutClick

@@ -18,7 +18,6 @@ fun SignupScreen(
     viewModel: AuthViewModel = koinViewModel(),
     onNavigateToLogIn: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
-    onNavigateToMain: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -26,9 +25,7 @@ fun SignupScreen(
 
     when (state) {
         is AuthState.Loading -> LoadingScreen()
-        is AuthState.Authenticated -> LaunchedEffect(Unit) {
-            onNavigateToMain()
-        }
+        is AuthState.Authenticated ->  { /* No-op */ }
         is AuthState.Unauthenticated,
         is AuthState.Error -> {
             AuthFormContent(

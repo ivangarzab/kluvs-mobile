@@ -43,11 +43,11 @@ class ClubDetailsViewModel(
                     _state.update { it.copy(availableClubs = clubListItems) }
 
                     if (clubListItems.isNotEmpty()) {
-                        Bark.i("User has ${clubListItems.size} club(s), loading first club details")
+                        Bark.v("User has ${clubListItems.size} club(s), loading first club details")
                         // Load full details for the first club only
                         loadClubData(clubListItems.first().id)
                     } else {
-                        Bark.i("User has no clubs, showing empty state")
+                        Bark.v("User has no clubs, showing empty state")
                         _state.update {
                             it.copy(isLoading = false)
                         }

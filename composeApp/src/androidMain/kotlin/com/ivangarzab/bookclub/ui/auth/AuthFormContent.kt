@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,8 +44,10 @@ import com.ivangarzab.bookclub.presentation.viewmodels.auth.AuthMode
 import com.ivangarzab.bookclub.presentation.viewmodels.auth.AuthUiState
 import com.ivangarzab.bookclub.presentation.viewmodels.auth.LoginNavigation
 import com.ivangarzab.bookclub.theme.KluvsTheme
-import com.ivangarzab.bookclub.theme.signInDiscord
-import com.ivangarzab.bookclub.theme.signInGoogle
+import com.ivangarzab.bookclub.theme.bgSignInDiscord
+import com.ivangarzab.bookclub.theme.bgSignInGoogle
+import com.ivangarzab.bookclub.theme.textSignInGoogle
+import com.ivangarzab.bookclub.theme.white
 import com.ivangarzab.bookclub.ui.components.InputField
 import com.ivangarzab.bookclub.ui.components.SocialButton
 import com.ivangarzab.bookclub.ui.components.TextDivider
@@ -104,11 +107,13 @@ fun AuthFormContent(
 
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = if (mode == AuthMode.LOGIN) {
-                    "Sign in to your account"
-                } else {
-                    "Create a new account"
-                },
+                text = stringResource(
+                    if (mode == AuthMode.LOGIN) {
+                        R.string.sign_in_to_your_account
+                    } else {
+                        R.string.create_a_new_account
+                    }
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge,
             )
@@ -116,39 +121,40 @@ fun AuthFormContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             SocialButton(
-                text = "Continue with Discord",
+                text = stringResource(R.string.continue_with_discord),
                 icon = painterResource(R.drawable.ic_discord),
                 iconSize = 20.dp,
-                backgroundColor = signInDiscord,
-                textColor = Color(0xFFFFFFFF),
+                backgroundColor = bgSignInDiscord,
+                textColor = white,
                 onClick = { onOAuthSignIn(AuthProvider.DISCORD) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             SocialButton(
-                text = "Continue with Google",
+                text = stringResource(R.string.continue_with_google),
                 icon = painterResource(R.drawable.ic_google),
                 iconSize = 40.dp,
-                backgroundColor = signInGoogle,
-                textColor = Color(0xFF1F1F1F),
+                backgroundColor = bgSignInGoogle,
+                textColor = textSignInGoogle,
                 onClick = { onOAuthSignIn(AuthProvider.GOOGLE) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextDivider(text = "or continue with email")
+            TextDivider(text = stringResource(R.string.or_continue_with_email))
 
             Spacer(modifier = Modifier.height(16.dp))
 
             InputField(
                 modifier = Modifier.fillMaxWidth(),
-                label = "Email",
+                label = stringResource(R.string.email),
                 value = state.emailField,
                 onValueChange = onEmailFieldChange,
                 iconRes = R.drawable.ic_email,
-                iconDescription = "Email text field icon",
-                supportingText = state.emailError ?: "Enter valid email address",
+                iconDescription = stringResource(R.string.description_email_text_field),
+                supportingText = state.emailError
+                    ?: stringResource(R.string.enter_valid_email_address),
                 supportingTextColor = if (state.emailError != null) {
                     MaterialTheme.colorScheme.error
                 } else {
@@ -165,12 +171,13 @@ fun AuthFormContent(
             InputField(
                 modifier = Modifier.fillMaxWidth(),
                 isPassword = true,
-                label = "Password",
+                label = stringResource(R.string.password),
                 value = state.passwordField,
                 onValueChange = onPasswordFieldChange,
                 iconRes = R.drawable.ic_password,
-                iconDescription = "Password text field icon",
-                supportingText = state.passwordError ?: "Minimum 8 characters",
+                iconDescription = stringResource(R.string.description_password_text_field),
+                supportingText = state.passwordError
+                    ?: stringResource(R.string.min_eight_characters),
                 supportingTextColor = if (state.emailError != null) {
                     MaterialTheme.colorScheme.error
                 } else {
@@ -195,12 +202,13 @@ fun AuthFormContent(
                 InputField(
                     modifier = Modifier.fillMaxWidth(),
                     isPassword = true,
-                    label = "Confirm Password",
+                    label = stringResource(R.string.confirm_password),
                     value = state.confirmPasswordField,
                     onValueChange = onConfirmPasswordFieldChange,
                     iconRes = R.drawable.ic_password,
-                    iconDescription = "Confirm password text field icon",
-                    supportingText = state.confirmPasswordError ?: "Must match password above",
+                    iconDescription = stringResource(R.string.description_confirm_password_text_field),
+                    supportingText = state.confirmPasswordError
+                        ?: stringResource(R.string.match_password_above),
                     supportingTextColor = if (state.emailError != null) {
                         MaterialTheme.colorScheme.error
                     } else {
@@ -223,7 +231,7 @@ fun AuthFormContent(
                     onClick = { onNavigate(LoginNavigation.ForgetPassword) },
                     content = {
                         Text(
-                            text = "Forgot password?",
+                            text = stringResource(R.string.forgot_password),
                             textAlign = TextAlign.Right,
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.bodyMedium,
@@ -241,9 +249,9 @@ fun AuthFormContent(
             ) {
                 Text(
                     text = if (mode == AuthMode.LOGIN) {
-                        "Sign In"
+                        stringResource(R.string.sign_in)
                     } else {
-                        "Sign Up"
+                        stringResource(R.string.sign_up)
                     },
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.background
@@ -259,9 +267,9 @@ fun AuthFormContent(
             ) {
                 Text(
                     text = if (mode == AuthMode.LOGIN) {
-                        "Don't have an account?"
+                        stringResource(R.string.dont_have_an_account)
                     } else {
-                        "Already have an account?"
+                        stringResource(R.string.already_have_an_account)
                     },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium,
@@ -281,9 +289,9 @@ fun AuthFormContent(
                             }
                         ),
                     text = if (mode == AuthMode.LOGIN) {
-                        "Sign up"
+                        stringResource(R.string.sign_up)
                     } else {
-                        "Sign in"
+                        stringResource(R.string.sign_in)
                     },
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium,

@@ -1,7 +1,7 @@
 package com.ivangarzab.bookclub.data.auth
 
 import com.ivangarzab.bark.Bark
-import com.ivangarzab.bookclub.data.auth.mappers.toAuthErrorMessage
+import com.ivangarzab.bookclub.data.auth.mappers.toAuthError
 import com.ivangarzab.bookclub.data.auth.mappers.toDomain
 import com.ivangarzab.bookclub.data.local.storage.SecureStorage
 import com.ivangarzab.bookclub.domain.models.User
@@ -29,7 +29,7 @@ class AuthRepositoryImpl(
     override val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
     override suspend fun initialize(): Result<User?> {
-        Bark.d("Initializing AuthRepository")
+        Bark.v("Initializing AuthRepository")
 
         return try {
             // Check if we have stored tokens
@@ -37,7 +37,7 @@ class AuthRepositoryImpl(
             val refreshToken = secureStorage.get(SecureStorage.KEY_REFRESH_TOKEN)
 
             if (accessToken != null && refreshToken != null) {
-                Bark.d("Found stored session, attempting to restore")
+                Bark.v("Found stored session, attempting to restore")
 
                 // Restore session
                 authService.setSession(accessToken, refreshToken)
@@ -49,7 +49,7 @@ class AuthRepositoryImpl(
                     val user = session.user?.toDomain()
                     if (user != null) {
                         updateAuthState(user)
-                        Bark.i("Session restored successfully for user: ${user.email}")
+                        Bark.d("Session restored successfully for user: ${user.email}")
                         return Result.success(user)
                     }
                 }
@@ -58,7 +58,7 @@ class AuthRepositoryImpl(
                 Bark.w("Stored session was invalid, clearing")
                 clearStoredSession()
             } else {
-                Bark.d("No stored session found")
+                Bark.v("No stored session found")
             }
 
             Result.success(null)
@@ -70,7 +70,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signUpWithEmail(email: String, password: String): Result<User> {
-        Bark.d("Signing up with email: $email")
+        Bark.v("Signing up with email: $email")
 
         return try {
             val session = authService.signUpWithEmail(email, password)
@@ -83,7 +83,7 @@ class AuthRepositoryImpl(
             // Update state
             updateAuthState(user)
 
-            Bark.i("Sign up successful for: ${user.email}")
+            Bark.d("Sign up successful for: ${user.email}")
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("Sign up failed for: $email", e)
@@ -92,7 +92,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signInWithEmail(email: String, password: String): Result<User> {
-        Bark.d("Signing in with email: $email")
+        Bark.v("Signing in with email: $email")
 
         return try {
             val session = authService.signInWithEmail(email, password)
@@ -105,7 +105,7 @@ class AuthRepositoryImpl(
             // Update state
             updateAuthState(user)
 
-            Bark.i("Sign in successful for: ${user.email}")
+            Bark.d("Sign in successful for: ${user.email}")
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("Sign in failed for: $email", e)
@@ -114,11 +114,11 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signInWithDiscord(): Result<String> {
-        Bark.d("Initiating Discord OAuth")
+        Bark.v("Initiating Discord OAuth")
 
         return try {
             val url = authService.getOAuthUrl("discord")
-            Bark.i("Discord OAuth URL generated")
+            Bark.d("Discord OAuth URL generated")
             Result.success(url)
         } catch (e: Exception) {
             Bark.e("Failed to get Discord OAuth URL", e)
@@ -127,11 +127,11 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signInWithGoogle(): Result<String> {
-        Bark.d("Initiating Google OAuth")
+        Bark.v("Initiating Google OAuth")
 
         return try {
             val url = authService.getOAuthUrl("google")
-            Bark.i("Google OAuth URL generated")
+            Bark.d("Google OAuth URL generated")
             Result.success(url)
         } catch (e: Exception) {
             Bark.e("Failed to get Google OAuth URL", e)
@@ -140,7 +140,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun handleOAuthCallback(callbackUrl: String): Result<User> {
-        Bark.d("Handling OAuth callback")
+        Bark.v("Handling OAuth callback")
 
         return try {
             val session = authService.handleOAuthCallback(callbackUrl)
@@ -153,7 +153,7 @@ class AuthRepositoryImpl(
             // Update state
             updateAuthState(user)
 
-            Bark.i("OAuth sign in successful for: ${user.email}")
+            Bark.d("OAuth sign in successful for: ${user.email}")
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("OAuth callback failed", e)
@@ -162,7 +162,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signOut(): Result<Unit> {
-        Bark.d("Signing out user: ${_currentUser.value?.email}")
+        Bark.v("Signing out user: ${_currentUser.value?.email}")
 
         return try {
             // Sign out from Supabase
@@ -174,7 +174,7 @@ class AuthRepositoryImpl(
             // Update state
             updateAuthState(null)
 
-            Bark.i("Sign out successful")
+            Bark.d("Sign out successful")
             Result.success(Unit)
         } catch (e: Exception) {
             Bark.e("Sign out failed", e)
@@ -186,7 +186,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun refreshSession(): Result<User> {
-        Bark.d("Refreshing session")
+        Bark.v("Refreshing session")
 
         return try {
             val session = authService.refreshSession()
@@ -199,7 +199,7 @@ class AuthRepositoryImpl(
             // Update state
             updateAuthState(user)
 
-            Bark.i("Session refresh successful")
+            Bark.d("Session refresh successful")
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("Session refresh failed", e)
@@ -216,7 +216,7 @@ class AuthRepositoryImpl(
     private fun storeSession(accessToken: String, refreshToken: String) {
         secureStorage.save(SecureStorage.KEY_ACCESS_TOKEN, accessToken)
         secureStorage.save(SecureStorage.KEY_REFRESH_TOKEN, refreshToken)
-        Bark.d("Session tokens stored securely")
+        Bark.v("Session tokens stored securely")
     }
 
     /**
@@ -226,7 +226,7 @@ class AuthRepositoryImpl(
         secureStorage.remove(SecureStorage.KEY_ACCESS_TOKEN)
         secureStorage.remove(SecureStorage.KEY_REFRESH_TOKEN)
         secureStorage.remove(SecureStorage.KEY_USER_ID)
-        Bark.d("Session tokens cleared")
+        Bark.v("Session tokens cleared")
     }
 
     /**

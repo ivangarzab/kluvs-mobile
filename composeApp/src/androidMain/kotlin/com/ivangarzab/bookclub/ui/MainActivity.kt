@@ -89,9 +89,6 @@ fun MainNavHost(
                 onNavigateToForgotPassword = {
                     navController.navigate(NavDestinations.FORGOT_PASSWORD)
                 },
-                onNavigateToMain = {
-                    // Navigation handled by AppCoordinator - no-op
-                },
             )
         }
         composable(NavDestinations.SIGNUP) {
@@ -101,9 +98,6 @@ fun MainNavHost(
                 },
                 onNavigateToForgotPassword = {
                     navController.navigate(NavDestinations.FORGOT_PASSWORD)
-                },
-                onNavigateToMain = {
-                    // Navigation handled by AppCoordinator - no-op
                 },
             )
         }

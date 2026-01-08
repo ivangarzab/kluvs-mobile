@@ -34,10 +34,10 @@ class AppCoordinator(
             // Observe auth state changes
             authRepository.currentUser.collect { user ->
                 _navigationState.value = if (user != null) {
-                    Bark.i("User authenticated: ${user.email}")
+                    Bark.d("User authenticated: ${user.email}")
                     NavigationState.Authenticated(userId = user.id)
                 } else {
-                    Bark.i("User unauthenticated")
+                    Bark.d("User unauthenticated")
                     NavigationState.Unauthenticated
                 }
             }
