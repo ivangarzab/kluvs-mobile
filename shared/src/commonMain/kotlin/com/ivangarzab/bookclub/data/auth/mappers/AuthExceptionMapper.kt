@@ -1,37 +1,47 @@
 package com.ivangarzab.bookclub.data.auth.mappers
 
-import com.ivangarzab.bookclub.data.auth.AuthException
+import com.ivangarzab.bookclub.data.auth.AuthError
 
 /**
- * Maps any [Exception] into an [AuthException].
+ * Maps any [Exception] into an [AuthError] code.
+ *
+ * These error codes are locale-agnostic. The UI layer is responsible
+ * for mapping them to localized strings using platform resources.
  */
-fun Exception.toAuthErrorMessage(): AuthException = AuthException(
-    message = this.message?.let { message ->
-        when {
-            // Invalid credentials
-            message.contains("Invalid login credentials", ignoreCase = true) ->
-                "Invalid email or password"
+fun Exception.toAuthError(): AuthError {
+    val errorMessage = this.message ?: return AuthError.UnexpectedError
 
-            message.contains("Email not confirmed", ignoreCase = true) ->
-                "Please verify your email address"
-            // Network errors
-            message.contains("Unable to resolve host", ignoreCase = true) ||
-                    message.contains("Failed to connect", ignoreCase = true) ->
-                "No internet connection"
-            // Rate limiting
-            message.contains("Email rate limit exceeded", ignoreCase = true) ->
-                "Too many attempts. Please try again later"
-            // User not found
-            message.contains("User not found", ignoreCase = true) ->
-                "No account found with this email"
-            // Weak password (for sign up)
-            message.contains("Password should be at least", ignoreCase = true) ->
-                "Password is too weak"
-            // Email already exists (for sign up)
-            message.contains("User already registered", ignoreCase = true) ->
-                "An account with this email already exists"
-            // Generic fallback
-            else -> "Authentication failed. Please try again"
-        }
-    } ?: "An unexpected error occurred"
-)
+    return when {
+        // Invalid credentials
+        errorMessage.contains("Invalid login credentials", ignoreCase = true) ->
+            AuthError.InvalidCredentials
+
+        // Email not confirmed
+        errorMessage.contains("Email not confirmed", ignoreCase = true) ->
+            AuthError.EmailNotConfirmed
+
+        // Network errors
+        errorMessage.contains("Unable to resolve host", ignoreCase = true) ||
+                errorMessage.contains("Failed to connect", ignoreCase = true) ->
+            AuthError.NoConnection
+
+        // Rate limiting
+        errorMessage.contains("Email rate limit exceeded", ignoreCase = true) ->
+            AuthError.RateLimitExceeded
+
+        // User not found
+        errorMessage.contains("User not found", ignoreCase = true) ->
+            AuthError.UserNotFound
+
+        // Weak password (for sign up)
+        errorMessage.contains("Password should be at least", ignoreCase = true) ->
+            AuthError.WeakPassword
+
+        // Email already exists (for sign up)
+        errorMessage.contains("User already registered", ignoreCase = true) ->
+            AuthError.UserAlreadyExists
+
+        // Generic fallback
+        else -> AuthError.AuthenticationFailed
+    }
+}

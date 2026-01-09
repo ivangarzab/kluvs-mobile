@@ -2,6 +2,7 @@ package com.ivangarzab.bookclub.presentation.viewmodels.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ivangarzab.bookclub.data.auth.AuthError
 import com.ivangarzab.bookclub.data.auth.AuthRepository
 import com.ivangarzab.bookclub.domain.models.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -111,7 +112,9 @@ class AuthViewModel(
             _state.update { AuthState.Authenticated(user) }
             clearForm()
         }.onFailure { error ->
-            _state.update { AuthState.Error(error.message ?: "Error signing up") }
+            _state.update {
+                AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+            }
         }
     }
 
@@ -124,7 +127,9 @@ class AuthViewModel(
             _state.update { AuthState.Authenticated(user) }
             clearForm()
         }.onFailure { error ->
-            _state.update { AuthState.Error(error.message ?: "Error signing in") }
+            _state.update {
+                AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+            }
         }
     }
 
@@ -133,7 +138,9 @@ class AuthViewModel(
         authRepository.signOut()
             .onSuccess { _state.update { AuthState.Unauthenticated } }
             .onFailure { error ->
-                _state.update { AuthState.Error(error.message ?: "Error signing out") }
+                _state.update {
+                    AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+                }
             }
     }
 
@@ -146,5 +153,5 @@ sealed class AuthState {
     data object Unauthenticated : AuthState()
     data object Loading : AuthState()
     data class Authenticated(val user: User) : AuthState()
-    data class Error(val message: String) : AuthState()
+    data class Error(val error: AuthError) : AuthState()
 }

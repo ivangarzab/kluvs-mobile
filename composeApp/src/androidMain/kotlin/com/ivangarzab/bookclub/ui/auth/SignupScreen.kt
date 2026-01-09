@@ -1,7 +1,6 @@
 package com.ivangarzab.bookclub.ui.auth
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -10,6 +9,7 @@ import com.ivangarzab.bookclub.presentation.viewmodels.auth.AuthState
 import com.ivangarzab.bookclub.presentation.viewmodels.auth.AuthViewModel
 import com.ivangarzab.bookclub.presentation.viewmodels.auth.LoginNavigation
 import com.ivangarzab.bookclub.ui.components.LoadingScreen
+import com.ivangarzab.bookclub.ui.extensions.toLocalizedMessage
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -32,7 +32,7 @@ fun SignupScreen(
                 modifier = modifier,
                 mode = AuthMode.SIGNUP,
                 state = uiState,
-                errorMessage = (state as? AuthState.Error)?.message,
+                errorMessage = (state as? AuthState.Error)?.error?.toLocalizedMessage(),
                 onEmailFieldChange = viewModel::onEmailFieldChanged,
                 onPasswordFieldChange = viewModel::onPasswordFieldChanged,
                 onConfirmPasswordFieldChange = viewModel::onConfirmPasswordFieldChanged,

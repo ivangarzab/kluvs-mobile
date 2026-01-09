@@ -54,6 +54,17 @@
     <string name="dont_have_an_account">Don\'t have an account?</string>
     <string name="already_have_an_account">Already have an account?</string>
 
+    <!-- Auth Error Messages -->
+    <string name="error_invalid_credentials">Invalid email or password</string>
+    <string name="error_email_not_confirmed">Please verify your email address</string>
+    <string name="error_no_connection">No internet connection</string>
+    <string name="error_rate_limit_exceeded">Too many attempts. Please try again later</string>
+    <string name="error_user_not_found">No account found with this email</string>
+    <string name="error_weak_password">Password is too weak</string>
+    <string name="error_user_already_exists">An account with this email already exists</string>
+    <string name="error_authentication_failed">Authentication failed. Please try again</string>
+    <string name="error_unexpected">An unexpected error occurred</string>
+
     <string name="description_email_text_field">Email text field icon</string>
     <string name="description_password_text_field">Password text field icon</string>
     <string name="description_confirm_password_text_field">Confirm password text field icon</string>

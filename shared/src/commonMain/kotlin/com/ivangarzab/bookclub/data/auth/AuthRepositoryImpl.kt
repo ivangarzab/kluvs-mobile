@@ -65,7 +65,7 @@ class AuthRepositoryImpl(
         } catch (e: Exception) {
             Bark.e("Failed to initialize auth", e)
             clearStoredSession()
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
@@ -87,7 +87,7 @@ class AuthRepositoryImpl(
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("Sign up failed for: $email", e)
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
@@ -109,7 +109,7 @@ class AuthRepositoryImpl(
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("Sign in failed for: $email", e)
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
@@ -122,7 +122,7 @@ class AuthRepositoryImpl(
             Result.success(url)
         } catch (e: Exception) {
             Bark.e("Failed to get Discord OAuth URL", e)
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
@@ -135,7 +135,7 @@ class AuthRepositoryImpl(
             Result.success(url)
         } catch (e: Exception) {
             Bark.e("Failed to get Google OAuth URL", e)
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
@@ -157,7 +157,7 @@ class AuthRepositoryImpl(
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("OAuth callback failed", e)
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
@@ -181,7 +181,7 @@ class AuthRepositoryImpl(
             // Still clear local state even if server sign out fails
             clearStoredSession()
             updateAuthState(null)
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
@@ -206,7 +206,7 @@ class AuthRepositoryImpl(
             // If refresh fails, user needs to sign in again
             clearStoredSession()
             updateAuthState(null)
-            Result.failure(e.toAuthErrorMessage())
+            Result.failure(e.toAuthError())
         }
     }
 
