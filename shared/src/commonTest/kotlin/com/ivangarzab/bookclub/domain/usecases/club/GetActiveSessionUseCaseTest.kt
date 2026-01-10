@@ -68,7 +68,7 @@ class GetActiveSessionUseCaseTest {
             year = 1937,
             isbn = null
         )
-        val dueDate = LocalDateTime(2025, 3, 15, 0, 0)
+        val dueDate = LocalDateTime(2026, 3, 15, 0, 0)
         val session = Session(
             id = "session-1",
             clubId = clubId,
@@ -100,7 +100,7 @@ class GetActiveSessionUseCaseTest {
         assertEquals("1937", sessionDetails.book.year)
         // Verify formatted date contains expected parts
         assertTrue(sessionDetails.dueDate.contains("March"))
-        assertTrue(sessionDetails.dueDate.contains("2025"))
+        assertTrue(sessionDetails.dueDate.contains("2026"))
         verifySuspend { clubRepository.getClub(clubId) }
     }
 
@@ -141,8 +141,8 @@ class GetActiveSessionUseCaseTest {
         // Given
         val clubId = "club-123"
         val pastDate = LocalDateTime(2024, 1, 1, 19, 0)
-        val futureDate1 = LocalDateTime(2026, 1, 1, 19, 0)
-        val futureDate2 = LocalDateTime(2026, 2, 1, 19, 0)
+        val futureDate1 = LocalDateTime(2026, 6, 1, 19, 0)
+        val futureDate2 = LocalDateTime(2026, 7, 1, 19, 0)
 
         val discussions = listOf(
             Discussion(id = "d1", sessionId = "s1", title = "Past", date = pastDate, location = null),
@@ -248,9 +248,9 @@ class GetActiveSessionUseCaseTest {
     fun `sorts discussions chronologically`() = runTest {
         // Given
         val clubId = "club-123"
-        val date1 = LocalDateTime(2025, 3, 1, 19, 0)
-        val date2 = LocalDateTime(2025, 1, 1, 19, 0)
-        val date3 = LocalDateTime(2025, 2, 1, 19, 0)
+        val date1 = LocalDateTime(2026, 3, 1, 19, 0)
+        val date2 = LocalDateTime(2026, 1, 15, 19, 0)
+        val date3 = LocalDateTime(2026, 2, 1, 19, 0)
 
         // Deliberately unsorted
         val discussions = listOf(

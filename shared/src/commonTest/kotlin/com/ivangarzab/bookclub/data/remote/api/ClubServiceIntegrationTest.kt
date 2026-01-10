@@ -101,7 +101,7 @@ class ClubServiceIntegrationTest {
         // Then: should return correct club data
         assertEquals("club-1", response.id)
         assertEquals("Freaks & Geeks", response.name)
-        assertEquals("987654321098765432", response.discord_channel)
+        assertEquals("1039326367973642363", response.discord_channel)
         assertEquals(productionServerId, response.server_id)
 
         // Should have members (from MemberClubs table)
@@ -262,7 +262,7 @@ class ClubServiceIntegrationTest {
 
         // Then: discord_channel should be a valid Discord Snowflake (large number as string)
         assertNotNull(response.discord_channel)
-        assertEquals("987654321098765432", response.discord_channel)
+        assertEquals("1039326367973642363", response.discord_channel)
 
         // Should be convertible to Long
         assertTrue(response.discord_channel!!.toLongOrNull() != null,
