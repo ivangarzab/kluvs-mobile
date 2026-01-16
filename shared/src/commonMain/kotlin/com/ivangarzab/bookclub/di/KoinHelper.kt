@@ -1,5 +1,6 @@
 package com.ivangarzab.bookclub.di
 
+import com.ivangarzab.bookclub.data.auth.di.authModule
 import com.ivangarzab.bookclub.data.remote.di.remoteDataModule
 import com.ivangarzab.bookclub.data.repositories.di.repositoryModule
 import com.ivangarzab.bookclub.domain.usecases.di.useCaseModule
@@ -25,6 +26,7 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
         generalModule,
         platformDataModule,
         remoteDataModule,
+        authModule,
         repositoryModule,
         useCaseModule,
         viewModelModule,

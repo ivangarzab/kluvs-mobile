@@ -1,6 +1,7 @@
 package com.ivangarzab.bookclub.presentation.viewmodels.club
 
 import com.ivangarzab.bookclub.data.repositories.ClubRepository
+import com.ivangarzab.bookclub.data.repositories.MemberRepository
 import com.ivangarzab.bookclub.domain.models.Book
 import com.ivangarzab.bookclub.domain.models.Club
 import com.ivangarzab.bookclub.domain.models.Discussion
@@ -9,6 +10,7 @@ import com.ivangarzab.bookclub.domain.models.Session
 import com.ivangarzab.bookclub.domain.usecases.club.GetActiveSessionUseCase
 import com.ivangarzab.bookclub.domain.usecases.club.GetClubDetailsUseCase
 import com.ivangarzab.bookclub.domain.usecases.club.GetClubMembersUseCase
+import com.ivangarzab.bookclub.domain.usecases.member.GetMemberClubsUseCase
 import com.ivangarzab.bookclub.domain.usecases.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
@@ -32,9 +34,11 @@ import kotlin.test.assertTrue
 class ClubDetailsViewModelTest {
 
     private lateinit var clubRepository: ClubRepository
+    private lateinit var memberRepository: MemberRepository
     private lateinit var getClubDetails: GetClubDetailsUseCase
     private lateinit var getActiveSession: GetActiveSessionUseCase
     private lateinit var getClubMembers: GetClubMembersUseCase
+    private lateinit var getMemberClubs: GetMemberClubsUseCase
     private lateinit var viewModel: ClubDetailsViewModel
 
     private val formatDateTime = FormatDateTimeUseCase()
@@ -44,13 +48,15 @@ class ClubDetailsViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         clubRepository = mock<ClubRepository>()
+        memberRepository = mock<MemberRepository>()
 
-        // Use REAL UseCases with mocked repository
+        // Use REAL UseCases with mocked repositories
         getClubDetails = GetClubDetailsUseCase(clubRepository, formatDateTime)
         getActiveSession = GetActiveSessionUseCase(clubRepository, formatDateTime)
         getClubMembers = GetClubMembersUseCase(clubRepository)
+        getMemberClubs = GetMemberClubsUseCase(memberRepository)
 
-        viewModel = ClubDetailsViewModel(getClubDetails, getActiveSession, getClubMembers)
+        viewModel = ClubDetailsViewModel(getClubDetails, getActiveSession, getClubMembers, getMemberClubs)
     }
 
     @AfterTest
@@ -64,7 +70,7 @@ class ClubDetailsViewModelTest {
         val state = viewModel.state.value
         assertTrue(state.isLoading)
         assertNull(state.error)
-        assertNull(state.clubDetails)
+        assertNull(state.currentClubDetails)
         assertNull(state.activeSession)
         assertTrue(state.members.isEmpty())
     }
@@ -112,8 +118,8 @@ class ClubDetailsViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.isLoading)
         assertNull(state.error)
-        assertEquals("Test Club", state.clubDetails?.clubName)
-        assertEquals(2, state.clubDetails?.memberCount)
+        assertEquals("Test Club", state.currentClubDetails?.clubName)
+        assertEquals(2, state.currentClubDetails?.memberCount)
         assertEquals("session-1", state.activeSession?.sessionId)
         assertEquals(2, state.members.size)
         assertEquals("Alice", state.members[0].name)
@@ -157,7 +163,7 @@ class ClubDetailsViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.isLoading)
         assertEquals(errorMessage, state.error)
-        assertNull(state.clubDetails)
+        assertNull(state.currentClubDetails)
         assertNull(state.activeSession)
         assertTrue(state.members.isEmpty())
     }
@@ -185,7 +191,7 @@ class ClubDetailsViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.isLoading)
         assertNull(state.error)
-        assertEquals("Test Club", state.clubDetails?.clubName)
+        assertEquals("Test Club", state.currentClubDetails?.clubName)
         assertNull(state.activeSession)
         assertTrue(state.members.isEmpty())
     }
@@ -247,7 +253,7 @@ class ClubDetailsViewModelTest {
         viewModel.loadClubData(clubId)
 
         // Then
-        assertEquals(3, viewModel.state.value.clubDetails?.memberCount)
+        assertEquals(3, viewModel.state.value.currentClubDetails?.memberCount)
     }
 
     @Test
@@ -274,7 +280,7 @@ class ClubDetailsViewModelTest {
 
         // Then - State should be refreshed
         val refreshedState = viewModel.state.value
-        assertEquals(clubId, refreshedState.clubDetails?.clubId)
+        assertEquals(clubId, refreshedState.currentClubDetails?.clubId)
         assertFalse(refreshedState.isLoading)
     }
 
@@ -289,7 +295,7 @@ class ClubDetailsViewModelTest {
         // Then - State should remain unchanged (still in initial loading state)
         val afterRefreshState = viewModel.state.value
         assertEquals(initialState.isLoading, afterRefreshState.isLoading)
-        assertEquals(initialState.clubDetails, afterRefreshState.clubDetails)
+        assertEquals(initialState.currentClubDetails, afterRefreshState.currentClubDetails)
     }
 
     @Test

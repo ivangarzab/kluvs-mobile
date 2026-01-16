@@ -1,6 +1,17 @@
 package com.ivangarzab.bookclub.presentation.models
 
 /**
+ * Lightweight UI model for club selection/listing.
+ *
+ * Contains minimal data needed to display and select clubs.
+ * Used for multi-club support where user can switch between clubs.
+ */
+data class ClubListItem(
+    val id: String,
+    val name: String
+)
+
+/**
  * UI model for club overview displayed in GeneralTab.
  *
  * Contains formatted and derived data ready for direct display.

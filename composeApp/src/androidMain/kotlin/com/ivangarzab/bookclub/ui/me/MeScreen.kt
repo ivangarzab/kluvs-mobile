@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,7 +52,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun MeScreen(
     modifier: Modifier = Modifier,
     userId: String,
-    viewModel: MeViewModel = koinViewModel()
+    viewModel: MeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -62,7 +63,10 @@ fun MeScreen(
     MeScreenContent(
         modifier = modifier,
         state = state,
-        onRetry = viewModel::refresh
+        onRetry = viewModel::refresh,
+        onSettingsClick = { /* TODO() */ },
+        onHelpClick = { /* TODO() */ },
+        onSignOutClick = viewModel::signOut,
     )
 }
 
@@ -71,6 +75,9 @@ fun MeScreenContent(
     modifier: Modifier = Modifier,
     state: MeState,
     onRetry: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onHelpClick: () -> Unit,
+    onSignOutClick: () -> Unit,
 ) {
     val screenState = when {
         state.isLoading -> ScreenState.Loading
@@ -91,6 +98,7 @@ fun MeScreenContent(
                 message = targetState.message,
                 onRetry = onRetry
             )
+            is ScreenState.Empty,
             is ScreenState.Content -> {
                 Column(
                     modifier = modifier
@@ -104,18 +112,29 @@ fun MeScreenContent(
                         handle = state.profile?.handle ?: "",
                         joinDate = state.profile?.joinDate ?: ""
                     )
+
                     Divider()
+
                     StatisticsSection(
                         modifier = Modifier.fillMaxWidth(),
                         data = state.statistics
                     )
+
                     Divider()
+
                     CurrentlyReadingSection(
                         modifier = Modifier.fillMaxWidth(),
                         currentReadings = state.currentlyReading
                     )
+
                     Divider()
-                    FooterSection(modifier = Modifier.fillMaxWidth())
+
+                    FooterSection(
+                        modifier = Modifier.fillMaxWidth(),
+                        onSettingsClick = onSettingsClick,
+                        onHelpClick = onHelpClick,
+                        onSignOutClick = onSignOutClick,
+                    )
                 }
             }
         }
@@ -176,6 +195,9 @@ private fun ProfileSection(
 @Composable
 private fun FooterSection(
     modifier: Modifier = Modifier,
+    onSettingsClick: () -> Unit,
+    onHelpClick: () -> Unit,
+    onSignOutClick: () -> Unit,
 ) {
     Card(
         modifier = modifier,
@@ -189,19 +211,39 @@ private fun FooterSection(
                 .padding(vertical = 16.dp)
         ) {
             FooterItem(
-                label = "Settings",
-                icon = R.drawable.ic_settings
+                label = stringResource(R.string.settings),
+                icon = R.drawable.ic_settings,
+                onClick = onSettingsClick
             )
-            Spacer(modifier.padding(vertical = 8.dp))
-            Divider(color = MaterialTheme.colorScheme.inverseOnSurface)
-            Spacer(modifier.padding(vertical = 8.dp))
+
+            Divider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.inverseOnSurface
+            )
+
             FooterItem(
-                label = "Help & Support",
-                icon = R.drawable.ic_help
+                label = stringResource(R.string.help_and_support),
+                icon = R.drawable.ic_help,
+                onClick = onHelpClick
             )
-            Spacer(modifier.padding(vertical = 8.dp))
-            Divider(color = MaterialTheme.colorScheme.inverseOnSurface)
-            Spacer(modifier.padding(vertical = 4.dp))
+
+            Divider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.inverseOnSurface
+            )
+
+            FooterItem(
+                label = stringResource(R.string.sign_out),
+                icon = R.drawable.ic_signout,
+                iconColor = MaterialTheme.colorScheme.error,
+                onClick = onSignOutClick
+            )
+
+            Divider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.inverseOnSurface
+            )
+
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
@@ -221,22 +263,26 @@ private fun FooterSection(
 private fun FooterItem(
     modifier: Modifier = Modifier,
     label: String,
+    labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     @DrawableRes icon: Int,
+    iconColor: Color = MaterialTheme.colorScheme.primary,
+    onClick: () -> Unit,
 ) {
     Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
             painter = painterResource(icon),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
+            tint = iconColor
         )
         Spacer(Modifier.padding(horizontal = 4.dp))
         Text(
             text = label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = labelColor,
             style = MaterialTheme.typography.bodyLarge
         )
     }
@@ -244,9 +290,10 @@ private fun FooterItem(
 
 @Composable
 private fun Divider(
+    modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
-    HorizontalDivider(color = color)
+    HorizontalDivider(modifier = modifier, color = color)
 }
 
 @PreviewLightDark
@@ -268,6 +315,9 @@ fun Preview_MeScreen() = KluvsTheme {
                 CurrentlyReadingBook(bookTitle = "1984", clubName = "Quill's Club", progress = 0.66f, dueDate = "Tomorrow")
             )
         ),
-        onRetry = { }
+        onRetry = { },
+        onSettingsClick = { },
+        onHelpClick = { },
+        onSignOutClick = { },
     )
 }

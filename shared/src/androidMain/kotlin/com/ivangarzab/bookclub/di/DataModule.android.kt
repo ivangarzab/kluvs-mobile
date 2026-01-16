@@ -1,5 +1,8 @@
 package com.ivangarzab.bookclub.di
 
+import com.ivangarzab.bookclub.data.local.storage.AndroidSecureStorage
+import com.ivangarzab.bookclub.data.local.storage.SecureStorage
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -8,7 +11,10 @@ import org.koin.dsl.module
  * dependencies for Android.
  */
 val androidDataModule = module {
-    // Insert all Android-specific modules here
+    // SecureStorage - platform-specific implementation
+    single<SecureStorage> {
+        AndroidSecureStorage(androidContext())
+    }
 }
 
 actual val platformDataModule: Module = androidDataModule

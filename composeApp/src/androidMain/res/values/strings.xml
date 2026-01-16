@@ -6,6 +6,13 @@
     <string name="clubs">Clubs</string>
     <string name="me">Me</string>
     <string name="general">General</string>
+    <string name="settings">Settings</string>
+    <string name="help_and_support">Help &amp; Support</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_out">Sign Out</string>
     <string name="active_session">Active Session</string>
     <string name="members">Members</string>
     <string name="members_x">Members (%s)</string>
@@ -34,4 +41,31 @@
     <string name="no_session_details">No session details available</string>
     <string name="no_members_in_club">No members in club</string>
     <string name="and_more">And more…</string>
+    <string name="sign_in_to_your_account">Sign in to your account</string>
+    <string name="create_a_new_account">Create a new account</string>
+    <string name="continue_with_discord">Continue with Discord</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="or_continue_with_email">or continue with email</string>
+    <string name="enter_valid_email_address">enter valid email address</string>
+    <string name="min_eight_characters">Minimum 8 characters</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="match_password_above">Must match password above</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="dont_have_an_account">Don\'t have an account?</string>
+    <string name="already_have_an_account">Already have an account?</string>
+
+    <!-- Auth Error Messages -->
+    <string name="error_invalid_credentials">Invalid email or password</string>
+    <string name="error_email_not_confirmed">Please verify your email address</string>
+    <string name="error_no_connection">No internet connection</string>
+    <string name="error_rate_limit_exceeded">Too many attempts. Please try again later</string>
+    <string name="error_user_not_found">No account found with this email</string>
+    <string name="error_weak_password">Password is too weak</string>
+    <string name="error_user_already_exists">An account with this email already exists</string>
+    <string name="error_authentication_failed">Authentication failed. Please try again</string>
+    <string name="error_unexpected">An unexpected error occurred</string>
+
+    <string name="description_email_text_field">Email text field icon</string>
+    <string name="description_password_text_field">Password text field icon</string>
+    <string name="description_confirm_password_text_field">Confirm password text field icon</string>
 </resources>

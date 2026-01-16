@@ -49,6 +49,7 @@ kotlin {
 
             implementation(libs.supabase)
             implementation(libs.supabase.functions)
+            implementation(libs.supabase.auth)
 
             implementation(libs.koin)
             implementation(libs.bark)
@@ -58,6 +59,7 @@ kotlin {
             implementation(libs.ktor.client.android)
             implementation(libs.koin.android)
             implementation(libs.koin.compose)
+            implementation(libs.androidx.security.crypto)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

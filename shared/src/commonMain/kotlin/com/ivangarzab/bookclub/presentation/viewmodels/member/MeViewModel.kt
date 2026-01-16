@@ -3,6 +3,7 @@ package com.ivangarzab.bookclub.presentation.viewmodels.member
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.bookclub.domain.usecases.auth.SignOutUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetCurrentUserProfileUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetUserStatisticsUseCase
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 class MeViewModel(
     private val getCurrentUserProfile: GetCurrentUserProfileUseCase,
     private val getUserStatistics: GetUserStatisticsUseCase,
-    private val getCurrentlyReadingBooks: GetCurrentlyReadingBooksUseCase
+    private val getCurrentlyReadingBooks: GetCurrentlyReadingBooksUseCase,
+    private val signOutUseCase: SignOutUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MeState())
@@ -74,5 +76,10 @@ class MeViewModel(
     fun refresh() {
         Bark.v("Refreshing member data")
         currentUserId?.let { loadUserData(it) }
+    }
+
+    fun signOut() = viewModelScope.launch {
+        Bark.d("Signing out")
+        signOutUseCase()
     }
 }

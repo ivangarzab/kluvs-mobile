@@ -1,5 +1,6 @@
 package com.ivangarzab.bookclub.presentation.viewmodels.member
 
+import com.ivangarzab.bookclub.data.auth.AuthRepository
 import com.ivangarzab.bookclub.data.repositories.ClubRepository
 import com.ivangarzab.bookclub.data.repositories.MemberRepository
 import com.ivangarzab.bookclub.domain.models.Book
@@ -7,6 +8,7 @@ import com.ivangarzab.bookclub.domain.models.Club
 import com.ivangarzab.bookclub.domain.models.Discussion
 import com.ivangarzab.bookclub.domain.models.Member
 import com.ivangarzab.bookclub.domain.models.Session
+import com.ivangarzab.bookclub.domain.usecases.auth.SignOutUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetCurrentUserProfileUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetUserStatisticsUseCase
@@ -34,9 +36,11 @@ class MeViewModelTest {
 
     private lateinit var memberRepository: MemberRepository
     private lateinit var clubRepository: ClubRepository
+    private lateinit var authRepository: AuthRepository
     private lateinit var getCurrentUserProfile: GetCurrentUserProfileUseCase
     private lateinit var getUserStatistics: GetUserStatisticsUseCase
     private lateinit var getCurrentlyReadingBooks: GetCurrentlyReadingBooksUseCase
+    private lateinit var signOut: SignOutUseCase
     private lateinit var viewModel: MeViewModel
 
     private val formatDateTime = FormatDateTimeUseCase()
@@ -47,13 +51,15 @@ class MeViewModelTest {
         Dispatchers.setMain(testDispatcher)
         memberRepository = mock<MemberRepository>()
         clubRepository = mock<ClubRepository>()
+        authRepository = mock<AuthRepository>()
 
         // Use REAL UseCases with mocked repositories
         getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime)
         getUserStatistics = GetUserStatisticsUseCase(memberRepository)
         getCurrentlyReadingBooks = GetCurrentlyReadingBooksUseCase(memberRepository, clubRepository, formatDateTime)
+        signOut = SignOutUseCase(authRepository)
 
-        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks)
+        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks, signOut)
     }
 
     @AfterTest

@@ -81,7 +81,7 @@ class GetClubDetailsUseCaseTest {
             id = "session-1",
             clubId = clubId,
             book = book,
-            dueDate = LocalDateTime(2025, 3, 15, 0, 0),
+            dueDate = LocalDateTime(2026, 3, 15, 0, 0),
             discussions = emptyList()
         )
         val club = Club(
@@ -113,7 +113,7 @@ class GetClubDetailsUseCaseTest {
     fun `returns club details with next upcoming discussion`() = runTest {
         // Given
         val clubId = "club-123"
-        val futureDate = LocalDateTime(2025, 12, 31, 19, 0)
+        val futureDate = LocalDateTime(2026, 12, 31, 19, 0)
         val discussion = Discussion(
             id = "disc-1",
             sessionId = "session-1",
@@ -150,7 +150,7 @@ class GetClubDetailsUseCaseTest {
         assertEquals("Library", clubDetails.nextDiscussion?.location)
         // Verify formatted date is present and correctly formatted
         assertTrue(clubDetails.nextDiscussion?.formattedDate?.contains("December") == true)
-        assertTrue(clubDetails.nextDiscussion?.formattedDate?.contains("2025") == true)
+        assertTrue(clubDetails.nextDiscussion?.formattedDate?.contains("2026") == true)
         verifySuspend { clubRepository.getClub(clubId) }
     }
 

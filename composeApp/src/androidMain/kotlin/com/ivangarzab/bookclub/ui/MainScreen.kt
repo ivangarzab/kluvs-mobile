@@ -36,16 +36,30 @@ import com.ivangarzab.bookclub.ui.clubs.ClubsScreen
 import com.ivangarzab.bookclub.ui.me.MeScreen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    userId: String,
+) {
+    MainScreenContent(
+        modifier = modifier,
+        userId = userId,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreenContent(
+    modifier: Modifier = Modifier,
+    userId: String,
 ) {
     val scope = rememberCoroutineScope()
+
     val pagerState = rememberPagerState(
         pageCount = { 2 },
         initialPage = 0
     )
+
     val titles = listOf(
         stringResource(R.string.clubs),
         stringResource(R.string.me)
@@ -146,9 +160,15 @@ fun MainScreen(
             val contentModifier = Modifier
                 .fillMaxSize()
             when (page) {
-                0 -> ClubsScreen(contentModifier, "0f01ad5e-0665-4f02-8cdd-8d55ecb26ac3")
+                0 -> ClubsScreen(
+                    modifier = contentModifier,
+                    userId = userId,
+                )
                 1 -> /*HomeScreen(contentModifier)
-                2 ->*/ MeScreen(contentModifier, "5cc30117-4f77-462a-9881-dd63f0130a09")
+                2 ->*/ MeScreen(
+                    modifier = contentModifier,
+                    userId = userId,
+                )
             }
         }
     }
@@ -157,5 +177,7 @@ fun MainScreen(
 @PreviewLightDark
 @Composable
 fun Preview_MainScreen() = KluvsTheme {
-    MainScreen()
+    MainScreenContent(
+        userId = ""
+    )
 }

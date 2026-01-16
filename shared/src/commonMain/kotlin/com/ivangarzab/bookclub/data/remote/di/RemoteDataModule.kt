@@ -18,6 +18,7 @@ import com.ivangarzab.bookclub.data.remote.source.SessionRemoteDataSource
 import com.ivangarzab.bookclub.data.remote.source.SessionRemoteDataSourceImpl
 import com.ivangarzab.bookclub.shared.BuildKonfig
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.functions.Functions
 import org.koin.dsl.module
@@ -33,6 +34,7 @@ val remoteDataModule = module {
             supabaseKey = BuildKonfig.SUPABASE_KEY
         ) {
             install(Functions)
+            install(Auth)
         }
     }
 
