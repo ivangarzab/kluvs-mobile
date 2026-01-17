@@ -6,6 +6,7 @@ import com.ivangarzab.bookclub.domain.models.Club
 import com.ivangarzab.bookclub.domain.usecases.club.GetActiveSessionUseCase
 import com.ivangarzab.bookclub.domain.usecases.club.GetClubDetailsUseCase
 import com.ivangarzab.bookclub.domain.usecases.club.GetClubMembersUseCase
+import com.ivangarzab.bookclub.domain.usecases.member.GetMemberClubsUseCase
 import com.ivangarzab.bookclub.domain.usecases.util.FormatDateTimeUseCase
 import com.ivangarzab.bookclub.presentation.viewmodels.club.ClubDetailsState
 import com.ivangarzab.bookclub.presentation.viewmodels.club.ClubDetailsViewModel
@@ -58,9 +59,10 @@ class ClubDetailsViewModelHelperTest {
         val getClubDetails = GetClubDetailsUseCase(clubRepository, formatDateTime)
         val getActiveSession = GetActiveSessionUseCase(clubRepository, formatDateTime)
         val getClubMembers = GetClubMembersUseCase(clubRepository)
+        val getMemberClubs = GetMemberClubsUseCase(memberRepository)
 
         // Create real ViewModel with real use cases
-        viewModel = ClubDetailsViewModel(getClubDetails, getActiveSession, getClubMembers)
+        viewModel = ClubDetailsViewModel(getClubDetails, getActiveSession, getClubMembers, getMemberClubs)
 
         // Start Koin with test module
         startKoin {

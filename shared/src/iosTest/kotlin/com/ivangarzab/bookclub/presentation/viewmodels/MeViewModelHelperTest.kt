@@ -1,8 +1,10 @@
 package com.ivangarzab.bookclub.presentation.viewmodels
 
+import com.ivangarzab.bookclub.data.auth.AuthRepository
 import com.ivangarzab.bookclub.data.repositories.ClubRepository
 import com.ivangarzab.bookclub.data.repositories.MemberRepository
 import com.ivangarzab.bookclub.domain.models.Member
+import com.ivangarzab.bookclub.domain.usecases.auth.SignOutUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetCurrentUserProfileUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.bookclub.domain.usecases.member.GetUserStatisticsUseCase
@@ -39,6 +41,7 @@ class MeViewModelHelperTest {
 
     private lateinit var memberRepository: MemberRepository
     private lateinit var clubRepository: ClubRepository
+    private lateinit var authRepository: AuthRepository
     private lateinit var viewModel: MeViewModel
     private lateinit var testScope: CoroutineScope
     private lateinit var helper: MeViewModelHelper
@@ -51,6 +54,7 @@ class MeViewModelHelperTest {
         // Create mocked repositories
         memberRepository = mock<MemberRepository>()
         clubRepository = mock<ClubRepository>()
+        authRepository = mock<AuthRepository>()
 
         // Create test scope
         testScope = CoroutineScope(testDispatcher + Job())
@@ -60,9 +64,10 @@ class MeViewModelHelperTest {
         val getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime)
         val getUserStatistics = GetUserStatisticsUseCase(memberRepository)
         val getCurrentlyReadingBooks = GetCurrentlyReadingBooksUseCase(memberRepository, clubRepository, formatDateTime)
+        val signOut = SignOutUseCase(authRepository)
 
         // Create real ViewModel with real use cases
-        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks)
+        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks, signOut)
 
         // Start Koin with test module
         startKoin {
