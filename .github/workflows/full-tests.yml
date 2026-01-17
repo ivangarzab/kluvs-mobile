@@ -26,16 +26,16 @@ jobs:
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
     steps:
-      - name: Checkout bookclub-mobile
+      - name: Checkout kluvs-mobile
         uses: actions/checkout@v5
         with:
-          path: bookclub-mobile
+          path: kluvs-mobile
 
-      - name: Checkout bookclub-api
+      - name: Checkout kluvs-api
         uses: actions/checkout@v5
         with:
-          repository: ivangarzab/bookclub-api
-          path: bookclub-api
+          repository: ivangarzab/kluvs-api
+          path: kluvs-api
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Java
@@ -50,7 +50,7 @@ jobs:
           version: latest
 
       - name: Start Supabase Local Instance
-        working-directory: bookclub-api
+        working-directory: kluvs-api
         run: |
           echo "Starting Supabase local instance..."
           supabase init || true
@@ -61,11 +61,11 @@ jobs:
         run: sleep 10
 
       - name: Verify Supabase is running
-        working-directory: bookclub-api
+        working-directory: kluvs-api
         run: supabase status
 
       - name: Apply Database Migrations and Seed
-        working-directory: bookclub-api
+        working-directory: kluvs-api
         run: |
           echo "Applying database migrations and seed data..."
           supabase db reset --local
@@ -80,24 +80,24 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-cleanup: true
-          build-root-directory: bookclub-mobile
+          build-root-directory: kluvs-mobile
 
       - name: Grant Execute Permission for Gradle
-        working-directory: bookclub-mobile
+        working-directory: kluvs-mobile
         run: chmod +x gradlew
 
       - name: Run ALL Tests (Unit + Integration)
-        working-directory: bookclub-mobile
+        working-directory: kluvs-mobile
         run: ./gradlew shared:testDebugUnitTest --continue
 
       - name: Generate Complete Kover Coverage Report
-        working-directory: bookclub-mobile
+        working-directory: kluvs-mobile
         run: ./gradlew shared:koverXmlReport shared:koverHtmlReport
 
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./bookclub-mobile/shared/build/reports/kover/report.xml
+          files: ./kluvs-mobile/shared/build/reports/kover/report.xml
           flags: all-tests
           name: complete-coverage
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -105,7 +105,7 @@ jobs:
 
       - name: Stop Supabase
         if: always()
-        working-directory: bookclub-api
+        working-directory: kluvs-api
         run: supabase stop
 
       - name: Upload Test Results
@@ -114,8 +114,8 @@ jobs:
         with:
           name: all-test-results
           path: |
-            bookclub-mobile/**/build/test-results/**/*.xml
-            bookclub-mobile/**/build/reports/tests/**
+            kluvs-mobile/**/build/test-results/**/*.xml
+            kluvs-mobile/**/build/reports/tests/**
           retention-days: 30
 
       - name: Upload Coverage Reports
@@ -124,6 +124,6 @@ jobs:
         with:
           name: coverage-reports
           path: |
-            bookclub-mobile/shared/build/reports/kover/html/
-            bookclub-mobile/shared/build/reports/kover/report.xml
+            kluvs-mobile/shared/build/reports/kover/html/
+            kluvs-mobile/shared/build/reports/kover/report.xml
           retention-days: 30

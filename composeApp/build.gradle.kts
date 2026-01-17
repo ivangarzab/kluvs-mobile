@@ -43,11 +43,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.ivangarzab.bookclub"
+    namespace = "com.ivangarzab.kluvs"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.ivangarzab.bookclub"
+        applicationId = "com.ivangarzab.kluvs"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

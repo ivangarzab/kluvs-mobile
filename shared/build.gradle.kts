@@ -74,7 +74,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.ivangarzab.bookclub.shared"
+    namespace = "com.ivangarzab.kluvs.shared"
     //noinspection GradleDependency
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
@@ -88,7 +88,7 @@ android {
 }
 
 buildkonfig {
-    packageName = "com.ivangarzab.bookclub.shared"
+    packageName = "com.ivangarzab.kluvs.shared"
 
     defaultConfigs {
         // Production Supabase credentials
@@ -129,7 +129,7 @@ kover {
         filters {
             excludes {
                 classes("*.BuildConfig", "*.BuildKonfig") // generated code
-                packages("com.ivangarzab.bookclub.data.remote.dtos") // Dtos
+                packages("com.ivangarzab.kluvs.data.remote.dtos") // Dtos
                 packages("**.di") // Dependency Injection
                 // Add other exclusions as needed
             }
