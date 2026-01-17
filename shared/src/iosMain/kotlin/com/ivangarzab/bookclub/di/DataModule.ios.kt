@@ -1,5 +1,7 @@
 package com.ivangarzab.bookclub.di
 
+import com.ivangarzab.bookclub.data.local.storage.IosSecureStorage
+import com.ivangarzab.bookclub.data.local.storage.SecureStorage
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -8,7 +10,8 @@ import org.koin.dsl.module
  * dependencies for iOS.
  */
 val iosDataModule = module {
-    // Insert all iOS-specific modules here
+    // SecureStorage - platform-specific implementation
+    single<SecureStorage> { IosSecureStorage() }
 }
 
 actual val platformDataModule: Module = iosDataModule

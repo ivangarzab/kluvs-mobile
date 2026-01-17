@@ -28,7 +28,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
             DispatchQueue.main.async {
                 self?.isLoading = state.isLoading
                 self?.error = state.error
-                self?.clubDetails = state.clubDetails
+                self?.clubDetails = state.currentClubDetails
                 self?.activeSession = state.activeSession
                 self?.members = state.members
             }

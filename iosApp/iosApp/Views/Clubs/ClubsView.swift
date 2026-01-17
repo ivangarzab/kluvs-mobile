@@ -2,9 +2,10 @@ import SwiftUI
 import Shared
 
 struct ClubsView: View {
+    let userId: String
     @StateObject private var viewModel = ClubDetailsViewModelWrapper()
     @State private var selectedTab = 0
-    private let clubId = "0f01ad5e-0665-4f02-8cdd-8d55ecb26ac3" // TODO: Get from navigation
+    private let clubId = "0f01ad5e-0665-4f02-8cdd-8d55ecb26ac3" // TODO: Get clubId from user's clubs list via userId
 
     var body: some View {
         ZStack {
@@ -54,5 +55,5 @@ struct ClubsView: View {
 }
 
 #Preview {
-    ClubsView()
+    ClubsView(userId: "1")
 }

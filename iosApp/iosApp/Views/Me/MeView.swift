@@ -2,8 +2,9 @@ import SwiftUI
 import Shared
 
 struct MeView: View {
+    let userId: String
     @StateObject private var viewModel = MeViewModelWrapper()
-    private let userId = "5cc30117-4f77-462a-9881-dd63f0130a09" // TODO: Get from auth
+    @StateObject private var authViewModel = AuthViewModelWrapper()
 
     var body: some View {
         ZStack {
@@ -37,7 +38,9 @@ struct MeView: View {
                         Divider()
                             .padding(.vertical, 8)
 
-                        FooterSection()
+                        FooterSection(onSignOut: {
+                            authViewModel.signOut()
+                        })
                     }
                     .padding(16)
                 }
@@ -85,14 +88,25 @@ struct ProfileSection: View {
 
 // MARK: - Footer Section
 struct FooterSection: View {
+    let onSignOut: () -> Void
+
     var body: some View {
         VStack(spacing: 0) {
-            FooterItem(label: String(localized: "button_settings"), icon: .settings)
+            FooterItem(label: String(localized: "button_settings"), icon: .settings, action: {
+                // TODO: Navigate to settings
+            })
 
             Divider()
                 .padding(.vertical, 8)
 
-            FooterItem(label: String(localized: "button_help_support"), icon: .help)
+            FooterItem(label: String(localized: "button_help_support"), icon: .help, action: {
+                // TODO: Navigate to help & support
+            })
+
+            Divider()
+                .padding(.vertical, 8)
+
+            FooterItem(label: String(localized: "sign_out"), icon: .logout, action: onSignOut)
 
             Divider()
                 .padding(.vertical, 8)
@@ -113,24 +127,36 @@ struct FooterSection: View {
 struct FooterItem: View {
     let label: String
     let icon: CustomIcon
+    let action: (() -> Void)?
+
+    init(label: String, icon: CustomIcon, action: (() -> Void)? = nil) {
+        self.label = label
+        self.icon = icon
+        self.action = action
+    }
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image.custom(icon)
-                .font(.system(size: 20))
-                .foregroundColor(.brandOrange)
-                .frame(width: 24, height: 24)
+        Button(action: {
+            action?()
+        }) {
+            HStack(spacing: 12) {
+                Image.custom(icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(.brandOrange)
+                    .frame(width: 24, height: 24)
 
-            Text(label)
-                .font(.body)
-                .foregroundColor(.primary)
+                Text(label)
+                    .font(.body)
+                    .foregroundColor(.primary)
 
-            Spacer()
+                Spacer()
+            }
+            .padding(.horizontal, 16)
         }
-        .padding(.horizontal, 16)
+        .disabled(action == nil)
     }
 }
 
 #Preview {
-    MeView()
+    MeView(userId: "1")
 }

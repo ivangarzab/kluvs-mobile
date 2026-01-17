@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MainView: View {
+    let userId: String
     @State private var selectedTab = 0
 
     private let titles = [
@@ -17,9 +18,9 @@ struct MainView: View {
                 // Content area
                 Group {
                     if selectedTab == 0 {
-                        ClubsView()
+                        ClubsView(userId: userId)
                     } else {
-                        MeView()
+                        MeView(userId: userId)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -76,5 +77,5 @@ extension EnvironmentValues {
 }
 
 #Preview {
-    MainView()
+    MainView(userId: "1")
 }
