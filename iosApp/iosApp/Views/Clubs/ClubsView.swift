@@ -5,7 +5,6 @@ struct ClubsView: View {
     let userId: String
     @StateObject private var viewModel = ClubDetailsViewModelWrapper()
     @State private var selectedTab = 0
-    private let clubId = "0f01ad5e-0665-4f02-8cdd-8d55ecb26ac3" // TODO: Get clubId from user's clubs list via userId
 
     var body: some View {
         ZStack {
@@ -14,8 +13,20 @@ struct ClubsView: View {
                     .transition(.opacity)
             } else if let error = viewModel.error {
                 ErrorView(message: error, onRetry: {
-                    viewModel.loadClubData(clubId: clubId)
+                    viewModel.loadUserClubs(userId: userId)
                 })
+                .transition(.opacity)
+            } else if viewModel.availableClubs.isEmpty {
+                // Empty state - user has no clubs
+                VStack(spacing: 8) {
+                    Text(String(localized: "empty_no_clubs"))
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    Text(String(localized: "empty_no_clubs_hint"))
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                }
                 .transition(.opacity)
             } else {
                 VStack(spacing: 0) {
@@ -49,7 +60,7 @@ struct ClubsView: View {
         .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
         .animation(.easeInOut(duration: 0.3), value: viewModel.error)
         .onAppear {
-            viewModel.loadClubData(clubId: clubId)
+            viewModel.loadUserClubs(userId: userId)
         }
     }
 }

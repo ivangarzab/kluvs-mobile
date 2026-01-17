@@ -115,6 +115,28 @@
         }
       }
     },
+    "empty_no_clubs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No clubs yet"
+          }
+        }
+      }
+    },
+    "empty_no_clubs_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Join a club to get started"
+          }
+        }
+      }
+    },
     "empty_no_books_reading" : {
       "extractionState" : "manual",
       "localizations" : {
