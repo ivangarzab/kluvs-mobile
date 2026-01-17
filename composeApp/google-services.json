@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "487510225974",
+    "project_id": "kluvs-6969",
+    "storage_bucket": "kluvs-6969.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487510225974:android:40b8bbaad8e2cf43b29497",
+        "android_client_info": {
+          "package_name": "com.ivangarzab.kluvs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-ni-QgOjKKcll2dNlhyxKtwm9QV--k8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
