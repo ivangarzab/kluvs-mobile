@@ -103,7 +103,7 @@ fun AuthFormContent(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -134,7 +134,7 @@ fun AuthFormContent(
             SocialButton(
                 text = stringResource(R.string.continue_with_google),
                 icon = painterResource(R.drawable.ic_google),
-                iconSize = 40.dp,
+                iconSize = 20.dp,
                 backgroundColor = bgSignInGoogle,
                 textColor = textSignInGoogle,
                 onClick = { onOAuthSignIn(AuthProvider.GOOGLE) }

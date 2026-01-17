@@ -8,7 +8,7 @@ import SwiftUI
 
 struct SocialButtonView: View {
     let text: String
-    let iconName: String // SF Symbol name for now (custom assets can be added later)
+    let iconName: CustomIcon
     let iconSize: CGFloat
     let backgroundColor: Color
     let textColor: Color
@@ -17,11 +17,11 @@ struct SocialButtonView: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                Image(systemName: iconName)
+                Image.custom(iconName)
                     .resizable()
                     .scaledToFit()
                     .frame(width: iconSize, height: iconSize)
-                    .foregroundColor(textColor)
+                    .foregroundColor(nil)
 
                 Text(text)
                     .font(.body)
@@ -40,8 +40,8 @@ struct SocialButtonView: View {
     VStack(spacing: 16) {
         SocialButtonView(
             text: "Continue with Discord",
-            iconName: "bubble.left.and.bubble.right.fill", // Placeholder SF Symbol
-            iconSize: 20,
+            iconName: CustomIcon.discord,
+            iconSize: 24,
             backgroundColor: .discordBlue,
             textColor: .white,
             action: {}
@@ -49,7 +49,7 @@ struct SocialButtonView: View {
 
         SocialButtonView(
             text: "Continue with Google",
-            iconName: "globe", // Placeholder SF Symbol
+            iconName: CustomIcon.discord,
             iconSize: 24,
             backgroundColor: .googleGray,
             textColor: .googleTextGray,

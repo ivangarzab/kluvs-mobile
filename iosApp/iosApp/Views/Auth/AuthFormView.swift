@@ -24,7 +24,7 @@ struct AuthFormView: View {
         ScrollView {
             VStack(spacing: 16) {
                 Spacer()
-                    .frame(height: 32)
+                    .frame(height: 24)
 
                 // Header
                 Text("Welcome to your Kluvs")
@@ -36,12 +36,11 @@ struct AuthFormView: View {
                     .foregroundColor(.secondary)
 
                 Spacer()
-                    .frame(height: 24)
-
-                // OAuth buttons
+                    .frame(height: 12)
+                
                 SocialButtonView(
                     text: "Continue with Discord",
-                    iconName: "bubble.left.and.bubble.right.fill", // TODO: Replace with custom Discord icon
+                    iconName: CustomIcon.discord,
                     iconSize: 20,
                     backgroundColor: .discordBlue,
                     textColor: .white,
@@ -52,7 +51,7 @@ struct AuthFormView: View {
 
                 SocialButtonView(
                     text: "Continue with Google",
-                    iconName: "globe", // TODO: Replace with custom Google icon
+                    iconName: CustomIcon.google,
                     iconSize: 24,
                     backgroundColor: .googleGray,
                     textColor: .googleTextGray,
@@ -61,7 +60,7 @@ struct AuthFormView: View {
                     }
                 )
 
-                TextDividerView(text: "OR")
+                TextDividerView(text: "or continue with email")
 
                 // Email field
                 InputFieldView(
@@ -145,7 +144,7 @@ struct AuthFormView: View {
                     Text(mode == .login ? "Sign In" : "Sign Up")
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
                         .background(Color.brandOrange)
@@ -183,13 +182,11 @@ struct AuthFormView: View {
     }
 }
 
-// AuthMode enum (matches Kotlin)
 enum AuthMode {
     case login
     case signup
 }
 
-// LoginNavigation enum (matches Kotlin)
 enum LoginNavigation {
     case signIn
     case signUp
