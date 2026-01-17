@@ -28,6 +28,8 @@ class ClubDetailsViewModelHelper : KoinComponent {
         return Closeable { job.cancel() }
     }
 
+    fun loadUserClubs(userId: String) = viewModel.loadUserClubs(userId)
+
     fun loadClubData(clubId: String) = viewModel.loadClubData(clubId)
 
     fun refresh() = viewModel.refresh()

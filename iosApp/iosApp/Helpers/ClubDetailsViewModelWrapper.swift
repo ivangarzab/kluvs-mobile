@@ -11,6 +11,7 @@ import Shared
 class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: String? = nil
+    @Published var availableClubs: [Shared.ClubListItem] = []
     @Published var clubDetails: Shared.ClubDetails? = nil
     @Published var activeSession: Shared.ActiveSessionDetails? = nil
     @Published var members: [Shared.MemberListItemInfo] = []
@@ -28,12 +29,17 @@ class ClubDetailsViewModelWrapper: ObservableObject {
             DispatchQueue.main.async {
                 self?.isLoading = state.isLoading
                 self?.error = state.error
-                self?.clubDetails = state.clubDetails
+                self?.availableClubs = state.availableClubs
+                self?.clubDetails = state.currentClubDetails
                 self?.activeSession = state.activeSession
                 self?.members = state.members
             }
         }
         cancellables.append(stateCancellable)
+    }
+
+    func loadUserClubs(userId: String) {
+        helper.loadUserClubs(userId: userId)
     }
 
     func loadClubData(clubId: String) {

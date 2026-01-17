@@ -1,0 +1,188 @@
+package com.ivangarzab.bookclub.app
+
+import com.ivangarzab.bookclub.data.auth.AuthRepository
+import com.ivangarzab.bookclub.domain.models.AuthProvider
+import com.ivangarzab.bookclub.domain.models.User
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+
+/**
+ * Tests for AppCoordinator.
+ *
+ * Verifies the app-level navigation logic based on authentication state.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class AppCoordinatorTest {
+
+    private lateinit var authRepository: AuthRepository
+    private lateinit var appCoordinator: AppCoordinator
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @BeforeTest
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+        authRepository = mock<AuthRepository>()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `transitions to Unauthenticated when no user exists`() = runTest {
+        // Given
+        val currentUserFlow = MutableStateFlow<User?>(null)
+        every { authRepository.currentUser } returns currentUserFlow
+        everySuspend { authRepository.initialize() } returns Result.success(null)
+
+        // When
+        appCoordinator = AppCoordinator(authRepository)
+
+        // Wait for initialization to complete
+        testScheduler.advanceUntilIdle()
+
+        // Then - should transition to Unauthenticated
+        assertIs<NavigationState.Unauthenticated>(appCoordinator.navigationState.value)
+    }
+
+    @Test
+    fun `transitions to Authenticated when user exists after initialization`() = runTest {
+        // Given
+        val testUser = User(
+            id = "user-123",
+            email = "test@example.com",
+            displayName = "Test User",
+            avatarUrl = null,
+            provider = AuthProvider.EMAIL
+        )
+        val currentUserFlow = MutableStateFlow<User?>(testUser)
+        every { authRepository.currentUser } returns currentUserFlow
+        everySuspend { authRepository.initialize() } returns Result.success(testUser)
+
+        // When
+        appCoordinator = AppCoordinator(authRepository)
+
+        // Wait for initialization to complete
+        testScheduler.advanceUntilIdle()
+
+        // Then - should transition to Authenticated
+        val state = appCoordinator.navigationState.value
+        assertIs<NavigationState.Authenticated>(state)
+        assertEquals("user-123", state.userId)
+    }
+
+    @Test
+    fun `transitions to Authenticated when user signs in after starting unauthenticated`() = runTest {
+        // Given - start with no user
+        val currentUserFlow = MutableStateFlow<User?>(null)
+        every { authRepository.currentUser } returns currentUserFlow
+        everySuspend { authRepository.initialize() } returns Result.success(null)
+
+        appCoordinator = AppCoordinator(authRepository)
+
+        // Wait for initialization
+        testScheduler.advanceUntilIdle()
+
+        // Verify starting in Unauthenticated
+        assertIs<NavigationState.Unauthenticated>(appCoordinator.navigationState.value)
+
+        // When - user signs in
+        val testUser = User(
+            id = "user-456",
+            email = "new@example.com",
+            displayName = "New User",
+            avatarUrl = null,
+            provider = AuthProvider.GOOGLE
+        )
+        currentUserFlow.value = testUser
+
+        // Then - should transition to Authenticated
+        val state = appCoordinator.navigationState.value
+        assertIs<NavigationState.Authenticated>(state)
+        assertEquals("user-456", state.userId)
+    }
+
+    @Test
+    fun `transitions to Unauthenticated when user signs out`() = runTest {
+        // Given - start with authenticated user
+        val testUser = User(
+            id = "user-789",
+            email = "signout@example.com",
+            displayName = "Sign Out User",
+            avatarUrl = null,
+            provider = AuthProvider.DISCORD
+        )
+        val currentUserFlow = MutableStateFlow<User?>(testUser)
+        every { authRepository.currentUser } returns currentUserFlow
+        everySuspend { authRepository.initialize() } returns Result.success(testUser)
+
+        appCoordinator = AppCoordinator(authRepository)
+
+        // Wait for initialization
+        testScheduler.advanceUntilIdle()
+
+        // Verify starting in Authenticated
+        assertIs<NavigationState.Authenticated>(appCoordinator.navigationState.value)
+
+        // When - user signs out
+        currentUserFlow.value = null
+
+        // Then - should transition to Unauthenticated
+        assertIs<NavigationState.Unauthenticated>(appCoordinator.navigationState.value)
+    }
+
+    @Test
+    fun `updates userId when different user signs in`() = runTest {
+        // Given - start with first user
+        val user1 = User(
+            id = "user-1",
+            email = "first@example.com",
+            displayName = "First User",
+            avatarUrl = null,
+            provider = AuthProvider.EMAIL
+        )
+        val currentUserFlow = MutableStateFlow<User?>(user1)
+        every { authRepository.currentUser } returns currentUserFlow
+        everySuspend { authRepository.initialize() } returns Result.success(user1)
+
+        appCoordinator = AppCoordinator(authRepository)
+
+        // Wait for initialization
+        testScheduler.advanceUntilIdle()
+
+        // Verify first user
+        val state1 = appCoordinator.navigationState.value
+        assertIs<NavigationState.Authenticated>(state1)
+        assertEquals("user-1", state1.userId)
+
+        // When - different user signs in
+        val user2 = User(
+            id = "user-2",
+            email = "second@example.com",
+            displayName = "Second User",
+            avatarUrl = null,
+            provider = AuthProvider.EMAIL
+        )
+        currentUserFlow.value = user2
+
+        // Then - should update to new userId
+        val state2 = appCoordinator.navigationState.value
+        assertIs<NavigationState.Authenticated>(state2)
+        assertEquals("user-2", state2.userId)
+    }
+}

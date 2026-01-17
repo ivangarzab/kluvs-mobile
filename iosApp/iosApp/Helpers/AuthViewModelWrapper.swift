@@ -1,0 +1,120 @@
+//
+//  AuthViewModelWrapper.swift
+//  iosApp
+//
+//  iOS wrapper for shared AuthViewModel
+//
+import Swift
+import Shared
+
+@MainActor
+class AuthViewModelWrapper: ObservableObject {
+    // Auth state
+    @Published var authState: AuthStateWrapper = .unauthenticated
+
+    // UI state - form fields
+    @Published var emailField: String = ""
+    @Published var passwordField: String = ""
+    @Published var confirmPasswordField: String = ""
+
+    // UI state - validation errors
+    @Published var emailError: String? = nil
+    @Published var passwordError: String? = nil
+    @Published var confirmPasswordError: String? = nil
+
+    private let helper: AuthViewModelHelper
+    private var cancellables: [Shared.Closeable] = []
+
+    init() {
+        self.helper = AuthViewModelHelper()
+        startObserving()
+    }
+
+    private func startObserving() {
+        // Observe auth state
+        let stateCancellable = helper.observeState { [weak self] state in
+            DispatchQueue.main.async {
+                self?.authState = AuthStateWrapper.from(state)
+            }
+        }
+        cancellables.append(stateCancellable)
+
+        // Observe UI state
+        let uiStateCancellable = helper.observeUiState { [weak self] uiState in
+            DispatchQueue.main.async {
+                self?.emailField = uiState.emailField
+                self?.passwordField = uiState.passwordField
+                self?.confirmPasswordField = uiState.confirmPasswordField
+                self?.emailError = uiState.emailError
+                self?.passwordError = uiState.passwordError
+                self?.confirmPasswordError = uiState.confirmPasswordError
+            }
+        }
+        cancellables.append(uiStateCancellable)
+    }
+
+    func onEmailChanged(_ value: String) {
+        helper.onEmailFieldChanged(value: value)
+    }
+
+    func onPasswordChanged(_ value: String) {
+        helper.onPasswordFieldChanged(value: value)
+    }
+
+    func onConfirmPasswordChanged(_ value: String) {
+        helper.onConfirmPasswordFieldChanged(value: value)
+    }
+
+    func signIn() {
+        helper.validateAndSignIn()
+    }
+
+    func signUp() {
+        helper.validateAndSignUp()
+    }
+
+    func signOut() {
+        helper.signOut()
+    }
+
+    deinit {
+        cancellables.forEach { $0.close() }
+    }
+}
+
+// Swift-friendly enum wrapper for AuthState
+enum AuthStateWrapper: Equatable {
+    case unauthenticated
+    case loading
+    case authenticated(user: Shared.User)
+    case error(error: Shared.AuthError)
+
+    // Custom Equatable implementation since Kotlin classes may not be Equatable
+    static func == (lhs: AuthStateWrapper, rhs: AuthStateWrapper) -> Bool {
+        switch (lhs, rhs) {
+        case (.unauthenticated, .unauthenticated):
+            return true
+        case (.loading, .loading):
+            return true
+        case (.authenticated(let lUser), .authenticated(let rUser)):
+            return lUser.id == rUser.id
+        case (.error, .error):
+            return true // We just care that it's an error state
+        default:
+            return false
+        }
+    }
+
+    static func from(_ kotlinState: Shared.AuthState) -> AuthStateWrapper {
+        if kotlinState is Shared.AuthState.Unauthenticated {
+            return .unauthenticated
+        } else if kotlinState is Shared.AuthState.Loading {
+            return .loading
+        } else if let authenticated = kotlinState as? Shared.AuthState.Authenticated {
+            return .authenticated(user: authenticated.user)
+        } else if let error = kotlinState as? Shared.AuthState.Error {
+            return .error(error: error.error)
+        }
+        return .unauthenticated
+    }
+}
