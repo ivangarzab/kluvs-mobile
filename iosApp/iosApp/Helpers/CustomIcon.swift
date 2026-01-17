@@ -16,10 +16,17 @@ enum CustomIcon: String {
     
     case discord = "ic_discord"
     case google = "ic_google"
+    case apple = "apple.logo" // SF Symbol
 
     var image: Image {
-        Image(self.rawValue)
-            .renderingMode(.template)
+        // Use SF Symbol for apple, custom assets for others
+        if self == .apple {
+            return Image(systemName: self.rawValue)
+                .renderingMode(.template)
+        } else {
+            return Image(self.rawValue)
+                .renderingMode(.template)
+        }
     }
 }
 

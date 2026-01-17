@@ -46,18 +46,26 @@ class IosSecureStorage : SecureStorage {
         val valueData = (value as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             ?: throw IllegalArgumentException("Failed to encode value as UTF-8")
 
+        // Bridge objects to CF
+        val keyRef = CFBridgingRetain(key)
+        val serviceRef = CFBridgingRetain(SERVICE_NAME)
+        val dataRef = CFBridgingRetain(valueData)
+
         // Create CFMutableDictionary
         val query = CFDictionaryCreateMutable(null, 4, null, null)
         CFDictionarySetValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionarySetValue(query, kSecAttrAccount, CFBridgingRetain(key))
-        CFDictionarySetValue(query, kSecAttrService, CFBridgingRetain(SERVICE_NAME))
-        CFDictionarySetValue(query, kSecValueData, CFBridgingRetain(valueData))
+        CFDictionarySetValue(query, kSecAttrAccount, keyRef)
+        CFDictionarySetValue(query, kSecAttrService, serviceRef)
+        CFDictionarySetValue(query, kSecValueData, dataRef)
 
         // Add to keychain
         val status = SecItemAdd(query, null)
 
-        // Release CF objects
+        // Release all CF objects (must release in reverse order)
         CFBridgingRelease(query)
+        CFBridgingRelease(dataRef)
+        CFBridgingRelease(serviceRef)
+        CFBridgingRelease(keyRef)
 
         if (status != errSecSuccess) {
             throw RuntimeException("Failed to save to keychain: $status")
@@ -65,11 +73,15 @@ class IosSecureStorage : SecureStorage {
     }
 
     override fun get(key: String): String? {
+        // Bridge objects to CF
+        val keyRef = CFBridgingRetain(key)
+        val serviceRef = CFBridgingRetain(SERVICE_NAME)
+
         // Create CFMutableDictionary
         val query = CFDictionaryCreateMutable(null, 5, null, null)
         CFDictionarySetValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionarySetValue(query, kSecAttrAccount, CFBridgingRetain(key))
-        CFDictionarySetValue(query, kSecAttrService, CFBridgingRetain(SERVICE_NAME))
+        CFDictionarySetValue(query, kSecAttrAccount, keyRef)
+        CFDictionarySetValue(query, kSecAttrService, serviceRef)
         CFDictionarySetValue(query, kSecReturnData, kCFBooleanTrue)
         CFDictionarySetValue(query, kSecMatchLimit, kSecMatchLimitOne)
 
@@ -87,36 +99,48 @@ class IosSecureStorage : SecureStorage {
             }
         }
 
-        // Release CF objects
+        // Release all CF objects
         CFBridgingRelease(query)
+        CFBridgingRelease(serviceRef)
+        CFBridgingRelease(keyRef)
 
         return result
     }
 
     override fun remove(key: String) {
+        // Bridge objects to CF
+        val keyRef = CFBridgingRetain(key)
+        val serviceRef = CFBridgingRetain(SERVICE_NAME)
+
         // Create CFMutableDictionary
         val query = CFDictionaryCreateMutable(null, 3, null, null)
         CFDictionarySetValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionarySetValue(query, kSecAttrAccount, CFBridgingRetain(key))
-        CFDictionarySetValue(query, kSecAttrService, CFBridgingRetain(SERVICE_NAME))
+        CFDictionarySetValue(query, kSecAttrAccount, keyRef)
+        CFDictionarySetValue(query, kSecAttrService, serviceRef)
 
         SecItemDelete(query)
 
-        // Release CF objects
+        // Release all CF objects
         CFBridgingRelease(query)
+        CFBridgingRelease(serviceRef)
+        CFBridgingRelease(keyRef)
         // Note: We ignore the status because deleting a non-existent item is not an error
     }
 
     override fun clear() {
+        // Bridge objects to CF
+        val serviceRef = CFBridgingRetain(SERVICE_NAME)
+
         // Delete all items for this service
         val query = CFDictionaryCreateMutable(null, 2, null, null)
         CFDictionarySetValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionarySetValue(query, kSecAttrService, CFBridgingRetain(SERVICE_NAME))
+        CFDictionarySetValue(query, kSecAttrService, serviceRef)
 
         SecItemDelete(query)
 
-        // Release CF objects
+        // Release all CF objects
         CFBridgingRelease(query)
+        CFBridgingRelease(serviceRef)
         // Note: We ignore the status because clearing an empty keychain is not an error
     }
 

@@ -15,6 +15,7 @@ struct ContentView: View {
                     LoginView(
                         onNavigateToSignup: {
                             navigationPath.append(AuthRoute.signup)
+                            navigationPath.removeLast()
                         },
                         onNavigateToForgotPassword: {
                             navigationPath.append(AuthRoute.forgotPassword)

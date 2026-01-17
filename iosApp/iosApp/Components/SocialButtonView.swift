@@ -17,11 +17,21 @@ struct SocialButtonView: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                Image.custom(iconName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: iconSize, height: iconSize)
-                    .foregroundColor(nil)
+                // Apple uses template mode (white icon), others use original colors
+                if iconName == .apple {
+                    Image.custom(iconName)
+                        .resizable()
+                        .renderingMode(.template)
+                        .scaledToFit()
+                        .frame(width: iconSize, height: iconSize)
+                        .foregroundColor(.white)
+                } else {
+                    Image.custom(iconName)
+                        .resizable()
+                        .renderingMode(.original)
+                        .scaledToFit()
+                        .frame(width: iconSize, height: iconSize)
+                }
 
                 Text(text)
                     .font(.body)

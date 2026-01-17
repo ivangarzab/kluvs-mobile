@@ -23,8 +23,8 @@ struct AuthFormView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                Spacer()
-                    .frame(height: 24)
+//                Spacer()
+//                    .frame(height: 24)
 
                 // Header
                 Text("Welcome to your Kluvs")
@@ -37,9 +37,20 @@ struct AuthFormView: View {
 
                 Spacer()
                     .frame(height: 12)
-                
+
                 SocialButtonView(
-                    text: "Continue with Discord",
+                    text: String(localized: "button_continue_apple"),
+                    iconName: CustomIcon.apple,
+                    iconSize: 20,
+                    backgroundColor: .black,
+                    textColor: .white,
+                    action: {
+                        // TODO: Implement OAuth
+                    }
+                )
+
+                SocialButtonView(
+                    text: String(localized: "button_continue_discord"),
                     iconName: CustomIcon.discord,
                     iconSize: 20,
                     backgroundColor: .discordBlue,
@@ -50,7 +61,7 @@ struct AuthFormView: View {
                 )
 
                 SocialButtonView(
-                    text: "Continue with Google",
+                    text: String(localized: "button_continue_google"),
                     iconName: CustomIcon.google,
                     iconSize: 24,
                     backgroundColor: .googleGray,
@@ -60,17 +71,17 @@ struct AuthFormView: View {
                     }
                 )
 
-                TextDividerView(text: "or continue with email")
+                TextDividerView(text: String(localized: "hint_or_continue_email"))
 
                 // Email field
                 InputFieldView(
-                    label: "Email",
+                    label: String(localized: "label_email"),
                     text: Binding(
                         get: { viewModel.emailField },
                         set: { viewModel.onEmailChanged($0) }
                     ),
                     icon: .email,
-                    supportingText: viewModel.emailError ?? "Enter a valid email address",
+                    supportingText: viewModel.emailError ?? String(localized: "hint_email"),
                     supportingTextColor: viewModel.emailError != nil ? .red : .gray,
                     keyboardType: .emailAddress,
                     submitLabel: .next,
@@ -80,13 +91,13 @@ struct AuthFormView: View {
 
                 // Password field
                 InputFieldView(
-                    label: "Password",
+                    label: String(localized: "label_password"),
                     text: Binding(
                         get: { viewModel.passwordField },
                         set: { viewModel.onPasswordChanged($0) }
                     ),
                     icon: .password,
-                    supportingText: viewModel.passwordError ?? (mode == .login ? "Minimum 6 characters" : "Minimum 8 characters"),
+                    supportingText: viewModel.passwordError ?? (mode == .login ? String(localized: "hint_password_login") : String(localized: "hint_password_signup")),
                     supportingTextColor: viewModel.passwordError != nil ? .red : .gray,
                     isPassword: true,
                     submitLabel: mode == .login ? .go : .next,
@@ -103,13 +114,13 @@ struct AuthFormView: View {
                 // Confirm password (signup only)
                 if mode == .signup {
                     InputFieldView(
-                        label: "Confirm Password",
+                        label: String(localized: "label_confirm_password"),
                         text: Binding(
                             get: { viewModel.confirmPasswordField },
                             set: { viewModel.onConfirmPasswordChanged($0) }
                         ),
                         icon: .password,
-                        supportingText: viewModel.confirmPasswordError ?? "Must match password above",
+                        supportingText: viewModel.confirmPasswordError ?? String(localized: "hint_confirm_password"),
                         supportingTextColor: viewModel.confirmPasswordError != nil ? .red : .gray,
                         isPassword: true,
                         submitLabel: .go,
@@ -128,9 +139,7 @@ struct AuthFormView: View {
                         .font(.body)
                         .foregroundColor(.brandOrange)
                     }
-                } else {
-                    Spacer()
-                        .frame(height: 16)
+                    .frame(height: 20) // Fixed height to match signup spacing
                 }
 
                 // Submit button
@@ -144,7 +153,7 @@ struct AuthFormView: View {
                     Text(mode == .login ? "Sign In" : "Sign Up")
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
                         .background(Color.brandOrange)
