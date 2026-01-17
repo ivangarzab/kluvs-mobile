@@ -12,11 +12,7 @@ struct ContentView: View {
                 case .initializing:
                     LoadingView()
                 case .unauthenticated:
-                    LoginView(
-                        onNavigateToSignup: {
-                            navigationPath.append(AuthRoute.signup)
-                            navigationPath.removeLast()
-                        },
+                    AuthView(
                         onNavigateToForgotPassword: {
                             navigationPath.append(AuthRoute.forgotPassword)
                         }
@@ -27,15 +23,6 @@ struct ContentView: View {
             }
             .navigationDestination(for: AuthRoute.self) { route in
                 switch route {
-                case .signup:
-                    SignupView(
-                        onNavigateToLogin: {
-                            navigationPath.removeLast()
-                        },
-                        onNavigateToForgotPassword: {
-                            navigationPath.append(AuthRoute.forgotPassword)
-                        }
-                    )
                 case .forgotPassword:
                     ForgotPasswordView()
                 }
@@ -53,7 +40,6 @@ struct ContentView: View {
 }
 
 enum AuthRoute: Hashable {
-    case signup
     case forgotPassword
 }
 

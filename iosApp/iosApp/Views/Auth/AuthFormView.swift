@@ -23,8 +23,8 @@ struct AuthFormView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-//                Spacer()
-//                    .frame(height: 24)
+                Spacer()
+                    .frame(height: 24)
 
                 // Header
                 Text("Welcome to your Kluvs")
@@ -34,9 +34,6 @@ struct AuthFormView: View {
                 Text(mode == .login ? "Sign in to your account" : "Create a new account")
                     .font(.body)
                     .foregroundColor(.secondary)
-
-                Spacer()
-                    .frame(height: 12)
 
                 SocialButtonView(
                     text: String(localized: "button_continue_apple"),
@@ -153,7 +150,7 @@ struct AuthFormView: View {
                     Text(mode == .login ? "Sign In" : "Sign Up")
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(uiColor: .systemBackground))
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
                         .background(Color.brandOrange)

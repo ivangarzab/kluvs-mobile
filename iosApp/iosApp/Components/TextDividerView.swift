@@ -18,6 +18,8 @@ struct TextDividerView: View {
             Text(text)
                 .font(.caption)
                 .foregroundColor(.gray)
+                .fixedSize(horizontal: true, vertical: false)
+                .lineLimit(1)
 
             Rectangle()
                 .fill(Color.gray.opacity(0.3))
