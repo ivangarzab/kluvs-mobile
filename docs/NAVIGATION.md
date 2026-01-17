@@ -16,7 +16,7 @@ This balances code reuse with platform-appropriate navigation patterns.
 
 ### AppCoordinator
 
-**Location:** `shared/src/commonMain/kotlin/com/ivangarzab/bookclub/app/AppCoordinator.kt`
+**Location:** `shared/src/commonMain/kotlin/com/ivangarzab/kluvs/app/AppCoordinator.kt`
 
 **Purpose:** Observes app-wide state (authentication, onboarding, etc.) and emits navigation state for platforms to act on.
 
@@ -52,7 +52,7 @@ sealed class NavigationState {
 
 ### MainActivity Integration
 
-**Location:** `composeApp/src/androidMain/kotlin/com/ivangarzab/bookclub/ui/MainActivity.kt`
+**Location:** `composeApp/src/androidMain/kotlin/com/ivangarzab/kluvs/ui/MainActivity.kt`
 
 **How it works:**
 

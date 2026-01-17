@@ -49,17 +49,17 @@ Integration tests require a local Supabase instance. The full test suite runs in
 
 #### Setting Up Local Supabase for Integration Tests
 
-Integration tests rely on a **local Supabase instance** running from the `bookclub-api` project. This ensures tests run against a consistent, isolated environment with seed data.
+Integration tests rely on a **local Supabase instance** running from the `kluvs-api` project. This ensures tests run against a consistent, isolated environment with seed data.
 
 **Prerequisites:**
-1. The `bookclub-api` project must be cloned at `/Users/ivangarzab/Git/bookclub-api`
+1. The `kluvs-api` project must be cloned at `/Users/ivangarzab/Git/kluvs-api`
 2. Supabase CLI must be installed (`brew install supabase/tap/supabase`)
 
 **Setup Workflow:**
 
 ```bash
 # Navigate to the API project
-cd /Users/ivangarzab/Git/bookclub-api
+cd /Users/ivangarzab/Git/kluvs-api
 
 # Start local Supabase (if not already running)
 npx supabase start
@@ -81,11 +81,11 @@ TEST_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZ
 
 **⚠️ Important: Applying Backend Changes**
 
-When the backend API (`bookclub-api`) has new database migrations:
+When the backend API (`kluvs-api`) has new database migrations:
 
 ```bash
 # Navigate to API project
-cd /Users/ivangarzab/Git/bookclub-api
+cd /Users/ivangarzab/Git/kluvs-api
 
 # Reset local database to apply new migrations and reseed
 npx supabase db reset
@@ -113,16 +113,16 @@ This command:
 
 **Test Data:**
 
-Integration tests use seed data defined in `/Users/ivangarzab/Git/bookclub-api/supabase/seed.sql`. See test file headers (e.g., `ClubServiceIntegrationTest.kt:28-50`) for documentation of available test data.
+Integration tests use seed data defined in `/Users/ivangarzab/Git/kluvs-api/supabase/seed.sql`. See test file headers (e.g., `ClubServiceIntegrationTest.kt:28-50`) for documentation of available test data.
 
 ### Run Specific Test
 
 ```bash
 # Run a single test class
-./gradlew shared:testDebugUnitTest --tests "com.ivangarzab.bookclub.data.repositories.ClubRepositoryTest"
+./gradlew shared:testDebugUnitTest --tests "com.ivangarzab.kluvs.data.repositories.ClubRepositoryTest"
 
 # Run a single test method
-./gradlew shared:testDebugUnitTest --tests "com.ivangarzab.bookclub.data.repositories.ClubRepositoryTest.testGetClubById"
+./gradlew shared:testDebugUnitTest --tests "com.ivangarzab.kluvs.data.repositories.ClubRepositoryTest.testGetClubById"
 ```
 
 ### Code Coverage
@@ -174,12 +174,12 @@ The data layer follows a clean architecture pattern with three layers:
 All dependency injection is managed through Koin with modular organization:
 
 - **`platformDataModule`** - Platform-specific dependencies (Android/iOS)
-  - Android: `shared/src/androidMain/kotlin/com/ivangarzab/bookclub/di/DataModule.android.kt`
-  - iOS: `shared/src/iosMain/kotlin/com/ivangarzab/bookclub/di/DataModule.ios.kt`
+  - Android: `shared/src/androidMain/kotlin/com/ivangarzab/kluvs/di/DataModule.android.kt`
+  - iOS: `shared/src/iosMain/kotlin/com/ivangarzab/kluvs/di/DataModule.ios.kt`
 - **`remoteDataModule`** - API services and remote data sources
 - **`repositoryModule`** - Repository implementations
 
-Koin is initialized in `shared/src/commonMain/kotlin/com/ivangarzab/bookclub/di/KoinHelper.kt`
+Koin is initialized in `shared/src/commonMain/kotlin/com/ivangarzab/kluvs/di/KoinHelper.kt`
 
 ### Configuration Management
 
@@ -222,7 +222,7 @@ The project uses GitHub Actions:
 
 - **Unit Tests** (`.github/workflows/unit-tests.yml`) - Fast feedback on PRs, excludes integration tests
 - **Full Tests** (`.github/workflows/full-tests.yml`) - Runs on `main` branch with local Supabase instance
-  - Checks out both `bookclub-mobile` and `bookclub-api` repos
+  - Checks out both `kluvs-mobile` and `kluvs-api` repos
   - Starts local Supabase instance
   - Applies migrations and seed data
   - Runs complete test suite
@@ -242,5 +242,5 @@ The `shared/build.gradle.kts` includes a custom task configuration (lines 137-14
 
 Code coverage excludes:
 - Generated code (`*.BuildConfig`, `*.BuildKonfig`)
-- DTOs (`com.ivangarzab.bookclub.data.remote.dtos`)
+- DTOs (`com.ivangarzab.kluvs.data.remote.dtos`)
 - Dependency injection modules (`**.di`)

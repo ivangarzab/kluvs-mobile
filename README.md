@@ -1,7 +1,7 @@
 # 📚 Kluvs 🎬🍽️
 
-[![Full Tests](https://github.com/ivangarzab/bookclub-mobile/actions/workflows/full-tests.yml/badge.svg)](https://github.com/ivangarzab/bookclub-mobile/actions/workflows/full-tests.yml)
-[![codecov](https://codecov.io/gh/ivangarzab/bookclub-mobile/branch/main/graph/badge.svg)](https://codecov.io/gh/ivangarzab/bookclub-mobile)
+[![Full Tests](https://github.com/ivangarzab/kluvs-mobile/actions/workflows/full-tests.yml/badge.svg)](https://github.com/ivangarzab/kluvs-mobile/actions/workflows/full-tests.yml)
+[![codecov](https://codecov.io/gh/ivangarzab/kluvs-mobile/branch/main/graph/badge.svg)](https://codecov.io/gh/ivangarzab/kluvs-mobile)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.0-blue.svg?logo=kotlin)](https://kotlinlang.org)
 
 <p align="center">
@@ -35,7 +35,7 @@
 ## 📂 Project Structure
 
 ```
-bookclub-mobile/
+kluvs-mobile/
 ├── composeApp/       # Compose Multiplatform UI code
 │   ├── commonMain/   # Shared UI components
 │   ├── androidMain/  # Android-specific code
@@ -60,8 +60,8 @@ bookclub-mobile/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/ivangarzab/bookclub-mobile.git
-   cd bookclub-mobile
+   git clone https://github.com/ivangarzab/kluvs-mobile.git
+   cd kluvs-mobile
    ```
 
 2. **Configure Supabase credentials**
@@ -114,7 +114,7 @@ The project uses GitHub Actions for continuous integration:
 
 - Built with [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
 - Powered by [Supabase](https://supabase.com)
-- Backend API: [bookclub-api](https://github.com/ivangarzab/bookclub-api)
+- Backend API: [kluvs-api](https://github.com/ivangarzab/kluvs-api)
 - Discord companion bot: [quill-bot](https://github.com/ivangarzab/quill-bot)
 - KMP Logging: [barK](https://github.com/ivangarzab/barK)
 
