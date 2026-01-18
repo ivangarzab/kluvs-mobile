@@ -7,15 +7,6 @@ plugins {
     id("org.jetbrains.kotlinx.kover") version "0.9.3"
 }
 
-/**
- * Attempt to get a Gradle Property called [name]; if it fails, attempt to get it as an
- * Environment Variable; if that fails, return [default].
- */
-fun getPropertyOrEnvVar(name: String, default: String = ""): String =
-    (findProperty(name) as String?)
-        ?: System.getenv(name)
-        ?: default
-
 kotlin {
     androidTarget {
         compilations.all {
