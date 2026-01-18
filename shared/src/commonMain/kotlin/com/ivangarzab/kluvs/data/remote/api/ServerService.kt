@@ -1,6 +1,6 @@
 package com.ivangarzab.kluvs.data.remote.api
 
-import com.ivangarzab.kluvs.data.remote.api.JsonHelper.getJsonForSupabaseService
+import com.ivangarzab.kluvs.network.utils.JsonHelper.getJsonForSupabaseService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.DeleteResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.ServerResponseDto

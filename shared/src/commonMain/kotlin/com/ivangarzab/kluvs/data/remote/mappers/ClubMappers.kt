@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.data.remote.dtos.ClubDto
 import com.ivangarzab.kluvs.data.remote.dtos.ClubResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.ServerClubDto
 import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.kluvs.network.utils.parseDateOnlyString
 
 /**
  * Maps a [ClubDto] from the API to a [com.ivangarzab.kluvs.model.Club] domain model.

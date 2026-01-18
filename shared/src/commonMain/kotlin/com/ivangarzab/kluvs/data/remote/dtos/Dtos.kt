@@ -1,9 +1,9 @@
 package com.ivangarzab.kluvs.data.remote.dtos
 
-import com.ivangarzab.kluvs.data.remote.serializers.IntListToStringListSerializer
-import com.ivangarzab.kluvs.data.remote.serializers.IntToStringSerializer
-import com.ivangarzab.kluvs.data.remote.serializers.NullableIntListToStringListSerializer
-import com.ivangarzab.kluvs.data.remote.serializers.NullableIntToStringSerializer
+import com.ivangarzab.kluvs.network.serializers.IntListToStringListSerializer
+import com.ivangarzab.kluvs.network.serializers.IntToStringSerializer
+import com.ivangarzab.kluvs.network.serializers.NullableIntListToStringListSerializer
+import com.ivangarzab.kluvs.network.serializers.NullableIntToStringSerializer
 import kotlinx.serialization.Serializable
 
 // ========================================

@@ -1,14 +1,14 @@
-package com.ivangarzab.kluvs.data.remote.api
+package com.ivangarzab.kluvs.network.utils
 
 import kotlinx.serialization.json.Json
 
 /**
- * [Json]-related helping functions.
+ * [kotlinx.serialization.json.Json]-related helping functions.
  */
 object JsonHelper {
 
     /**
-     * Return a [Json] configured to ignore unknown keys, encode default values, and that
+     * Return a [kotlinx.serialization.json.Json] configured to ignore unknown keys, encode default values, and that
      * explicitly adds null values.
      */
     fun getJsonForSupabaseService(): Json = Json {

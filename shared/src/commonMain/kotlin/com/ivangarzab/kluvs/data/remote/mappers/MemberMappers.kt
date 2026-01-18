@@ -3,6 +3,7 @@ package com.ivangarzab.kluvs.data.remote.mappers
 import com.ivangarzab.kluvs.data.remote.dtos.MemberDto
 import com.ivangarzab.kluvs.data.remote.dtos.MemberResponseDto
 import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.kluvs.network.utils.parseDateTimeString
 
 /**
  * Maps a [MemberDto] from the API to a [com.ivangarzab.kluvs.model.Member] domain model.

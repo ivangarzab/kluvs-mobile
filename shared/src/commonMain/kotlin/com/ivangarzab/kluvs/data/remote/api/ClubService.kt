@@ -1,6 +1,6 @@
 package com.ivangarzab.kluvs.data.remote.api
 
-import com.ivangarzab.kluvs.data.remote.api.JsonHelper.getJsonForSupabaseService
+import com.ivangarzab.kluvs.network.utils.JsonHelper.getJsonForSupabaseService
 import com.ivangarzab.kluvs.data.remote.dtos.ClubResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.ClubSuccessResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.CreateClubRequestDto

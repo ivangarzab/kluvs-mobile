@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.remote.mappers
+package com.ivangarzab.kluvs.network.utils
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime

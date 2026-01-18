@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.data.auth.di.authModule
 import com.ivangarzab.kluvs.data.remote.di.remoteDataModule
 import com.ivangarzab.kluvs.data.repositories.di.repositoryModule
 import com.ivangarzab.kluvs.domain.usecases.di.useCaseModule
+import com.ivangarzab.kluvs.network.di.coreNetworkModule
 import com.ivangarzab.kluvs.presentation.viewmodels.di.viewModelModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +26,7 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
     modules(
         generalModule,
         platformDataModule,
+        coreNetworkModule,
         remoteDataModule,
         authModule,
         repositoryModule,

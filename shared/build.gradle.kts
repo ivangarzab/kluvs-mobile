@@ -1,20 +1,15 @@
-import utils.getPropertyOrEnvVar
-
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
+    id("org.jetbrains.kotlinx.kover") version "0.9.3"
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.mokkery)
-    id("com.codingfeline.buildkonfig") version "+"
-    id("org.jetbrains.kotlinx.kover") version "0.9.3"
 }
 
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 
@@ -32,15 +27,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":core:model"))
+            implementation(project(":core:network"))
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization)
             api(libs.androidx.lifecycle.viewmodel)
-
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
-            implementation(libs.ktor.client.logging)
 
             implementation(libs.supabase)
             implementation(libs.supabase.functions)
@@ -51,13 +42,12 @@ kotlin {
 
         }
         androidMain.dependencies {
-            implementation(libs.ktor.client.android)
             implementation(libs.koin.android)
             implementation(libs.koin.compose)
             implementation(libs.androidx.security.crypto)
         }
         iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -79,43 +69,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-buildkonfig {
-    packageName = "com.ivangarzab.kluvs.shared"
-
-    defaultConfigs {
-        // Production Supabase credentials
-        val supabaseUrl: String = getPropertyOrEnvVar("SUPABASE_URL")
-        val supabaseKey: String = getPropertyOrEnvVar("SUPABASE_KEY")
-        require(supabaseUrl.isNotEmpty() && supabaseKey.isNotEmpty()) {
-            "Make sure to provide the SUPABASE_URL and SUPABASE_KEY in your global gradle.properties file."
-        }
-        buildConfigField(
-            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
-            "SUPABASE_KEY",
-            supabaseKey
-        )
-        buildConfigField(
-            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
-            "SUPABASE_URL",
-            supabaseUrl
-        )
-
-        // Testing Supabase credentials
-        val testSupabaseUrl: String = getPropertyOrEnvVar("TEST_SUPABASE_URL")
-        val testSupabaseKey: String = getPropertyOrEnvVar("TEST_SUPABASE_KEY")
-        buildConfigField(
-            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
-            "TEST_SUPABASE_KEY",
-            testSupabaseKey
-        )
-        buildConfigField(
-            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
-            "TEST_SUPABASE_URL",
-            testSupabaseUrl
-        )
     }
 }
 

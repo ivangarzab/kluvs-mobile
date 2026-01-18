@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.remote.serializers
+package com.ivangarzab.kluvs.network.serializers
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer

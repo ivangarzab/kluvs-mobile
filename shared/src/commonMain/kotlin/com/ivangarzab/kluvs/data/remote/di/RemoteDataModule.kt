@@ -16,27 +16,13 @@ import com.ivangarzab.kluvs.data.remote.source.ServerRemoteDataSource
 import com.ivangarzab.kluvs.data.remote.source.ServerRemoteDataSourceImpl
 import com.ivangarzab.kluvs.data.remote.source.SessionRemoteDataSource
 import com.ivangarzab.kluvs.data.remote.source.SessionRemoteDataSourceImpl
-import com.ivangarzab.kluvs.shared.BuildKonfig
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.Auth
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.functions.Functions
 import org.koin.dsl.module
 
 /**
  * [org.koin.core.Koin] module for the data layer.
  */
 val remoteDataModule = module {
-
-    single<SupabaseClient> {
-        createSupabaseClient(
-            supabaseUrl = BuildKonfig.SUPABASE_URL,
-            supabaseKey = BuildKonfig.SUPABASE_KEY
-        ) {
-            install(Functions)
-            install(Auth)
-        }
-    }
 
     // Services
     single<ClubService> { ClubServiceImpl(get<SupabaseClient>()) }
