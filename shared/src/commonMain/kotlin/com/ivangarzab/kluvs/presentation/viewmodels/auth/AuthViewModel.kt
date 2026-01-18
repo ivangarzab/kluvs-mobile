@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.kluvs.data.auth.AuthError
 import com.ivangarzab.kluvs.data.auth.AuthRepository
-import com.ivangarzab.kluvs.domain.models.User
+import com.ivangarzab.kluvs.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

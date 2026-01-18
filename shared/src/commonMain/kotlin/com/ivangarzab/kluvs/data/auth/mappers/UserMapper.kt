@@ -1,7 +1,7 @@
 package com.ivangarzab.kluvs.data.auth.mappers
 
-import com.ivangarzab.kluvs.domain.models.AuthProvider
-import com.ivangarzab.kluvs.domain.models.User
+import com.ivangarzab.kluvs.model.AuthProvider
+import com.ivangarzab.kluvs.model.User
 import io.github.jan.supabase.auth.user.UserInfo
 
 /**

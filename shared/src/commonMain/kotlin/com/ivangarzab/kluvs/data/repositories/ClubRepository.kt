@@ -3,7 +3,7 @@ package com.ivangarzab.kluvs.data.repositories
 import com.ivangarzab.kluvs.data.remote.dtos.CreateClubRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateClubRequestDto
 import com.ivangarzab.kluvs.data.remote.source.ClubRemoteDataSource
-import com.ivangarzab.kluvs.domain.models.Club
+import com.ivangarzab.kluvs.model.Club
 
 /**
  * Repository for managing Club data.

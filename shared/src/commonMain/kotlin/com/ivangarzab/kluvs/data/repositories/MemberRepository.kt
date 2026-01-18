@@ -3,7 +3,7 @@ package com.ivangarzab.kluvs.data.repositories
 import com.ivangarzab.kluvs.data.remote.dtos.CreateMemberRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateMemberRequestDto
 import com.ivangarzab.kluvs.data.remote.source.MemberRemoteDataSource
-import com.ivangarzab.kluvs.domain.models.Member
+import com.ivangarzab.kluvs.model.Member
 
 /**
  * Repository for managing Member data.

@@ -5,7 +5,7 @@ import com.ivangarzab.kluvs.data.remote.api.SessionService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.mappers.toDomain
-import com.ivangarzab.kluvs.domain.models.Session
+import com.ivangarzab.kluvs.model.Session
 
 /**
  * Remote data source for Session operations.
@@ -20,7 +20,7 @@ interface SessionRemoteDataSource {
     /**
      * Fetches a session by ID.
      *
-     * Returns a [Session] with all nested relations populated:
+     * Returns a [com.ivangarzab.kluvs.model.Session] with all nested relations populated:
      * - book (full Book object)
      * - discussions (full Discussion objects)
      * - clubId (extracted from nested Club)
@@ -30,14 +30,14 @@ interface SessionRemoteDataSource {
     /**
      * Creates a new session.
      *
-     * Returns the created [Session] with nested relations if available.
+     * Returns the created [com.ivangarzab.kluvs.model.Session] with nested relations if available.
      */
     suspend fun createSession(request: CreateSessionRequestDto): Result<Session>
 
     /**
      * Updates an existing session.
      *
-     * Returns the updated [Session] with nested relations if available.
+     * Returns the updated [com.ivangarzab.kluvs.model.Session] with nested relations if available.
      */
     suspend fun updateSession(request: UpdateSessionRequestDto): Result<Session>
 

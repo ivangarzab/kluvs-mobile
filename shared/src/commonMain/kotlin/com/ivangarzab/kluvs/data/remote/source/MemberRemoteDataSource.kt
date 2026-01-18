@@ -5,7 +5,7 @@ import com.ivangarzab.kluvs.data.remote.api.MemberService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateMemberRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateMemberRequestDto
 import com.ivangarzab.kluvs.data.remote.mappers.toDomain
-import com.ivangarzab.kluvs.domain.models.Member
+import com.ivangarzab.kluvs.model.Member
 
 /**
  * Remote data source for Member operations.
@@ -20,7 +20,7 @@ interface MemberRemoteDataSource {
     /**
      * Fetches a member by ID.
      *
-     * Returns a [Member] with all nested relations populated:
+     * Returns a [com.ivangarzab.kluvs.model.Member] with all nested relations populated:
      * - clubs (full Club objects the member belongs to)
      * - shameClubs (full Club objects where member is shamed)
      */
@@ -29,21 +29,21 @@ interface MemberRemoteDataSource {
     /**
      * Fetches a member by user ID (auth ID).
      *
-     * Returns a [Member] with all nested relations populated.
+     * Returns a [com.ivangarzab.kluvs.model.Member] with all nested relations populated.
      */
     suspend fun getMemberByUserId(userId: String): Result<Member>
 
     /**
      * Creates a new member.
      *
-     * Returns the created [Member] (basic info only, no nested relations).
+     * Returns the created [com.ivangarzab.kluvs.model.Member] (basic info only, no nested relations).
      */
     suspend fun createMember(request: CreateMemberRequestDto): Result<Member>
 
     /**
      * Updates an existing member.
      *
-     * Returns the updated [Member] (basic info only, no nested relations).
+     * Returns the updated [com.ivangarzab.kluvs.model.Member] (basic info only, no nested relations).
      */
     suspend fun updateMember(request: UpdateMemberRequestDto): Result<Member>
 

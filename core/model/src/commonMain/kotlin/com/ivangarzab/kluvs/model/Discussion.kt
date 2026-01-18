@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.domain.models
+package com.ivangarzab.kluvs.model
 
 import kotlinx.datetime.LocalDateTime
 

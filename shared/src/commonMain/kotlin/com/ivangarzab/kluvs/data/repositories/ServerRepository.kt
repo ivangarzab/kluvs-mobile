@@ -3,7 +3,7 @@ package com.ivangarzab.kluvs.data.repositories
 import com.ivangarzab.kluvs.data.remote.dtos.CreateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.source.ServerRemoteDataSource
-import com.ivangarzab.kluvs.domain.models.Server
+import com.ivangarzab.kluvs.model.Server
 
 /**
  * Repository for managing Server data.

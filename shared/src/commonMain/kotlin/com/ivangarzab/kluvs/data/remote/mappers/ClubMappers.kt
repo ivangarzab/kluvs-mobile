@@ -3,10 +3,10 @@ package com.ivangarzab.kluvs.data.remote.mappers
 import com.ivangarzab.kluvs.data.remote.dtos.ClubDto
 import com.ivangarzab.kluvs.data.remote.dtos.ClubResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.ServerClubDto
-import com.ivangarzab.kluvs.domain.models.Club
+import com.ivangarzab.kluvs.model.Club
 
 /**
- * Maps a [ClubDto] from the API to a [Club] domain model.
+ * Maps a [ClubDto] from the API to a [com.ivangarzab.kluvs.model.Club] domain model.
  *
  * Note: ClubDto contains only basic club info without nested relations.
  * Relations (members, sessions) will be null.
@@ -26,7 +26,7 @@ fun ClubDto.toDomain(): Club {
 }
 
 /**
- * Maps a [ClubResponseDto] from the API to a [Club] domain model.
+ * Maps a [ClubResponseDto] from the API to a [com.ivangarzab.kluvs.model.Club] domain model.
  *
  * This is the full club response with all nested relations populated:
  * - members (list of Member objects)
@@ -53,7 +53,7 @@ fun ClubResponseDto.toDomain(): Club {
 }
 
 /**
- * Maps a [ServerClubDto] from the API to a [Club] domain model.
+ * Maps a [ServerClubDto] from the API to a [com.ivangarzab.kluvs.model.Club] domain model.
  *
  * Note: ServerClubDto is used in Server responses and contains:
  * - Basic club info (id, name, discord_channel)

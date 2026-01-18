@@ -1,12 +1,11 @@
 package com.ivangarzab.kluvs.domain.usecases.member
 
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
-import com.ivangarzab.kluvs.domain.models.Club
 import com.ivangarzab.kluvs.presentation.models.ClubListItem
 import kotlin.collections.emptyList
 
 /**
- * UseCase for fetching the current user's [Club] list for the MainScreen.
+ * UseCase for fetching the current user's [com.ivangarzab.kluvs.model.Club] list for the MainScreen.
  *
  * Extract list of clubs form the Member model into a UI-friendly list.
  *

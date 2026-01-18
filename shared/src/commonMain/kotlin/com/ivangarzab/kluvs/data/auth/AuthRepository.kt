@@ -1,6 +1,6 @@
 package com.ivangarzab.kluvs.data.auth
 
-import com.ivangarzab.kluvs.domain.models.User
+import com.ivangarzab.kluvs.model.User
 import kotlinx.coroutines.flow.StateFlow
 
 /**

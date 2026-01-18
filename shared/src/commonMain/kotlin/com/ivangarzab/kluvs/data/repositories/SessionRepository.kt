@@ -5,9 +5,9 @@ import com.ivangarzab.kluvs.data.remote.dtos.CreateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.mappers.toDto
 import com.ivangarzab.kluvs.data.remote.source.SessionRemoteDataSource
-import com.ivangarzab.kluvs.domain.models.Book
-import com.ivangarzab.kluvs.domain.models.Discussion
-import com.ivangarzab.kluvs.domain.models.Session
+import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.Discussion
+import com.ivangarzab.kluvs.model.Session
 import kotlinx.datetime.LocalDateTime
 
 /**

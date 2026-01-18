@@ -5,7 +5,7 @@ import com.ivangarzab.kluvs.data.remote.api.ClubService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateClubRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateClubRequestDto
 import com.ivangarzab.kluvs.data.remote.mappers.toDomain
-import com.ivangarzab.kluvs.domain.models.Club
+import com.ivangarzab.kluvs.model.Club
 
 /**
  * Remote data source for Club operations.
@@ -20,7 +20,7 @@ interface ClubRemoteDataSource {
     /**
      * Fetches a club by ID with optional server ID.
      *
-     * Returns a [Club] with all nested relations populated:
+     * Returns a [com.ivangarzab.kluvs.model.Club] with all nested relations populated:
      * - members (full Member objects)
      * - activeSession (full Session object)
      * - pastSessions (full Session objects)
@@ -34,21 +34,21 @@ interface ClubRemoteDataSource {
     /**
      * Fetches a club by Discord channel ID and server ID.
      *
-     * Returns a [Club] with all nested relations populated.
+     * Returns a [com.ivangarzab.kluvs.model.Club] with all nested relations populated.
      */
     suspend fun getClubByChannel(channel: String, serverId: String): Result<Club>
 
     /**
      * Creates a new club.
      *
-     * Returns the created [Club] (basic info only, no nested relations).
+     * Returns the created [com.ivangarzab.kluvs.model.Club] (basic info only, no nested relations).
      */
     suspend fun createClub(request: CreateClubRequestDto): Result<Club>
 
     /**
      * Updates an existing club.
      *
-     * Returns the updated [Club] (basic info only, no nested relations).
+     * Returns the updated [com.ivangarzab.kluvs.model.Club] (basic info only, no nested relations).
      */
     suspend fun updateClub(request: UpdateClubRequestDto): Result<Club>
 

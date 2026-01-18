@@ -1,7 +1,7 @@
 package com.ivangarzab.kluvs.domain.usecases.member
 
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
-import com.ivangarzab.kluvs.domain.models.Member
+import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
 import com.ivangarzab.kluvs.presentation.models.DateTimeFormat
 import com.ivangarzab.kluvs.presentation.models.UserProfile

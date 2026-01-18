@@ -1,7 +1,7 @@
 package com.ivangarzab.kluvs.domain.usecases.club
 
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
-import com.ivangarzab.kluvs.domain.models.Club
+import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
 import com.ivangarzab.kluvs.presentation.models.BookInfo
 import com.ivangarzab.kluvs.presentation.models.ClubDetails
@@ -15,7 +15,7 @@ import kotlin.time.ExperimentalTime
 /**
  * UseCase for fetching complete club information for the GeneralTab.
  *
- * Transforms domain [Club] model into UI-friendly [ClubDetails] with:
+ * Transforms domain [com.ivangarzab.kluvs.model.Club] model into UI-friendly [ClubDetails] with:
  * - Calculated member count
  * - Current book being read
  * - Next upcoming discussion

@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.domain.models
+package com.ivangarzab.kluvs.model
 
 /**
  * Domain model for authenticated User.
@@ -26,6 +26,7 @@ data class User(
 
 /**
  * Authentication providers supported by the app.
+ * TODO: Consider moving into :core:auth
  */
 enum class AuthProvider {
     EMAIL,

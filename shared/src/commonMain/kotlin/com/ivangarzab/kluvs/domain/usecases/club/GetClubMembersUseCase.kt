@@ -1,14 +1,14 @@
 package com.ivangarzab.kluvs.domain.usecases.club
 
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
-import com.ivangarzab.kluvs.domain.models.Club
-import com.ivangarzab.kluvs.domain.models.Member
+import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.presentation.models.MemberListItemInfo
 
 /**
  * UseCase for fetching club members sorted by points for MembersTab.
  *
- * Transforms domain [Member] models into UI-friendly [MemberListItemInfo] with:
+ * Transforms domain [com.ivangarzab.kluvs.model.Member] models into UI-friendly [MemberListItemInfo] with:
  * - Member information
  * - Points for ranking
  * - Sorted by points (descending)

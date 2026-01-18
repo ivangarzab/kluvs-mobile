@@ -1,7 +1,7 @@
 package com.ivangarzab.kluvs.data.repositories
 
 import com.ivangarzab.kluvs.data.remote.source.MemberRemoteDataSource
-import com.ivangarzab.kluvs.domain.models.Member
+import com.ivangarzab.kluvs.model.Member
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any

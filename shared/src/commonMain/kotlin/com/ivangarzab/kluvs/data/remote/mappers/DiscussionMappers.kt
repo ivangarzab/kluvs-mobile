@@ -1,10 +1,10 @@
 package com.ivangarzab.kluvs.data.remote.mappers
 
 import com.ivangarzab.kluvs.data.remote.dtos.DiscussionDto
-import com.ivangarzab.kluvs.domain.models.Discussion
+import com.ivangarzab.kluvs.model.Discussion
 
 /**
- * Maps a [DiscussionDto] from the API to a [Discussion] domain model.
+ * Maps a [DiscussionDto] from the API to a [com.ivangarzab.kluvs.model.Discussion] domain model.
  */
 fun DiscussionDto.toDomain(): Discussion {
     return Discussion(
@@ -17,7 +17,7 @@ fun DiscussionDto.toDomain(): Discussion {
 }
 
 /**
- * Maps a [Discussion] domain model to a [DiscussionDto].
+ * Maps a [com.ivangarzab.kluvs.model.Discussion] domain model to a [DiscussionDto].
  */
 fun Discussion.toDto(): DiscussionDto = DiscussionDto(
     id = id,

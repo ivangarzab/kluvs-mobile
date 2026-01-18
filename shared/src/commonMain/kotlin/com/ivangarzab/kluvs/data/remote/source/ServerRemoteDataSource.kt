@@ -5,7 +5,7 @@ import com.ivangarzab.kluvs.data.remote.api.ServerService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.mappers.toDomain
-import com.ivangarzab.kluvs.domain.models.Server
+import com.ivangarzab.kluvs.model.Server
 
 /**
  * Remote data source for Server operations.
@@ -20,14 +20,14 @@ interface ServerRemoteDataSource {
     /**
      * Fetches all servers.
      *
-     * Returns a list of [Server] objects with nested clubs populated.
+     * Returns a list of [com.ivangarzab.kluvs.model.Server] objects with nested clubs populated.
      */
     suspend fun getAllServers(): Result<List<Server>>
 
     /**
      * Fetches a server by ID.
      *
-     * Returns a [Server] with all nested relations populated:
+     * Returns a [com.ivangarzab.kluvs.model.Server] with all nested relations populated:
      * - clubs (full Club objects in this server)
      */
     suspend fun getServer(serverId: String): Result<Server>
@@ -35,14 +35,14 @@ interface ServerRemoteDataSource {
     /**
      * Creates a new server.
      *
-     * Returns the created [Server] (basic info only, no nested clubs).
+     * Returns the created [com.ivangarzab.kluvs.model.Server] (basic info only, no nested clubs).
      */
     suspend fun createServer(request: CreateServerRequestDto): Result<Server>
 
     /**
      * Updates an existing server.
      *
-     * Returns the updated [Server] (basic info only, no nested clubs).
+     * Returns the updated [com.ivangarzab.kluvs.model.Server] (basic info only, no nested clubs).
      */
     suspend fun updateServer(request: UpdateServerRequestDto): Result<Server>
 
