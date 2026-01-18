@@ -1,6 +1,8 @@
+import utils.getPropertyOrEnvVar
+
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.library")
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.mokkery)
     id("com.codingfeline.buildkonfig") version "+"
