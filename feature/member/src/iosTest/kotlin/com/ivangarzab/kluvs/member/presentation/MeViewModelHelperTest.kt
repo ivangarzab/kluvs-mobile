@@ -1,16 +1,14 @@
-package com.ivangarzab.kluvs.presentation.viewmodels
+package com.ivangarzab.kluvs.member.presentation
 
-import com.ivangarzab.kluvs.data.auth.AuthRepository
+import com.ivangarzab.kluvs.auth.domain.AuthRepository
+import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
-import com.ivangarzab.kluvs.domain.models.Member
-import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentUserProfileUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentlyReadingBooksUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetUserStatisticsUseCase
+import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
+import com.ivangarzab.kluvs.member.domain.GetCurrentlyReadingBooksUseCase
+import com.ivangarzab.kluvs.member.domain.GetUserStatisticsUseCase
+import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
-import com.ivangarzab.kluvs.presentation.viewmodels.member.MeState
-import com.ivangarzab.kluvs.presentation.viewmodels.member.MeViewModel
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
@@ -62,7 +60,8 @@ class MeViewModelHelperTest {
         val formatDateTime = FormatDateTimeUseCase()
         val getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime)
         val getUserStatistics = GetUserStatisticsUseCase(memberRepository)
-        val getCurrentlyReadingBooks = GetCurrentlyReadingBooksUseCase(memberRepository, clubRepository, formatDateTime)
+        val getCurrentlyReadingBooks =
+            GetCurrentlyReadingBooksUseCase(memberRepository, clubRepository, formatDateTime)
         val signOut = SignOutUseCase(authRepository)
 
         // Create real ViewModel with real use cases
@@ -126,7 +125,9 @@ class MeViewModelHelperTest {
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
-        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(testMember)
+        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(
+            testMember
+        )
 
         // When - call loadUserData
         helper.loadUserData("user-1")
@@ -160,11 +161,17 @@ class MeViewModelHelperTest {
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
-        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(testMember)
+        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(
+            testMember
+        )
         helper.loadUserData("user-1")
 
         // Then - should not receive new states after closing
-        assertEquals(initialSize, receivedStates.size, "Should not receive state emitted after closing")
+        assertEquals(
+            initialSize,
+            receivedStates.size,
+            "Should not receive state emitted after closing"
+        )
     }
 
     @Test
@@ -179,7 +186,9 @@ class MeViewModelHelperTest {
             userId = userId,
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
-        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(
+            testMember
+        )
 
         // When
         helper.loadUserData(userId)
@@ -200,7 +209,9 @@ class MeViewModelHelperTest {
             userId = userId,
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
-        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(
+            testMember
+        )
         helper.loadUserData(userId)
 
         // When
@@ -235,7 +246,9 @@ class MeViewModelHelperTest {
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
-        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(testMember)
+        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(
+            testMember
+        )
         helper.loadUserData("user-1")
 
         // Then
@@ -272,7 +285,9 @@ class MeViewModelHelperTest {
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
-        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(testMember)
+        everySuspend { memberRepository.getMemberByUserId("user-1") } returns Result.success(
+            testMember
+        )
         helper.loadUserData("user-1")
 
         // Then

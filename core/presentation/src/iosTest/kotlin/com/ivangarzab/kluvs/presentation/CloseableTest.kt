@@ -1,6 +1,5 @@
-package com.ivangarzab.kluvs.presentation.viewmodels
+package com.ivangarzab.kluvs.presentation
 
-import com.ivangarzab.kluvs.clubs.presentation.Closeable
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

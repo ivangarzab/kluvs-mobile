@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.local.storage
+package com.ivangarzab.kluvs.auth.persistence
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

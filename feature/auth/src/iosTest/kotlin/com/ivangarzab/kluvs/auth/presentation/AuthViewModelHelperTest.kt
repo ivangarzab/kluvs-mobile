@@ -1,11 +1,8 @@
-package com.ivangarzab.kluvs.presentation.viewmodels
+package com.ivangarzab.kluvs.auth.presentation
 
-import com.ivangarzab.kluvs.data.auth.AuthRepository
-import com.ivangarzab.kluvs.domain.models.AuthProvider
-import com.ivangarzab.kluvs.domain.models.User
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthState
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthUiState
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthViewModel
+import com.ivangarzab.kluvs.auth.domain.AuthRepository
+import com.ivangarzab.kluvs.model.AuthProvider
+import com.ivangarzab.kluvs.model.User
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -234,7 +231,11 @@ class AuthViewModelHelperTest {
         every { authRepository.currentUser } returns currentUserFlow
 
         // Then - should not receive new states after closing
-        assertEquals(initialSize, receivedStates.size, "Should not receive state emitted after closing")
+        assertEquals(
+            initialSize,
+            receivedStates.size,
+            "Should not receive state emitted after closing"
+        )
     }
 
     @Test
