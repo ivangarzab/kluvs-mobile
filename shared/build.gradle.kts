@@ -1,6 +1,7 @@
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
+    id("org.jetbrains.kotlinx.kover")
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.mokkery)
 }

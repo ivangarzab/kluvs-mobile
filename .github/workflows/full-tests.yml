@@ -88,16 +88,16 @@ jobs:
 
       - name: Run ALL Tests (Unit + Integration)
         working-directory: kluvs-mobile
-        run: ./gradlew shared:testDebugUnitTest --continue
+        run: ./gradlew testDebugUnitTest --continue
 
       - name: Generate Complete Kover Coverage Report
         working-directory: kluvs-mobile
-        run: ./gradlew shared:koverXmlReport shared:koverHtmlReport
+        run: ./gradlew koverXmlReport koverHtmlReport
 
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./kluvs-mobile/shared/build/reports/kover/report.xml
+          files: ./kluvs-mobile/build/reports/kover/report.xml
           flags: all-tests
           name: complete-coverage
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -124,6 +124,6 @@ jobs:
         with:
           name: coverage-reports
           path: |
-            kluvs-mobile/shared/build/reports/kover/html/
-            kluvs-mobile/shared/build/reports/kover/report.xml
+            kluvs-mobile/build/reports/kover/html/
+            kluvs-mobile/build/reports/kover/report.xml
           retention-days: 30

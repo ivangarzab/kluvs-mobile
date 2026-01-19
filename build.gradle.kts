@@ -15,10 +15,20 @@ subprojects {
     }
 }
 
-// Configure aggregation
+// Kover dependencies for aggregation - pulls coverage from all modules
+dependencies {
+    kover(project(":core:model"))
+    kover(project(":core:network"))
+    kover(project(":core:auth"))
+    kover(project(":core:data"))
+    kover(project(":core:presentation"))
+    kover(project(":feature:auth"))
+    kover(project(":feature:clubs"))
+    kover(project(":feature:member"))
+    kover(project(":shared"))
+}
 kover {
     reports {
-        // This ensures the root report includes all subprojects (core, feature, shared)
         total {
             filters {
                 excludes {
