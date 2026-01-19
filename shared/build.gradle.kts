@@ -47,9 +47,6 @@ kotlin {
             implementation(libs.kotlinx.serialization)
             api(libs.androidx.lifecycle.viewmodel)
 
-            implementation(libs.supabase)
-            implementation(libs.supabase.functions)
-
             implementation(libs.koin)
             implementation(libs.bark)
 
