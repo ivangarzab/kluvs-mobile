@@ -1,8 +1,7 @@
 package com.ivangarzab.kluvs.di
 
 import com.ivangarzab.kluvs.auth.di.authModule
-import com.ivangarzab.kluvs.data.remote.di.remoteDataModule
-import com.ivangarzab.kluvs.data.repositories.di.repositoryModule
+import com.ivangarzab.kluvs.data.di.coreDataModule
 import com.ivangarzab.kluvs.domain.usecases.di.useCaseModule
 import com.ivangarzab.kluvs.network.di.coreNetworkModule
 import com.ivangarzab.kluvs.presentation.viewmodels.di.viewModelModule
@@ -27,9 +26,8 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
         generalModule,
         platformDataModule,
         coreNetworkModule,
-        remoteDataModule,
+        coreDataModule,
         authModule,
-        repositoryModule,
         useCaseModule,
         viewModelModule,
     )

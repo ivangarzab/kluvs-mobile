@@ -11,7 +11,7 @@ import com.ivangarzab.kluvs.model.Club
  * Remote data source for Club operations.
  *
  * Responsibilities:
- * - Calls [ClubService] to fetch/mutate club data from Supabase
+ * - Calls [com.ivangarzab.kluvs.data.remote.api.ClubService] to fetch/mutate club data from Supabase
  * - Maps DTOs to domain models using mappers
  * - Wraps results in [Result] for error handling
  */
@@ -20,7 +20,7 @@ interface ClubRemoteDataSource {
     /**
      * Fetches a club by ID with optional server ID.
      *
-     * Returns a [com.ivangarzab.kluvs.model.Club] with all nested relations populated:
+     * Returns a [Club] with all nested relations populated:
      * - members (full Member objects)
      * - activeSession (full Session object)
      * - pastSessions (full Session objects)
@@ -34,21 +34,21 @@ interface ClubRemoteDataSource {
     /**
      * Fetches a club by Discord channel ID and server ID.
      *
-     * Returns a [com.ivangarzab.kluvs.model.Club] with all nested relations populated.
+     * Returns a [Club] with all nested relations populated.
      */
     suspend fun getClubByChannel(channel: String, serverId: String): Result<Club>
 
     /**
      * Creates a new club.
      *
-     * Returns the created [com.ivangarzab.kluvs.model.Club] (basic info only, no nested relations).
+     * Returns the created [Club] (basic info only, no nested relations).
      */
     suspend fun createClub(request: CreateClubRequestDto): Result<Club>
 
     /**
      * Updates an existing club.
      *
-     * Returns the updated [com.ivangarzab.kluvs.model.Club] (basic info only, no nested relations).
+     * Returns the updated [Club] (basic info only, no nested relations).
      */
     suspend fun updateClub(request: UpdateClubRequestDto): Result<Club>
 

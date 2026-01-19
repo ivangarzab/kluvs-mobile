@@ -11,7 +11,7 @@ import com.ivangarzab.kluvs.model.Server
  * Remote data source for Server operations.
  *
  * Responsibilities:
- * - Calls [ServerService] to fetch/mutate server data from Supabase
+ * - Calls [com.ivangarzab.kluvs.data.remote.api.ServerService] to fetch/mutate server data from Supabase
  * - Maps DTOs to domain models using mappers
  * - Wraps results in [Result] for error handling
  */
@@ -20,14 +20,14 @@ interface ServerRemoteDataSource {
     /**
      * Fetches all servers.
      *
-     * Returns a list of [com.ivangarzab.kluvs.model.Server] objects with nested clubs populated.
+     * Returns a list of [Server] objects with nested clubs populated.
      */
     suspend fun getAllServers(): Result<List<Server>>
 
     /**
      * Fetches a server by ID.
      *
-     * Returns a [com.ivangarzab.kluvs.model.Server] with all nested relations populated:
+     * Returns a [Server] with all nested relations populated:
      * - clubs (full Club objects in this server)
      */
     suspend fun getServer(serverId: String): Result<Server>
@@ -35,14 +35,14 @@ interface ServerRemoteDataSource {
     /**
      * Creates a new server.
      *
-     * Returns the created [com.ivangarzab.kluvs.model.Server] (basic info only, no nested clubs).
+     * Returns the created [Server] (basic info only, no nested clubs).
      */
     suspend fun createServer(request: CreateServerRequestDto): Result<Server>
 
     /**
      * Updates an existing server.
      *
-     * Returns the updated [com.ivangarzab.kluvs.model.Server] (basic info only, no nested clubs).
+     * Returns the updated [Server] (basic info only, no nested clubs).
      */
     suspend fun updateServer(request: UpdateServerRequestDto): Result<Server>
 

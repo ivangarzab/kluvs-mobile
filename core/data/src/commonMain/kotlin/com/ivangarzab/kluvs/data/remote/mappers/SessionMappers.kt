@@ -5,10 +5,10 @@ import com.ivangarzab.kluvs.data.remote.dtos.SessionResponseDto
 import com.ivangarzab.kluvs.model.Session
 
 /**
- * Maps a [SessionDto] from the API to a [com.ivangarzab.kluvs.model.Session] domain model.
+ * Maps a [com.ivangarzab.kluvs.data.remote.dtos.SessionDto] from the API to a [Session] domain model.
  *
  * Note: SessionDto may have partial data (used in nested contexts).
- * For full session data, use [SessionResponseDto.toDomain].
+ * For full session data, use [com.ivangarzab.kluvs.data.remote.dtos.SessionResponseDto.toDomain].
  */
 fun SessionDto.toDomain(): Session {
     return Session(
@@ -21,7 +21,7 @@ fun SessionDto.toDomain(): Session {
 }
 
 /**
- * Maps a [SessionResponseDto] from the API to a [com.ivangarzab.kluvs.model.Session] domain model.
+ * Maps a [com.ivangarzab.kluvs.data.remote.dtos.SessionResponseDto] from the API to a [Session] domain model.
  *
  * This is the full session response with all related data populated.
  */

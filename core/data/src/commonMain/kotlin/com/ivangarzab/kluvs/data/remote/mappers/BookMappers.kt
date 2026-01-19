@@ -4,7 +4,7 @@ import com.ivangarzab.kluvs.data.remote.dtos.BookDto
 import com.ivangarzab.kluvs.model.Book
 
 /**
- * Maps a [BookDto] from the API to a [com.ivangarzab.kluvs.model.Book] domain model.
+ * Maps a [com.ivangarzab.kluvs.data.remote.dtos.BookDto] from the API to a [Book] domain model.
  */
 fun BookDto.toDomain(): Book {
     return Book(

@@ -11,7 +11,7 @@ import com.ivangarzab.kluvs.model.Session
  * Remote data source for Session operations.
  *
  * Responsibilities:
- * - Calls [SessionService] to fetch/mutate session data from Supabase
+ * - Calls [com.ivangarzab.kluvs.data.remote.api.SessionService] to fetch/mutate session data from Supabase
  * - Maps DTOs to domain models using mappers
  * - Wraps results in [Result] for error handling
  */
@@ -20,7 +20,7 @@ interface SessionRemoteDataSource {
     /**
      * Fetches a session by ID.
      *
-     * Returns a [com.ivangarzab.kluvs.model.Session] with all nested relations populated:
+     * Returns a [Session] with all nested relations populated:
      * - book (full Book object)
      * - discussions (full Discussion objects)
      * - clubId (extracted from nested Club)
@@ -30,14 +30,14 @@ interface SessionRemoteDataSource {
     /**
      * Creates a new session.
      *
-     * Returns the created [com.ivangarzab.kluvs.model.Session] with nested relations if available.
+     * Returns the created [Session] with nested relations if available.
      */
     suspend fun createSession(request: CreateSessionRequestDto): Result<Session>
 
     /**
      * Updates an existing session.
      *
-     * Returns the updated [com.ivangarzab.kluvs.model.Session] with nested relations if available.
+     * Returns the updated [Session] with nested relations if available.
      */
     suspend fun updateSession(request: UpdateSessionRequestDto): Result<Session>
 

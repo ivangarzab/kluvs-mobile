@@ -6,7 +6,7 @@ import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.network.utils.parseDateTimeString
 
 /**
- * Maps a [MemberDto] from the API to a [com.ivangarzab.kluvs.model.Member] domain model.
+ * Maps a [com.ivangarzab.kluvs.data.remote.dtos.MemberDto] from the API to a [Member] domain model.
  *
  * Note: MemberDto contains only basic member info without nested Club objects.
  * Relations (clubs, shameClubs) will be null.
@@ -27,7 +27,7 @@ fun MemberDto.toDomain(): Member {
 }
 
 /**
- * Maps a [MemberResponseDto] from the API to a [com.ivangarzab.kluvs.model.Member] domain model.
+ * Maps a [com.ivangarzab.kluvs.data.remote.dtos.MemberResponseDto] from the API to a [Member] domain model.
  *
  * This is the full member response with all nested relations populated:
  * - clubs (list of Club objects the member belongs to)
