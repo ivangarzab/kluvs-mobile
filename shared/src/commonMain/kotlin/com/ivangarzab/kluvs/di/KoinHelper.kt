@@ -2,7 +2,7 @@ package com.ivangarzab.kluvs.di
 
 import com.ivangarzab.kluvs.app.AppCoordinator
 import com.ivangarzab.kluvs.auth.di.authFeatureModule
-import com.ivangarzab.kluvs.auth.di.authModule
+import com.ivangarzab.kluvs.auth.di.coreAuthModule
 import com.ivangarzab.kluvs.clubs.di.clubsFeatureModule
 import com.ivangarzab.kluvs.data.di.coreDataModule
 import com.ivangarzab.kluvs.member.di.memberFeatureModule
@@ -33,7 +33,7 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
         coreNetworkModule,
         coreDataModule,
         corePresentationModule,
-        authModule,
+        coreAuthModule,
         //feature modules
         authFeatureModule,
         clubsFeatureModule,

@@ -24,8 +24,8 @@ kotlin {
                 implementation(libs.koin)
         }
         commonTest.dependencies {
-
-
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
@@ -38,6 +38,7 @@ kotlin {
 
 buildkonfig {
     packageName = "com.ivangarzab.kluvs.network"
+    exposeObjectWithName = "BuildKonfig"
 
     defaultConfigs {
         // Production Supabase credentials

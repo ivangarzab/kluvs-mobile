@@ -6,7 +6,7 @@ import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
-import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

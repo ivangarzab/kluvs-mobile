@@ -12,5 +12,9 @@ kotlin {
             implementation(libs.koin)
             implementation(libs.bark)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }

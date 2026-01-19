@@ -21,7 +21,6 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(projects.shared)
-            implementation(project(":core:auth"))
 
             implementation(compose.runtime)
             implementation(compose.foundation)

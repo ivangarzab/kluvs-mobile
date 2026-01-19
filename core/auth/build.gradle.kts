@@ -1,5 +1,6 @@
 plugins {
     id("kluvs.kmp.library")
+    alias(libs.plugins.mokkery)
 }
 
 kotlin {
@@ -13,7 +14,8 @@ kotlin {
             implementation(libs.koin)
         }
         commonTest.dependencies {
-
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
         androidMain.dependencies {
             implementation(libs.androidx.security.crypto)

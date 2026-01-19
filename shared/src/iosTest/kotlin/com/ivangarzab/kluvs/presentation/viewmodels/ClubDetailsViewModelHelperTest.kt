@@ -6,7 +6,7 @@ import com.ivangarzab.kluvs.domain.models.Club
 import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.presentation.ClubDetailsViewModelHelper
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
-import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import com.ivangarzab.kluvs.presentation.viewmodels.club.ClubDetailsState

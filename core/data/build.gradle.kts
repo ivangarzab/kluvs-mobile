@@ -1,6 +1,7 @@
 plugins {
     id("kluvs.kmp.library")
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.mokkery)
 }
 
 kotlin {
@@ -17,7 +18,10 @@ kotlin {
             implementation(libs.bark)
         }
         commonTest.dependencies {
-
+            implementation(project(":core:network"))
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
         androidMain.dependencies {
 
