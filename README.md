@@ -36,16 +36,23 @@
 
 ```
 kluvs-mobile/
-├── composeApp/       # Compose Multiplatform UI code
-│   ├── commonMain/   # Shared UI components
-│   ├── androidMain/  # Android-specific code
-│   └── iosMain/      # iOS-specific code
-├── shared/           # Shared business logic
-│   ├── commonMain/   # Core domain & data layers
-│   ├── androidMain/  # Android-specific implementations
-│   └── iosMain/      # iOS-specific implementations
-└── iosApp/           # iOS application entry point
+├── composeApp/           # Android UI (Compose Multiplatform)
+├── iosApp/               # iOS application entry point
+├── shared/               # iOS framework export + DI + AppCoordinator
+├── core/
+│   ├── model/            # Domain models (User, Club, Member, etc.)
+│   ├── network/          # Supabase client configuration
+│   ├── auth/             # Authentication business logic
+│   ├── data/             # Repositories and data sources
+│   └── presentation/     # Shared UI utilities
+├── feature/
+│   ├── auth/             # Authentication UI
+│   ├── clubs/            # Club details UI
+│   └── member/           # Profile/stats UI
+└── docs/                 # Architecture documentation
 ```
+
+See `docs/MODULE_GRAPH.md` for the full dependency graph.
 
 ## 🚀 Getting Started
 
@@ -88,17 +95,18 @@ kluvs-mobile/
 
 ### Run Unit Tests
 ```bash
-./gradlew shared:testDebugUnitTest
+# All modules (excludes integration tests)
+./gradlew testDebugUnitTest -PexcludeTests="**/*IntegrationTest.class"
 ```
 
 ### Run Integration Tests (requires local Supabase)
 ```bash
-./gradlew shared:testDebugUnitTest --tests "*IntegrationTest"
+./gradlew :shared:testDebugUnitTest --tests "*IntegrationTest"
 ```
 
 ### Generate Coverage Report
 ```bash
-./gradlew shared:koverHtmlReport
+./gradlew :shared:koverHtmlReport
 ```
 Reports are generated in `shared/build/reports/kover/html/`
 

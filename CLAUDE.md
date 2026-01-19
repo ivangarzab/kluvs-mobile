@@ -32,17 +32,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Run Unit Tests Only
 
 ```bash
-# Run all unit tests (excludes integration tests)
-./gradlew shared:testDebugUnitTest -PexcludeTests="**/*IntegrationTest.class"
+# Run all unit tests across all modules (excludes integration tests)
+./gradlew testDebugUnitTest -PexcludeTests="**/*IntegrationTest.class"
+
+# Run tests for a specific module
+./gradlew :core:data:testDebugUnitTest
+./gradlew :feature:clubs:testDebugUnitTest
 ```
 
 ### Run Integration Tests
 
-Integration tests require a local Supabase instance. The full test suite runs integration tests:
+Integration tests require a local Supabase instance. They live in the `:shared` module:
 
 ```bash
 # Run ALL tests including integration tests
-./gradlew shared:testDebugUnitTest
+./gradlew :shared:testDebugUnitTest
 ```
 
 **Note**: Integration tests connect to a Supabase instance specified by `TEST_SUPABASE_URL` and `TEST_SUPABASE_KEY` environment variables.
@@ -119,10 +123,10 @@ Integration tests use seed data defined in `/Users/ivangarzab/Git/kluvs-api/supa
 
 ```bash
 # Run a single test class
-./gradlew shared:testDebugUnitTest --tests "com.ivangarzab.kluvs.data.repositories.ClubRepositoryTest"
+./gradlew :core:data:testDebugUnitTest --tests "com.ivangarzab.kluvs.data.repositories.ClubRepositoryTest"
 
 # Run a single test method
-./gradlew shared:testDebugUnitTest --tests "com.ivangarzab.kluvs.data.repositories.ClubRepositoryTest.testGetClubById"
+./gradlew :core:data:testDebugUnitTest --tests "com.ivangarzab.kluvs.data.repositories.ClubRepositoryTest.testGetClubById"
 ```
 
 ### Code Coverage
@@ -141,54 +145,64 @@ Reports are generated in `shared/build/reports/kover/html/`
 
 ### Module Structure
 
-The project is organized into two main modules:
+The project follows a multi-module architecture. See `docs/MODULE_GRAPH.md` for the full dependency graph.
 
-- **`shared/`** - Shared business logic and data layer (Kotlin Multiplatform)
-  - Domain models
-  - Data repositories
-  - Remote data sources and API services
-  - Dependency injection setup
-- **`composeApp/`** - UI layer with Compose Multiplatform
-  - Android-specific UI implementations currently
-  - iOS support planned
+```
+kluvs-mobile/
+├── composeApp/           # Android UI (Compose Multiplatform)
+├── iosApp/               # iOS application entry point
+├── shared/               # iOS framework export + DI setup + AppCoordinator
+├── core/
+│   ├── model/            # Domain models (User, Club, Member, etc.)
+│   ├── network/          # Supabase client, BuildKonfig, serializers
+│   ├── auth/             # Authentication logic and repository
+│   ├── data/             # Repositories and remote data sources
+│   └── presentation/     # Shared UI utilities (FormatDateTimeUseCase)
+└── feature/
+    ├── auth/             # Auth UI (AuthViewModel)
+    ├── clubs/            # Club details UI (ClubDetailsViewModel)
+    └── member/           # Profile UI (MeViewModel)
+```
+
+Each module has its own `README.md` with detailed documentation.
 
 ### Data Layer Architecture
 
-The data layer follows a clean architecture pattern with three layers:
+The data layer follows a clean architecture pattern (located in `:core:data`):
 
-1. **Services** (`data/remote/api/`) - Direct Supabase API communication via Supabase Functions
+1. **Services** (`core/data/.../remote/api/`) - Direct Supabase API communication
    - `ServerService`, `ClubService`, `MemberService`, `SessionService`
-   - Handle raw API requests/responses
 
-2. **Remote Data Sources** (`data/remote/source/`) - Transform DTOs to domain models
+2. **Remote Data Sources** (`core/data/.../remote/source/`) - Transform DTOs to domain models
    - Use mappers to convert between DTOs and domain models
-   - Handle data source-specific error handling
 
-3. **Repositories** (`data/repositories/`) - Abstract data access for the domain layer
+3. **Repositories** (`core/data/.../repositories/`) - Abstract data access
    - Expose clean domain interfaces
-   - Currently delegate to remote data sources only
-   - Designed to support local data sources in the future for caching/offline support
+   - Designed to support local caching in the future
 
 ### Dependency Injection with Koin
 
 All dependency injection is managed through Koin with modular organization:
 
-- **`platformDataModule`** - Platform-specific dependencies (Android/iOS)
-  - Android: `shared/src/androidMain/kotlin/com/ivangarzab/kluvs/di/DataModule.android.kt`
-  - iOS: `shared/src/iosMain/kotlin/com/ivangarzab/kluvs/di/DataModule.ios.kt`
-- **`remoteDataModule`** - API services and remote data sources
-- **`repositoryModule`** - Repository implementations
+- **`platformDataModule`** - Platform-specific dependencies (Android/iOS SecureStorage)
+- **`coreNetworkModule`** - Supabase client
+- **`coreDataModule`** - Services, data sources, repositories
+- **`coreAuthModule`** - Auth service and repository
+- **`corePresentationModule`** - Shared presentation utilities
+- **`authFeatureModule`** - AuthViewModel
+- **`clubsFeatureModule`** - Club-related ViewModels and UseCases
+- **`memberFeatureModule`** - Member-related ViewModels and UseCases
 
 Koin is initialized in `shared/src/commonMain/kotlin/com/ivangarzab/kluvs/di/KoinHelper.kt`
 
 ### Configuration Management
 
-Supabase credentials are managed via BuildKonfig:
+Supabase credentials are managed via BuildKonfig in `:core:network`:
 
 - Production credentials: `SUPABASE_URL`, `SUPABASE_KEY`
 - Test credentials: `TEST_SUPABASE_URL`, `TEST_SUPABASE_KEY`
 
-These must be set in `~/.gradle/gradle.properties` or as environment variables. See `shared/build.gradle.kts:87-122` for the configuration logic.
+These must be set in `~/.gradle/gradle.properties` or as environment variables. See `core/network/build.gradle.kts` for the configuration logic.
 
 ## Navigation Architecture
 
@@ -203,18 +217,27 @@ See `docs/NAVIGATION.md` for detailed navigation architecture documentation.
 
 ### Test Organization
 
+Tests are co-located with their implementations in each module:
+
 - **Unit Tests** - Fast tests with mocked dependencies using Mokkery
-  - Mappers, serializers, data sources, repositories
-  - Located in `shared/src/commonTest/`
+  - `:core:model` - Model tests
+  - `:core:auth` - Auth repository and mapper tests
+  - `:core:data` - Repository, data source, and mapper tests
+  - `:core:network` - Serializer tests
+  - `:core:presentation` - Utility tests
+  - `:feature:auth` - AuthViewModel tests
+  - `:feature:clubs` - Club UseCase and ViewModel tests
+  - `:feature:member` - Member UseCase and ViewModel tests
 
 - **Integration Tests** - Tests against real Supabase instance
+  - Located in `shared/src/commonTest/`
   - Suffixed with `*IntegrationTest.kt`
   - Require local Supabase instance running
   - Excluded from quick test runs via `excludeTests` property
 
 ### Logging in Tests
 
-Tests use barK logging with a custom test rule (`BarkTestRule`) to capture and assert log output. Platform-specific implementations exist for Android and iOS.
+Tests use barK logging with a custom test rule (`BarkTestRule`) in `shared/src/commonTest/`. Platform-specific implementations exist for Android and iOS.
 
 ## CI/CD
 
@@ -232,15 +255,19 @@ The project uses GitHub Actions:
 
 ### Exclude Tests Dynamically
 
-The `shared/build.gradle.kts` includes a custom task configuration (lines 137-149) that allows excluding tests via property:
+The `shared/build.gradle.kts` includes a custom task configuration that allows excluding tests via property:
 
 ```bash
-./gradlew shared:testDebugUnitTest -PexcludeTests="**/*IntegrationTest.class"
+./gradlew testDebugUnitTest -PexcludeTests="**/*IntegrationTest.class"
 ```
+
+### Convention Plugin
+
+All library modules use a shared convention plugin `kluvs.kmp.library` defined in `buildSrc/`. This ensures consistent Kotlin Multiplatform configuration across modules.
 
 ### Kover Exclusions
 
 Code coverage excludes:
 - Generated code (`*.BuildConfig`, `*.BuildKonfig`)
-- DTOs (`com.ivangarzab.kluvs.data.remote.dtos`)
+- DTOs (`**.dtos`)
 - Dependency injection modules (`**.di`)
