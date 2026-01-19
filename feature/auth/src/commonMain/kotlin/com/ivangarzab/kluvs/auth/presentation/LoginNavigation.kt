@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.viewmodels.auth
+package com.ivangarzab.kluvs.auth.presentation
 
 /**
  * The purpose of this class is to contain all of the different navigation options

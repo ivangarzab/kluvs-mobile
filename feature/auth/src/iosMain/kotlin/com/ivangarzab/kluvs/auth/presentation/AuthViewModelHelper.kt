@@ -1,9 +1,5 @@
-package com.ivangarzab.kluvs.presentation.viewmodels
+package com.ivangarzab.kluvs.auth.presentation
 
-import com.ivangarzab.kluvs.clubs.presentation.Closeable
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthState
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthUiState
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -11,7 +7,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 /**
- * The purpose of this class is to wrap the [AuthViewModel] for easier
+ * The purpose of this class is to wrap the [com.ivangarzab.kluvs.auth.presentation.AuthViewModel] for easier
  * use and access on the iOS side.
  */
 @Suppress("unused")

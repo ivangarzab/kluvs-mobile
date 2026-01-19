@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.viewmodels.auth
+package com.ivangarzab.kluvs.auth.presentation
 
 data class AuthUiState(
     val emailField: String = "",

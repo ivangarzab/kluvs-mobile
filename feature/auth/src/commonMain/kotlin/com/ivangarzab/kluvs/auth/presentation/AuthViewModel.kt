@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.viewmodels.auth
+package com.ivangarzab.kluvs.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -32,6 +32,7 @@ kotlin {
             api(project(":core:presentation"))
             implementation(project(":core:network"))
 
+            api(project(":feature:auth"))
             api(project(":feature:clubs"))
 
             implementation(libs.kotlinx.coroutines.core)
