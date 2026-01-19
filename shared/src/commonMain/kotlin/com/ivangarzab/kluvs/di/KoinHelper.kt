@@ -1,6 +1,6 @@
 package com.ivangarzab.kluvs.di
 
-import com.ivangarzab.kluvs.data.auth.di.authModule
+import com.ivangarzab.kluvs.auth.di.authModule
 import com.ivangarzab.kluvs.data.remote.di.remoteDataModule
 import com.ivangarzab.kluvs.data.repositories.di.repositoryModule
 import com.ivangarzab.kluvs.domain.usecases.di.useCaseModule

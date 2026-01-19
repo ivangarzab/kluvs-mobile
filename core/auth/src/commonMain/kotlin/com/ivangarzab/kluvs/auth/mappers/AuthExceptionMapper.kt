@@ -1,6 +1,6 @@
-package com.ivangarzab.kluvs.data.auth.mappers
+package com.ivangarzab.kluvs.auth.mappers
 
-import com.ivangarzab.kluvs.data.auth.AuthError
+import com.ivangarzab.kluvs.auth.domain.AuthError
 
 /**
  * Maps any [Exception] into an [AuthError] code.

@@ -28,6 +28,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:model"))
             implementation(project(":core:network"))
+            implementation(project(":core:auth"))
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization)
@@ -35,7 +36,6 @@ kotlin {
 
             implementation(libs.supabase)
             implementation(libs.supabase.functions)
-            implementation(libs.supabase.auth)
 
             implementation(libs.koin)
             implementation(libs.bark)
@@ -44,7 +44,6 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.koin.compose)
-            implementation(libs.androidx.security.crypto)
         }
         iosMain.dependencies {
 

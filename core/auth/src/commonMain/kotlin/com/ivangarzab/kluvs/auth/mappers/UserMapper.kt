@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.auth.mappers
+package com.ivangarzab.kluvs.auth.mappers
 
 import com.ivangarzab.kluvs.model.AuthProvider
 import com.ivangarzab.kluvs.model.User

@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.auth
+package com.ivangarzab.kluvs.auth.remote
 
 import io.github.jan.supabase.auth.user.UserSession
 

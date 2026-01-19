@@ -1,9 +1,10 @@
 package com.ivangarzab.kluvs.domain.usecases.auth
 
-import com.ivangarzab.kluvs.data.auth.AuthRepository
+import com.ivangarzab.kluvs.auth.domain.AuthRepository
+
 
 /**
- * Sign out the current user through the [AuthRepository].
+ * Sign out the current user through the [com.ivangarzab.kluvs.auth.AuthRepository].
  */
 class SignOutUseCase(
     private val authRepository: AuthRepository

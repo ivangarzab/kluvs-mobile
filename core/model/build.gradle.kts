@@ -5,26 +5,19 @@ plugins {
 
 kotlin {
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(libs.kotlinx.serialization)
-                implementation(libs.kotlinx.datetime)
-            }
+        commonMain.dependencies {
+            implementation(libs.kotlinx.serialization)
+            implementation(libs.kotlinx.datetime)
         }
-        commonTest {
-            dependencies {
+        commonTest.dependencies {
 
-            }
         }
-        androidMain {
-            dependencies {
+        androidMain.dependencies {
 
-            }
+
         }
-        iosMain {
-            dependencies {
+        iosMain.dependencies {
 
-            }
         }
     }
 }

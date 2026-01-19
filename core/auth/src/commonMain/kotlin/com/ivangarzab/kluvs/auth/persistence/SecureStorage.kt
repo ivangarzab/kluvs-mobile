@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.local.storage
+package com.ivangarzab.kluvs.auth.persistence
 
 /**
  * Platform-agnostic interface for secure storage of sensitive data (auth tokens, credentials).

@@ -1,9 +1,10 @@
-package com.ivangarzab.kluvs.data.auth
+package com.ivangarzab.kluvs.auth.domain
 
 import com.ivangarzab.bark.Bark
-import com.ivangarzab.kluvs.data.auth.mappers.toAuthError
-import com.ivangarzab.kluvs.data.auth.mappers.toDomain
-import com.ivangarzab.kluvs.data.local.storage.SecureStorage
+import com.ivangarzab.kluvs.auth.remote.AuthService
+import com.ivangarzab.kluvs.auth.mappers.toAuthError
+import com.ivangarzab.kluvs.auth.mappers.toDomain
+import com.ivangarzab.kluvs.auth.persistence.SecureStorage
 import com.ivangarzab.kluvs.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

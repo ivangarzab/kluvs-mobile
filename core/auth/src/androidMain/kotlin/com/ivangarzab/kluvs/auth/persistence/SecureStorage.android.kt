@@ -1,12 +1,12 @@
-package com.ivangarzab.kluvs.data.local.storage
+package com.ivangarzab.kluvs.auth.persistence
 
 import android.content.Context
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import androidx.core.content.edit
 
 /**
- * Android implementation of [SecureStorage] using [EncryptedSharedPreferences].
+ * Android implementation of [com.ivangarzab.kluvs.auth.persistence.SecureStorage] using [EncryptedSharedPreferences].
  *
  * Provides hardware-backed encryption for storing sensitive auth tokens.
  */

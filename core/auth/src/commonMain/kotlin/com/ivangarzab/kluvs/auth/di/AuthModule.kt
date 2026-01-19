@@ -1,9 +1,10 @@
-package com.ivangarzab.kluvs.data.auth.di
+package com.ivangarzab.kluvs.auth.di
 
-import com.ivangarzab.kluvs.data.auth.AuthRepository
-import com.ivangarzab.kluvs.data.auth.AuthRepositoryImpl
-import com.ivangarzab.kluvs.data.auth.AuthService
-import com.ivangarzab.kluvs.data.auth.AuthServiceImpl
+import com.ivangarzab.kluvs.auth.domain.AuthRepository
+import com.ivangarzab.kluvs.auth.domain.AuthRepositoryImpl
+import com.ivangarzab.kluvs.auth.persistence.SecureStorage
+import com.ivangarzab.kluvs.auth.remote.AuthService
+import com.ivangarzab.kluvs.auth.remote.AuthServiceImpl
 import io.github.jan.supabase.SupabaseClient
 import org.koin.dsl.module
 
@@ -28,7 +29,7 @@ val authModule = module {
     single<AuthRepository> {
         AuthRepositoryImpl(
             authService = get<AuthService>(),
-            secureStorage = get() // Provided by platform module
+            secureStorage = get<SecureStorage>() // Provided by platform module
         )
     }
 }

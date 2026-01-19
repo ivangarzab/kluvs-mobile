@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.auth
+package com.ivangarzab.kluvs.auth.domain
 
 import com.ivangarzab.kluvs.model.User
 import kotlinx.coroutines.flow.StateFlow

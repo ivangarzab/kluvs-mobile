@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.auth
+package com.ivangarzab.kluvs.auth.domain
 
 /**
  * Represents authentication error codes.

@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.data.local.storage
+package com.ivangarzab.kluvs.auth.persistence
 
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -31,7 +31,7 @@ import platform.Security.kSecReturnData
 import platform.Security.kSecValueData
 
 /**
- * iOS implementation of [SecureStorage] using Keychain Services.
+ * iOS implementation of [com.ivangarzab.kluvs.auth.persistence.SecureStorage] using Keychain Services.
  *
  * Provides hardware-backed encryption for storing sensitive auth tokens.
  */
