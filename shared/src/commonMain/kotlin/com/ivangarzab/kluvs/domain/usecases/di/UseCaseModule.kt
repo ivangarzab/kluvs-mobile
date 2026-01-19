@@ -1,7 +1,7 @@
 package com.ivangarzab.kluvs.domain.usecases.di
 
 import com.ivangarzab.kluvs.domain.usecases.auth.SignOutUseCase
-import com.ivangarzab.kluvs.domain.usecases.club.GetActiveSessionUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentUserProfileUseCase

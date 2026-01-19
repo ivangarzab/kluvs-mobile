@@ -3,7 +3,8 @@ package com.ivangarzab.kluvs.presentation.viewmodels
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.domain.models.Club
-import com.ivangarzab.kluvs.domain.usecases.club.GetActiveSessionUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
+import com.ivangarzab.kluvs.clubs.presentation.ClubDetailsViewModelHelper
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetMemberClubsUseCase

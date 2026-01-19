@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.models
+package com.ivangarzab.kluvs.clubs.presentation
 
 /**
  * Lightweight UI model for club selection/listing.

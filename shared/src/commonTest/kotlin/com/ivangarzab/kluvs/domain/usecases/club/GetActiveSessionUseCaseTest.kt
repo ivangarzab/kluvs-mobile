@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.domain.usecases.club
 
+import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.domain.models.Book
 import com.ivangarzab.kluvs.domain.models.Club

@@ -1,12 +1,10 @@
-package com.ivangarzab.kluvs.domain.usecases.club
+package com.ivangarzab.kluvs.clubs.domain
 
+import com.ivangarzab.kluvs.clubs.presentation.ActiveSessionDetails
+import com.ivangarzab.kluvs.clubs.presentation.BookInfo
+import com.ivangarzab.kluvs.clubs.presentation.DiscussionTimelineItemInfo
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.model.Club
-import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
-import com.ivangarzab.kluvs.presentation.models.ActiveSessionDetails
-import com.ivangarzab.kluvs.presentation.models.BookInfo
-import com.ivangarzab.kluvs.presentation.models.DateTimeFormat
-import com.ivangarzab.kluvs.presentation.models.DiscussionTimelineItemInfo
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock.System.now
@@ -15,7 +13,7 @@ import kotlin.time.ExperimentalTime
 /**
  * UseCase for fetching active reading session with discussion timeline for ActiveSessionTab.
  *
- * Transforms domain [com.ivangarzab.kluvs.model.Club] model into UI-friendly [ActiveSessionDetails] with:
+ * Transforms domain [Club] model into UI-friendly [ActiveSessionDetails] with:
  * - Book information
  * - Sorted discussions with status indicators (isPast, isNext, isFuture)
  * - Formatted dates

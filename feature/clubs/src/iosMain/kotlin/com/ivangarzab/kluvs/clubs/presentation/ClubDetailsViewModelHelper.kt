@@ -1,7 +1,5 @@
-package com.ivangarzab.kluvs.presentation.viewmodels
+package com.ivangarzab.kluvs.clubs.presentation
 
-import com.ivangarzab.kluvs.presentation.viewmodels.club.ClubDetailsState
-import com.ivangarzab.kluvs.presentation.viewmodels.club.ClubDetailsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -21,7 +19,7 @@ class ClubDetailsViewModelHelper : KoinComponent {
     /**
      * iOS-friendly observation method.
      *
-     * Returns a [Closeable] that can be used to cancel the observation.
+     * Returns a [com.ivangarzab.kluvs.presentation.viewmodels.Closeable] that can be used to cancel the observation.
      */
     fun observeState(callback: (ClubDetailsState) -> Unit): Closeable {
         val job = viewModel.state.onEach { callback(it) }.launchIn(coroutineScope)

@@ -1,12 +1,10 @@
 package com.ivangarzab.kluvs.domain.usecases.club
 
+import com.ivangarzab.kluvs.clubs.presentation.BookInfo
+import com.ivangarzab.kluvs.clubs.presentation.ClubDetails
+import com.ivangarzab.kluvs.clubs.presentation.DiscussionInfo
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.model.Club
-import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
-import com.ivangarzab.kluvs.presentation.models.BookInfo
-import com.ivangarzab.kluvs.presentation.models.ClubDetails
-import com.ivangarzab.kluvs.presentation.models.DateTimeFormat
-import com.ivangarzab.kluvs.presentation.models.DiscussionInfo
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock.System.now

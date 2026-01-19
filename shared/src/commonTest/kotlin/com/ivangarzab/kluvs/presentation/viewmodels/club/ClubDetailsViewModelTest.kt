@@ -7,7 +7,7 @@ import com.ivangarzab.kluvs.domain.models.Club
 import com.ivangarzab.kluvs.domain.models.Discussion
 import com.ivangarzab.kluvs.domain.models.Member
 import com.ivangarzab.kluvs.domain.models.Session
-import com.ivangarzab.kluvs.domain.usecases.club.GetActiveSessionUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetMemberClubsUseCase

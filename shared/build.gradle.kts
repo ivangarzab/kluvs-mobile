@@ -31,6 +31,8 @@ kotlin {
             api(project(":core:data"))
             implementation(project(":core:network"))
 
+            api(project(":feature:clubs"))
+
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization)
             api(libs.androidx.lifecycle.viewmodel)
