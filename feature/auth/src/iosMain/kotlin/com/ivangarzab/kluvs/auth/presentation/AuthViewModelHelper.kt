@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.auth.presentation
 
+import com.ivangarzab.kluvs.presentation.Closeable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
