@@ -1,6 +1,6 @@
 package com.ivangarzab.kluvs.app
 
-import com.ivangarzab.kluvs.clubs.presentation.Closeable
+import com.ivangarzab.kluvs.presentation.Closeable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

@@ -7,6 +7,7 @@ import com.ivangarzab.kluvs.clubs.di.clubsFeatureModule
 import com.ivangarzab.kluvs.data.di.coreDataModule
 import com.ivangarzab.kluvs.member.di.memberFeatureModule
 import com.ivangarzab.kluvs.network.di.coreNetworkModule
+import com.ivangarzab.kluvs.presentation.di.corePresentationModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.context.startKoin
@@ -31,6 +32,7 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
         // core modules
         coreNetworkModule,
         coreDataModule,
+        corePresentationModule,
         authModule,
         //feature modules
         authFeatureModule,

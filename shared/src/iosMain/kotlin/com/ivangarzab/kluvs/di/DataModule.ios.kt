@@ -1,7 +1,7 @@
 package com.ivangarzab.kluvs.di
 
-import com.ivangarzab.kluvs.data.local.storage.IosSecureStorage
-import com.ivangarzab.kluvs.data.local.storage.SecureStorage
+import com.ivangarzab.kluvs.auth.persistence.IosSecureStorage
+import com.ivangarzab.kluvs.auth.persistence.SecureStorage
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

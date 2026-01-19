@@ -21,6 +21,13 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+
+            export(project(":core:model"))
+            export(project(":core:presentation"))
+            export(project(":core:auth"))
+            export(project(":feature:auth"))
+            export(project(":feature:clubs"))
+            export(project(":feature:member"))
         }
     }
     
