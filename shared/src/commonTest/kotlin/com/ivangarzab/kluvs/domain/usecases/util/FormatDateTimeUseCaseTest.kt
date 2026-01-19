@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.domain.usecases.util
 
-import com.ivangarzab.kluvs.presentation.models.DateTimeFormat
+import com.ivangarzab.kluvs.presentation.state.DateTimeFormat
+import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import kotlinx.datetime.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals

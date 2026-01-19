@@ -5,10 +5,10 @@ import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.domain.models.Club
 import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.presentation.ClubDetailsViewModelHelper
-import com.ivangarzab.kluvs.domain.usecases.club.GetClubDetailsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetMemberClubsUseCase
-import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import com.ivangarzab.kluvs.presentation.viewmodels.club.ClubDetailsState
 import com.ivangarzab.kluvs.presentation.viewmodels.club.ClubDetailsViewModel
 import dev.mokkery.answering.returns

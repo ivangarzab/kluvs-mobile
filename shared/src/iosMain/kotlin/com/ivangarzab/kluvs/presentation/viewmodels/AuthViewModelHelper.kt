@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.presentation.viewmodels
 
+import com.ivangarzab.kluvs.clubs.presentation.Closeable
 import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthState
 import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthUiState
 import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthViewModel
@@ -22,7 +23,7 @@ class AuthViewModelHelper : KoinComponent {
     /**
      * iOS-friendly observation method for authentication state.
      *
-     * Returns a [Closeable] that can be used to cancel the observation.
+     * Returns a [com.ivangarzab.kluvs.presentation.Closeable] that can be used to cancel the observation.
      */
     fun observeState(callback: (AuthState) -> Unit): Closeable {
         val job = viewModel.state.onEach { callback(it) }.launchIn(coroutineScope)
@@ -32,7 +33,7 @@ class AuthViewModelHelper : KoinComponent {
     /**
      * iOS-friendly observation method for UI state (form fields).
      *
-     * Returns a [Closeable] that can be used to cancel the observation.
+     * Returns a [com.ivangarzab.kluvs.presentation.Closeable] that can be used to cancel the observation.
      */
     fun observeUiState(callback: (AuthUiState) -> Unit): Closeable {
         val job = viewModel.uiState.onEach { callback(it) }.launchIn(coroutineScope)

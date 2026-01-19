@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.models
+package com.ivangarzab.kluvs.presentation.state
 
 /**
  * Date/time formatting options for UI display.

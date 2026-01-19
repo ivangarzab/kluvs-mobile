@@ -40,12 +40,12 @@ import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.presentation.models.CurrentlyReadingBook
 import com.ivangarzab.kluvs.presentation.models.UserProfile
 import com.ivangarzab.kluvs.presentation.models.UserStatistics
+import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.presentation.viewmodels.member.MeState
 import com.ivangarzab.kluvs.presentation.viewmodels.member.MeViewModel
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.ui.components.ErrorScreen
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
-import com.ivangarzab.kluvs.presentation.models.ScreenState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

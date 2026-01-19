@@ -1,6 +1,6 @@
-package com.ivangarzab.kluvs.domain.usecases.util
+package com.ivangarzab.kluvs.presentation.util
 
-import com.ivangarzab.kluvs.presentation.models.DateTimeFormat
+import com.ivangarzab.kluvs.presentation.state.DateTimeFormat
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 
@@ -10,12 +10,12 @@ import kotlinx.datetime.LocalTime
  * Provides consistent date/time formatting across the application.
  * Uses kotlinx-datetime for multiplatform support.
  *
- * @see DateTimeFormat for available formatting options
+ * @see com.ivangarzab.kluvs.presentation.state.DateTimeFormat for available formatting options
  */
 class FormatDateTimeUseCase {
 
     /**
-     * Formats a [LocalDateTime] according to the specified format.
+     * Formats a [kotlinx.datetime.LocalDateTime] according to the specified format.
      *
      * @param dateTime The date and time to format
      * @param format The desired output format

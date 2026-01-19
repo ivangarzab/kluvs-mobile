@@ -12,7 +12,7 @@ import com.ivangarzab.kluvs.domain.usecases.auth.SignOutUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetUserStatisticsUseCase
-import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
+import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.mock

@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.viewmodels
+package com.ivangarzab.kluvs.presentation
 
 /**
  * Closeable interface for iOS to properly manage subscriptions.

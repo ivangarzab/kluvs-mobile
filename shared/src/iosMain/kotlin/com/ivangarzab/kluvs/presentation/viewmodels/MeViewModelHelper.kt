@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.presentation.viewmodels
 
+import com.ivangarzab.kluvs.clubs.presentation.Closeable
 import com.ivangarzab.kluvs.presentation.viewmodels.member.MeState
 import com.ivangarzab.kluvs.presentation.viewmodels.member.MeViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +23,7 @@ class MeViewModelHelper : KoinComponent {
     /**
      * iOS-friendly observation method.
      *
-     * Returns a [Closeable] that can be used to cancel the observation.
+     * Returns a [com.ivangarzab.kluvs.presentation.Closeable] that can be used to cancel the observation.
      */
     fun observeState(callback: (MeState) -> Unit): Closeable {
         val job = viewModel.state.onEach { callback(it) }.launchIn(coroutineScope)

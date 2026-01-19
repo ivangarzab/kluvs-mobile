@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
-import com.ivangarzab.kluvs.domain.usecases.club.GetClubDetailsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -2,9 +2,13 @@ package com.ivangarzab.kluvs.clubs.domain
 
 import com.ivangarzab.kluvs.clubs.presentation.ActiveSessionDetails
 import com.ivangarzab.kluvs.clubs.presentation.BookInfo
+import com.ivangarzab.kluvs.clubs.presentation.ClubListItem
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionTimelineItemInfo
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
+import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.kluvs.presentation.state.DateTimeFormat
+import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock.System.now
@@ -70,4 +74,33 @@ class GetActiveSessionUseCase(
             }
         }
     }
+}
+
+/**
+ * UseCase for fetching the current user's [Club] list for the MainScreen.
+ *
+ * Extract list of clubs form the Member model into a UI-friendly list.
+ *
+ * @param memberRepository Repository for member data
+ */
+class GetMemberClubsUseCase(
+    private val memberRepository: MemberRepository
+) {
+    /**
+     * Fetches all clubs for a member by their user ID.
+     *
+     * @param userId The auth user ID to look up
+     * @return Result containing list of [com.ivangarzab.kluvs.clubs.presentation.ClubListItem], or error if failed
+     */
+    suspend operator fun invoke(userId: String): Result<List<ClubListItem>> {
+        return memberRepository.getMemberByUserId(userId).map { member ->
+            member.clubs?.map { club ->
+                ClubListItem(
+                    id = club.id,
+                    name = club.name
+                )
+            } ?: emptyList()
+        }
+    }
+
 }

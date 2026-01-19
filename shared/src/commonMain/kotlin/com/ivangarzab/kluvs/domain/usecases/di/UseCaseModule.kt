@@ -2,13 +2,13 @@ package com.ivangarzab.kluvs.domain.usecases.di
 
 import com.ivangarzab.kluvs.domain.usecases.auth.SignOutUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
-import com.ivangarzab.kluvs.domain.usecases.club.GetClubDetailsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentlyReadingBooksUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetUserStatisticsUseCase
-import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
+import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 

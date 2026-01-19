@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.models
+package com.ivangarzab.kluvs.presentation.state
 
 /**
  * Shared interface defining general screen states.

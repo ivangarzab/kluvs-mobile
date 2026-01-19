@@ -7,7 +7,7 @@ import com.ivangarzab.kluvs.domain.models.Club
 import com.ivangarzab.kluvs.domain.models.Discussion
 import com.ivangarzab.kluvs.domain.models.Member
 import com.ivangarzab.kluvs.domain.models.Session
-import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
+import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.mock

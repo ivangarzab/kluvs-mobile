@@ -20,9 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.presentation.models.BookInfo
-import com.ivangarzab.kluvs.presentation.models.ClubDetails
-import com.ivangarzab.kluvs.presentation.models.DiscussionInfo
+import com.ivangarzab.kluvs.clubs.presentation.BookInfo
+import com.ivangarzab.kluvs.clubs.presentation.ClubDetails
+import com.ivangarzab.kluvs.clubs.presentation.DiscussionInfo
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.ui.components.NextDiscussionCard
 import com.ivangarzab.kluvs.ui.components.NoSectionData

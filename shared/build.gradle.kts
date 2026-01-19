@@ -29,6 +29,7 @@ kotlin {
             api(project(":core:model"))
             api(project(":core:auth"))
             api(project(":core:data"))
+            api(project(":core:presentation"))
             implementation(project(":core:network"))
 
             api(project(":feature:clubs"))

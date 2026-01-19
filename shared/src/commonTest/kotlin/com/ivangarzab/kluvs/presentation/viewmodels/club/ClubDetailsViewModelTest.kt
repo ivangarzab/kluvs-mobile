@@ -8,10 +8,10 @@ import com.ivangarzab.kluvs.domain.models.Discussion
 import com.ivangarzab.kluvs.domain.models.Member
 import com.ivangarzab.kluvs.domain.models.Session
 import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
-import com.ivangarzab.kluvs.domain.usecases.club.GetClubDetailsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.domain.usecases.club.GetClubMembersUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetMemberClubsUseCase
-import com.ivangarzab.kluvs.domain.usecases.util.FormatDateTimeUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
