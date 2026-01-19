@@ -1,7 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
-    id("org.jetbrains.kotlinx.kover") version "0.9.3"
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.mokkery)
 }
@@ -23,8 +22,9 @@ kotlin {
             isStatic = true
 
             export(project(":core:model"))
-            export(project(":core:presentation"))
             export(project(":core:auth"))
+            export(project(":core:data"))
+            export(project(":core:presentation"))
             export(project(":feature:auth"))
             export(project(":feature:clubs"))
             export(project(":feature:member"))
@@ -78,19 +78,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-kover {
-    reports {
-        filters {
-            excludes {
-                classes("*.BuildConfig", "*.BuildKonfig") // generated code
-                packages("com.ivangarzab.kluvs.data.remote.dtos") // Dtos
-                packages("**.di") // Dependency Injection
-                // Add other exclusions as needed
-            }
-        }
     }
 }
 

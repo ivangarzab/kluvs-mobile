@@ -13,5 +13,5 @@ dependencies {
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.compose.multiplatform.gradle.plugin)
     implementation(libs.compose.compiler.gradle.plugin)
+    implementation(libs.kover.gradle.plugin)
 }
-

@@ -45,7 +45,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Common Unit Tests
-        run: ./gradlew shared:testDebugUnitTest -PexcludeTests="**/*IntegrationTest*" --continue
+        run: ./gradlew testDebugUnitTest -PexcludeTests="**/*IntegrationTest*" --continue
 
       - name: Upload Kotlin Test Results
         uses: actions/upload-artifact@v4
@@ -104,7 +104,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run iOS Unit Tests
-        run: ./gradlew shared:iosSimulatorArm64Test --continue
+        run: ./gradlew iosSimulatorArm64Test --continue
 
       - name: Upload iOS Test Results
         uses: actions/upload-artifact@v4
