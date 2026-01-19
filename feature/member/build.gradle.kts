@@ -6,9 +6,9 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(project(":core:model"))
-            api(project(":core:presentation"))
-            api(project(":core:auth"))
+            implementation(project(":core:model"))
+            implementation(project(":core:presentation"))
+            implementation(project(":core:auth"))
             implementation(project(":core:data"))
 
             api(libs.androidx.lifecycle.viewmodel)
