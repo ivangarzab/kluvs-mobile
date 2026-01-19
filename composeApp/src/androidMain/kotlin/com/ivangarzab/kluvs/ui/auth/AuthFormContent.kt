@@ -39,10 +39,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.domain.models.AuthProvider
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthMode
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthUiState
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.LoginNavigation
+import com.ivangarzab.kluvs.auth.presentation.AuthMode
+import com.ivangarzab.kluvs.auth.presentation.AuthUiState
+import com.ivangarzab.kluvs.auth.presentation.LoginNavigation
+import com.ivangarzab.kluvs.model.AuthProvider
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.theme.bgSignInDiscord
 import com.ivangarzab.kluvs.theme.bgSignInGoogle

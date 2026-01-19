@@ -3,10 +3,10 @@ package com.ivangarzab.kluvs.ui.extensions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.data.auth.AuthError
+import com.ivangarzab.kluvs.auth.domain.AuthError
 
 /**
- * Maps [AuthError] codes to localized string resources.
+ * Maps [com.ivangarzab.kluvs.auth.AuthError] codes to localized string resources.
  *
  * Usage in Composables:
  * ```

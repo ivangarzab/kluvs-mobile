@@ -30,3 +30,13 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":shared")
+// core
+include(":core:model")
+include(":core:network")
+include(":core:auth")
+include(":core:data")
+include(":core:presentation")
+// features
+include(":feature:auth")
+include(":feature:clubs")
+include(":feature:member")

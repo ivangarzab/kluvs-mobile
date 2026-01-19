@@ -1,6 +1,6 @@
 package com.ivangarzab.kluvs.app
 
-import com.ivangarzab.kluvs.presentation.viewmodels.Closeable
+import com.ivangarzab.kluvs.presentation.Closeable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -20,7 +20,7 @@ class AppCoordinatorHelper : KoinComponent {
     /**
      * iOS-friendly observation method for navigation state.
      *
-     * Returns a [Closeable] that can be used to cancel the observation.
+     * Returns a [com.ivangarzab.kluvs.presentation.Closeable] that can be used to cancel the observation.
      */
     fun observeNavigationState(callback: (NavigationState) -> Unit): Closeable {
         val job = appCoordinator.navigationState.onEach { callback(it) }.launchIn(coroutineScope)

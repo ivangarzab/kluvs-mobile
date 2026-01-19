@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthMode
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthState
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.AuthViewModel
-import com.ivangarzab.kluvs.presentation.viewmodels.auth.LoginNavigation
+import com.ivangarzab.kluvs.auth.presentation.AuthMode
+import com.ivangarzab.kluvs.auth.presentation.AuthState
+import com.ivangarzab.kluvs.auth.presentation.AuthViewModel
+import com.ivangarzab.kluvs.auth.presentation.LoginNavigation
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.ui.extensions.toLocalizedMessage
 import org.koin.androidx.compose.koinViewModel
