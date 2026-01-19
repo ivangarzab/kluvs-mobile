@@ -8,6 +8,7 @@ import com.ivangarzab.kluvs.auth.remote.AuthService
 import com.ivangarzab.kluvs.auth.remote.AuthServiceImpl
 import io.github.jan.supabase.SupabaseClient
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -37,10 +38,10 @@ val coreAuthModule = module {
     }
 
     // Auth UseCases
-    singleOf(::SignOutUseCase)
+    factoryOf(::SignOutUseCase)
 
     // Secure Storage - platform-specific module
-    secureStorageModule
+    includes(secureStorageModule)
 }
 
 expect val secureStorageModule: Module
