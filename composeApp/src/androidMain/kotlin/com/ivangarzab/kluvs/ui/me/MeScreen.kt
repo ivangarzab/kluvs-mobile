@@ -37,12 +37,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.presentation.models.CurrentlyReadingBook
-import com.ivangarzab.kluvs.presentation.models.UserProfile
-import com.ivangarzab.kluvs.presentation.models.UserStatistics
+import com.ivangarzab.kluvs.member.presentation.CurrentlyReadingBook
+import com.ivangarzab.kluvs.member.presentation.MeState
+import com.ivangarzab.kluvs.member.presentation.MeViewModel
+import com.ivangarzab.kluvs.member.presentation.UserProfile
+import com.ivangarzab.kluvs.member.presentation.UserStatistics
 import com.ivangarzab.kluvs.presentation.state.ScreenState
-import com.ivangarzab.kluvs.presentation.viewmodels.member.MeState
-import com.ivangarzab.kluvs.presentation.viewmodels.member.MeViewModel
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.ui.components.ErrorScreen
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
@@ -312,7 +312,12 @@ fun Preview_MeScreen() = KluvsTheme {
             ),
             statistics = UserStatistics(clubsCount = 6, totalPoints = 100, booksRead = 2),
             currentlyReading = listOf(
-                CurrentlyReadingBook(bookTitle = "1984", clubName = "Quill's Club", progress = 0.66f, dueDate = "Tomorrow")
+                CurrentlyReadingBook(
+                    bookTitle = "1984",
+                    clubName = "Quill's Club",
+                    progress = 0.66f,
+                    dueDate = "Tomorrow"
+                )
             )
         ),
         onRetry = { },

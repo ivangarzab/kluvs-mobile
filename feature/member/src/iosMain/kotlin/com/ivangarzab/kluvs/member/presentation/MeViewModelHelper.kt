@@ -1,14 +1,10 @@
-package com.ivangarzab.kluvs.presentation.viewmodels
+package com.ivangarzab.kluvs.member.presentation
 
-import com.ivangarzab.kluvs.clubs.presentation.Closeable
-import com.ivangarzab.kluvs.presentation.viewmodels.member.MeState
-import com.ivangarzab.kluvs.presentation.viewmodels.member.MeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.getValue
 
 /**
  * The purpose of this class is to wrap the [MeViewModelHelper] for easier

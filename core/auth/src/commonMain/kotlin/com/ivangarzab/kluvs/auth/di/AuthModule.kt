@@ -2,10 +2,12 @@ package com.ivangarzab.kluvs.auth.di
 
 import com.ivangarzab.kluvs.auth.domain.AuthRepository
 import com.ivangarzab.kluvs.auth.domain.AuthRepositoryImpl
+import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.auth.persistence.SecureStorage
 import com.ivangarzab.kluvs.auth.remote.AuthService
 import com.ivangarzab.kluvs.auth.remote.AuthServiceImpl
 import io.github.jan.supabase.SupabaseClient
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 /**
@@ -32,4 +34,7 @@ val authModule = module {
             secureStorage = get<SecureStorage>() // Provided by platform module
         )
     }
+
+    // Auth UseCases
+    singleOf(::SignOutUseCase)
 }

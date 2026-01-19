@@ -1,16 +1,17 @@
 package com.ivangarzab.kluvs.di
 
+import com.ivangarzab.kluvs.app.AppCoordinator
 import com.ivangarzab.kluvs.auth.di.authFeatureModule
 import com.ivangarzab.kluvs.auth.di.authModule
 import com.ivangarzab.kluvs.clubs.di.clubsFeatureModule
 import com.ivangarzab.kluvs.data.di.coreDataModule
-import com.ivangarzab.kluvs.domain.usecases.di.useCaseModule
+import com.ivangarzab.kluvs.member.di.memberFeatureModule
 import com.ivangarzab.kluvs.network.di.coreNetworkModule
-import com.ivangarzab.kluvs.presentation.viewmodels.di.viewModelModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
@@ -34,9 +35,7 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
         //feature modules
         authFeatureModule,
         clubsFeatureModule,
-
-        useCaseModule,
-        viewModelModule,
+        memberFeatureModule
     )
 }
 
@@ -46,4 +45,7 @@ private val generalModule = module {
     single<CoroutineScope> {
         CoroutineScope(SupervisorJob())
     }
+    // Cross-platform navigation ViewModel
+    // Singleton - survives navigation
+    singleOf(::AppCoordinator)
 }

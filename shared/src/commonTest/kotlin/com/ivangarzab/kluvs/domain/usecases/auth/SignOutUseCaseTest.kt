@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.domain.usecases.auth
 
+import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.data.auth.AuthError
 import com.ivangarzab.kluvs.data.auth.AuthRepository
 import dev.mokkery.answering.returns

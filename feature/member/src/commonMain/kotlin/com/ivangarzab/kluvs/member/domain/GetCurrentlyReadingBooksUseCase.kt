@@ -1,14 +1,14 @@
-package com.ivangarzab.kluvs.domain.usecases.member
+package com.ivangarzab.kluvs.member.domain
 
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
+import com.ivangarzab.kluvs.member.presentation.CurrentlyReadingBook
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
-import com.ivangarzab.kluvs.presentation.models.CurrentlyReadingBook
 import com.ivangarzab.kluvs.presentation.state.DateTimeFormat
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock.System.now
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
@@ -42,12 +42,12 @@ class GetCurrentlyReadingBooksUseCase(
      * Note: Future enhancement could use a reading_progress table for individual progress tracking.
      *
      * @param userId The Discord user ID of the current user
-     * @return Result containing list of [CurrentlyReadingBook] if successful, or error if failed
+     * @return Result containing list of [com.ivangarzab.kluvs.presentation.models.CurrentlyReadingBook] if successful, or error if failed
      */
     suspend operator fun invoke(userId: String): Result<List<CurrentlyReadingBook>> {
         return memberRepository.getMemberByUserId(userId).mapCatching { member: Member ->
             val clubs = member.clubs ?: emptyList()
-            val currentTime = now().toLocalDateTime(TimeZone.currentSystemDefault())
+            val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
             // For each club, fetch the active session and create a currently reading entry
             clubs.mapNotNull { club ->

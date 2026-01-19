@@ -1,7 +1,4 @@
-package com.ivangarzab.kluvs.domain.usecases.auth
-
-import com.ivangarzab.kluvs.auth.domain.AuthRepository
-
+package com.ivangarzab.kluvs.auth.domain
 
 /**
  * Sign out the current user through the [com.ivangarzab.kluvs.auth.AuthRepository].

@@ -1,12 +1,12 @@
-package com.ivangarzab.kluvs.presentation.viewmodels.member
+package com.ivangarzab.kluvs.member.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
-import com.ivangarzab.kluvs.domain.usecases.auth.SignOutUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentUserProfileUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentlyReadingBooksUseCase
-import com.ivangarzab.kluvs.domain.usecases.member.GetUserStatisticsUseCase
+import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
+import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
+import com.ivangarzab.kluvs.member.domain.GetCurrentlyReadingBooksUseCase
+import com.ivangarzab.kluvs.member.domain.GetUserStatisticsUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

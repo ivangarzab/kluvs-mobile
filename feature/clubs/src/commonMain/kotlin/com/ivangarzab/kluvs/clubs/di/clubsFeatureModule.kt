@@ -8,7 +8,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 val clubsFeatureModule = module {
-    // Use Cases (Factories are preferred for stateless logic)
+    // Use Cases
     factoryOf(::GetActiveSessionUseCase)
     factoryOf(::GetClubDetailsUseCase)
     factoryOf(::GetClubMembersUseCase)

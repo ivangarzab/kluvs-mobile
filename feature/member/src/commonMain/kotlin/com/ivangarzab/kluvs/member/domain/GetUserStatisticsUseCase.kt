@@ -1,8 +1,8 @@
-package com.ivangarzab.kluvs.domain.usecases.member
+package com.ivangarzab.kluvs.member.domain
 
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
+import com.ivangarzab.kluvs.member.presentation.UserStatistics
 import com.ivangarzab.kluvs.model.Member
-import com.ivangarzab.kluvs.presentation.models.UserStatistics
 
 /**
  * UseCase for calculating user statistics for MeScreen StatisticsSection.
@@ -21,7 +21,7 @@ class GetUserStatisticsUseCase(
      * Calculates statistics for the specified user.
      *
      * @param userId The Discord user ID of the current user
-     * @return Result containing [UserStatistics] if successful, or error if failed
+     * @return Result containing [com.ivangarzab.kluvs.presentation.models.UserStatistics] if successful, or error if failed
      */
     suspend operator fun invoke(userId: String): Result<UserStatistics> {
         return memberRepository.getMemberByUserId(userId).map { member: Member ->

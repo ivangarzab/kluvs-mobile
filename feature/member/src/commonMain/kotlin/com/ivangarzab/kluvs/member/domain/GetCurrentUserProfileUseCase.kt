@@ -1,15 +1,15 @@
-package com.ivangarzab.kluvs.domain.usecases.member
+package com.ivangarzab.kluvs.member.domain
 
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
+import com.ivangarzab.kluvs.member.presentation.UserProfile
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import com.ivangarzab.kluvs.presentation.state.DateTimeFormat
-import com.ivangarzab.kluvs.presentation.models.UserProfile
 
 /**
  * UseCase for fetching the current user's profile for MeScreen header.
  *
- * Transforms domain Member model into UI-friendly [UserProfile] with:
+ * Transforms domain Member model into UI-friendly [com.ivangarzab.kluvs.presentation.models.UserProfile] with:
  * - Member information
  * - Generated handle (if not available)
  * - Formatted join date
@@ -25,7 +25,7 @@ class GetCurrentUserProfileUseCase(
      * Fetches the profile for the specified user.
      *
      * @param userId The Discord user ID of the current user
-     * @return Result containing [UserProfile] if successful, or error if failed
+     * @return Result containing [com.ivangarzab.kluvs.presentation.models.UserProfile] if successful, or error if failed
      */
     suspend operator fun invoke(userId: String): Result<UserProfile> {
         return memberRepository.getMemberByUserId(userId).map { member: Member ->

@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.presentation.models
+package com.ivangarzab.kluvs.member.presentation
 
 /**
  * UI model for current user's profile displayed in MeScreen header.

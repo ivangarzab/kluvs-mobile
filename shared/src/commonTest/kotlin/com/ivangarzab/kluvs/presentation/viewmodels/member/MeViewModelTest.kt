@@ -8,7 +8,7 @@ import com.ivangarzab.kluvs.domain.models.Club
 import com.ivangarzab.kluvs.domain.models.Discussion
 import com.ivangarzab.kluvs.domain.models.Member
 import com.ivangarzab.kluvs.domain.models.Session
-import com.ivangarzab.kluvs.domain.usecases.auth.SignOutUseCase
+import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetUserStatisticsUseCase

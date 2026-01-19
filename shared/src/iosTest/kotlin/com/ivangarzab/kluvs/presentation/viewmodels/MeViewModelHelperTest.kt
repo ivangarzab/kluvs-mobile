@@ -4,7 +4,7 @@ import com.ivangarzab.kluvs.data.auth.AuthRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.domain.models.Member
-import com.ivangarzab.kluvs.domain.usecases.auth.SignOutUseCase
+import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.kluvs.domain.usecases.member.GetUserStatisticsUseCase

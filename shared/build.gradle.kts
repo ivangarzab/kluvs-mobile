@@ -34,6 +34,7 @@ kotlin {
 
             api(project(":feature:auth"))
             api(project(":feature:clubs"))
+            api(project(":feature:member"))
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization)
