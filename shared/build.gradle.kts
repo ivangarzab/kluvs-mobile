@@ -80,17 +80,3 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
-
-afterEvaluate {
-    /**
-     * The purpose of this task extension is to allow the :shared:testDebugUnitTest to accept
-     * manual exclusions, and make it easier to run the Unit Test suit without running the
-     * Integration tests classes contained within it.
-     */
-    tasks.named("testDebugUnitTest", Test::class) {
-        if (project.hasProperty("excludeTests")) {
-            val exclusions = project.property("excludeTests").toString().split(",")
-            exclude(exclusions)
-        }
-    }
-}
