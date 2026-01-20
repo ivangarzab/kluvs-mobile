@@ -25,6 +25,8 @@ navigation = "2.9.6"
 androidx-viewmodel = "2.10.0"
 androidx-security="1.1.0-alpha06"
 kover = "0.9.4"
+google-services="4.4.4"
+firebase-appdistribution="5.2.0"
 
 
 [libraries]
@@ -84,3 +86,5 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 buildKonfig = { id = "com.codingfeline.buildkonfig", version = "0.14.0" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebaseAppDistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebase-appdistribution" }

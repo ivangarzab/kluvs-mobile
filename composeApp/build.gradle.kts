@@ -5,6 +5,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseAppDistribution)
 }
 
 kotlin {
@@ -61,6 +63,22 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+
+            firebaseAppDistribution {
+                serviceCredentialsFile = System.getenv("FIREBASE_CREDENTIALS_FILE")
+                    ?: "${System.getProperty("user.home")}/.config/firebase/kluvs-app-distribution.json"
+                artifactType = "APK"
+                groups = "og"
+            }
+        }
+
+        getByName("debug") {
+            firebaseAppDistribution {
+                serviceCredentialsFile = System.getenv("FIREBASE_CREDENTIALS_FILE")
+                    ?: "${System.getProperty("user.home")}/.config/firebase/kluvs-app-distribution.json"
+                artifactType = "APK"
+                groups = "og"
+            }
         }
     }
     compileOptions {

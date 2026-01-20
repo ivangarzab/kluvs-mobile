@@ -2,6 +2,8 @@ plugins {
     // Plugins provided by buildSrc are available project-wide via convention plugins.
     // Only declare plugins here that are NOT in buildSrc dependencies.
     alias(libs.plugins.kotlinSerialization) apply false
+    alias(libs.plugins.googleServices) apply false
+    alias(libs.plugins.firebaseAppDistribution) apply false
     id("org.jetbrains.kotlinx.kover")
 }
 
