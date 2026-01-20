@@ -28,12 +28,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.presentation.viewmodels.club.ClubDetailsState
-import com.ivangarzab.kluvs.presentation.viewmodels.club.ClubDetailsViewModel
+import com.ivangarzab.kluvs.clubs.presentation.ClubDetailsState
+import com.ivangarzab.kluvs.clubs.presentation.ClubDetailsViewModel
+import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.ui.components.ErrorScreen
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
-import com.ivangarzab.kluvs.presentation.models.ScreenState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

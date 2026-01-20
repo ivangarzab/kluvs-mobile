@@ -3,7 +3,7 @@ package com.ivangarzab.kluvs.app
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
-import com.ivangarzab.kluvs.data.auth.AuthRepository
+import com.ivangarzab.kluvs.auth.domain.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

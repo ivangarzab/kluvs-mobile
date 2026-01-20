@@ -1,8 +1,8 @@
 package com.ivangarzab.kluvs.app
 
-import com.ivangarzab.kluvs.data.auth.AuthRepository
-import com.ivangarzab.kluvs.domain.models.AuthProvider
-import com.ivangarzab.kluvs.domain.models.User
+import com.ivangarzab.kluvs.auth.domain.AuthRepository
+import com.ivangarzab.kluvs.model.AuthProvider
+import com.ivangarzab.kluvs.model.User
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend

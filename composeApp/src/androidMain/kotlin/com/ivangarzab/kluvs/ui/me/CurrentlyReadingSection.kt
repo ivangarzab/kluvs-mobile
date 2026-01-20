@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.presentation.models.CurrentlyReadingBook
+import com.ivangarzab.kluvs.member.presentation.CurrentlyReadingBook
 import com.ivangarzab.kluvs.theme.KluvsTheme
 
 @Composable

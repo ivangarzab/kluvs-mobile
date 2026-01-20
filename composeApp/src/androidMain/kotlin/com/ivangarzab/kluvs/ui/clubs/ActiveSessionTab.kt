@@ -34,9 +34,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.presentation.models.ActiveSessionDetails
-import com.ivangarzab.kluvs.presentation.models.BookInfo
-import com.ivangarzab.kluvs.presentation.models.DiscussionTimelineItemInfo
+import com.ivangarzab.kluvs.clubs.presentation.ActiveSessionDetails
+import com.ivangarzab.kluvs.clubs.presentation.BookInfo
+import com.ivangarzab.kluvs.clubs.presentation.DiscussionTimelineItemInfo
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.ui.components.NextDiscussionCard
 import com.ivangarzab.kluvs.ui.components.NoTabData
