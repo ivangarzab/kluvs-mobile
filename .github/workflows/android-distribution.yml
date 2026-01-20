@@ -1,0 +1,44 @@
+name: Android Distribution
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual trigger if needed
+
+jobs:
+  distribute-android:
+    name: Build and Distribute Android
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      # Path where we will store the service account JSON
+      FIREBASE_CREDENTIALS_FILE: ${{ github.workspace }}/firebase-key.json
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Create Firebase Service Account File
+        run: echo '${{ secrets.FIREBASE_APP_DISTRIBUTION_CREDENTIALS_JSON }}' > $FIREBASE_CREDENTIALS_FILE
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: Build and Upload to Firebase
+        run: ./gradlew :composeApp:assembleDebug :composeApp:appDistributionUploadDebug
+
+      - name: Cleanup Credentials
+        if: always()
+        run: rm -f $FIREBASE_CREDENTIALS_FILE
