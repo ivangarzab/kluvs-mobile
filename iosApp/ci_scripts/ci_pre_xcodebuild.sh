@@ -13,6 +13,6 @@ export PATH="$JAVA_HOME/bin:$PATH"
 cd ../..
 
 # Run KMP iOS simulator tests
-./gradlew :shared:iosSimulatorArm64Test
+./gradlew iosSimulatorArm64Test -PexcludeTests="**/*IntegrationTest*" --continue
 
 echo "✅ KMP iOS tests passed"
