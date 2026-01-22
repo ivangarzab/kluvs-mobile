@@ -77,6 +77,26 @@ class AuthViewModelWrapper: ObservableObject {
         helper.signOut()
     }
 
+    func signInWithDiscord() {
+        helper.signInWithDiscord()
+    }
+
+    func signInWithGoogle() {
+        helper.signInWithGoogle()
+    }
+
+    func handleOAuthCallback(callbackUrl: String) {
+        helper.handleOAuthCallback(callbackUrl: callbackUrl)
+    }
+
+    func onOAuthUrlLaunched() {
+        helper.onOAuthUrlLaunched()
+    }
+
+    func signInWithApple(idToken: String) {
+        helper.signInWithApple(idToken: idToken)
+    }
+
     deinit {
         cancellables.forEach { $0.close() }
     }
@@ -88,6 +108,7 @@ enum AuthStateWrapper: Equatable {
     case loading
     case authenticated(user: Shared.User)
     case error(error: Shared.AuthError)
+    case oauthPending(url: String) // Why not just loading?
 
     // Custom Equatable implementation since Kotlin classes may not be Equatable
     static func == (lhs: AuthStateWrapper, rhs: AuthStateWrapper) -> Bool {
@@ -100,6 +121,8 @@ enum AuthStateWrapper: Equatable {
             return lUser.id == rUser.id
         case (.error, .error):
             return true // We just care that it's an error state
+        case (.oauthPending(let lUrl), .oauthPending(let rUrl)):
+            return lUrl == rUrl
         default:
             return false
         }
@@ -114,6 +137,8 @@ enum AuthStateWrapper: Equatable {
             return .authenticated(user: authenticated.user)
         } else if let error = kotlinState as? Shared.AuthState.Error {
             return .error(error: error.error)
+        } else if let oauthPending = kotlinState as? Shared.AuthState.OAuthPending {
+            return .oauthPending(url: oauthPending.url)
         }
         return .unauthenticated
     }
