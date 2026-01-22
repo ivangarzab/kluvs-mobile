@@ -144,6 +144,84 @@ class AuthViewModel(
             }
     }
 
+    /**
+     * Initiates Discord OAuth sign-in flow.
+     * Emits [AuthState.OAuthPending] with the OAuth URL to open in browser.
+     */
+    fun signInWithDiscord() = viewModelScope.launch {
+        _state.update { AuthState.Loading }
+        authRepository.signInWithDiscord()
+            .onSuccess { url ->
+                _state.update { AuthState.OAuthPending(url) }
+            }
+            .onFailure { error ->
+                _state.update {
+                    AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+                }
+            }
+    }
+
+    /**
+     * Initiates Google OAuth sign-in flow.
+     * Emits [AuthState.OAuthPending] with the OAuth URL to open in browser.
+     */
+    fun signInWithGoogle() = viewModelScope.launch {
+        _state.update { AuthState.Loading }
+        authRepository.signInWithGoogle()
+            .onSuccess { url ->
+                _state.update { AuthState.OAuthPending(url) }
+            }
+            .onFailure { error ->
+                _state.update {
+                    AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+                }
+            }
+    }
+
+    /**
+     * Resets state to [AuthState.Unauthenticated].
+     * Used when OAuth URL has been launched and we're waiting for callback.
+     */
+    fun onOAuthUrlLaunched() {
+        _state.update { AuthState.Unauthenticated }
+    }
+
+    /**
+     * Handles OAuth callback from deep link.
+     * Should be called when the app receives an OAuth redirect.
+     */
+    fun handleOAuthCallback(callbackUrl: String) = viewModelScope.launch {
+        _state.update { AuthState.Loading }
+        authRepository.handleOAuthCallback(callbackUrl)
+            .onSuccess { user ->
+                _state.update { AuthState.Authenticated(user) }
+                clearForm()
+            }
+            .onFailure { error ->
+                _state.update {
+                    AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+                }
+            }
+    }
+
+    /**
+     * Signs in with Apple using a native ID token.
+     * Called from iOS after native Apple Sign In returns the identity token.
+     */
+    fun signInWithApple(idToken: String) = viewModelScope.launch {
+        _state.update { AuthState.Loading }
+        authRepository.signInWithAppleNative(idToken)
+            .onSuccess { user ->
+                _state.update { AuthState.Authenticated(user) }
+                clearForm()
+            }
+            .onFailure { error ->
+                _state.update {
+                    AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+                }
+            }
+    }
+
     private fun clearForm() {
         _uiState.update { AuthUiState() }
     }
@@ -154,4 +232,6 @@ sealed class AuthState {
     data object Loading : AuthState()
     data class Authenticated(val user: User) : AuthState()
     data class Error(val error: AuthError) : AuthState()
+    /** OAuth flow initiated - UI should open the URL in a browser */
+    data class OAuthPending(val url: String) : AuthState()
 }

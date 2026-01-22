@@ -16,8 +16,10 @@ struct LoginView: View {
             switch viewModel.authState {
             case .loading:
                 LoadingView()
+            case .oauthPending:
+                LoadingView()
             case .authenticated:
-                EmptyView() // Navigation handled by AppCoordinator
+                EmptyView()
             case .unauthenticated, .error:
                 AuthFormView(
                     mode: .login,

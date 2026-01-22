@@ -8,6 +8,7 @@ import SwiftUI
 
 struct AuthView: View {
     @StateObject private var viewModel = AuthViewModelWrapper()
+    @StateObject private var oauthHandler = OAuthCallbackHandler.shared
     @State private var authMode: AuthMode = .login
     let onNavigateToForgotPassword: () -> Void
 
@@ -18,6 +19,11 @@ struct AuthView: View {
                 LoadingView()
             case .authenticated:
                 EmptyView() // Navigation handled by AppCoordinator
+            case .oauthPending(let url):
+                LoadingView()
+                    .onAppear {
+                        openOAuthUrl(url)
+                    }
             case .unauthenticated, .error:
                 AuthFormView(
                     mode: authMode,
@@ -37,6 +43,21 @@ struct AuthView: View {
                         }
                     }
                 )
+            }
+        }
+        .onChange(of: oauthHandler.callbackUrl) { _, newUrl in
+            if let url = newUrl {
+                viewModel.handleOAuthCallback(callbackUrl: url.absoluteString)
+                oauthHandler.clearCallback()
+            }
+        }
+    }
+
+    private func openOAuthUrl(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        UIApplication.shared.open(url) { success in
+            if success {
+                viewModel.onOAuthUrlLaunched()
             }
         }
     }

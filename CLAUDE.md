@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Workflow Preferences
+
+**IMPORTANT: Do NOT execute expensive Gradle commands.** Gradle builds and test runs consume excessive tokens due to verbose output. Instead:
+
+- Make code changes and let the user build/test locally
+- The user will report any compilation errors or test failures
+- If a build or test run is absolutely necessary, ask the user to run it manually
+- This keeps the human-in-the-loop for verification and saves significant tokens
+
 ## Project Overview
 
 **Kluvs** is a Kotlin Multiplatform mobile application for managing book clubs and reading sessions across Discord communities. The app uses Compose Multiplatform for UI and Supabase for backend services.

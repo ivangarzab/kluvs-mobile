@@ -119,7 +119,7 @@ class AuthRepositoryImpl(
 
         return try {
             val url = authService.getOAuthUrl("discord")
-            Bark.d("Discord OAuth URL generated")
+            Bark.v("Discord OAuth URL generated")
             Result.success(url)
         } catch (e: Exception) {
             Bark.e("Failed to get Discord OAuth URL", e)
@@ -132,7 +132,7 @@ class AuthRepositoryImpl(
 
         return try {
             val url = authService.getOAuthUrl("google")
-            Bark.d("Google OAuth URL generated")
+            Bark.v("Google OAuth URL generated")
             Result.success(url)
         } catch (e: Exception) {
             Bark.e("Failed to get Google OAuth URL", e)
@@ -158,6 +158,28 @@ class AuthRepositoryImpl(
             Result.success(user)
         } catch (e: Exception) {
             Bark.e("OAuth callback failed", e)
+            Result.failure(e.toAuthError())
+        }
+    }
+
+    override suspend fun signInWithAppleNative(idToken: String): Result<User> {
+        Bark.v("Signing in with Apple native ID token")
+
+        return try {
+            val session = authService.signInWithAppleIdToken(idToken)
+            val user = session.user?.toDomain()
+                ?: throw IllegalStateException("Apple Sign In succeeded but user info is missing")
+
+            // Store session tokens
+            storeSession(session.accessToken, session.refreshToken)
+
+            // Update state
+            updateAuthState(user)
+
+            Bark.d("Apple Sign In successful for: ${user.email}")
+            Result.success(user)
+        } catch (e: Exception) {
+            Bark.e("Apple Sign In failed", e)
             Result.failure(e.toAuthError())
         }
     }
