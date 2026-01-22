@@ -44,7 +44,7 @@ interface AuthRepository {
      *
      * @param email User's email address
      * @param password User's password
-     * @return Result with User if successful, or error
+     * @return Result with [User] if successful, or error
      */
     suspend fun signUpWithEmail(email: String, password: String): Result<User>
 
@@ -57,7 +57,7 @@ interface AuthRepository {
      *
      * @param email User's email address
      * @param password User's password
-     * @return Result with User if successful, or error
+     * @return Result with [User] if successful, or error
      */
     suspend fun signInWithEmail(email: String, password: String): Result<User>
 
@@ -79,9 +79,20 @@ interface AuthRepository {
      * Completes OAuth sign-in after callback from provider.
      *
      * @param callbackUrl The deep link URL from OAuth provider
-     * @return Result with User if successful, or error
+     * @return Result with [User] if successful, or error
      */
     suspend fun handleOAuthCallback(callbackUrl: String): Result<User>
+
+    /**
+     * Signs in with Apple using a native ID token.
+     *
+     * Used on iOS where we obtain the ID token from ASAuthorizationAppleIDCredential
+     * and send it to Supabase for verification.
+     *
+     * @param idToken The identity token from Apple Sign In
+     * @return Result with [User] if successful, or error
+     */
+    suspend fun signInWithAppleNative(idToken: String): Result<User>
 
     /**
      * Signs out the current user.

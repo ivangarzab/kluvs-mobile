@@ -26,7 +26,7 @@ interface AuthService {
      *
      * @param email User's email address
      * @param password User's password
-     * @return UserSession containing access/refresh tokens and user info
+     * @return [UserSession] containing access/refresh tokens and user info
      * @throws Exception if sign in fails (e.g., invalid credentials)
      */
     suspend fun signInWithEmail(email: String, password: String): UserSession
@@ -51,10 +51,22 @@ interface AuthService {
      * for a session.
      *
      * @param url The deep link URL received from OAuth callback
-     * @return UserSession if OAuth was successful
+     * @return [UserSession] if OAuth was successful
      * @throws Exception if OAuth completion fails
      */
     suspend fun handleOAuthCallback(url: String): UserSession
+
+    /**
+     * Signs in with Apple using an ID token from native Apple Sign In.
+     *
+     * This is used on iOS where we get the identity token from
+     * ASAuthorizationAppleIDCredential and send it to Supabase for verification.
+     *
+     * @param idToken The identity token from Apple Sign In
+     * @return [UserSession] if sign in was successful
+     * @throws Exception if sign in fails
+     */
+    suspend fun signInWithAppleIdToken(idToken: String): UserSession
 
     /**
      * Signs out the current user.
