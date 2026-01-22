@@ -68,4 +68,10 @@
     <string name="description_email_text_field">Email text field icon</string>
     <string name="description_password_text_field">Password text field icon</string>
     <string name="description_confirm_password_text_field">Confirm password text field icon</string>
+
+    <!-- Logout Confirmation -->
+    <string name="logout_confirmation_title">Sign Out</string>
+    <string name="logout_confirmation_message">Are you sure you want to sign out?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

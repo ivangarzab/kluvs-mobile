@@ -4,7 +4,6 @@ import Shared
 struct MeView: View {
     let userId: String
     @StateObject private var viewModel = MeViewModelWrapper()
-    @StateObject private var authViewModel = AuthViewModelWrapper()
 
     var body: some View {
         ZStack {
@@ -39,7 +38,7 @@ struct MeView: View {
                             .padding(.vertical, 8)
 
                         FooterSection(onSignOut: {
-                            authViewModel.signOut()
+                            viewModel.onSignOutClicked()
                         })
                     }
                     .padding(16)
@@ -51,6 +50,18 @@ struct MeView: View {
         .animation(.easeInOut(duration: 0.3), value: viewModel.error)
         .onAppear {
             viewModel.loadUserData(userId: userId)
+        }
+        .alert(isPresented: $viewModel.showLogoutConfirmation) {
+            Alert(
+                title: Text(NSLocalizedString("logout_confirmation_title", comment: "")),
+                message: Text(NSLocalizedString("logout_confirmation_message", comment: "")),
+                primaryButton: .destructive(Text(NSLocalizedString("yes", comment: ""))) {
+                    viewModel.onSignOutDialogConfirmed()
+                },
+                secondaryButton: .cancel(Text(NSLocalizedString("no", comment: ""))) {
+                    viewModel.onSignOutDialogDismissed()
+                }
+            )
         }
     }
 }

@@ -78,8 +78,17 @@ class MeViewModel(
         currentUserId?.let { loadUserData(it) }
     }
 
-    fun signOut() = viewModelScope.launch {
-        Bark.d("Signing out")
+    fun onSignOutClicked() {
+        _state.update { it.copy(showLogoutConfirmation = true) }
+    }
+
+    fun onSignOutDialogDismissed() {
+        _state.update { it.copy(showLogoutConfirmation = false) }
+    }
+
+    fun onSignOutDialogConfirmed() = viewModelScope.launch {
+        Bark.v("Sign out confirmed")
+        _state.update { it.copy(showLogoutConfirmation = false) }
         signOutUseCase()
     }
 }

@@ -18,12 +18,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,13 +62,42 @@ fun MeScreen(
         viewModel.loadUserData(userId)
     }
 
+    if (state.showLogoutConfirmation) {
+        LogoutConfirmationDialog(
+            onConfirm = viewModel::onSignOutDialogConfirmed,
+            onDismiss = viewModel::onSignOutDialogDismissed
+        )
+    }
+
     MeScreenContent(
         modifier = modifier,
         state = state,
         onRetry = viewModel::refresh,
         onSettingsClick = { /* TODO() */ },
         onHelpClick = { /* TODO() */ },
-        onSignOutClick = viewModel::signOut,
+        onSignOutClick = viewModel::onSignOutClicked,
+    )
+}
+
+@Composable
+fun LogoutConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.logout_confirmation_title)) },
+        text = { Text(stringResource(R.string.logout_confirmation_message)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.yes))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.no))
+            }
+        }
     )
 }
 
