@@ -9,9 +9,12 @@ import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.Apple
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.IDToken
+import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserSession
 import io.ktor.http.Url
 import io.ktor.http.parseQueryString
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Implementation of [AuthService] using Supabase GoTrue.
@@ -86,7 +89,7 @@ class AuthServiceImpl(
     }
 
     override suspend fun handleOAuthCallback(url: String): UserSession {
-        Bark.v("Handling OAuth callback: $url")
+        Bark.d("Handling OAuth callback URL: $url")
 
         return try {
             // Parse the callback URL to extract tokens from the fragment
@@ -95,6 +98,7 @@ class AuthServiceImpl(
             val fragment = parsedUrl.fragment
 
             if (fragment.isBlank()) {
+                Bark.w("OAuth callback URL missing fragment. Full URL: $url")
                 throw IllegalArgumentException("OAuth callback URL missing fragment with tokens")
             }
 
@@ -107,11 +111,28 @@ class AuthServiceImpl(
 
             Bark.v("Parsed OAuth tokens from callback")
 
-            // Import the tokens into the Supabase auth client
+            // Import the tokens and retrieve user data to establish complete session
             auth.importAuthToken(
                 accessToken = accessToken,
-                refreshToken = refreshToken
+                refreshToken = refreshToken,
+                retrieveUser = true
             )
+
+            // Wait for session status to confirm authentication (with timeout)
+            // This handles the race condition where currentSessionOrNull() returns null
+            // before the session is fully established internally
+            Bark.v("Waiting for session status to confirm authentication...")
+            val sessionResult = withTimeoutOrNull(5000L) {
+                auth.sessionStatus.first { status ->
+                    Bark.v("Session status update: $status")
+                    status is SessionStatus.Authenticated
+                }
+            }
+
+            if (sessionResult == null) {
+                Bark.e("Session status timeout: did not become Authenticated within 5 seconds")
+                throw IllegalStateException("OAuth timeout: session not established")
+            }
 
             val userSession = auth.currentSessionOrNull()
                 ?: throw IllegalStateException("OAuth succeeded but no session was created")
@@ -149,7 +170,22 @@ class AuthServiceImpl(
 
         try {
             auth.signOut()
-            Bark.d("Sign out successful")
+
+            // Wait for session status to confirm sign out (with timeout)
+            // This ensures the session is fully cleared before returning
+            Bark.v("Waiting for session status to confirm sign out...")
+            val signOutResult = withTimeoutOrNull(3000L) {
+                auth.sessionStatus.first { status ->
+                    Bark.v("Session status update during sign out: $status")
+                    status is SessionStatus.NotAuthenticated
+                }
+            }
+
+            if (signOutResult == null) {
+                Bark.w("Sign out: session status did not become NotAuthenticated within 3 seconds, continuing anyway")
+            }
+
+            Bark.v("Sign out successful")
         } catch (e: Exception) {
             Bark.e("Sign out failed", e)
             throw e
