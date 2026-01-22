@@ -1,5 +1,6 @@
 import config.AndroidConfig
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -29,5 +30,23 @@ android {
     compileSdk = AndroidConfig.COMPILE_SDK
     defaultConfig {
         minSdk = AndroidConfig.MIN_SDK
+    }
+}
+
+// Support test exclusions for Native/iOS targets
+tasks.withType<KotlinNativeTest>().configureEach {
+    if (project.hasProperty("excludeTests")) {
+        val patterns = project.property("excludeTests").toString().split(",")
+        patterns.forEach { pattern ->
+            // KotlinNativeTest (iOS) filtering is different from JVM Test filtering.
+            // It expects a pattern like "com.package.ClassName" or "com.package.*"
+            // We transform the glob pattern into something closer to what it expects.
+            val filteredPattern = pattern
+                .replace("**/", "")
+                .replace(".class", "")
+                .replace("/", ".")
+            
+            filter.excludeTestsMatching(filteredPattern)
+        }
     }
 }
