@@ -16,6 +16,8 @@ struct SignupView: View {
             switch viewModel.authState {
             case .loading:
                 LoadingView()
+            case .oauthPending:
+                LoadingView()
             case .authenticated:
                 EmptyView()
             case .unauthenticated, .error:
