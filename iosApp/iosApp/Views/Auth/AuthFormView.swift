@@ -4,6 +4,7 @@
 //
 //  Main auth form UI (equivalent to Android's AuthFormContent)
 //
+import AuthenticationServices
 import SwiftUI
 import Shared
 
@@ -42,7 +43,20 @@ struct AuthFormView: View {
                     backgroundColor: .black,
                     textColor: .white,
                     action: {
-                        // TODO: Implement OAuth
+                        AppleSignInHandler.shared.signIn { result in
+                            switch result {
+                            case .success(let idToken):
+                                viewModel.signInWithApple(idToken: idToken)
+                            case .failure(let error):
+                                // Don't show error for user cancellation
+                                if let authError = error as? ASAuthorizationError,
+                                   authError.code == .canceled {
+                                    return
+                                }
+                                errorMessage = error.localizedDescription
+                                showErrorAlert = true
+                            }
+                        }
                     }
                 )
 
@@ -53,7 +67,7 @@ struct AuthFormView: View {
                     backgroundColor: .discordBlue,
                     textColor: .white,
                     action: {
-                        // TODO: Implement OAuth
+                        viewModel.signInWithDiscord()
                     }
                 )
 
@@ -64,7 +78,7 @@ struct AuthFormView: View {
                     backgroundColor: .googleGray,
                     textColor: .googleTextGray,
                     action: {
-                        // TODO: Implement OAuth
+                        viewModel.signInWithGoogle()
                     }
                 )
 

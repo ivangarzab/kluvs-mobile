@@ -15,6 +15,7 @@ class MeViewModelWrapper: ObservableObject {
     @Published var profile: Shared.UserProfile? = nil
     @Published var statistics: Shared.UserStatistics? = nil
     @Published var currentlyReading: [Shared.CurrentlyReadingBook] = []
+    @Published var showLogoutConfirmation: Bool = false
 
     private let helper: MeViewModelHelper
     private var cancellables: [Shared.Closeable] = []
@@ -32,6 +33,7 @@ class MeViewModelWrapper: ObservableObject {
                 self?.profile = state.profile
                 self?.statistics = state.statistics
                 self?.currentlyReading = state.currentlyReading
+                self?.showLogoutConfirmation = state.showLogoutConfirmation
             }
         }
         cancellables.append(stateCancellable)
@@ -43,6 +45,18 @@ class MeViewModelWrapper: ObservableObject {
 
     func refresh() {
         helper.refresh()
+    }
+
+    func onSignOutClicked() {
+        helper.showLogoutConfirmation()
+    }
+
+    func onSignOutDialogDismissed() {
+        helper.hideLogoutConfirmation()
+    }
+
+    func onSignOutDialogConfirmed() {
+        helper.confirmLogout()
     }
 
     deinit {

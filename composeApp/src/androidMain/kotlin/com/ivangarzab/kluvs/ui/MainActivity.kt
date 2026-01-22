@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.ui
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.app.AppCoordinator
 import com.ivangarzab.kluvs.app.NavigationState
 import com.ivangarzab.kluvs.theme.KluvsTheme
@@ -28,6 +30,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // Handle OAuth callback if app was launched via deep link
+        handleOAuthIntent(intent)
+
         setContent {
             KluvsTheme {
                 val navController = rememberNavController()
@@ -38,6 +44,21 @@ class MainActivity : ComponentActivity() {
                     navController = navController
                 )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Expand once we have more intents/deeplinks to handle
+        handleOAuthIntent(intent)
+    }
+
+    private fun handleOAuthIntent(intent: Intent?) {
+        val uri = intent?.data ?: return
+
+        if (uri.scheme == "kluvs" && uri.host == "auth" && uri.path == "/callback") {
+            Bark.v("Received OAuth callback: $uri")
+            OAuthCallbackHandler.handleCallback(uri.toString())
         }
     }
 }

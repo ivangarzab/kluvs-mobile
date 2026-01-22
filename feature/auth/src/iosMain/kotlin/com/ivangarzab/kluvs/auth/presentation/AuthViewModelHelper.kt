@@ -48,4 +48,14 @@ class AuthViewModelHelper : KoinComponent {
     fun validateAndSignUp() = viewModel.validateAndSignUp()
 
     fun signOut() = viewModel.signOut()
+
+    fun signInWithDiscord() = viewModel.signInWithDiscord()
+
+    fun signInWithGoogle() = viewModel.signInWithGoogle()
+
+    fun handleOAuthCallback(callbackUrl: String) = viewModel.handleOAuthCallback(callbackUrl)
+
+    fun onOAuthUrlLaunched() = viewModel.onOAuthUrlLaunched()
+
+    fun signInWithApple(idToken: String) = viewModel.signInWithApple(idToken)
 }
