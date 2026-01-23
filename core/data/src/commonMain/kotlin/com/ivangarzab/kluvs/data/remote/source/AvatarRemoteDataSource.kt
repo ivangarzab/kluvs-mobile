@@ -1,0 +1,46 @@
+package com.ivangarzab.kluvs.data.remote.source
+
+import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.data.remote.api.AvatarService
+
+/**
+ * Remote data source for Avatar operations.
+ *
+ * Responsibilities:
+ * - Calls [AvatarService] for storage operations
+ * - Wraps results in [Result] for error handling
+ */
+interface AvatarRemoteDataSource {
+    /**
+     * Constructs the public URL for an avatar.
+     * This is a synchronous operation (no network call).
+     */
+    fun getAvatarUrl(avatarPath: String?): String?
+
+    /**
+     * Uploads avatar image to storage.
+     *
+     * @param memberId The member's ID (used as folder name)
+     * @param imageData Compressed image bytes
+     * @return Result with the storage path on success
+     */
+    suspend fun uploadAvatar(memberId: String, imageData: ByteArray): Result<String>
+}
+
+internal class AvatarRemoteDataSourceImpl(
+    private val avatarService: AvatarService
+) : AvatarRemoteDataSource {
+
+    override fun getAvatarUrl(avatarPath: String?): String? {
+        return avatarService.getAvatarUrl(avatarPath)
+    }
+
+    override suspend fun uploadAvatar(memberId: String, imageData: ByteArray): Result<String> {
+        return try {
+            avatarService.uploadAvatar(memberId, imageData)
+        } catch (e: Exception) {
+            Bark.e("Failed to upload avatar for member=$memberId", e)
+            Result.failure(e)
+        }
+    }
+}

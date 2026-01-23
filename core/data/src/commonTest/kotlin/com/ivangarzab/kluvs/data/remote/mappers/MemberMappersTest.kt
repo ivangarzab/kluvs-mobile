@@ -134,6 +134,100 @@ class MemberMappersTest {
     }
 
     @Test
+    fun `MemberDto with avatarPath maps correctly`() {
+        // Given: A MemberDto with avatar_path
+        val dto = MemberDto(
+            id = "1",
+            name = "Test Member",
+            handle = "testuser",
+            avatar_path = "member-1/avatar.png",
+            points = 100,
+            books_read = 5,
+            user_id = "user-123",
+            role = "member",
+            created_at = null,
+            clubs = emptyList()
+        )
+
+        // When: Mapping to domain
+        val domain = dto.toDomain()
+
+        // Then: avatarPath is mapped correctly
+        assertEquals("member-1/avatar.png", domain.avatarPath)
+    }
+
+    @Test
+    fun `MemberDto with null avatarPath maps correctly`() {
+        // Given: A MemberDto without avatar_path
+        val dto = MemberDto(
+            id = "1",
+            name = "Test Member",
+            handle = "testuser",
+            avatar_path = null,
+            points = 100,
+            books_read = 5,
+            user_id = "user-123",
+            role = "member",
+            created_at = null,
+            clubs = emptyList()
+        )
+
+        // When: Mapping to domain
+        val domain = dto.toDomain()
+
+        // Then: avatarPath is null
+        assertNull(domain.avatarPath)
+    }
+
+    @Test
+    fun `MemberResponseDto with avatarPath maps correctly`() {
+        // Given: A MemberResponseDto with avatar_path
+        val dto = MemberResponseDto(
+            id = "2",
+            name = "John Smith",
+            handle = "johnsmith",
+            avatar_path = "member-2/avatar.png",
+            points = 200,
+            books_read = 15,
+            user_id = "user-456",
+            role = "admin",
+            created_at = "2023-06-10T14:22:33Z",
+            clubs = emptyList(),
+            shame_clubs = emptyList()
+        )
+
+        // When: Mapping to domain
+        val domain = dto.toDomain()
+
+        // Then: avatarPath is mapped correctly
+        assertEquals("member-2/avatar.png", domain.avatarPath)
+    }
+
+    @Test
+    fun `MemberResponseDto with null avatarPath maps correctly`() {
+        // Given: A MemberResponseDto without avatar_path
+        val dto = MemberResponseDto(
+            id = "2",
+            name = "John Smith",
+            handle = "johnsmith",
+            avatar_path = null,
+            points = 200,
+            books_read = 15,
+            user_id = "user-456",
+            role = "admin",
+            created_at = "2023-06-10T14:22:33Z",
+            clubs = emptyList(),
+            shame_clubs = emptyList()
+        )
+
+        // When: Mapping to domain
+        val domain = dto.toDomain()
+
+        // Then: avatarPath is null
+        assertNull(domain.avatarPath)
+    }
+
+    @Test
     fun `MemberDto with createdAt timestamp maps to LocalDateTime`() {
         // Given: A MemberDto with createdAt timestamp
         val dto = MemberDto(
