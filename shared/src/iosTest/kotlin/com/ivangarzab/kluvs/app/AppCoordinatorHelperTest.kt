@@ -32,6 +32,7 @@ import kotlin.test.assertTrue
 class AppCoordinatorHelperTest {
 
     private lateinit var authRepository: AuthRepository
+    private lateinit var currentUserFlow: MutableStateFlow<User?>
     private lateinit var appCoordinator: AppCoordinator
     private lateinit var testScope: CoroutineScope
     private lateinit var helper: AppCoordinatorHelper
@@ -45,7 +46,7 @@ class AppCoordinatorHelperTest {
         authRepository = mock<AuthRepository>()
 
         // Setup repository state flows - start with no user
-        val currentUserFlow = MutableStateFlow<User?>(null)
+        currentUserFlow = MutableStateFlow<User?>(null)
         every { authRepository.currentUser } returns currentUserFlow
         everySuspend { authRepository.initialize() } returns Result.success(null)
 
@@ -120,9 +121,6 @@ class AppCoordinatorHelperTest {
     @Test
     fun `observeNavigationState emits Authenticated when user signs in`() = runTest {
         // Given
-        val currentUserFlow = MutableStateFlow<User?>(null)
-        every { authRepository.currentUser } returns currentUserFlow
-
         val receivedStates = mutableListOf<NavigationState>()
         val closeable = helper.observeNavigationState { state ->
             receivedStates.add(state)
@@ -152,9 +150,6 @@ class AppCoordinatorHelperTest {
     @Test
     fun `closeable stops receiving navigation updates when closed`() = runTest {
         // Given
-        val currentUserFlow = MutableStateFlow<User?>(null)
-        every { authRepository.currentUser } returns currentUserFlow
-
         val receivedStates = mutableListOf<NavigationState>()
         val closeable = helper.observeNavigationState { state ->
             receivedStates.add(state)
@@ -182,9 +177,6 @@ class AppCoordinatorHelperTest {
     @Test
     fun `multiple observers can observe navigation state simultaneously`() = runTest {
         // Given
-        val currentUserFlow = MutableStateFlow<User?>(null)
-        every { authRepository.currentUser } returns currentUserFlow
-
         val observer1States = mutableListOf<NavigationState>()
         val observer2States = mutableListOf<NavigationState>()
 
