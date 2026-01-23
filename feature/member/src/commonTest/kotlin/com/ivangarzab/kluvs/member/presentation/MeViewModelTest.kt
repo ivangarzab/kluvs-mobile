@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.member.presentation
 
 import com.ivangarzab.kluvs.auth.domain.AuthRepository
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.model.Book
@@ -12,8 +13,11 @@ import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.member.domain.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.kluvs.member.domain.GetUserStatisticsUseCase
+import com.ivangarzab.kluvs.member.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
+import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
@@ -37,10 +41,12 @@ class MeViewModelTest {
     private lateinit var memberRepository: MemberRepository
     private lateinit var clubRepository: ClubRepository
     private lateinit var authRepository: AuthRepository
+    private lateinit var avatarRepository: AvatarRepository
     private lateinit var getCurrentUserProfile: GetCurrentUserProfileUseCase
     private lateinit var getUserStatistics: GetUserStatisticsUseCase
     private lateinit var getCurrentlyReadingBooks: GetCurrentlyReadingBooksUseCase
     private lateinit var signOut: SignOutUseCase
+    private lateinit var updateAvatarUseCase: UpdateAvatarUseCase
     private lateinit var viewModel: MeViewModel
 
     private val formatDateTime = FormatDateTimeUseCase()
@@ -52,14 +58,19 @@ class MeViewModelTest {
         memberRepository = mock<MemberRepository>()
         clubRepository = mock<ClubRepository>()
         authRepository = mock<AuthRepository>()
+        avatarRepository = mock<AvatarRepository>()
 
         // Use REAL UseCases with mocked repositories
-        getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime)
+        getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime, avatarRepository)
         getUserStatistics = GetUserStatisticsUseCase(memberRepository)
         getCurrentlyReadingBooks = GetCurrentlyReadingBooksUseCase(memberRepository, clubRepository, formatDateTime)
         signOut = SignOutUseCase(authRepository)
+        updateAvatarUseCase = UpdateAvatarUseCase(avatarRepository, memberRepository)
 
-        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks, signOut)
+        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks, signOut, updateAvatarUseCase)
+
+        every { avatarRepository.getAvatarUrl(null) } returns null
+
     }
 
     @AfterTest
@@ -300,7 +311,14 @@ class MeViewModelTest {
         assertEquals("Error", viewModel.state.value.error)
 
         // Given - Now succeed
-        val member = Member("member-1", "Alice", null, 100, 5, userId, null, null, emptyList(), null)
+        val member = Member(
+            id = "member-1",
+            name = "Alice",
+            points = 100,
+            booksRead = 5,
+            userId = userId,
+            clubs = emptyList()
+        )
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
 
         // When - Load again
@@ -314,7 +332,14 @@ class MeViewModelTest {
     fun `loadUserData generates handle from member name`() = runTest {
         // Given
         val userId = "user-123"
-        val member = Member("member-1", "John Doe", null, 50, 2, userId, null, null, emptyList(), null)
+        val member = Member(
+            id = "member-1",
+            name = "John Doe",
+            points = 50,
+            booksRead = 2,
+            userId = userId,
+            clubs = emptyList()
+        )
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
 
         // When
@@ -354,5 +379,102 @@ class MeViewModelTest {
         assertEquals("Alice", state.profile?.name)
         assertEquals(1, state.statistics?.clubsCount)
         assertTrue(state.currentlyReading.isEmpty()) // No active sessions
+    }
+
+    @Test
+    fun `uploadAvatar succeeds and refreshes profile`() = runTest {
+        // Given
+        val userId = "user-123"
+        val memberId = "member-1"
+        val imageData = ByteArray(100) { it.toByte() }
+        val storagePath = "$memberId/avatar.png"
+        val avatarUrl = "https://storage.example.com/$storagePath"
+        val memberWithoutAvatar = Member(id = memberId, name = "Alice", userId = userId, points = 100, booksRead = 5, clubs = emptyList())
+        val memberWithAvatar = memberWithoutAvatar.copy(avatarPath = storagePath)
+
+        // Load initial profile (no avatar)
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(memberWithoutAvatar)
+        every { avatarRepository.getAvatarUrl(null) } returns null
+        viewModel.loadUserData(userId)
+
+        // Setup avatar upload mocks
+        everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.success(storagePath)
+        everySuspend { memberRepository.updateMember(memberId, avatarPath = storagePath) } returns Result.success(memberWithAvatar)
+
+        // Setup refresh after upload - return member with avatar
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(memberWithAvatar)
+        every { avatarRepository.getAvatarUrl(storagePath) } returns avatarUrl
+
+        // When
+        viewModel.uploadAvatar(imageData)
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isUploadingAvatar)
+        assertNull(state.snackbarError)
+    }
+
+    @Test
+    fun `uploadAvatar fails when no member ID available`() = runTest {
+        // Given - No profile loaded
+        val imageData = ByteArray(100)
+
+        // When
+        viewModel.uploadAvatar(imageData)
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isUploadingAvatar)
+        assertEquals("No member ID available", state.snackbarError)
+    }
+
+    @Test
+    fun `uploadAvatar handles upload failure`() = runTest {
+        // Given
+        val userId = "user-123"
+        val memberId = "member-1"
+        val imageData = ByteArray(100)
+        val member = Member(id = memberId, name = "Alice", userId = userId, points = 100, booksRead = 5, clubs = emptyList())
+
+        // Load initial profile
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
+        viewModel.loadUserData(userId)
+
+        // Setup avatar upload to fail
+        val exception = Exception("Upload failed")
+        everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
+
+        // When
+        viewModel.uploadAvatar(imageData)
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isUploadingAvatar)
+        assertEquals("Upload failed", state.snackbarError)
+    }
+
+    @Test
+    fun `clearAvatarError clears the error state`() = runTest {
+        // Given
+        val userId = "user-123"
+        val memberId = "member-1"
+        val imageData = ByteArray(100)
+        val member = Member(id = memberId, name = "Alice", userId = userId, points = 100, booksRead = 5, clubs = emptyList())
+
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
+        viewModel.loadUserData(userId)
+
+        val exception = Exception("Upload failed")
+        everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
+        viewModel.uploadAvatar(imageData)
+
+        // Verify error is set
+        assertEquals("Upload failed", viewModel.state.value.snackbarError)
+
+        // When
+        viewModel.clearAvatarError()
+
+        // Then
+        assertNull(viewModel.state.value.snackbarError)
     }
 }

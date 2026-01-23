@@ -1,28 +1,34 @@
 package com.ivangarzab.kluvs.clubs.domain
 
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.model.Member
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
+import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class GetClubMembersUseCaseTest {
 
     private lateinit var clubRepository: ClubRepository
+    private lateinit var avatarRepository: AvatarRepository
     private lateinit var useCase: GetClubMembersUseCase
 
     @BeforeTest
     fun setup() {
         clubRepository = mock<ClubRepository>()
-        useCase = GetClubMembersUseCase(clubRepository)
+        avatarRepository = mock<AvatarRepository>()
+        useCase = GetClubMembersUseCase(clubRepository, avatarRepository)
     }
 
     @Test
@@ -45,6 +51,7 @@ class GetClubMembersUseCaseTest {
             shameList = emptyList()
         )
         everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        every { avatarRepository.getAvatarUrl(null) } returns null
 
         // When
         val result = useCase(clubId)
@@ -110,6 +117,7 @@ class GetClubMembersUseCaseTest {
             shameList = emptyList()
         )
         everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        every { avatarRepository.getAvatarUrl(null) } returns null
 
         // When
         val result = useCase(clubId)
@@ -145,6 +153,8 @@ class GetClubMembersUseCaseTest {
             shameList = emptyList()
         )
         everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        every { avatarRepository.getAvatarUrl(null) } returns null
+
 
         // When
         val result = useCase(clubId)
@@ -174,5 +184,79 @@ class GetClubMembersUseCaseTest {
         assertTrue(result.isFailure)
         assertEquals(exception, result.exceptionOrNull())
         verifySuspend { clubRepository.getClub(clubId) }
+    }
+
+    @Test
+    fun `populates avatar URLs when members have avatar paths`() = runTest {
+        // Given
+        val clubId = "club-123"
+        val avatarPath1 = "member-1/avatar.png"
+        val avatarPath2 = "member-2/avatar.png"
+        val avatarUrl1 = "https://storage.example.com/$avatarPath1"
+        val avatarUrl2 = "https://storage.example.com/$avatarPath2"
+        val members = listOf(
+            Member(id = "m1", name = "Alice", avatarPath = avatarPath1, points = 100, booksRead = 10),
+            Member(id = "m2", name = "Bob", avatarPath = avatarPath2, points = 50, booksRead = 5)
+        )
+        val club = Club(
+            id = clubId,
+            name = "Test Club",
+            serverId = null,
+            discordChannel = null,
+            members = members,
+            activeSession = null,
+            pastSessions = emptyList(),
+            shameList = emptyList()
+        )
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        every { avatarRepository.getAvatarUrl(avatarPath1) } returns avatarUrl1
+        every { avatarRepository.getAvatarUrl(avatarPath2) } returns avatarUrl2
+
+        // When
+        val result = useCase(clubId)
+
+        // Then
+        assertTrue(result.isSuccess)
+        val memberList = result.getOrNull()!!
+        assertEquals(2, memberList.size)
+        assertEquals(avatarUrl1, memberList[0].avatarUrl)
+        assertEquals(avatarUrl2, memberList[1].avatarUrl)
+        verify { avatarRepository.getAvatarUrl(avatarPath1) }
+        verify { avatarRepository.getAvatarUrl(avatarPath2) }
+    }
+
+    @Test
+    fun `handles members with mixed avatar presence`() = runTest {
+        // Given
+        val clubId = "club-123"
+        val avatarPath1 = "member-1/avatar.png"
+        val avatarUrl1 = "https://storage.example.com/$avatarPath1"
+        val members = listOf(
+            Member(id = "m1", name = "Alice", avatarPath = avatarPath1, points = 100, booksRead = 10),
+            Member(id = "m2", name = "Bob", avatarPath = null, points = 50, booksRead = 5)
+        )
+        val club = Club(
+            id = clubId,
+            name = "Test Club",
+            serverId = null,
+            discordChannel = null,
+            members = members,
+            activeSession = null,
+            pastSessions = emptyList(),
+            shameList = emptyList()
+        )
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        every { avatarRepository.getAvatarUrl(avatarPath1) } returns avatarUrl1
+        every { avatarRepository.getAvatarUrl(null) } returns null
+
+        // When
+        val result = useCase(clubId)
+
+        // Then
+        assertTrue(result.isSuccess)
+        val memberList = result.getOrNull()!!
+        assertEquals(2, memberList.size)
+        assertEquals(avatarUrl1, memberList[0].avatarUrl)
+        assertEquals(null, memberList[1].avatarUrl)
     }
 }

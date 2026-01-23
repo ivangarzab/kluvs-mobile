@@ -6,5 +6,7 @@ data class MeState(
     val profile: UserProfile? = null,
     val statistics: UserStatistics? = null,
     val currentlyReading: List<CurrentlyReadingBook> = emptyList(),
-    val showLogoutConfirmation: Boolean = false
+    val showLogoutConfirmation: Boolean = false,
+    val snackbarError: String? = null,
+    val isUploadingAvatar: Boolean = false,
 )

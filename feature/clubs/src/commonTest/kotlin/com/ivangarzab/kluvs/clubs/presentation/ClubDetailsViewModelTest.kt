@@ -11,8 +11,10 @@ import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +37,7 @@ class ClubDetailsViewModelTest {
 
     private lateinit var clubRepository: ClubRepository
     private lateinit var memberRepository: MemberRepository
+    private lateinit var avatarRepository: AvatarRepository
     private lateinit var getClubDetails: GetClubDetailsUseCase
     private lateinit var getActiveSession: GetActiveSessionUseCase
     private lateinit var getClubMembers: GetClubMembersUseCase
@@ -49,14 +52,17 @@ class ClubDetailsViewModelTest {
         Dispatchers.setMain(testDispatcher)
         clubRepository = mock<ClubRepository>()
         memberRepository = mock<MemberRepository>()
+        avatarRepository = mock<AvatarRepository>()
 
         // Use REAL UseCases with mocked repositories
         getClubDetails = GetClubDetailsUseCase(clubRepository, formatDateTime)
         getActiveSession = GetActiveSessionUseCase(clubRepository, formatDateTime)
-        getClubMembers = GetClubMembersUseCase(clubRepository)
+        getClubMembers = GetClubMembersUseCase(clubRepository, avatarRepository)
         getMemberClubs = GetMemberClubsUseCase(memberRepository)
 
         viewModel = ClubDetailsViewModel(getClubDetails, getActiveSession, getClubMembers, getMemberClubs)
+
+        every { avatarRepository.getAvatarUrl(null) } returns null
     }
 
     @AfterTest
