@@ -37,6 +37,8 @@ kotlin {
             implementation(libs.koin)
             implementation(libs.koin.compose)
             implementation(libs.bark)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

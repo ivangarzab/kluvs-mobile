@@ -27,6 +27,7 @@ androidx-security="1.1.0-alpha06"
 kover = "0.9.4"
 google-services="4.4.4"
 firebase-appdistribution="5.2.0"
+coil = "3.2.0"
 
 
 [libraries]
@@ -60,6 +61,7 @@ ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 supabase = { module = "io.github.jan-tennert.supabase:supabase-kt", version.ref = "supabase" }
 supabase-functions = { module = "io.github.jan-tennert.supabase:functions-kt", version.ref = "supabase" }
 supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt", version.ref = "supabase" }
+supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "supabase" }
 supabase-test = { module = "io.github.jan-tennert.supabase:test-kt", version.ref = "supabase" }
 
 bark = { module = "com.ivangarzab:bark", version.ref = "bark" }
@@ -68,6 +70,10 @@ koin = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
+
 
 # Gradle plugins (for buildSrc convention plugins)
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }

@@ -19,6 +19,7 @@ kotlin {
                 api(libs.supabase)
                 implementation(libs.supabase.functions)
                 implementation(libs.supabase.auth)
+                implementation(libs.supabase.storage)
 
                 implementation(libs.bark)
                 implementation(libs.koin)
