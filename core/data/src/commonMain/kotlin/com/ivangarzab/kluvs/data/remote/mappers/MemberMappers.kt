@@ -39,6 +39,7 @@ fun MemberResponseDto.toDomain(): Member {
         id = id,
         name = name,
         handle = handle,
+        avatarPath = avatar_path,
         points = points,
         booksRead = books_read,
         userId = user_id,
