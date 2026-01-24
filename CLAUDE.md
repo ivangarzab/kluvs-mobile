@@ -11,6 +11,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - If a build or test run is absolutely necessary, ask the user to run it manually
 - This keeps the human-in-the-loop for verification and saves significant tokens
 
+## Planning Preferences
+
+**Plan file location:** All implementation plans should be saved to `.claude/plans/` (gitignored).
+
+**Phased approach for KMP features:** When implementing features that span shared code and platform-specific code, follow this order:
+1. **Phase 1: Shared code (Data Layer)** - Models, DTOs, Services, RemoteDataSources, Repositories, Mappers
+2. **Phase 2: Shared code (Feature Layer)** - UseCases, ViewModels, expect declarations
+3. **Phase 3: Android** - actual declarations, UI components
+4. **Phase 4: iOS** - actual declarations, platform-specific UI
+
+**STOP after each phase** for user verification before proceeding.
+
+**Plans and agents must NOT run builds or tests.** When a plan includes verification steps:
+- List the test files to create/update
+- Describe what the tests should verify
+- End with "The user will run tests manually" or similar
+- Never include `./gradlew` commands in agent execution steps
+
 ## Project Overview
 
 **Kluvs** is a Kotlin Multiplatform mobile application for managing book clubs and reading sessions across Discord communities. The app uses Compose Multiplatform for UI and Supabase for backend services.
