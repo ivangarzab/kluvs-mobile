@@ -33,6 +33,6 @@ internal class AvatarServiceImpl(private val supabase: SupabaseClient) : AvatarS
     }
 
     companion object {
-        private const val BUCKET = "member_avatars"
+        internal const val BUCKET = "member-avatars"
     }
 }
