@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import PhotosUI
 
 struct MeView: View {
     let userId: String
@@ -19,7 +20,13 @@ struct MeView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         if let profile = viewModel.profile {
-                            ProfileSection(profile: profile)
+                            ProfileSection(
+                                profile: profile,
+                                isUploadingAvatar: viewModel.isUploadingAvatar,
+                                onAvatarPicked: { imageData in
+                                    viewModel.uploadAvatar(imageData: imageData)
+                                }
+                            )
                         }
 
                         Divider()
@@ -48,6 +55,16 @@ struct MeView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
         .animation(.easeInOut(duration: 0.3), value: viewModel.error)
+        .overlay(alignment: .bottom) {
+            if let snackbarError = viewModel.snackbarError {
+                SnackbarView(message: snackbarError) {
+                    viewModel.clearAvatarError()
+                }
+                .padding()
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.snackbarError)
         .onAppear {
             viewModel.loadUserData(userId: userId)
         }
@@ -69,13 +86,45 @@ struct MeView: View {
 // MARK: - Profile Section
 struct ProfileSection: View {
     let profile: Shared.UserProfile
+    var isUploadingAvatar: Bool = false
+    var onAvatarPicked: ((Data) -> Void)? = nil
+
+    @State private var selectedItem: PhotosPickerItem? = nil
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
-            // Avatar placeholder
-            Circle()
-                .fill(Color.brandOrange)
-                .frame(width: 60, height: 60)
+            // Avatar with edit button
+            ZStack(alignment: .bottomTrailing) {
+                MemberAvatar(
+                    avatarUrl: profile.avatarUrl,
+                    size: 60,
+                    isLoading: isUploadingAvatar,
+                    onClick: nil
+                )
+
+                // Edit button overlay
+                PhotosPicker(selection: $selectedItem, matching: .images) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.brandOrange.opacity(0.9))
+                            .frame(width: 24, height: 24)
+
+                        Image(systemName: "pencil")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
+                            .foregroundColor(.white)
+                    }
+                }
+                .onChange(of: selectedItem) { newItem in
+                    Task {
+                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                            let compressedData = compressImage(data)
+                            onAvatarPicked?(compressedData)
+                        }
+                    }
+                }
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(profile.name)
@@ -166,6 +215,84 @@ struct FooterItem: View {
         }
         .disabled(action == nil)
     }
+}
+
+// MARK: - Snackbar View
+struct SnackbarView: View {
+    let message: String
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack {
+            Text(message)
+                .font(.body)
+                .foregroundColor(.white)
+                .lineLimit(2)
+
+            Spacer()
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .foregroundColor(.white)
+            }
+        }
+        .padding()
+        .background(Color.red.opacity(0.9))
+        .cornerRadius(8)
+        .shadow(radius: 4)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                onDismiss()
+            }
+        }
+    }
+}
+
+// MARK: - Image Compression
+/**
+ * Compresses and resizes image to fit within constraints.
+ *
+ * - Parameters:
+ *   - imageData: Original image data
+ *   - maxDimension: Maximum width/height (default 512)
+ *   - maxBytes: Maximum file size in bytes (default 500KB)
+ * - Returns: Compressed image data
+ */
+private func compressImage(_ imageData: Data, maxDimension: CGFloat = 512, maxBytes: Int = 500_000) -> Data {
+    guard let image = UIImage(data: imageData) else {
+        return imageData
+    }
+
+    // Calculate new size maintaining aspect ratio
+    let size = image.size
+    let scale: CGFloat
+    if size.width > maxDimension || size.height > maxDimension {
+        scale = min(maxDimension / size.width, maxDimension / size.height)
+    } else {
+        scale = 1.0
+    }
+
+    let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+
+    // Resize image
+    UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+    image.draw(in: CGRect(origin: .zero, size: newSize))
+    guard let resizedImage = UIGraphicsGetImageFromCurrentImageContext() else {
+        UIGraphicsEndImageContext()
+        return imageData
+    }
+    UIGraphicsEndImageContext()
+
+    // Compress with decreasing quality until under maxBytes
+    var quality: CGFloat = 0.9
+    var compressedData = resizedImage.jpegData(compressionQuality: quality) ?? imageData
+
+    while compressedData.count > maxBytes && quality > 0.1 {
+        quality -= 0.1
+        compressedData = resizedImage.jpegData(compressionQuality: quality) ?? compressedData
+    }
+
+    return compressedData
 }
 
 #Preview {

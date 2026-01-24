@@ -35,10 +35,11 @@ struct MemberListItem: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Avatar placeholder
-            Circle()
-                .fill(Color.brandOrange)
-                .frame(width: 40, height: 40)
+            // Member avatar
+            MemberAvatar(
+                avatarUrl: member.avatarUrl,
+                size: 40
+            )
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(member.name)
