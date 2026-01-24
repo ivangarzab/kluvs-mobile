@@ -74,4 +74,9 @@
     <string name="logout_confirmation_message">Are you sure you want to sign out?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <!-- Avatar -->
+    <string name="profile_picture">Profile picture</string>
+    <string name="edit_profile_picture">Edit profile picture</string>
+    <string name="avatar_of_x">Avatar of %s</string>
 </resources>

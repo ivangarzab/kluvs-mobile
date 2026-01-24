@@ -2,7 +2,6 @@ package com.ivangarzab.kluvs.ui.clubs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -28,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.clubs.presentation.MemberListItemInfo
 import com.ivangarzab.kluvs.theme.KluvsTheme
+import com.ivangarzab.kluvs.ui.components.MemberAvatar
 import com.ivangarzab.kluvs.ui.components.NoTabData
 
 @Composable
@@ -60,7 +58,12 @@ fun MembersTab(
 
             LazyColumn {
                 itemsIndexed(members) { index, member ->
-                    MemberListItem(member.name, member.handle, member.points)
+                    MemberListItem(
+                        name = member.name,
+                        handle = member.handle,
+                        points = member.points,
+                        avatarUrl = member.avatarUrl
+                    )
                     if (index < members.size - 1) {
                         MemberDivider()
                     }
@@ -72,10 +75,11 @@ fun MembersTab(
 
 @Composable
 private fun MemberListItem(
+    modifier: Modifier = Modifier,
     name: String,
     handle: String,
     points: Int,
-    modifier: Modifier = Modifier
+    avatarUrl: String? = null
 ) {
     Row(
         modifier = modifier
@@ -87,14 +91,10 @@ private fun MemberListItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Placeholder avatar
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    )
+            MemberAvatar(
+                avatarUrl = avatarUrl,
+                size = 40.dp,
+                contentDescription = stringResource(R.string.avatar_of_x, name)
             )
             Column {
                 Text(
