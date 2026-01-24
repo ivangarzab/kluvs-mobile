@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.clubs.domain
 
 import com.ivangarzab.kluvs.clubs.presentation.MemberListItemInfo
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.model.Member
@@ -14,9 +15,11 @@ import com.ivangarzab.kluvs.model.Member
  * - Sorted by points (descending)
  *
  * @param clubRepository Repository for club data
+ * @param avatarRepository Repository for avatar operations
  */
 class GetClubMembersUseCase(
-    private val clubRepository: ClubRepository
+    private val clubRepository: ClubRepository,
+    private val avatarRepository: AvatarRepository
 ) {
     /**
      * Fetches club members sorted by points.
@@ -35,7 +38,7 @@ class GetClubMembersUseCase(
                     name = member.name,
                     handle = member.handle ?: "@",
                     points = member.points,
-                    avatarUrl = null // TODO: Add avatar support when available
+                    avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath)
                 )
             }?.sortedByDescending { it.points } ?: emptyList()
         }

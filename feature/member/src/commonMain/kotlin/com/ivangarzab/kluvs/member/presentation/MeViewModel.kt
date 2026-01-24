@@ -7,6 +7,7 @@ import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.member.domain.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.kluvs.member.domain.GetUserStatisticsUseCase
+import com.ivangarzab.kluvs.member.domain.UpdateAvatarUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +23,7 @@ class MeViewModel(
     private val getUserStatistics: GetUserStatisticsUseCase,
     private val getCurrentlyReadingBooks: GetCurrentlyReadingBooksUseCase,
     private val signOutUseCase: SignOutUseCase,
+    private val updateAvatarUseCase: UpdateAvatarUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MeState())
@@ -90,5 +92,38 @@ class MeViewModel(
         Bark.v("Sign out confirmed")
         _state.update { it.copy(showLogoutConfirmation = false) }
         signOutUseCase()
+    }
+
+    fun uploadAvatar(imageData: ByteArray) {
+        viewModelScope.launch {
+            _state.update { it.copy(isUploadingAvatar = true, snackbarError = null) }
+
+            val memberId = _state.value.profile?.memberId
+            if (memberId == null) {
+                Bark.e("No member ID available to update avatar")
+                _state.update {
+                    it.copy(
+                        isUploadingAvatar = false,
+                        snackbarError = "No member ID available"
+                    )
+                }
+                return@launch
+            }
+
+            updateAvatarUseCase(memberId, imageData)
+                .onSuccess {
+                    // Refresh profile to show new avatar
+                    currentUserId?.let { userId -> loadUserData(userId) }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(snackbarError = error.message) }
+                }
+
+            _state.update { it.copy(isUploadingAvatar = false) }
+        }
+    }
+
+    fun clearAvatarError() {
+        _state.update { it.copy(snackbarError = null) }
     }
 }

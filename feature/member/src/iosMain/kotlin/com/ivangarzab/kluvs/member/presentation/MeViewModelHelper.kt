@@ -36,4 +36,8 @@ class MeViewModelHelper : KoinComponent {
     fun hideLogoutConfirmation() = viewModel.onSignOutDialogDismissed()
 
     fun confirmLogout() = viewModel.onSignOutDialogConfirmed()
+
+    fun uploadAvatar(imageData: ByteArray) = viewModel.uploadAvatar(imageData)
+
+    fun clearAvatarError() = viewModel.clearAvatarError()
 }

@@ -13,6 +13,7 @@ kotlin {
 
             implementation(libs.ktor.client.core)
             implementation(libs.supabase.functions)
+            implementation(libs.supabase.storage)
 
             implementation(libs.koin)
             implementation(libs.bark)

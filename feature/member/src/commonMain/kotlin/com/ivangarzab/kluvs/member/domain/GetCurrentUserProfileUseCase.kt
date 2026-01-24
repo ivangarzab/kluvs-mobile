@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.member.domain
 
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.member.presentation.UserProfile
 import com.ivangarzab.kluvs.model.Member
@@ -16,10 +17,12 @@ import com.ivangarzab.kluvs.presentation.state.DateTimeFormat
  *
  * @param memberRepository Repository for member data
  * @param formatDateTime UseCase for formatting dates
+ * @param avatarRepository Repository for avatar operations
  */
 class GetCurrentUserProfileUseCase(
     private val memberRepository: MemberRepository,
-    private val formatDateTime: FormatDateTimeUseCase
+    private val formatDateTime: FormatDateTimeUseCase,
+    private val avatarRepository: AvatarRepository
 ) {
     /**
      * Fetches the profile for the specified user.
@@ -36,7 +39,7 @@ class GetCurrentUserProfileUseCase(
                 joinDate = member.createdAt?.let {
                     formatDateTime(it, DateTimeFormat.YEAR_ONLY)
                 } ?: "2025",
-                avatarUrl = null // TODO: Add avatar support when available
+                avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath)
             )
         }
     }

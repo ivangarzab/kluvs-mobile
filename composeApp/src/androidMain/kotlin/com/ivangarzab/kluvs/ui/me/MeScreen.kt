@@ -1,5 +1,8 @@
 package com.ivangarzab.kluvs.ui.me
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -16,23 +19,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -48,6 +57,8 @@ import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.ui.components.ErrorScreen
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
+import com.ivangarzab.kluvs.ui.components.MemberAvatar
+import com.ivangarzab.kluvs.ui.utils.compressImage
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -57,9 +68,31 @@ fun MeScreen(
     viewModel: MeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            context.contentResolver.openInputStream(it)?.use { inputStream ->
+                val bytes = compressImage(inputStream.readBytes())
+                viewModel.uploadAvatar(bytes)
+            }
+        }
+    }
 
     LaunchedEffect(userId) {
         viewModel.loadUserData(userId)
+    }
+
+    // Show snackbar for errors
+    LaunchedEffect(state.snackbarError) {
+        state.snackbarError?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearAvatarError()
+        }
     }
 
     if (state.showLogoutConfirmation) {
@@ -69,14 +102,26 @@ fun MeScreen(
         )
     }
 
-    MeScreenContent(
-        modifier = modifier,
-        state = state,
-        onRetry = viewModel::refresh,
-        onSettingsClick = { /* TODO() */ },
-        onHelpClick = { /* TODO() */ },
-        onSignOutClick = viewModel::onSignOutClicked,
-    )
+    Box(modifier = modifier) {
+        MeScreenContent(
+            modifier = Modifier,
+            state = state,
+            onRetry = viewModel::refresh,
+            onSettingsClick = { /* TODO() */ },
+            onHelpClick = { /* TODO() */ },
+            onSignOutClick = viewModel::onSignOutClicked,
+            onAvatarClick = {
+                imagePickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            }
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
 }
 
 @Composable
@@ -109,6 +154,7 @@ fun MeScreenContent(
     onSettingsClick: () -> Unit,
     onHelpClick: () -> Unit,
     onSignOutClick: () -> Unit,
+    onAvatarClick: () -> Unit = {},
 ) {
     val screenState = when {
         state.isLoading -> ScreenState.Loading
@@ -138,10 +184,12 @@ fun MeScreenContent(
                         .padding(16.dp),
                 ) {
                     ProfileSection(
-                        imageUrl = state.profile?.avatarUrl ?: "",
+                        avatarUrl = state.profile?.avatarUrl,
                         name = state.profile?.name ?: "",
                         handle = state.profile?.handle ?: "",
-                        joinDate = state.profile?.joinDate ?: ""
+                        joinDate = state.profile?.joinDate ?: "",
+                        isUploadingAvatar = state.isUploadingAvatar,
+                        onAvatarClick = onAvatarClick
                     )
 
                     Divider()
@@ -175,10 +223,12 @@ fun MeScreenContent(
 @Composable
 private fun ProfileSection(
     modifier: Modifier = Modifier,
-    imageUrl: String,
+    avatarUrl: String?,
     name: String,
     handle: String,
-    joinDate: String
+    joinDate: String,
+    isUploadingAvatar: Boolean = false,
+    onAvatarClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier,
@@ -190,15 +240,32 @@ private fun ProfileSection(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Placeholder avatar
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
+            // Avatar with edit button overlay
+            Box {
+                MemberAvatar(
+                    avatarUrl = avatarUrl,
+                    size = 60.dp,
+                    contentDescription = stringResource(R.string.profile_picture),
+                    onClick = onAvatarClick,
+                    isLoading = isUploadingAvatar
+                )
+
+                // Edit icon overlay
+                FloatingActionButton(
+                    onClick = onAvatarClick,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.BottomEnd),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit, //TODO: Add custom icon
+                        contentDescription = stringResource(R.string.edit_profile_picture),
+                        modifier = Modifier.size(14.dp)
                     )
-            )
+                }
+            }
 
             Spacer(Modifier.padding(8.dp))
 

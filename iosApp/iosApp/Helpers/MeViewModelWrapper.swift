@@ -16,6 +16,8 @@ class MeViewModelWrapper: ObservableObject {
     @Published var statistics: Shared.UserStatistics? = nil
     @Published var currentlyReading: [Shared.CurrentlyReadingBook] = []
     @Published var showLogoutConfirmation: Bool = false
+    @Published var snackbarError: String? = nil
+    @Published var isUploadingAvatar: Bool = false
 
     private let helper: MeViewModelHelper
     private var cancellables: [Shared.Closeable] = []
@@ -34,6 +36,8 @@ class MeViewModelWrapper: ObservableObject {
                 self?.statistics = state.statistics
                 self?.currentlyReading = state.currentlyReading
                 self?.showLogoutConfirmation = state.showLogoutConfirmation
+                self?.snackbarError = state.snackbarError
+                self?.isUploadingAvatar = state.isUploadingAvatar
             }
         }
         cancellables.append(stateCancellable)
@@ -57,6 +61,22 @@ class MeViewModelWrapper: ObservableObject {
 
     func onSignOutDialogConfirmed() {
         helper.confirmLogout()
+    }
+
+    func uploadAvatar(imageData: Data) {
+        let byteArray = KotlinByteArray(size: Int32(imageData.count))
+        imageData.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+            if let baseAddress = bytes.baseAddress {
+                for i in 0..<imageData.count {
+                    byteArray.set(index: Int32(i), value: Int8(bitPattern: baseAddress.load(fromByteOffset: i, as: UInt8.self)))
+                }
+            }
+        }
+        helper.uploadAvatar(imageData: byteArray)
+    }
+
+    func clearAvatarError() {
+        helper.clearAvatarError()
     }
 
     deinit {

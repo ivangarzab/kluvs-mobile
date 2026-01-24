@@ -59,6 +59,7 @@ interface MemberRepository {
      * @param role Optional new role (null to keep current value)
      * @param points Optional new points value (null to keep current value)
      * @param booksRead Optional new books read count (null to keep current value)
+     * @param avatarPath Optional new avatar path (null to keep current value)
      * @param clubIds Optional list of club IDs to set as the member's clubs (null to keep current clubs).
      *                When provided, this REPLACES all club memberships with the new list.
      * @return Result containing the updated Member if successful, or an error if the operation failed
@@ -70,6 +71,7 @@ interface MemberRepository {
         role: String? = null,
         points: Int? = null,
         booksRead: Int? = null,
+        avatarPath: String? = null,
         clubIds: List<String>? = null
     ): Result<Member>
 
@@ -124,6 +126,7 @@ internal class MemberRepositoryImpl(
         role: String?,
         points: Int?,
         booksRead: Int?,
+        avatarPath: String?,
         clubIds: List<String>?
     ): Result<Member> =
         memberRemoteDataSource.updateMember(
@@ -134,6 +137,7 @@ internal class MemberRepositoryImpl(
                 role = role,
                 points = points,
                 books_read = booksRead,
+                avatar_path = avatarPath,
                 clubs = clubIds
             )
         )

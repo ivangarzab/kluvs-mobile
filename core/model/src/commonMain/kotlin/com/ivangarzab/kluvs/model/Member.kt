@@ -18,6 +18,8 @@ data class Member(
     /** Username handle for this member. */
     val handle: String? = null,
 
+    val avatarPath: String? = null,
+
     val points: Int = 0,
 
     val booksRead: Int = 0,

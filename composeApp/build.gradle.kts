@@ -21,6 +21,10 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
+        androidInstrumentedTest.dependencies {
+            implementation(libs.androidx.test.junit)
+            implementation(libs.androidx.test.runner)
+        }
         commonMain.dependencies {
             implementation(projects.shared)
 
@@ -37,6 +41,8 @@ kotlin {
             implementation(libs.koin)
             implementation(libs.koin.compose)
             implementation(libs.bark)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -54,6 +60,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "0.1"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
         resources {
