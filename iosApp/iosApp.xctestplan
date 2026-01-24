@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "56305670-0E39-458F-926F-84F5C2539EAC",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Kluvs.xcodeproj",
+      "identifier" : "B9DA97B02DC1472C00A4DA20",
+      "name" : "iosApp"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Kluvs.xcodeproj",
+        "identifier" : "E081F1F12F2025CB00AFD427",
+        "name" : "iosAppTests"
+      }
+    }
+  ],
+  "version" : 1
+}
