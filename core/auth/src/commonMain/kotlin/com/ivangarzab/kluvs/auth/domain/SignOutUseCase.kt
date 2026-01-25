@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.auth.domain
 
 import com.ivangarzab.kluvs.database.KluvsDatabase
+import com.ivangarzab.bark.Bark
 
 /**
  * Sign out the current user and clear local cached data.
@@ -21,6 +22,7 @@ class SignOutUseCase(
     }
 
     private suspend fun clearLocalData() {
+        Bark.v("Clearing local database")
         database.clubDao().deleteAll()
         database.serverDao().deleteAll()
         database.memberDao().deleteAll()
@@ -28,5 +30,6 @@ class SignOutUseCase(
         database.sessionDao().deleteAll()
         database.bookDao().deleteAll()
         database.discussionDao().deleteAll()
+        Bark.v("Local database cleared successfully")
     }
 }

@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.data.local.mappers.toDomain
 import com.ivangarzab.kluvs.data.local.mappers.toEntity
 import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.model.Session
+import com.ivangarzab.bark.Bark
 
 /**
  * Local data source for Session entities.
@@ -45,6 +46,7 @@ class SessionLocalDataSourceImpl(
     }
 
     override suspend fun insertSession(session: Session) {
+        Bark.d("Inserting session ${session.id} into database")
         // First insert the book if it has an ID
         session.book.id?.let { bookId ->
             bookDao.insertBook(session.book.toEntity())
@@ -54,6 +56,7 @@ class SessionLocalDataSourceImpl(
     }
 
     override suspend fun insertSessions(sessions: List<Session>) {
+        Bark.d("Inserting ${sessions.size} sessions into database")
         // Insert all books first
         val books = sessions.mapNotNull { it.book.takeIf { book -> book.id != null } }
         bookDao.insertBooks(books.map { it.toEntity() })
@@ -65,6 +68,7 @@ class SessionLocalDataSourceImpl(
     override suspend fun deleteSession(sessionId: String) {
         val entity = sessionDao.getSession(sessionId)
         if (entity != null) {
+            Bark.d("Deleting session $sessionId from database")
             sessionDao.deleteSession(entity)
         }
     }
@@ -74,6 +78,7 @@ class SessionLocalDataSourceImpl(
     }
 
     override suspend fun deleteAll() {
+        Bark.d("Clearing all sessions from database")
         sessionDao.deleteAll()
     }
 }

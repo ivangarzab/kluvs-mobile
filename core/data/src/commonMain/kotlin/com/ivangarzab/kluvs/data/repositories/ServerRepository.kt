@@ -7,6 +7,7 @@ import com.ivangarzab.kluvs.data.remote.dtos.CreateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.source.ServerRemoteDataSource
 import com.ivangarzab.kluvs.model.Server
+import com.ivangarzab.bark.Bark
 
 /**
  * Repository for managing Server data with local caching.
@@ -71,20 +72,36 @@ internal class ServerRepositoryImpl(
             val lastFetchedAt = serverLocalDataSource.getLastFetchedAt(serverId)
 
             if (cached != null && cachePolicy.isFresh(lastFetchedAt, CacheTTL.SERVER)) {
+                Bark.d("Cache hit for server $serverId")
                 return Result.success(cached)
             }
+            Bark.d("Cache miss for server $serverId")
         }
 
+        Bark.d("Fetching server $serverId from remote")
         val result = serverRemoteDataSource.getServer(serverId)
-        result.getOrNull()?.let { serverLocalDataSource.insertServer(it) }
+
+        result.onSuccess { server ->
+            Bark.d("Caching server ${server.id}")
+            serverLocalDataSource.insertServer(server)
+        }.onFailure { error ->
+            Bark.e("Failed to fetch server $serverId", error)
+        }
+
         return result
     }
 
     override suspend fun getAllServers(forceRefresh: Boolean): Result<List<Server>> {
-        // For now, always fetch from remote for getAllServers
-        // TODO: Implement smarter caching strategy for list endpoints
+        Bark.d("Fetching all servers from remote")
         val result = serverRemoteDataSource.getAllServers()
-        result.getOrNull()?.forEach { serverLocalDataSource.insertServer(it) }
+
+        result.onSuccess { servers ->
+            Bark.d("Caching ${servers.size} servers")
+            servers.forEach { serverLocalDataSource.insertServer(it) }
+        }.onFailure { error ->
+            Bark.e("Failed to fetch all servers", error)
+        }
+
         return result
     }
 

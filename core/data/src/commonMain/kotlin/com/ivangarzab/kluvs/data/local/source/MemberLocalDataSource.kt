@@ -5,6 +5,7 @@ import com.ivangarzab.kluvs.data.local.mappers.toEntity
 import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.database.entities.ClubMemberCrossRef
 import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.bark.Bark
 
 /**
  * Local data source for Member entities.
@@ -45,26 +46,31 @@ class MemberLocalDataSourceImpl(
     }
 
     override suspend fun insertMember(member: Member) {
+        Bark.d("Inserting member ${member.id} into database")
         memberDao.insertMember(member.toEntity())
     }
 
     override suspend fun insertMembers(members: List<Member>) {
+        Bark.d("Inserting ${members.size} members into database")
         memberDao.insertMembers(members.map { it.toEntity() })
     }
 
     override suspend fun insertClubMemberRelationship(clubId: String, memberId: String) {
+        Bark.d("Adding member $memberId to club $clubId")
         memberDao.insertClubMemberCrossRef(
             ClubMemberCrossRef(clubId = clubId, memberId = memberId)
         )
     }
 
     override suspend fun deleteClubMemberRelationship(clubId: String, memberId: String) {
+        Bark.d("Removing member $memberId from club $clubId")
         memberDao.deleteClubMemberCrossRef(clubId, memberId)
     }
 
     override suspend fun deleteMember(memberId: String) {
         val entity = memberDao.getMember(memberId)
         if (entity != null) {
+            Bark.d("Deleting member $memberId from database")
             memberDao.deleteMember(entity)
         }
     }
@@ -74,6 +80,7 @@ class MemberLocalDataSourceImpl(
     }
 
     override suspend fun deleteAll() {
+        Bark.d("Clearing all members from database")
         memberDao.deleteAll()
         memberDao.deleteAllCrossRefs()
     }

@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.local.cache.CachePolicy
 import com.ivangarzab.kluvs.data.local.cache.CacheTTL
 import com.ivangarzab.kluvs.data.local.source.ClubLocalDataSource
@@ -93,16 +94,22 @@ internal class ClubRepositoryImpl(
             val lastFetchedAt = clubLocalDataSource.getLastFetchedAt(clubId)
 
             if (cachedClub != null && cachePolicy.isFresh(lastFetchedAt, CacheTTL.CLUB)) {
+                Bark.d("Cache hit for club $clubId")
                 return Result.success(cachedClub)
             }
+            Bark.d("Cache miss for club $clubId")
         }
 
         // 2. Fetch from remote
+        Bark.d("Fetching club $clubId from remote")
         val result = clubRemoteDataSource.getClub(clubId, serverId)
 
         // 3. Cache on success
-        result.getOrNull()?.let { club ->
+        result.onSuccess { club ->
+            Bark.d("Caching club ${club.id}")
             clubLocalDataSource.insertClub(club)
+        }.onFailure { error ->
+            Bark.e("Failed to fetch club $clubId", error)
         }
 
         return result

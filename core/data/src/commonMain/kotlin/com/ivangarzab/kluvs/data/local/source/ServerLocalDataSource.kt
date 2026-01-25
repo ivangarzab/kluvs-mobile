@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.data.local.mappers.toDomain
 import com.ivangarzab.kluvs.data.local.mappers.toEntity
 import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.model.Server
+import com.ivangarzab.bark.Bark
 
 /**
  * Local data source for Server entities.
@@ -36,12 +37,14 @@ class ServerLocalDataSourceImpl(
     }
 
     override suspend fun insertServer(server: Server) {
+        Bark.d("Inserting server ${server.id} into database")
         serverDao.insertServer(server.toEntity())
     }
 
     override suspend fun deleteServer(serverId: String) {
         val entity = serverDao.getServer(serverId)
         if (entity != null) {
+            Bark.d("Deleting server $serverId from database")
             serverDao.deleteServer(entity)
         }
     }
@@ -51,6 +54,7 @@ class ServerLocalDataSourceImpl(
     }
 
     override suspend fun deleteAll() {
+        Bark.d("Clearing all servers from database")
         serverDao.deleteAll()
     }
 }

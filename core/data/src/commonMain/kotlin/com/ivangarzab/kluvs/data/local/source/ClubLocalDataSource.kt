@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.data.local.mappers.toDomain
 import com.ivangarzab.kluvs.data.local.mappers.toEntity
 import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.bark.Bark
 
 /**
  * Local data source for Club entities.
@@ -37,16 +38,19 @@ class ClubLocalDataSourceImpl(
     }
 
     override suspend fun insertClub(club: Club) {
+        Bark.v("Inserting club ${club.id} into database")
         clubDao.insertClub(club.toEntity())
     }
 
     override suspend fun insertClubs(clubs: List<Club>) {
+        Bark.v("Inserting ${clubs.size} clubs into database")
         clubDao.insertClubs(clubs.map { it.toEntity() })
     }
 
     override suspend fun deleteClub(clubId: String) {
         val entity = clubDao.getClub(clubId)
         if (entity != null) {
+            Bark.v("Deleting club $clubId from database")
             clubDao.deleteClub(entity)
         }
     }
@@ -56,6 +60,7 @@ class ClubLocalDataSourceImpl(
     }
 
     override suspend fun deleteAll() {
+        Bark.v("Clearing all clubs from database")
         clubDao.deleteAll()
     }
 }
