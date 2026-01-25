@@ -18,9 +18,6 @@ interface SessionDao {
     @Query("SELECT * FROM sessions WHERE clubId = :clubId")
     suspend fun getSessionsForClub(clubId: String): List<SessionEntity>
 
-    @Query("SELECT * FROM sessions WHERE clubId = :clubId AND isActive = 1")
-    suspend fun getActiveSessionForClub(clubId: String): SessionEntity?
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: SessionEntity)
 

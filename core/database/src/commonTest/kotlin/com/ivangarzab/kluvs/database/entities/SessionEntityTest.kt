@@ -2,9 +2,7 @@ package com.ivangarzab.kluvs.database.entities
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
 
 class SessionEntityTest {
 
@@ -15,9 +13,7 @@ class SessionEntityTest {
             id = "session-1",
             clubId = "club-1",
             bookId = "book-1",
-            startDate = "2024-01-01",
-            endDate = "2024-02-01",
-            isActive = true,
+            dueDate = "2024-02-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
@@ -25,9 +21,7 @@ class SessionEntityTest {
         assertEquals("session-1", sessionEntity.id)
         assertEquals("club-1", sessionEntity.clubId)
         assertEquals("book-1", sessionEntity.bookId)
-        assertEquals("2024-01-01", sessionEntity.startDate)
-        assertEquals("2024-02-01", sessionEntity.endDate)
-        assertTrue(sessionEntity.isActive)
+        assertEquals("2024-02-01T12:00:00Z", sessionEntity.dueDate)
         assertEquals(1234567890L, sessionEntity.lastFetchedAt)
     }
 
@@ -36,20 +30,17 @@ class SessionEntityTest {
         // Given
         val sessionEntity = SessionEntity(
             id = "session-1",
-            clubId = "club-1",
+            clubId = null,
             bookId = null,
-            startDate = null,
-            endDate = null,
-            isActive = false,
+            dueDate = null,
             lastFetchedAt = 1234567890L
         )
 
         // Then
         assertEquals("session-1", sessionEntity.id)
+        assertEquals(null, sessionEntity.clubId)
         assertEquals(null, sessionEntity.bookId)
-        assertEquals(null, sessionEntity.startDate)
-        assertEquals(null, sessionEntity.endDate)
-        assertFalse(sessionEntity.isActive)
+        assertEquals(null, sessionEntity.dueDate)
     }
 
     @Test
@@ -59,16 +50,13 @@ class SessionEntityTest {
             id = "session-1",
             clubId = "club-1",
             bookId = "book-1",
-            startDate = "2024-01-01",
-            endDate = "2024-02-01",
-            isActive = true,
+            dueDate = "2024-02-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
-        // When - mark session as inactive
+        // When - update due date
         val updated = original.copy(
-            isActive = false,
-            endDate = "2024-01-15",
+            dueDate = "2024-02-15T12:00:00Z",
             lastFetchedAt = 9876543210L
         )
 
@@ -76,9 +64,7 @@ class SessionEntityTest {
         assertEquals("session-1", updated.id)
         assertEquals("club-1", updated.clubId)
         assertEquals("book-1", updated.bookId)
-        assertEquals("2024-01-01", updated.startDate)
-        assertEquals("2024-01-15", updated.endDate)
-        assertFalse(updated.isActive)
+        assertEquals("2024-02-15T12:00:00Z", updated.dueDate)
         assertEquals(9876543210L, updated.lastFetchedAt)
     }
 
@@ -89,9 +75,7 @@ class SessionEntityTest {
             id = "session-1",
             clubId = "club-1",
             bookId = "book-1",
-            startDate = "2024-01-01",
-            endDate = "2024-02-01",
-            isActive = true,
+            dueDate = "2024-02-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
@@ -99,9 +83,7 @@ class SessionEntityTest {
             id = "session-1",
             clubId = "club-1",
             bookId = "book-1",
-            startDate = "2024-01-01",
-            endDate = "2024-02-01",
-            isActive = true,
+            dueDate = "2024-02-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
@@ -109,9 +91,7 @@ class SessionEntityTest {
             id = "session-2",
             clubId = "club-1",
             bookId = "book-2",
-            startDate = "2024-02-01",
-            endDate = "2024-03-01",
-            isActive = false,
+            dueDate = "2024-03-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 

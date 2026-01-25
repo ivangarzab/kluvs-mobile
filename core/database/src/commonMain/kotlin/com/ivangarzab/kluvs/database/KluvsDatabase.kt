@@ -6,12 +6,14 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import com.ivangarzab.kluvs.database.dao.BookDao
 import com.ivangarzab.kluvs.database.dao.ClubDao
+import com.ivangarzab.kluvs.database.dao.DiscussionDao
 import com.ivangarzab.kluvs.database.dao.MemberDao
 import com.ivangarzab.kluvs.database.dao.ServerDao
 import com.ivangarzab.kluvs.database.dao.SessionDao
 import com.ivangarzab.kluvs.database.entities.BookEntity
 import com.ivangarzab.kluvs.database.entities.ClubEntity
 import com.ivangarzab.kluvs.database.entities.ClubMemberCrossRef
+import com.ivangarzab.kluvs.database.entities.DiscussionEntity
 import com.ivangarzab.kluvs.database.entities.MemberEntity
 import com.ivangarzab.kluvs.database.entities.ServerEntity
 import com.ivangarzab.kluvs.database.entities.SessionEntity
@@ -27,7 +29,8 @@ import com.ivangarzab.kluvs.database.entities.SessionEntity
         MemberEntity::class,
         ClubMemberCrossRef::class,
         SessionEntity::class,
-        BookEntity::class
+        BookEntity::class,
+        DiscussionEntity::class
     ],
     version = 1,
     exportSchema = true
@@ -39,6 +42,7 @@ abstract class KluvsDatabase : RoomDatabase() {
     abstract fun memberDao(): MemberDao
     abstract fun sessionDao(): SessionDao
     abstract fun bookDao(): BookDao
+    abstract fun discussionDao(): DiscussionDao
 }
 
 /**

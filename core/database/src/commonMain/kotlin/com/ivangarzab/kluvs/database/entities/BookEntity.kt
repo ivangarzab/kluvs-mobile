@@ -6,14 +6,16 @@ import androidx.room.PrimaryKey
 /**
  * Room entity for books.
  * Represents a cached book with TTL tracking.
+ * Maps to BookDto from the API.
  */
 @Entity(tableName = "books")
 data class BookEntity(
     @PrimaryKey val id: String,
     val title: String,
-    val author: String?,
-    val year: String?,
+    val author: String,
+    val edition: String?,
+    val year: Int?,
+    val isbn: String?,
     val pageCount: Int?,
-    val coverUrl: String?,
     val lastFetchedAt: Long // Timestamp in milliseconds for TTL check
 )

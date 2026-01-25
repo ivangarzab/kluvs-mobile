@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
  * Room entity for club members.
  * Represents a cached member with TTL tracking.
  * Indexed by userId for efficient lookups.
+ * Maps to MemberDto from the API.
  */
 @Entity(
     tableName = "members",
@@ -22,5 +23,6 @@ data class MemberEntity(
     val points: Int,
     val booksRead: Int,
     val role: String?,
+    val createdAt: String?, // ISO-8601 datetime string
     val lastFetchedAt: Long // Timestamp in milliseconds for TTL check
 )

@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 class MemberEntityTest {
-
     @Test
     fun testMemberEntity_creation() {
         // Given
@@ -18,6 +17,7 @@ class MemberEntityTest {
             points = 100,
             booksRead = 5,
             role = "admin",
+            createdAt = "2024-01-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
@@ -30,6 +30,7 @@ class MemberEntityTest {
         assertEquals(100, memberEntity.points)
         assertEquals(5, memberEntity.booksRead)
         assertEquals("admin", memberEntity.role)
+        assertEquals("2024-01-01T12:00:00Z", memberEntity.createdAt)
         assertEquals(1234567890L, memberEntity.lastFetchedAt)
     }
 
@@ -45,6 +46,7 @@ class MemberEntityTest {
             points = 0,
             booksRead = 0,
             role = null,
+            createdAt = null,
             lastFetchedAt = 1234567890L
         )
 
@@ -55,6 +57,7 @@ class MemberEntityTest {
         assertEquals(null, memberEntity.handle)
         assertEquals(null, memberEntity.avatarPath)
         assertEquals(null, memberEntity.role)
+        assertEquals(null, memberEntity.createdAt)
         assertEquals(0, memberEntity.points)
         assertEquals(0, memberEntity.booksRead)
     }
@@ -71,6 +74,7 @@ class MemberEntityTest {
             points = 100,
             booksRead = 5,
             role = "member",
+            createdAt = "2024-01-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
@@ -85,6 +89,7 @@ class MemberEntityTest {
         assertEquals("member-1", updated.id)
         assertEquals(150, updated.points)
         assertEquals(6, updated.booksRead)
+        assertEquals("2024-01-01T12:00:00Z", updated.createdAt)
         assertEquals(9876543210L, updated.lastFetchedAt)
     }
 
@@ -100,6 +105,7 @@ class MemberEntityTest {
             points = 100,
             booksRead = 5,
             role = "member",
+            createdAt = "2024-01-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
@@ -112,6 +118,7 @@ class MemberEntityTest {
             points = 100,
             booksRead = 5,
             role = "member",
+            createdAt = "2024-01-01T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
@@ -124,6 +131,7 @@ class MemberEntityTest {
             points = 50,
             booksRead = 3,
             role = "member",
+            createdAt = "2024-01-15T12:00:00Z",
             lastFetchedAt = 1234567890L
         )
 
