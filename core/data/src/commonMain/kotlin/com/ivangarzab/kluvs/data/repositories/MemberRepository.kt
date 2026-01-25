@@ -1,5 +1,8 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.cache.CacheTTL
+import com.ivangarzab.kluvs.data.local.source.MemberLocalDataSource
 import com.ivangarzab.kluvs.data.remote.dtos.CreateMemberRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateMemberRequestDto
 import com.ivangarzab.kluvs.data.remote.source.MemberRemoteDataSource
@@ -18,18 +21,20 @@ interface MemberRepository {
      * Retrieves a single member by their ID.
      *
      * @param memberId The ID of the member to retrieve
+     * @param forceRefresh If true, bypasses cache and fetches from remote
      * @return Result containing the Member (with nested clubs, shame clubs, etc.) if successful,
      *         or an error if the operation failed
      */
-    suspend fun getMember(memberId: String): Result<Member>
+    suspend fun getMember(memberId: String, forceRefresh: Boolean = false): Result<Member>
 
     /**
      * Retrieves a member by their Discord user ID.
      *
      * @param userId The Discord user ID
+     * @param forceRefresh If true, bypasses cache and fetches from remote
      * @return Result containing the Member if successful, or an error if the operation failed
      */
-    suspend fun getMemberByUserId(userId: String): Result<Member>
+    suspend fun getMemberByUserId(userId: String, forceRefresh: Boolean = false): Result<Member>
 
     /**
      * Creates a new member.
@@ -85,32 +90,66 @@ interface MemberRepository {
 }
 
 /**
- * Implementation of [MemberRepository] that delegates to remote data sources.
+ * Implementation of [MemberRepository] with TTL-based caching.
  *
- * This is a simple pass-through implementation that can be extended later to include
- * caching strategies, offline support, and data synchronization.
+ * Implements a cache-aside pattern:
+ * - Read operations check local cache first (24h TTL)
+ * - Cache misses fetch from remote and populate cache
+ * - Write operations invalidate cache and delegate to remote
  *
  * Note: The API returns nested data (clubs, shame clubs) with Member responses.
  * Future implementations may decompose this nested data and coordinate with other
  * repositories for caching purposes.
  */
 internal class MemberRepositoryImpl(
-    private val memberRemoteDataSource: MemberRemoteDataSource
+    private val memberRemoteDataSource: MemberRemoteDataSource,
+    private val memberLocalDataSource: MemberLocalDataSource,
+    private val cachePolicy: CachePolicy
 ) : MemberRepository {
 
-    override suspend fun getMember(memberId: String): Result<Member> =
-        memberRemoteDataSource.getMember(memberId)
+    override suspend fun getMember(memberId: String, forceRefresh: Boolean): Result<Member> {
+        if (!forceRefresh) {
+            val cachedMember = memberLocalDataSource.getMember(memberId)
+            val lastFetchedAt = memberLocalDataSource.getLastFetchedAt(memberId)
 
-    override suspend fun getMemberByUserId(userId: String): Result<Member> =
-        memberRemoteDataSource.getMemberByUserId(userId)
+            if (cachedMember != null && !cachePolicy.isStale(lastFetchedAt, CacheTTL.MEMBER)) {
+                return Result.success(cachedMember)
+            }
+        }
+
+        val result = memberRemoteDataSource.getMember(memberId)
+        result.getOrNull()?.let { member ->
+            memberLocalDataSource.insertMember(member)
+        }
+        return result
+    }
+
+    override suspend fun getMemberByUserId(userId: String, forceRefresh: Boolean): Result<Member> {
+        if (!forceRefresh) {
+            val cachedMember = memberLocalDataSource.getMemberByUserId(userId)
+            val lastFetchedAt = cachedMember?.let {
+                memberLocalDataSource.getLastFetchedAt(it.id)
+            }
+
+            if (cachedMember != null && !cachePolicy.isStale(lastFetchedAt, CacheTTL.MEMBER)) {
+                return Result.success(cachedMember)
+            }
+        }
+
+        val result = memberRemoteDataSource.getMemberByUserId(userId)
+        result.getOrNull()?.let { member ->
+            memberLocalDataSource.insertMember(member)
+        }
+        return result
+    }
 
     override suspend fun createMember(
         name: String,
         userId: String?,
         role: String?,
         clubIds: List<String>?
-    ): Result<Member> =
-        memberRemoteDataSource.createMember(
+    ): Result<Member> {
+        val result = memberRemoteDataSource.createMember(
             CreateMemberRequestDto(
                 name = name,
                 user_id = userId,
@@ -118,6 +157,14 @@ internal class MemberRepositoryImpl(
                 clubs = clubIds
             )
         )
+
+        // Cache the newly created member
+        result.getOrNull()?.let { member ->
+            memberLocalDataSource.insertMember(member)
+        }
+
+        return result
+    }
 
     override suspend fun updateMember(
         memberId: String,
@@ -128,8 +175,8 @@ internal class MemberRepositoryImpl(
         booksRead: Int?,
         avatarPath: String?,
         clubIds: List<String>?
-    ): Result<Member> =
-        memberRemoteDataSource.updateMember(
+    ): Result<Member> {
+        val result = memberRemoteDataSource.updateMember(
             UpdateMemberRequestDto(
                 id = memberId,
                 name = name,
@@ -142,6 +189,22 @@ internal class MemberRepositoryImpl(
             )
         )
 
-    override suspend fun deleteMember(memberId: String): Result<String> =
-        memberRemoteDataSource.deleteMember(memberId)
+        // Update cache with the updated member
+        result.getOrNull()?.let { member ->
+            memberLocalDataSource.insertMember(member)
+        }
+
+        return result
+    }
+
+    override suspend fun deleteMember(memberId: String): Result<String> {
+        val result = memberRemoteDataSource.deleteMember(memberId)
+
+        // Remove from cache on successful deletion
+        if (result.isSuccess) {
+            memberLocalDataSource.deleteMember(memberId)
+        }
+
+        return result
+    }
 }

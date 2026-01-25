@@ -1,5 +1,7 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.source.ClubLocalDataSource
 import com.ivangarzab.kluvs.data.remote.source.ClubRemoteDataSource
 import com.ivangarzab.kluvs.model.Club
 import dev.mokkery.answering.returns
@@ -12,16 +14,28 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class ClubRepositoryTest {
 
     private lateinit var remoteDataSource: ClubRemoteDataSource
+    private lateinit var localDataSource: ClubLocalDataSource
+    private lateinit var cachePolicy: CachePolicy
     private lateinit var repository: ClubRepository
 
     @BeforeTest
     fun setup() {
         remoteDataSource = mock<ClubRemoteDataSource>()
-        repository = ClubRepositoryImpl(remoteDataSource)
+        localDataSource = mock<ClubLocalDataSource>()
+        cachePolicy = CachePolicy()
+        repository = ClubRepositoryImpl(remoteDataSource, localDataSource, cachePolicy)
+
+        // Default behavior: cache miss (return null)
+        everySuspend { localDataSource.getClub(any()) } returns null
+        everySuspend { localDataSource.getLastFetchedAt(any()) } returns null
+        everySuspend { localDataSource.insertClub(any()) } returns Unit
+        everySuspend { localDataSource.deleteClub(any()) } returns Unit
     }
 
     // ========================================

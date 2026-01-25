@@ -1,16 +1,15 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.cache.CacheTTL
+import com.ivangarzab.kluvs.data.local.source.ServerLocalDataSource
 import com.ivangarzab.kluvs.data.remote.dtos.CreateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.source.ServerRemoteDataSource
 import com.ivangarzab.kluvs.model.Server
 
 /**
- * Repository for managing Server data.
- *
- * This repository abstracts the data source layer and provides a clean API for accessing
- * server-related data. Currently delegates to remote data source, but can be extended
- * to support local caching and offline capabilities.
+ * Repository for managing Server data with local caching.
  */
 interface ServerRepository {
 
@@ -18,16 +17,18 @@ interface ServerRepository {
      * Retrieves a single server by its ID.
      *
      * @param serverId The ID of the server to retrieve
+     * @param forceRefresh If true, bypasses cache and fetches fresh data from remote
      * @return Result containing the Server if successful, or an error if the operation failed
      */
-    suspend fun getServer(serverId: String): Result<Server>
+    suspend fun getServer(serverId: String, forceRefresh: Boolean = false): Result<Server>
 
     /**
      * Retrieves all servers.
      *
+     * @param forceRefresh If true, bypasses cache and fetches fresh data from remote
      * @return Result containing a list of all Servers if successful, or an error if the operation failed
      */
-    suspend fun getAllServers(): Result<List<Server>>
+    suspend fun getAllServers(forceRefresh: Boolean = false): Result<List<Server>>
 
     /**
      * Creates a new server.
@@ -44,10 +45,7 @@ interface ServerRepository {
      * @param name Optional new name for the server (null to keep current value)
      * @return Result containing the updated Server if successful, or an error if the operation failed
      */
-    suspend fun updateServer(
-        serverId: String,
-        name: String?
-    ): Result<Server>
+    suspend fun updateServer(serverId: String, name: String?): Result<Server>
 
     /**
      * Deletes a server by its ID.
@@ -59,38 +57,42 @@ interface ServerRepository {
 }
 
 /**
- * Implementation of [ServerRepository] that delegates to remote data sources.
- *
- * This is a simple pass-through implementation that can be extended later to include
- * caching strategies, offline support, and data synchronization.
+ * Implementation of [ServerRepository] with local caching using TTL strategy.
  */
 internal class ServerRepositoryImpl(
-    private val serverRemoteDataSource: ServerRemoteDataSource
+    private val serverRemoteDataSource: ServerRemoteDataSource,
+    private val serverLocalDataSource: ServerLocalDataSource,
+    private val cachePolicy: CachePolicy
 ) : ServerRepository {
 
-    override suspend fun getServer(serverId: String): Result<Server> =
-        serverRemoteDataSource.getServer(serverId)
+    override suspend fun getServer(serverId: String, forceRefresh: Boolean): Result<Server> {
+        if (!forceRefresh) {
+            val cached = serverLocalDataSource.getServer(serverId)
+            val lastFetchedAt = serverLocalDataSource.getLastFetchedAt(serverId)
 
-    override suspend fun getAllServers(): Result<List<Server>> =
-        serverRemoteDataSource.getAllServers()
+            if (cached != null && cachePolicy.isFresh(lastFetchedAt, CacheTTL.SERVER)) {
+                return Result.success(cached)
+            }
+        }
+
+        val result = serverRemoteDataSource.getServer(serverId)
+        result.getOrNull()?.let { serverLocalDataSource.insertServer(it) }
+        return result
+    }
+
+    override suspend fun getAllServers(forceRefresh: Boolean): Result<List<Server>> {
+        // For now, always fetch from remote for getAllServers
+        // TODO: Implement smarter caching strategy for list endpoints
+        val result = serverRemoteDataSource.getAllServers()
+        result.getOrNull()?.forEach { serverLocalDataSource.insertServer(it) }
+        return result
+    }
 
     override suspend fun createServer(name: String): Result<Server> =
-        serverRemoteDataSource.createServer(
-            CreateServerRequestDto(
-                name = name,
-            )
-        )
+        serverRemoteDataSource.createServer(CreateServerRequestDto(name = name))
 
-    override suspend fun updateServer(
-        serverId: String,
-        name: String?,
-    ): Result<Server> =
-        serverRemoteDataSource.updateServer(
-            UpdateServerRequestDto(
-                id = serverId,
-                name = name
-            )
-        )
+    override suspend fun updateServer(serverId: String, name: String?): Result<Server> =
+        serverRemoteDataSource.updateServer(UpdateServerRequestDto(id = serverId, name = name))
 
     override suspend fun deleteServer(serverId: String): Result<String> =
         serverRemoteDataSource.deleteServer(serverId)

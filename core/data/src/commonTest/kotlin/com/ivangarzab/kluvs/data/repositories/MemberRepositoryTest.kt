@@ -1,5 +1,7 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.source.MemberLocalDataSource
 import com.ivangarzab.kluvs.data.remote.source.MemberRemoteDataSource
 import com.ivangarzab.kluvs.model.Member
 import dev.mokkery.answering.returns
@@ -12,16 +14,29 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class MemberRepositoryTest {
 
     private lateinit var remoteDataSource: MemberRemoteDataSource
+    private lateinit var localDataSource: MemberLocalDataSource
+    private lateinit var cachePolicy: CachePolicy
     private lateinit var repository: MemberRepository
 
     @BeforeTest
     fun setup() {
         remoteDataSource = mock<MemberRemoteDataSource>()
-        repository = MemberRepositoryImpl(remoteDataSource)
+        localDataSource = mock<MemberLocalDataSource>()
+        cachePolicy = CachePolicy()
+        repository = MemberRepositoryImpl(remoteDataSource, localDataSource, cachePolicy)
+
+        // Default behavior: cache miss (return null)
+        everySuspend { localDataSource.getMember(any()) } returns null
+        everySuspend { localDataSource.getMemberByUserId(any()) } returns null
+        everySuspend { localDataSource.getLastFetchedAt(any()) } returns null
+        everySuspend { localDataSource.insertMember(any()) } returns Unit
+        everySuspend { localDataSource.deleteMember(any()) } returns Unit
     }
 
     // ========================================

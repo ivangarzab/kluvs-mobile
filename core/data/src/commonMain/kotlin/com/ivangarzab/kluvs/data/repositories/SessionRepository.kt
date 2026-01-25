@@ -1,5 +1,8 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.cache.CacheTTL
+import com.ivangarzab.kluvs.data.local.source.SessionLocalDataSource
 import com.ivangarzab.kluvs.data.remote.dtos.BookDto
 import com.ivangarzab.kluvs.data.remote.dtos.CreateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateSessionRequestDto
@@ -23,10 +26,11 @@ interface SessionRepository {
      * Retrieves a single session by its ID.
      *
      * @param sessionId The ID of the session to retrieve
+     * @param forceRefresh If true, bypasses cache and fetches from remote
      * @return Result containing the Session (with nested book, discussions, shame list, etc.)
      *         if successful, or an error if the operation failed
      */
-    suspend fun getSession(sessionId: String): Result<Session>
+    suspend fun getSession(sessionId: String, forceRefresh: Boolean = false): Result<Session>
 
     /**
      * Creates a new reading session.
@@ -78,29 +82,47 @@ interface SessionRepository {
 }
 
 /**
- * Implementation of [SessionRepository] that delegates to remote data sources.
+ * Implementation of [SessionRepository] with TTL-based caching.
  *
- * This is a simple pass-through implementation that can be extended later to include
- * caching strategies, offline support, and data synchronization.
+ * Implements a cache-aside pattern:
+ * - Read operations check local cache first (6h TTL)
+ * - Cache misses fetch from remote and populate cache
+ * - Write operations invalidate cache and delegate to remote
  *
  * Note: The API returns nested data (book, discussions, shame list) with Session responses.
  * Future implementations may decompose this nested data and coordinate with other
  * repositories for caching purposes.
  */
 internal class SessionRepositoryImpl(
-    private val sessionRemoteDataSource: SessionRemoteDataSource
+    private val sessionRemoteDataSource: SessionRemoteDataSource,
+    private val sessionLocalDataSource: SessionLocalDataSource,
+    private val cachePolicy: CachePolicy
 ) : SessionRepository {
 
-    override suspend fun getSession(sessionId: String): Result<Session> =
-        sessionRemoteDataSource.getSession(sessionId)
+    override suspend fun getSession(sessionId: String, forceRefresh: Boolean): Result<Session> {
+        if (!forceRefresh) {
+            val cachedSession = sessionLocalDataSource.getSession(sessionId)
+            val lastFetchedAt = sessionLocalDataSource.getLastFetchedAt(sessionId)
+
+            if (cachedSession != null && !cachePolicy.isStale(lastFetchedAt, CacheTTL.SESSION)) {
+                return Result.success(cachedSession)
+            }
+        }
+
+        val result = sessionRemoteDataSource.getSession(sessionId)
+        result.getOrNull()?.let { session ->
+            sessionLocalDataSource.insertSession(session)
+        }
+        return result
+    }
 
     override suspend fun createSession(
         clubId: String,
         book: Book,
         dueDate: LocalDateTime?,
         discussions: List<Discussion>?
-    ): Result<Session> =
-        sessionRemoteDataSource.createSession(
+    ): Result<Session> {
+        val result = sessionRemoteDataSource.createSession(
             CreateSessionRequestDto(
                 club_id = clubId,
                 book = BookDto(
@@ -115,14 +137,21 @@ internal class SessionRepositoryImpl(
             )
         )
 
+        result.getOrNull()?.let { session ->
+            sessionLocalDataSource.insertSession(session)
+        }
+
+        return result
+    }
+
     override suspend fun updateSession(
         sessionId: String,
         book: Book?,
         dueDate: LocalDateTime?,
         discussions: List<Discussion>?,
         discussionIdsToDelete: List<String>?
-    ): Result<Session> =
-        sessionRemoteDataSource.updateSession(
+    ): Result<Session> {
+        val result = sessionRemoteDataSource.updateSession(
             UpdateSessionRequestDto(
                 id = sessionId,
                 book = book?.let {
@@ -140,6 +169,20 @@ internal class SessionRepositoryImpl(
             )
         )
 
-    override suspend fun deleteSession(sessionId: String): Result<String> =
-        sessionRemoteDataSource.deleteSession(sessionId)
+        result.getOrNull()?.let { session ->
+            sessionLocalDataSource.insertSession(session)
+        }
+
+        return result
+    }
+
+    override suspend fun deleteSession(sessionId: String): Result<String> {
+        val result = sessionRemoteDataSource.deleteSession(sessionId)
+
+        if (result.isSuccess) {
+            sessionLocalDataSource.deleteSession(sessionId)
+        }
+
+        return result
+    }
 }

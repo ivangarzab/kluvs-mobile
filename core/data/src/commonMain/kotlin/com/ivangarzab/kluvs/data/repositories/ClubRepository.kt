@@ -1,5 +1,8 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.cache.CacheTTL
+import com.ivangarzab.kluvs.data.local.source.ClubLocalDataSource
 import com.ivangarzab.kluvs.data.remote.dtos.CreateClubRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateClubRequestDto
 import com.ivangarzab.kluvs.data.remote.source.ClubRemoteDataSource
@@ -19,10 +22,11 @@ interface ClubRepository {
      *
      * @param clubId The ID of the club to retrieve
      * @param serverId Optional server ID for Discord integration (defaults to null for mobile-only clubs)
+     * @param forceRefresh If true, bypasses cache and fetches fresh data from remote
      * @return Result containing the Club (with nested members, sessions, etc.) if successful,
      *         or an error if the operation failed
      */
-    suspend fun getClub(clubId: String, serverId: String? = null): Result<Club>
+    suspend fun getClub(clubId: String, serverId: String? = null, forceRefresh: Boolean = false): Result<Club>
 
     /**
      * Creates a new club.
@@ -65,21 +69,44 @@ interface ClubRepository {
 }
 
 /**
- * Implementation of [ClubRepository] that delegates to remote data sources.
+ * Implementation of [ClubRepository] with local caching.
  *
- * This is a simple pass-through implementation that can be extended later to include
- * caching strategies, offline support, and data synchronization.
+ * Implements TTL-based caching strategy:
+ * 1. Checks local cache first (unless forceRefresh=true)
+ * 2. Returns cached data if fresh (within TTL)
+ * 3. Fetches from remote if cache is stale or missing
+ * 4. Updates cache with fresh data from remote
  *
  * Note: The API returns nested data (members, sessions, etc.) with Club responses.
- * Future implementations may decompose this nested data and coordinate with other
- * repositories for caching purposes.
+ * Currently only caches the basic club data, not nested relationships.
  */
 internal class ClubRepositoryImpl(
-    private val clubRemoteDataSource: ClubRemoteDataSource
+    private val clubRemoteDataSource: ClubRemoteDataSource,
+    private val clubLocalDataSource: ClubLocalDataSource,
+    private val cachePolicy: CachePolicy
 ) : ClubRepository {
 
-    override suspend fun getClub(clubId: String, serverId: String?): Result<Club> =
-        clubRemoteDataSource.getClub(clubId, serverId)
+    override suspend fun getClub(clubId: String, serverId: String?, forceRefresh: Boolean): Result<Club> {
+        // 1. Check local cache (unless force refresh)
+        if (!forceRefresh) {
+            val cachedClub = clubLocalDataSource.getClub(clubId)
+            val lastFetchedAt = clubLocalDataSource.getLastFetchedAt(clubId)
+
+            if (cachedClub != null && cachePolicy.isFresh(lastFetchedAt, CacheTTL.CLUB)) {
+                return Result.success(cachedClub)
+            }
+        }
+
+        // 2. Fetch from remote
+        val result = clubRemoteDataSource.getClub(clubId, serverId)
+
+        // 3. Cache on success
+        result.getOrNull()?.let { club ->
+            clubLocalDataSource.insertClub(club)
+        }
+
+        return result
+    }
 
     override suspend fun createClub(
         name: String,
