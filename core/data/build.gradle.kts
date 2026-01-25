@@ -9,11 +9,14 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:model"))
             implementation(project(":core:network"))
+            implementation(project(":core:database"))
             implementation(project(":core:auth"))
 
             implementation(libs.ktor.client.core)
             implementation(libs.supabase.functions)
             implementation(libs.supabase.storage)
+
+            implementation(libs.room.runtime)
 
             implementation(libs.koin)
             implementation(libs.bark)
