@@ -28,6 +28,7 @@ kotlin {
 
 // KSP configuration for Room
 dependencies {
+    add("kspCommonMainMetadata", libs.room.compiler)
     add("kspAndroid", libs.room.compiler)
     add("kspIosSimulatorArm64", libs.room.compiler)
     add("kspIosX64", libs.room.compiler)

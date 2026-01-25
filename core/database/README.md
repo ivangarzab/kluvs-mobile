@@ -53,21 +53,29 @@ All DAOs provide:
 
 ## Database Initialization
 
-The database uses expect/actual pattern for platform-specific initialization:
+The database uses platform-specific builder functions following the official Room KMP pattern:
 
 ### Android
 
 ```kotlin
-// In Application.onCreate()
-DatabaseBuilder.initialize(applicationContext)
-val database = DatabaseBuilder.build().build()
+// In your DI setup or Application class
+val database = getRoomDatabase(
+    getDatabaseBuilder(context)
+)
 ```
 
 ### iOS
 
 ```kotlin
-val database = DatabaseBuilder.build().build()
+// In your DI setup
+val database = getRoomDatabase(
+    getDatabaseBuilder()
+)
 ```
+
+The `getRoomDatabase()` function configures:
+- `BundledSQLiteDriver()` for cross-platform SQLite support
+- `Dispatchers.IO` for query coroutines
 
 ## Usage
 
