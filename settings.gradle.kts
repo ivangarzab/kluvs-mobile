@@ -33,6 +33,7 @@ include(":shared")
 // core
 include(":core:model")
 include(":core:network")
+include(":core:database")
 include(":core:auth")
 include(":core:data")
 include(":core:presentation")
