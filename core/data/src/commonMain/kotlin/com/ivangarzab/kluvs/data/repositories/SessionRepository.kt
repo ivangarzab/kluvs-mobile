@@ -117,7 +117,12 @@ internal class SessionRepositoryImpl(
 
         result.onSuccess { session ->
             Bark.d("Caching session ${session.id}")
-            sessionLocalDataSource.insertSession(session)
+            try {
+                sessionLocalDataSource.insertSession(session)
+                Bark.d("Successfully cached session ${session.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache session ${session.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to fetch session $sessionId", error)
         }
@@ -149,7 +154,12 @@ internal class SessionRepositoryImpl(
 
         result.onSuccess { session ->
             Bark.d("Caching newly created session ${session.id}")
-            sessionLocalDataSource.insertSession(session)
+            try {
+                sessionLocalDataSource.insertSession(session)
+                Bark.d("Successfully cached session ${session.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache session ${session.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to create session for club $clubId", error)
         }
@@ -185,7 +195,12 @@ internal class SessionRepositoryImpl(
 
         result.onSuccess { session ->
             Bark.d("Updating cache for session ${session.id}")
-            sessionLocalDataSource.insertSession(session)
+            try {
+                sessionLocalDataSource.insertSession(session)
+                Bark.d("Successfully cached session ${session.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache session ${session.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to update session $sessionId", error)
         }

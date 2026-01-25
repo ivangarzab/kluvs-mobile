@@ -125,7 +125,12 @@ internal class MemberRepositoryImpl(
 
         result.onSuccess { member ->
             Bark.d("Caching member ${member.id}")
-            memberLocalDataSource.insertMember(member)
+            try {
+                memberLocalDataSource.insertMember(member)
+                Bark.d("Successfully cached member ${member.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache member ${member.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to fetch member $memberId", error)
         }
@@ -156,7 +161,12 @@ internal class MemberRepositoryImpl(
 
         result.onSuccess { member ->
             Bark.d("Caching member ${member.id}")
-            memberLocalDataSource.insertMember(member)
+            try {
+                memberLocalDataSource.insertMember(member)
+                Bark.d("Successfully cached member ${member.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache member ${member.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to fetch member by userId $userId", error)
         }
@@ -182,7 +192,12 @@ internal class MemberRepositoryImpl(
 
         result.onSuccess { member ->
             Bark.d("Caching newly created member ${member.id}")
-            memberLocalDataSource.insertMember(member)
+            try {
+                memberLocalDataSource.insertMember(member)
+                Bark.d("Successfully cached member ${member.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache member ${member.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to create member", error)
         }
@@ -216,7 +231,12 @@ internal class MemberRepositoryImpl(
 
         result.onSuccess { member ->
             Bark.d("Updating cache for member ${member.id}")
-            memberLocalDataSource.insertMember(member)
+            try {
+                memberLocalDataSource.insertMember(member)
+                Bark.d("Successfully cached member ${member.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache member ${member.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to update member $memberId", error)
         }

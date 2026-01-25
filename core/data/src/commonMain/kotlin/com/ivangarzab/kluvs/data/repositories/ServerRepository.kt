@@ -83,7 +83,12 @@ internal class ServerRepositoryImpl(
 
         result.onSuccess { server ->
             Bark.d("Caching server ${server.id}")
-            serverLocalDataSource.insertServer(server)
+            try {
+                serverLocalDataSource.insertServer(server)
+                Bark.d("Successfully cached server ${server.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache server ${server.id}", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to fetch server $serverId", error)
         }
@@ -97,7 +102,12 @@ internal class ServerRepositoryImpl(
 
         result.onSuccess { servers ->
             Bark.d("Caching ${servers.size} servers")
-            servers.forEach { serverLocalDataSource.insertServer(it) }
+            try {
+                servers.forEach { serverLocalDataSource.insertServer(it) }
+                Bark.d("Successfully cached ${servers.size} servers")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache servers", e)
+            }
         }.onFailure { error ->
             Bark.e("Failed to fetch all servers", error)
         }
