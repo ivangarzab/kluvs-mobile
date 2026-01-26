@@ -12,7 +12,7 @@ import kotlinx.coroutines.IO
  * - IO dispatcher for query coroutines
  */
 fun getKluvsDatabase(
-    builder: RoomDatabase.Builder<KluvsDatabase>
+    builder: RoomDatabase.Builder<KluvsDatabaseImpl>
 ): KluvsDatabase {
     return builder
         .setDriver(BundledSQLiteDriver())

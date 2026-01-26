@@ -19,7 +19,20 @@ import com.ivangarzab.kluvs.database.entities.ServerEntity
 import com.ivangarzab.kluvs.database.entities.SessionEntity
 
 /**
- * Room database for Kluvs app.
+ * Room Database interface for Kluvs app.
+ */
+interface KluvsDatabase {
+    fun clubDao(): ClubDao
+    fun memberDao(): MemberDao
+    fun sessionDao(): SessionDao
+    fun bookDao(): BookDao
+    fun discussionDao(): DiscussionDao
+    fun serverDao(): ServerDao
+}
+
+/**
+ * Room Database implementation for Kluvs app.
+ *
  * Stores cached data for servers, clubs, members, sessions, and books.
  */
 @Database(
@@ -36,13 +49,13 @@ import com.ivangarzab.kluvs.database.entities.SessionEntity
     exportSchema = true
 )
 @ConstructedBy(KluvsDatabaseConstructor::class)
-abstract class KluvsDatabase : RoomDatabase() {
-    abstract fun serverDao(): ServerDao
-    abstract fun clubDao(): ClubDao
-    abstract fun memberDao(): MemberDao
-    abstract fun sessionDao(): SessionDao
-    abstract fun bookDao(): BookDao
-    abstract fun discussionDao(): DiscussionDao
+abstract class KluvsDatabaseImpl : RoomDatabase(), KluvsDatabase {
+    abstract override fun serverDao(): ServerDao
+    abstract override fun clubDao(): ClubDao
+    abstract override fun memberDao(): MemberDao
+    abstract override fun sessionDao(): SessionDao
+    abstract override fun bookDao(): BookDao
+    abstract override fun discussionDao(): DiscussionDao
 }
 
 /**
@@ -53,6 +66,6 @@ abstract class KluvsDatabase : RoomDatabase() {
  * @see https://developer.android.com/kotlin/multiplatform/room#defining-database
  */
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "KotlinNoActualForExpect")
-expect object KluvsDatabaseConstructor : RoomDatabaseConstructor<KluvsDatabase> {
-    override fun initialize(): KluvsDatabase
+expect object KluvsDatabaseConstructor : RoomDatabaseConstructor<KluvsDatabaseImpl> {
+    override fun initialize(): KluvsDatabaseImpl
 }

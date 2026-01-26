@@ -8,10 +8,10 @@ import androidx.room.RoomDatabase
  * Android-specific database builder.
  * Requires Android context to determine database file path.
  */
-fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<KluvsDatabase> {
+fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<KluvsDatabaseImpl> {
     val appContext = context.applicationContext
     val dbFile = appContext.getDatabasePath(DATABASE_NAME)
-    return Room.databaseBuilder<KluvsDatabase>(
+    return Room.databaseBuilder<KluvsDatabaseImpl>(
         context = appContext,
         name = dbFile.absolutePath
     )

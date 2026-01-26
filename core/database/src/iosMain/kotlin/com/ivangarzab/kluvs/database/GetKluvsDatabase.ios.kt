@@ -11,9 +11,9 @@ import platform.Foundation.NSUserDomainMask
  * iOS-specific database builder.
  * Uses NSFileManager to get the proper document directory path.
  */
-fun getDatabaseBuilder(): RoomDatabase.Builder<KluvsDatabase> {
+fun getDatabaseBuilder(): RoomDatabase.Builder<KluvsDatabaseImpl> {
     val dbFilePath = documentDirectory() + "/$DATABASE_NAME"
-    return Room.databaseBuilder<KluvsDatabase>(
+    return Room.databaseBuilder<KluvsDatabaseImpl>(
         name = dbFilePath
     )
 }
