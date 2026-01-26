@@ -5,8 +5,10 @@ set -x
 
 echo "🚀 Starting post-cloning task for KMP build"
 
-# 1. Install Java 17 (Skip auto-update to save time)
-HOMEBREW_NO_AUTO_UPDATE=1 brew install openjdk@17
+# 1. Install Java 17, if needed (Skip auto-update to save time)
+if ! type "java" > /dev/null; then
+    HOMEBREW_NO_AUTO_UPDATE=1 brew install openjdk@17
+fi
 
 # 2. Set JAVA_HOME using the brew prefix (Avoids sudo/symlinks)
 export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home
