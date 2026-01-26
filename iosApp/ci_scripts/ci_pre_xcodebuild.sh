@@ -11,8 +11,11 @@ export PATH="$JAVA_HOME/bin:$PATH"
 # Navigate to project root (up two levels from iosApp/ci_scripts)
 cd ../..
 
-# Run KMP iOS simulator tests
-./gradlew iosSimulatorArm64Test -PexcludeTests="**/*IntegrationTest*" --continue
+# Run KMP iOS simulator tests (with increased timeout and additional retries)
+./gradlew iosSimulatorArm64Test \
+  -Dorg.gradle.internal.http.connectionTimeout=300000 \
+  -Dorg.gradle.internal.http.socketTimeout=300000 \
+  '-PexcludeTests=**/*IntegrationTest*' --continue
 
 echo "::endgroup::"
 
