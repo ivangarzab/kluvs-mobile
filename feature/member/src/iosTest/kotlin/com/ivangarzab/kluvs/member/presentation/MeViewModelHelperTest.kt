@@ -2,15 +2,19 @@ package com.ivangarzab.kluvs.member.presentation
 
 import com.ivangarzab.kluvs.auth.domain.AuthRepository
 import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
+import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.member.domain.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.kluvs.member.domain.GetUserStatisticsUseCase
+import com.ivangarzab.kluvs.member.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +43,8 @@ class MeViewModelHelperTest {
     private lateinit var memberRepository: MemberRepository
     private lateinit var clubRepository: ClubRepository
     private lateinit var authRepository: AuthRepository
+    private lateinit var avatarRepository: AvatarRepository
+    private lateinit var database: KluvsDatabase
     private lateinit var viewModel: MeViewModel
     private lateinit var testScope: CoroutineScope
     private lateinit var helper: MeViewModelHelper
@@ -52,20 +58,27 @@ class MeViewModelHelperTest {
         memberRepository = mock<MemberRepository>()
         clubRepository = mock<ClubRepository>()
         authRepository = mock<AuthRepository>()
+        avatarRepository = mock<AvatarRepository>()
+        database = mock<KluvsDatabase>()
+
+        // Setup default mock behaviors
+        everySuspend { avatarRepository.getAvatarUrl(any()) } returns ""
 
         // Create test scope
         testScope = CoroutineScope(testDispatcher + Job())
 
         // Create real use cases with mocked repositories
         val formatDateTime = FormatDateTimeUseCase()
-        val getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime)
+        val getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime, avatarRepository)
         val getUserStatistics = GetUserStatisticsUseCase(memberRepository)
         val getCurrentlyReadingBooks =
             GetCurrentlyReadingBooksUseCase(memberRepository, clubRepository, formatDateTime)
-        val signOut = SignOutUseCase(authRepository)
+        val signOut = SignOutUseCase(authRepository, database)
+        val updateAvatar = UpdateAvatarUseCase(avatarRepository, memberRepository)
+
 
         // Create real ViewModel with real use cases
-        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks, signOut)
+        viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks, signOut, updateAvatar)
 
         // Start Koin with test module
         startKoin {
