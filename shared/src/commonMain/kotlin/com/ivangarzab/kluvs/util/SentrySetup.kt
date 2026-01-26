@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.app
+package com.ivangarzab.kluvs.util
 
 import io.sentry.kotlin.multiplatform.Sentry
 
