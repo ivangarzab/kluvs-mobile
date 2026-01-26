@@ -105,26 +105,27 @@ internal class ClubRepositoryImpl(
             } ?: false
 
             if (cachedClub != null && isComplete && cachePolicy.isFresh(lastFetchedAt, CacheTTL.CLUB)) {
-                Bark.d("Cache hit for club $clubId")
+                Bark.d("Cache hit for club (ID: $clubId)")
                 return Result.success(cachedClub)
             }
-            Bark.d("Cache miss for club $clubId")
+            Bark.d("Cache miss for club (ID: $clubId)")
         }
 
         // 2. Fetch from remote
-        Bark.d("Fetching club $clubId from remote")
+        Bark.d("Fetching club (ID: $clubId) from remote")
         val result = clubRemoteDataSource.getClub(clubId, serverId)
 
         // 3. Cache on success
         result.onSuccess { club ->
-            Bark.d("Caching club ${club.id}")
+            Bark.d("Caching club (ID: ${club.id})")
             try {
                 clubLocalDataSource.insertClub(club)
+                Bark.d("Successfully cached club (ID: ${club.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache club ${club.id}", e)
+                Bark.e("Failed to cache club (ID: ${club.id}). Retry on next fetch.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to fetch club $clubId", error)
+            Bark.e("Failed to fetch club (ID: $clubId). Serving cached data if available.", error)
         }
 
         return result

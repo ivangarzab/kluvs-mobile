@@ -59,8 +59,8 @@ class MeViewModel(
                 else -> "Multiple errors occurred"
             }
             error?.let { e ->
-                Bark.e("Error fetching member details: $e")
-            } ?: Bark.v("Got member details successfully")
+                Bark.e("Failed to fetch member details (ID: $userId). Serving cached data if available.", Exception(e))
+            } ?: Bark.i("Successfully loaded member details (ID: $userId)")
 
             // Update state with all results
             _state.update {
@@ -76,7 +76,7 @@ class MeViewModel(
     }
 
     fun refresh() {
-        Bark.v("Refreshing member data")
+        Bark.d("Refreshing member data")
         currentUserId?.let { loadUserData(it) }
     }
 
@@ -89,7 +89,7 @@ class MeViewModel(
     }
 
     fun onSignOutDialogConfirmed() = viewModelScope.launch {
-        Bark.v("Sign out confirmed")
+        Bark.i("Signing out user")
         _state.update { it.copy(showLogoutConfirmation = false) }
         signOutUseCase()
     }
@@ -100,7 +100,7 @@ class MeViewModel(
 
             val memberId = _state.value.profile?.memberId
             if (memberId == null) {
-                Bark.e("No member ID available to update avatar")
+                Bark.e("No member ID available to update avatar. Please retry.", null)
                 _state.update {
                     it.copy(
                         isUploadingAvatar = false,
@@ -112,10 +112,12 @@ class MeViewModel(
 
             updateAvatarUseCase(memberId, imageData)
                 .onSuccess {
+                    Bark.i("Avatar uploaded successfully (ID: $memberId)")
                     // Refresh profile to show new avatar
                     currentUserId?.let { userId -> loadUserData(userId) }
                 }
                 .onFailure { error ->
+                    Bark.e("Failed to upload avatar (ID: $memberId). Please retry.", error)
                     _state.update { it.copy(snackbarError = error.message) }
                 }
 

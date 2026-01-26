@@ -114,25 +114,25 @@ internal class MemberRepositoryImpl(
             val lastFetchedAt = memberLocalDataSource.getLastFetchedAt(memberId)
 
             if (cachedMember != null && !cachePolicy.isStale(lastFetchedAt, CacheTTL.MEMBER)) {
-                Bark.d("Cache hit for member $memberId")
+                Bark.d("Cache hit for member (ID: $memberId)")
                 return Result.success(cachedMember)
             }
-            Bark.d("Cache miss for member $memberId")
+            Bark.d("Cache miss for member (ID: $memberId)")
         }
 
-        Bark.d("Fetching member $memberId from remote")
+        Bark.d("Fetching member from remote (ID: $memberId)")
         val result = memberRemoteDataSource.getMember(memberId)
 
         result.onSuccess { member ->
-            Bark.d("Caching member ${member.id}")
+            Bark.v("Persisting member to cache (ID: ${member.id})")
             try {
                 memberLocalDataSource.insertMember(member)
-                Bark.d("Successfully cached member ${member.id}")
+                Bark.d("Member cached (ID: ${member.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache member ${member.id}", e)
+                Bark.e("Member cache failed. Will use remote data on next fetch.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to fetch member $memberId", error)
+            Bark.e("Failed to fetch member. Cached data may be unavailable.", error)
         }
 
         return result
@@ -140,7 +140,7 @@ internal class MemberRepositoryImpl(
 
     override suspend fun getMemberByUserId(userId: String, forceRefresh: Boolean): Result<Member> {
         if (forceRefresh) {
-            Bark.d("Force refresh requested for user $userId")
+            Bark.d("Forced cache refresh for user (ID: $userId)")
         }
 
         if (!forceRefresh) {
@@ -150,25 +150,25 @@ internal class MemberRepositoryImpl(
             }
 
             if (cachedMember != null && !cachePolicy.isStale(lastFetchedAt, CacheTTL.MEMBER)) {
-                Bark.d("Cache hit for user $userId (member ${cachedMember.id})")
+                Bark.d("Cache hit for user (ID: $userId, Member: ${cachedMember.id})")
                 return Result.success(cachedMember)
             }
-            Bark.d("Cache miss for user $userId")
+            Bark.d("Cache miss for user (ID: $userId)")
         }
 
-        Bark.d("Fetching member by userId $userId from remote")
+        Bark.d("Fetching member from remote (User ID: $userId)")
         val result = memberRemoteDataSource.getMemberByUserId(userId)
 
         result.onSuccess { member ->
-            Bark.d("Caching member ${member.id}")
+            Bark.v("Persisting member to cache (ID: ${member.id})")
             try {
                 memberLocalDataSource.insertMember(member)
-                Bark.d("Successfully cached member ${member.id}")
+                Bark.d("Member cached (ID: ${member.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache member ${member.id}", e)
+                Bark.e("Member cache failed. Will use remote data on next fetch.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to fetch member by userId $userId", error)
+            Bark.e("Failed to fetch member by user ID. Cached data may be unavailable.", error)
         }
 
         return result
@@ -180,7 +180,7 @@ internal class MemberRepositoryImpl(
         role: String?,
         clubIds: List<String>?
     ): Result<Member> {
-        Bark.d("Creating member '$name'")
+        Bark.d("Creating member: $name")
         val result = memberRemoteDataSource.createMember(
             CreateMemberRequestDto(
                 name = name,
@@ -191,15 +191,15 @@ internal class MemberRepositoryImpl(
         )
 
         result.onSuccess { member ->
-            Bark.d("Caching newly created member ${member.id}")
+            Bark.v("Persisting new member to cache (ID: ${member.id})")
             try {
                 memberLocalDataSource.insertMember(member)
-                Bark.d("Successfully cached member ${member.id}")
+                Bark.i("Member created and cached (ID: ${member.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache member ${member.id}", e)
+                Bark.e("Member cache failed. Will fetch from remote if needed.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to create member", error)
+            Bark.e("Member creation failed. Check input and retry.", error)
         }
 
         return result
@@ -215,7 +215,7 @@ internal class MemberRepositoryImpl(
         avatarPath: String?,
         clubIds: List<String>?
     ): Result<Member> {
-        Bark.d("Updating member $memberId")
+        Bark.d("Updating member (ID: $memberId)")
         val result = memberRemoteDataSource.updateMember(
             UpdateMemberRequestDto(
                 id = memberId,
@@ -230,29 +230,30 @@ internal class MemberRepositoryImpl(
         )
 
         result.onSuccess { member ->
-            Bark.d("Updating cache for member ${member.id}")
+            Bark.v("Persisting updated member to cache (ID: ${member.id})")
             try {
                 memberLocalDataSource.insertMember(member)
-                Bark.d("Successfully cached member ${member.id}")
+                Bark.i("Member updated and cached (ID: ${member.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache member ${member.id}", e)
+                Bark.e("Member cache failed. Will fetch updated data from remote.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to update member $memberId", error)
+            Bark.e("Member update failed. Verify input and retry.", error)
         }
 
         return result
     }
 
     override suspend fun deleteMember(memberId: String): Result<String> {
-        Bark.d("Deleting member $memberId")
+        Bark.d("Deleting member (ID: $memberId)")
         val result = memberRemoteDataSource.deleteMember(memberId)
 
         result.onSuccess {
-            Bark.d("Removing member $memberId from cache")
+            Bark.v("Removing member from cache (ID: $memberId)")
             memberLocalDataSource.deleteMember(memberId)
+            Bark.i("Member deleted (ID: $memberId)")
         }.onFailure { error ->
-            Bark.e("Failed to delete member $memberId", error)
+            Bark.e("Member deletion failed. Verify member exists and retry.", error)
         }
 
         return result

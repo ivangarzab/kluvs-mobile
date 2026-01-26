@@ -56,9 +56,10 @@ class SessionRemoteDataSourceImpl(
     override suspend fun getSession(sessionId: String): Result<Session> {
         return try {
             val dto = sessionService.get(sessionId)
+            Bark.i("Fetched session (ID: $sessionId)")
             Result.success(dto.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to fetch session with id=$sessionId", e)
+            Bark.e("Failed to fetch session (ID: $sessionId). Serving cached data if available.", e)
             Result.failure(e)
         }
     }
@@ -69,9 +70,10 @@ class SessionRemoteDataSourceImpl(
             // Response contains SessionDto which may have partial data
             val session = response.session
                 ?: throw Exception("Session creation succeeded but no session returned")
+            Bark.i("Session created for club (ID: ${request.clubId})")
             Result.success(session.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to create session", e)
+            Bark.e("Failed to create session. Please retry.", e)
             Result.failure(e)
         }
     }
@@ -81,9 +83,10 @@ class SessionRemoteDataSourceImpl(
             val response = sessionService.update(request)
             val session = response.session
                 ?: throw Exception("Session update succeeded but no session returned")
+            Bark.i("Session updated (ID: ${request.id})")
             Result.success(session.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to update session with id=${request.id}", e)
+            Bark.e("Failed to update session (ID: ${request.id}). Please retry.", e)
             Result.failure(e)
         }
     }
@@ -92,12 +95,13 @@ class SessionRemoteDataSourceImpl(
         return try {
             val response = sessionService.delete(sessionId)
             if (response.success) {
+                Bark.i("Session deleted (ID: $sessionId)")
                 Result.success(response.message)
             } else {
                 Result.failure(Exception("Delete failed: ${response.message}"))
             }
         } catch (e: Exception) {
-            Bark.e("Failed to delete session with id=$sessionId", e)
+            Bark.e("Failed to delete session (ID: $sessionId). Please retry.", e)
             Result.failure(e)
         }
     }

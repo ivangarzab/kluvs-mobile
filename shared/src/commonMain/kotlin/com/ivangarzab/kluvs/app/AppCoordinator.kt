@@ -26,7 +26,7 @@ class AppCoordinator(
     val navigationState: StateFlow<NavigationState> = _navigationState.asStateFlow()
 
     init {
-        Bark.d("AppCoordinator initialized")
+        Bark.d("Initializing app coordinator")
         viewModelScope.launch {
             // Initialize auth (restore session if exists)
             authRepository.initialize()
@@ -34,10 +34,10 @@ class AppCoordinator(
             // Observe auth state changes
             authRepository.currentUser.collect { user ->
                 _navigationState.value = if (user != null) {
-                    Bark.d("User authenticated: ${user.email}")
+                    Bark.i("Navigation: User authenticated (ID: ${user.id})")
                     NavigationState.Authenticated(userId = user.id)
                 } else {
-                    Bark.d("User unauthenticated")
+                    Bark.i("Navigation: User unauthenticated")
                     NavigationState.Unauthenticated
                 }
             }

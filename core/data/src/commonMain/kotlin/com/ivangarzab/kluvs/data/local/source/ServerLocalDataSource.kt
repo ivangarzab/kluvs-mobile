@@ -37,15 +37,27 @@ class ServerLocalDataSourceImpl(
     }
 
     override suspend fun insertServer(server: Server) {
-        Bark.d("Inserting server ${server.id} into database")
-        serverDao.insertServer(server.toEntity())
+        Bark.d("Inserting server (ID: ${server.id}) into database")
+        try {
+            serverDao.insertServer(server.toEntity())
+            Bark.d("Successfully inserted server (ID: ${server.id}) into database")
+        } catch (e: Exception) {
+            Bark.e("Failed to insert server (ID: ${server.id}) into database. Retry on next sync.", e)
+            throw e
+        }
     }
 
     override suspend fun deleteServer(serverId: String) {
         val entity = serverDao.getServer(serverId)
         if (entity != null) {
-            Bark.d("Deleting server $serverId from database")
-            serverDao.deleteServer(entity)
+            Bark.d("Deleting server (ID: $serverId) from database")
+            try {
+                serverDao.deleteServer(entity)
+                Bark.d("Successfully deleted server (ID: $serverId) from database")
+            } catch (e: Exception) {
+                Bark.e("Failed to delete server (ID: $serverId) from database. Retry on next sync.", e)
+                throw e
+            }
         }
     }
 
@@ -55,6 +67,12 @@ class ServerLocalDataSourceImpl(
 
     override suspend fun deleteAll() {
         Bark.d("Clearing all servers from database")
-        serverDao.deleteAll()
+        try {
+            serverDao.deleteAll()
+            Bark.d("Successfully cleared all servers from database")
+        } catch (e: Exception) {
+            Bark.e("Failed to clear all servers from database. Retry on next sync.", e)
+            throw e
+        }
     }
 }
