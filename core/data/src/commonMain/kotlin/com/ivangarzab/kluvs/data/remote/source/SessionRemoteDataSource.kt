@@ -70,7 +70,7 @@ class SessionRemoteDataSourceImpl(
             // Response contains SessionDto which may have partial data
             val session = response.session
                 ?: throw Exception("Session creation succeeded but no session returned")
-            Bark.i("Session created for club (ID: ${request.clubId})")
+            Bark.i("Session created for club (ID: ${request.club_id})")
             Result.success(session.toDomain())
         } catch (e: Exception) {
             Bark.e("Failed to create session. Please retry.", e)

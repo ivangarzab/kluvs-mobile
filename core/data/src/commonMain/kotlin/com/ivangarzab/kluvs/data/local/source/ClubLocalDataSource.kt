@@ -97,7 +97,7 @@ class ClubLocalDataSourceImpl(
                 try {
                     bookDao.insertBook(session.book.toEntity())
                 } catch (e: Exception) {
-                    Bark.e("Failed to cache book (ID: ${session.bookId}) for session (ID: ${session.id}). Retry on next sync.", e)
+                    Bark.e("Failed to cache book (ID: ${session.book.id}) for session (ID: ${session.id}). Retry on next sync.", e)
                 }
 
                 // Cache the session
