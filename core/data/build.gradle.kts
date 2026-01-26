@@ -23,6 +23,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(project(":core:network"))
+            implementation(project(":core:database"))
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.ktor.client.mock)
