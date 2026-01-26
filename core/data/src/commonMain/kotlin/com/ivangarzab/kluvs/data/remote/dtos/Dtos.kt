@@ -12,8 +12,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BookDto(
-    @Serializable(with = NullableIntToStringSerializer::class)
-    val id: String? = null,
+    @Serializable(with = IntToStringSerializer::class)
+    val id: String,
     val title: String,
     val author: String,
     val edition: String? = null,

@@ -141,6 +141,7 @@ internal class SessionRepositoryImpl(
             CreateSessionRequestDto(
                 club_id = clubId,
                 book = BookDto(
+                    id = book.id,
                     title = book.title,
                     author = book.author,
                     edition = book.edition,
@@ -180,6 +181,7 @@ internal class SessionRepositoryImpl(
                 id = sessionId,
                 book = book?.let {
                     BookDto(
+                        id = it.id,
                         title = it.title,
                         author = it.author,
                         edition = it.edition,

@@ -5,7 +5,7 @@ package com.ivangarzab.kluvs.model
  */
 data class Book(
 
-    val id: String? = null,
+    val id: String,
 
     val title: String,
 

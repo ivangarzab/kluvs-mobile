@@ -1,11 +1,11 @@
 package com.ivangarzab.kluvs.data.local.source
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.local.mappers.toDomain
 import com.ivangarzab.kluvs.data.local.mappers.toEntity
 import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.database.entities.ClubMemberCrossRef
 import com.ivangarzab.kluvs.model.Member
-import com.ivangarzab.bark.Bark
 
 /**
  * Local data source for Member entities.
@@ -32,13 +32,20 @@ class MemberLocalDataSourceImpl(
 ) : MemberLocalDataSource {
 
     private val memberDao = database.memberDao()
+    private val clubDao = database.clubDao()
 
     override suspend fun getMember(memberId: String): Member? {
-        return memberDao.getMember(memberId)?.toDomain()
+        val memberEntity = memberDao.getMember(memberId) ?: return null
+        val clubEntities = memberDao.getClubsForMember(memberId)
+        val clubs = if (clubEntities.isNotEmpty()) clubEntities.map { it.toDomain() } else null
+        return memberEntity.toDomain().copy(clubs = clubs)
     }
 
     override suspend fun getMemberByUserId(userId: String): Member? {
-        return memberDao.getMemberByUserId(userId)?.toDomain()
+        val memberEntity = memberDao.getMemberByUserId(userId) ?: return null
+        val clubEntities = memberDao.getClubsForMember(memberEntity.id)
+        val clubs = if (clubEntities.isNotEmpty()) clubEntities.map { it.toDomain() } else null
+        return memberEntity.toDomain().copy(clubs = clubs)
     }
 
     override suspend fun getMembersForClub(clubId: String): List<Member> {
@@ -46,8 +53,29 @@ class MemberLocalDataSourceImpl(
     }
 
     override suspend fun insertMember(member: Member) {
-        Bark.d("Inserting member ${member.id} into database")
+        Bark.v("Inserting member ${member.id} into database")
+        // Insert the member entity
         memberDao.insertMember(member.toEntity())
+
+        // Insert club-member relationships, but DON'T cache club entities here.
+        // Club entities should only be cached by ClubRepository with complete data.
+        // We'll insert relationships only if the club already exists (ignore foreign key errors).
+        member.clubs?.let { clubs ->
+            Bark.v("Processing ${clubs.size} club relationships for member ${member.id}")
+            var successCount = 0
+            clubs.forEach { club ->
+                try {
+                    memberDao.insertClubMemberCrossRef(
+                        ClubMemberCrossRef(clubId = club.id, memberId = member.id)
+                    )
+                    successCount++
+                } catch (e: Exception) {
+                    // Ignore foreign key violations - club will be cached later by ClubRepository
+                    Bark.v("Skipping relationship for club ${club.id} (not cached yet)")
+                }
+            }
+            Bark.v("Inserted $successCount/${clubs.size} relationships for member ${member.id}")
+        }
     }
 
     override suspend fun insertMembers(members: List<Member>) {

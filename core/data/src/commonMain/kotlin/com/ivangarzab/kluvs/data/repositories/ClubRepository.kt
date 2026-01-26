@@ -74,12 +74,14 @@ interface ClubRepository {
  *
  * Implements TTL-based caching strategy:
  * 1. Checks local cache first (unless forceRefresh=true)
- * 2. Returns cached data if fresh (within TTL)
- * 3. Fetches from remote if cache is stale or missing
+ * 2. Returns cached data if fresh (within TTL) AND complete
+ * 3. Fetches from remote if cache is stale, missing, or incomplete
  * 4. Updates cache with fresh data from remote
  *
- * Note: The API returns nested data (members, sessions, etc.) with Club responses.
- * Currently only caches the basic club data, not nested relationships.
+ * Caching Strategy:
+ * - Caches complete club data including members, activeSession, book, and discussions
+ * - Validates cache completeness (clubs without members are treated as incomplete)
+ * - Incomplete clubs (e.g., those cached via Member responses) trigger a refresh
  */
 internal class ClubRepositoryImpl(
     private val clubRemoteDataSource: ClubRemoteDataSource,
@@ -93,13 +95,20 @@ internal class ClubRepositoryImpl(
             val cachedClub = clubLocalDataSource.getClub(clubId)
             val lastFetchedAt = clubLocalDataSource.getLastFetchedAt(clubId)
 
-            Bark.d("Cache lookup for club $clubId: cachedClub=${cachedClub != null}, lastFetchedAt=$lastFetchedAt")
+            // Check if cached club is complete (has relationships loaded)
+            // A complete club should have been fetched by ClubRepository and includes:
+            // - members (may be empty list but should not be null for a complete fetch)
+            // - activeSession (may be null if no active session)
+            val isComplete = cachedClub?.let {
+                // If members is null, this is an incomplete club (cached from Member response)
+                it.members != null
+            } ?: false
 
-            if (cachedClub != null && cachePolicy.isFresh(lastFetchedAt, CacheTTL.CLUB)) {
+            if (cachedClub != null && isComplete && cachePolicy.isFresh(lastFetchedAt, CacheTTL.CLUB)) {
                 Bark.d("Cache hit for club $clubId")
                 return Result.success(cachedClub)
             }
-            Bark.d("Cache miss for club $clubId (cachedClub=${cachedClub != null}, fresh=${lastFetchedAt?.let { cachePolicy.isFresh(it, CacheTTL.CLUB) }})")
+            Bark.d("Cache miss for club $clubId")
         }
 
         // 2. Fetch from remote
@@ -111,7 +120,6 @@ internal class ClubRepositoryImpl(
             Bark.d("Caching club ${club.id}")
             try {
                 clubLocalDataSource.insertClub(club)
-                Bark.d("Successfully cached club ${club.id}")
             } catch (e: Exception) {
                 Bark.e("Failed to cache club ${club.id}", e)
             }

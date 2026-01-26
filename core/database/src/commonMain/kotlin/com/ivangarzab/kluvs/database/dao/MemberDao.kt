@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ivangarzab.kluvs.database.entities.ClubEntity
 import com.ivangarzab.kluvs.database.entities.ClubMemberCrossRef
 import com.ivangarzab.kluvs.database.entities.MemberEntity
 
@@ -25,6 +26,13 @@ interface MemberDao {
         WHERE cm.clubId = :clubId
     """)
     suspend fun getMembersForClub(clubId: String): List<MemberEntity>
+
+    @Query("""
+        SELECT c.* FROM clubs c
+        INNER JOIN club_members cm ON c.id = cm.clubId
+        WHERE cm.memberId = :memberId
+    """)
+    suspend fun getClubsForMember(memberId: String): List<ClubEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMember(member: MemberEntity)

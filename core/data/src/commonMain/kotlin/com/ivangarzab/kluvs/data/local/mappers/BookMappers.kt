@@ -27,7 +27,7 @@ fun BookEntity.toDomain(): Book {
 @OptIn(ExperimentalTime::class)
 fun Book.toEntity(): BookEntity {
     return BookEntity(
-        id = requireNotNull(id) { "Book ID cannot be null when caching" },
+        id = id,
         title = title,
         author = author,
         edition = edition,

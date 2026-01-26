@@ -46,19 +46,17 @@ class SessionLocalDataSourceImpl(
     }
 
     override suspend fun insertSession(session: Session) {
-        Bark.d("Inserting session ${session.id} into database")
-        // First insert the book if it has an ID
-        session.book.id?.let { bookId ->
-            bookDao.insertBook(session.book.toEntity())
-        }
+        Bark.v("Inserting session ${session.id} into database")
+        // First insert the book
+        bookDao.insertBook(session.book.toEntity())
         // Then insert the session
         sessionDao.insertSession(session.toEntity())
     }
 
     override suspend fun insertSessions(sessions: List<Session>) {
-        Bark.d("Inserting ${sessions.size} sessions into database")
+        Bark.v("Inserting ${sessions.size} sessions into database")
         // Insert all books first
-        val books = sessions.mapNotNull { it.book.takeIf { book -> book.id != null } }
+        val books = sessions.map { it.book }
         bookDao.insertBooks(books.map { it.toEntity() })
 
         // Then insert all sessions
