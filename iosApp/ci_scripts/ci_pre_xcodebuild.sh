@@ -2,7 +2,7 @@
 set -e
 set -x
 
-echo "::group::👾 Running KMP iOS Simulator Tests"
+echo "👾 Running KMP iOS Simulator Tests"
 
 # Re-export Java (each Xcode Cloud script runs in a fresh shell)
 export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home
@@ -16,7 +16,5 @@ cd ../..
   -Dorg.gradle.internal.http.connectionTimeout=300000 \
   -Dorg.gradle.internal.http.socketTimeout=300000 \
   '-PexcludeTests=**/*IntegrationTest*' --continue
-
-echo "::endgroup::"
 
 echo "✅ KMP iOS tests passed"
