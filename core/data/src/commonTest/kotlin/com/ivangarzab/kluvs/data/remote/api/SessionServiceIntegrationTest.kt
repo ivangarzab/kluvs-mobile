@@ -45,6 +45,7 @@ class SessionServiceIntegrationTest {
     fun testCreateSession() = runTest {
         // Given: a new session request
         val book = BookDto(
+            id = "0",
             title = "Test Book",
             author = "Test Author",
             edition = "1st",
@@ -90,6 +91,7 @@ class SessionServiceIntegrationTest {
     fun testGetSession() = runTest {
         // Given: a session exists
         val book = BookDto(
+            id = "0",
             title = "Get Test Book",
             author = "Get Author"
         )
@@ -124,7 +126,7 @@ class SessionServiceIntegrationTest {
     @Test
     fun testUpdateSession() = runTest {
         // Given: a session exists
-        val book = BookDto(title = "Original Book", author = "Original Author")
+        val book = BookDto(id = "0", title = "Original Book", author = "Original Author")
         val createRequest = CreateSessionRequestDto(
             club_id = "club-1",
             book = book,
@@ -137,6 +139,7 @@ class SessionServiceIntegrationTest {
         try {
             // When: updating the session
             val updatedBook = BookDto(
+                id = "0",
                 title = "Updated Book Title",
                 author = "Updated Author"
             )
@@ -167,7 +170,7 @@ class SessionServiceIntegrationTest {
     @Test
     fun testDeleteSession() = runTest {
         // Given: a session exists
-        val book = BookDto(title = "Delete Test Book", author = "Delete Author")
+        val book = BookDto(id = "0", title = "Delete Test Book", author = "Delete Author")
         val createRequest = CreateSessionRequestDto(
             club_id = "club-1",
             book = book
@@ -191,7 +194,7 @@ class SessionServiceIntegrationTest {
     @Test
     fun testCreateSessionWithDiscussions() = runTest {
         // Given: a session with discussions
-        val book = BookDto(title = "Discussion Book", author = "Discussion Author")
+        val book = BookDto(id = "0", title = "Discussion Book", author = "Discussion Author")
         val discussions = listOf(
             DiscussionDto(
                 id = "disc-test-1",
@@ -244,7 +247,7 @@ class SessionServiceIntegrationTest {
     @Test
     fun testUpdateSessionDiscussions() = runTest {
         // Given: a session with discussions
-        val book = BookDto(title = "Update Disc Book", author = "Author")
+        val book = BookDto(id = "0", title = "Update Disc Book", author = "Author")
         val initialDiscussions = listOf(
             DiscussionDto(
                 id = "disc-update-1",
@@ -302,7 +305,7 @@ class SessionServiceIntegrationTest {
     @Test
     fun testSessionWithNullDueDate() = runTest {
         // Given: a session without due date
-        val book = BookDto(title = "No Due Date Book", author = "Author")
+        val book = BookDto(id = "0", title = "No Due Date Book", author = "Author")
         val request = CreateSessionRequestDto(
             club_id = "club-1",
             book = book,
@@ -337,6 +340,7 @@ class SessionServiceIntegrationTest {
     fun testSessionBookHasAllFields() = runTest {
         // Given: a book with all fields
         val book = BookDto(
+            id = "0",
             title = "Complete Book",
             author = "Complete Author",
             edition = "Special Edition",

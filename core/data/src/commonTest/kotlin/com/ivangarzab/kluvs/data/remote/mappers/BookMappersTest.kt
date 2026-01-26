@@ -37,7 +37,7 @@ class BookMappersTest {
     fun `toDomain handles nullable fields correctly`() {
         // Given: A BookDto with only required fields
         val dto = BookDto(
-            id = null,
+            id = "0",
             title = "Some Book",
             author = "Some Author",
             edition = null,
@@ -50,7 +50,7 @@ class BookMappersTest {
         val domain = dto.toDomain()
 
         // Then: Nullable fields are null
-        assertNull(domain.id)
+        assertEquals("0", domain.id)
         assertEquals("Some Book", domain.title)
         assertEquals("Some Author", domain.author)
         assertNull(domain.edition)

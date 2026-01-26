@@ -84,7 +84,7 @@ class SessionRemoteDataSourceTest {
         // Given: Service returns success response
         val request = CreateSessionRequestDto(
             club_id = "club-1",
-            book = BookDto(null, "New Book", "New Author"),
+            book = BookDto("0", "New Book", "New Author"),
             due_date = "2025-06-30T00:00:00"
         )
 
@@ -120,7 +120,7 @@ class SessionRemoteDataSourceTest {
         // Given: Service returns response without session
         val request = CreateSessionRequestDto(
             club_id = "club-1",
-            book = BookDto(null, "Book", "Author")
+            book = BookDto("0", "Book", "Author")
         )
 
         val responseDto = SessionSuccessResponseDto(
