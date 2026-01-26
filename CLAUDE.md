@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - If a build or test run is absolutely necessary, ask the user to run it manually
 - This keeps the human-in-the-loop for verification and saves significant tokens
 
+**Do NOT** Do git operations for the user either.
+
 ## Planning Preferences
 
 **Plan file location:** All implementation plans should be saved to `.claude/plans/` (gitignored).

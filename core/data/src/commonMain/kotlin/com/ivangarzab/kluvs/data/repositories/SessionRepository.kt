@@ -1,5 +1,8 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.cache.CacheTTL
+import com.ivangarzab.kluvs.data.local.source.SessionLocalDataSource
 import com.ivangarzab.kluvs.data.remote.dtos.BookDto
 import com.ivangarzab.kluvs.data.remote.dtos.CreateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.UpdateSessionRequestDto
@@ -8,6 +11,7 @@ import com.ivangarzab.kluvs.data.remote.source.SessionRemoteDataSource
 import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.Discussion
 import com.ivangarzab.kluvs.model.Session
+import com.ivangarzab.bark.Bark
 import kotlinx.datetime.LocalDateTime
 
 /**
@@ -23,10 +27,11 @@ interface SessionRepository {
      * Retrieves a single session by its ID.
      *
      * @param sessionId The ID of the session to retrieve
+     * @param forceRefresh If true, bypasses cache and fetches from remote
      * @return Result containing the Session (with nested book, discussions, shame list, etc.)
      *         if successful, or an error if the operation failed
      */
-    suspend fun getSession(sessionId: String): Result<Session>
+    suspend fun getSession(sessionId: String, forceRefresh: Boolean = false): Result<Session>
 
     /**
      * Creates a new reading session.
@@ -78,32 +83,65 @@ interface SessionRepository {
 }
 
 /**
- * Implementation of [SessionRepository] that delegates to remote data sources.
+ * Implementation of [SessionRepository] with TTL-based caching.
  *
- * This is a simple pass-through implementation that can be extended later to include
- * caching strategies, offline support, and data synchronization.
+ * Implements a cache-aside pattern:
+ * - Read operations check local cache first (6h TTL)
+ * - Cache misses fetch from remote and populate cache
+ * - Write operations invalidate cache and delegate to remote
  *
  * Note: The API returns nested data (book, discussions, shame list) with Session responses.
  * Future implementations may decompose this nested data and coordinate with other
  * repositories for caching purposes.
  */
 internal class SessionRepositoryImpl(
-    private val sessionRemoteDataSource: SessionRemoteDataSource
+    private val sessionRemoteDataSource: SessionRemoteDataSource,
+    private val sessionLocalDataSource: SessionLocalDataSource,
+    private val cachePolicy: CachePolicy
 ) : SessionRepository {
 
-    override suspend fun getSession(sessionId: String): Result<Session> =
-        sessionRemoteDataSource.getSession(sessionId)
+    override suspend fun getSession(sessionId: String, forceRefresh: Boolean): Result<Session> {
+        if (!forceRefresh) {
+            val cachedSession = sessionLocalDataSource.getSession(sessionId)
+            val lastFetchedAt = sessionLocalDataSource.getLastFetchedAt(sessionId)
+
+            if (cachedSession != null && !cachePolicy.isStale(lastFetchedAt, CacheTTL.SESSION)) {
+                Bark.d("Cache hit for session $sessionId")
+                return Result.success(cachedSession)
+            }
+            Bark.d("Cache miss for session $sessionId")
+        }
+
+        Bark.d("Fetching session $sessionId from remote")
+        val result = sessionRemoteDataSource.getSession(sessionId)
+
+        result.onSuccess { session ->
+            Bark.d("Caching session ${session.id}")
+            try {
+                sessionLocalDataSource.insertSession(session)
+                Bark.d("Successfully cached session ${session.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache session ${session.id}", e)
+            }
+        }.onFailure { error ->
+            Bark.e("Failed to fetch session $sessionId", error)
+        }
+
+        return result
+    }
 
     override suspend fun createSession(
         clubId: String,
         book: Book,
         dueDate: LocalDateTime?,
         discussions: List<Discussion>?
-    ): Result<Session> =
-        sessionRemoteDataSource.createSession(
+    ): Result<Session> {
+        Bark.d("Creating session for club $clubId with book '${book.title}'")
+        val result = sessionRemoteDataSource.createSession(
             CreateSessionRequestDto(
                 club_id = clubId,
                 book = BookDto(
+                    id = book.id,
                     title = book.title,
                     author = book.author,
                     edition = book.edition,
@@ -115,18 +153,35 @@ internal class SessionRepositoryImpl(
             )
         )
 
+        result.onSuccess { session ->
+            Bark.d("Caching newly created session ${session.id}")
+            try {
+                sessionLocalDataSource.insertSession(session)
+                Bark.d("Successfully cached session ${session.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache session ${session.id}", e)
+            }
+        }.onFailure { error ->
+            Bark.e("Failed to create session for club $clubId", error)
+        }
+
+        return result
+    }
+
     override suspend fun updateSession(
         sessionId: String,
         book: Book?,
         dueDate: LocalDateTime?,
         discussions: List<Discussion>?,
         discussionIdsToDelete: List<String>?
-    ): Result<Session> =
-        sessionRemoteDataSource.updateSession(
+    ): Result<Session> {
+        Bark.d("Updating session $sessionId")
+        val result = sessionRemoteDataSource.updateSession(
             UpdateSessionRequestDto(
                 id = sessionId,
                 book = book?.let {
                     BookDto(
+                        id = it.id,
                         title = it.title,
                         author = it.author,
                         edition = it.edition,
@@ -140,6 +195,32 @@ internal class SessionRepositoryImpl(
             )
         )
 
-    override suspend fun deleteSession(sessionId: String): Result<String> =
-        sessionRemoteDataSource.deleteSession(sessionId)
+        result.onSuccess { session ->
+            Bark.d("Updating cache for session ${session.id}")
+            try {
+                sessionLocalDataSource.insertSession(session)
+                Bark.d("Successfully cached session ${session.id}")
+            } catch (e: Exception) {
+                Bark.e("Failed to cache session ${session.id}", e)
+            }
+        }.onFailure { error ->
+            Bark.e("Failed to update session $sessionId", error)
+        }
+
+        return result
+    }
+
+    override suspend fun deleteSession(sessionId: String): Result<String> {
+        Bark.d("Deleting session $sessionId")
+        val result = sessionRemoteDataSource.deleteSession(sessionId)
+
+        result.onSuccess {
+            Bark.d("Removing session $sessionId from cache")
+            sessionLocalDataSource.deleteSession(sessionId)
+        }.onFailure { error ->
+            Bark.e("Failed to delete session $sessionId", error)
+        }
+
+        return result
+    }
 }

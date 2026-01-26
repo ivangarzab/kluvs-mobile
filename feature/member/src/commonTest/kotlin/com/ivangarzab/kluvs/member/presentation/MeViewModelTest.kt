@@ -10,6 +10,13 @@ import com.ivangarzab.kluvs.model.Discussion
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.model.Session
 import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
+import com.ivangarzab.kluvs.database.KluvsDatabase
+import com.ivangarzab.kluvs.database.dao.BookDao
+import com.ivangarzab.kluvs.database.dao.ClubDao
+import com.ivangarzab.kluvs.database.dao.DiscussionDao
+import com.ivangarzab.kluvs.database.dao.MemberDao
+import com.ivangarzab.kluvs.database.dao.ServerDao
+import com.ivangarzab.kluvs.database.dao.SessionDao
 import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.member.domain.GetCurrentlyReadingBooksUseCase
 import com.ivangarzab.kluvs.member.domain.GetUserStatisticsUseCase
@@ -42,6 +49,7 @@ class MeViewModelTest {
     private lateinit var clubRepository: ClubRepository
     private lateinit var authRepository: AuthRepository
     private lateinit var avatarRepository: AvatarRepository
+    private lateinit var database: KluvsDatabase
     private lateinit var getCurrentUserProfile: GetCurrentUserProfileUseCase
     private lateinit var getUserStatistics: GetUserStatisticsUseCase
     private lateinit var getCurrentlyReadingBooks: GetCurrentlyReadingBooksUseCase
@@ -60,11 +68,36 @@ class MeViewModelTest {
         authRepository = mock<AuthRepository>()
         avatarRepository = mock<AvatarRepository>()
 
+        // Set up mock DAOs that SignOutUseCase will call
+        val clubDao = mock<ClubDao>()
+        val serverDao = mock<ServerDao>()
+        val memberDao = mock<MemberDao>()
+        val sessionDao = mock<SessionDao>()
+        val bookDao = mock<BookDao>()
+        val discussionDao = mock<DiscussionDao>()
+
+        database = mock<KluvsDatabase>()
+        every { database.clubDao() } returns clubDao
+        every { database.serverDao() } returns serverDao
+        every { database.memberDao() } returns memberDao
+        every { database.sessionDao() } returns sessionDao
+        every { database.bookDao() } returns bookDao
+        every { database.discussionDao() } returns discussionDao
+
+        // Mock the suspend delete methods to return Unit
+        everySuspend { clubDao.deleteAll() } returns Unit
+        everySuspend { serverDao.deleteAll() } returns Unit
+        everySuspend { memberDao.deleteAll() } returns Unit
+        everySuspend { memberDao.deleteAllCrossRefs() } returns Unit
+        everySuspend { sessionDao.deleteAll() } returns Unit
+        everySuspend { bookDao.deleteAll() } returns Unit
+        everySuspend { discussionDao.deleteAll() } returns Unit
+
         // Use REAL UseCases with mocked repositories
         getCurrentUserProfile = GetCurrentUserProfileUseCase(memberRepository, formatDateTime, avatarRepository)
         getUserStatistics = GetUserStatisticsUseCase(memberRepository)
         getCurrentlyReadingBooks = GetCurrentlyReadingBooksUseCase(memberRepository, clubRepository, formatDateTime)
-        signOut = SignOutUseCase(authRepository)
+        signOut = SignOutUseCase(authRepository, database)
         updateAvatarUseCase = UpdateAvatarUseCase(avatarRepository, memberRepository)
 
         viewModel = MeViewModel(getCurrentUserProfile, getUserStatistics, getCurrentlyReadingBooks, signOut, updateAvatarUseCase)

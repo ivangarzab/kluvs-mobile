@@ -1,5 +1,7 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.source.SessionLocalDataSource
 import com.ivangarzab.kluvs.data.remote.source.SessionRemoteDataSource
 import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.Discussion
@@ -15,10 +17,14 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class SessionRepositoryTest {
 
     private lateinit var remoteDataSource: SessionRemoteDataSource
+    private lateinit var localDataSource: SessionLocalDataSource
+    private lateinit var cachePolicy: CachePolicy
     private lateinit var repository: SessionRepository
 
     private val testBook = Book(
@@ -50,7 +56,15 @@ class SessionRepositoryTest {
     @BeforeTest
     fun setup() {
         remoteDataSource = mock<SessionRemoteDataSource>()
-        repository = SessionRepositoryImpl(remoteDataSource)
+        localDataSource = mock<SessionLocalDataSource>()
+        cachePolicy = CachePolicy()
+        repository = SessionRepositoryImpl(remoteDataSource, localDataSource, cachePolicy)
+
+        // Default behavior: cache miss (return null)
+        everySuspend { localDataSource.getSession(any()) } returns null
+        everySuspend { localDataSource.getLastFetchedAt(any()) } returns null
+        everySuspend { localDataSource.insertSession(any()) } returns Unit
+        everySuspend { localDataSource.deleteSession(any()) } returns Unit
     }
 
     // ========================================

@@ -6,10 +6,9 @@ import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
 import com.ivangarzab.kluvs.auth.persistence.SecureStorage
 import com.ivangarzab.kluvs.auth.remote.AuthService
 import com.ivangarzab.kluvs.auth.remote.AuthServiceImpl
+import com.ivangarzab.kluvs.database.KluvsDatabase
 import io.github.jan.supabase.SupabaseClient
 import org.koin.core.module.Module
-import org.koin.core.module.dsl.factoryOf
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 /**
@@ -38,7 +37,12 @@ val coreAuthModule = module {
     }
 
     // Auth UseCases
-    factoryOf(::SignOutUseCase)
+    factory<SignOutUseCase> {
+        SignOutUseCase(
+            authRepository = get<AuthRepository>(),
+            database = get<KluvsDatabase>()
+        )
+    }
 
     // Secure Storage - platform-specific module
     includes(secureStorageModule)

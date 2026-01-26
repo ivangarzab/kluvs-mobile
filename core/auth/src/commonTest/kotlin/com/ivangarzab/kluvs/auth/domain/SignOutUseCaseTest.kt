@@ -1,6 +1,15 @@
 package com.ivangarzab.kluvs.auth.domain
 
+import com.ivangarzab.kluvs.database.KluvsDatabase
+import com.ivangarzab.kluvs.database.dao.BookDao
+import com.ivangarzab.kluvs.database.dao.ClubDao
+import com.ivangarzab.kluvs.database.dao.DiscussionDao
+import com.ivangarzab.kluvs.database.dao.MemberDao
+import com.ivangarzab.kluvs.database.dao.ServerDao
+import com.ivangarzab.kluvs.database.dao.SessionDao
+import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
@@ -13,12 +22,39 @@ import kotlin.test.assertTrue
 class SignOutUseCaseTest {
 
     private lateinit var authRepository: AuthRepository
+    private lateinit var database: KluvsDatabase
     private lateinit var useCase: SignOutUseCase
 
     @BeforeTest
     fun setup() {
         authRepository = mock<AuthRepository>()
-        useCase = SignOutUseCase(authRepository)
+
+        // Set up mock DAOs that SignOutUseCase will call
+        val clubDao = mock<ClubDao>()
+        val serverDao = mock<ServerDao>()
+        val memberDao = mock<MemberDao>()
+        val sessionDao = mock<SessionDao>()
+        val bookDao = mock<BookDao>()
+        val discussionDao = mock<DiscussionDao>()
+
+        database = mock<KluvsDatabase>()
+        every { database.clubDao() } returns clubDao
+        every { database.serverDao() } returns serverDao
+        every { database.memberDao() } returns memberDao
+        every { database.sessionDao() } returns sessionDao
+        every { database.bookDao() } returns bookDao
+        every { database.discussionDao() } returns discussionDao
+
+        // Mock the suspend delete methods to return Unit
+        everySuspend { clubDao.deleteAll() } returns Unit
+        everySuspend { serverDao.deleteAll() } returns Unit
+        everySuspend { memberDao.deleteAll() } returns Unit
+        everySuspend { memberDao.deleteAllCrossRefs() } returns Unit
+        everySuspend { sessionDao.deleteAll() } returns Unit
+        everySuspend { bookDao.deleteAll() } returns Unit
+        everySuspend { discussionDao.deleteAll() } returns Unit
+
+        useCase = SignOutUseCase(authRepository, database)
     }
 
     @Test

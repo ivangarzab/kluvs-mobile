@@ -4,6 +4,7 @@ android-minSdk = "24"
 android-targetSdk = "36"
 
 agp = "8.13.0"
+ksp = "2.2.0-2.0.2"
 kotlin = "2.2.0"
 kotlin-coroutines = "1.10.2"
 kotlinSerialization = "1.9.0"
@@ -29,7 +30,8 @@ kover = "0.9.4"
 google-services="4.4.4"
 firebase-appdistribution="5.2.0"
 coil = "3.2.0"
-
+room = "2.8.4"
+sqlite = "2.6.2"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "kotlin-coroutines" }
@@ -76,6 +78,10 @@ koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin"
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+
 
 # Gradle plugins (for buildSrc convention plugins)
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -94,5 +100,7 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 buildKonfig = { id = "com.codingfeline.buildkonfig", version = "0.14.0" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
 firebaseAppDistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebase-appdistribution" }
+androidxRoom = { id = "androidx.room", version.ref = "room" }

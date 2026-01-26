@@ -8,7 +8,10 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:model"))
             implementation(project(":core:network"))
+            implementation(project(":core:database"))
+
             implementation(libs.supabase.auth)
+            implementation(libs.room.runtime)
 
             implementation(libs.bark)
             implementation(libs.koin)

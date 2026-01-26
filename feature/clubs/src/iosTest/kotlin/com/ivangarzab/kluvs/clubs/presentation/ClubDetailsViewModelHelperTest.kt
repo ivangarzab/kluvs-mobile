@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.model.Club
@@ -36,6 +37,7 @@ class ClubDetailsViewModelHelperTest {
 
     private lateinit var clubRepository: ClubRepository
     private lateinit var memberRepository: MemberRepository
+    private lateinit var avatarRepository: AvatarRepository
     private lateinit var viewModel: ClubDetailsViewModel
     private lateinit var testScope: CoroutineScope
     private lateinit var helper: ClubDetailsViewModelHelper
@@ -48,6 +50,7 @@ class ClubDetailsViewModelHelperTest {
         // Create mocked repositories
         clubRepository = mock<ClubRepository>()
         memberRepository = mock<MemberRepository>()
+        avatarRepository = mock<AvatarRepository>()
 
         // Create test scope
         testScope = CoroutineScope(testDispatcher + Job())
@@ -56,7 +59,7 @@ class ClubDetailsViewModelHelperTest {
         val formatDateTime = FormatDateTimeUseCase()
         val getClubDetails = GetClubDetailsUseCase(clubRepository, formatDateTime)
         val getActiveSession = GetActiveSessionUseCase(clubRepository, formatDateTime)
-        val getClubMembers = GetClubMembersUseCase(clubRepository)
+        val getClubMembers = GetClubMembersUseCase(clubRepository, avatarRepository)
         val getMemberClubs = GetMemberClubsUseCase(memberRepository)
 
         // Create real ViewModel with real use cases

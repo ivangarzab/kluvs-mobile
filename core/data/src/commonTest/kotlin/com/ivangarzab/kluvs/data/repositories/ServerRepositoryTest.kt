@@ -1,5 +1,7 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.data.local.cache.CachePolicy
+import com.ivangarzab.kluvs.data.local.source.ServerLocalDataSource
 import com.ivangarzab.kluvs.data.remote.source.ServerRemoteDataSource
 import com.ivangarzab.kluvs.model.Server
 import dev.mokkery.answering.returns
@@ -12,16 +14,28 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class ServerRepositoryTest {
 
     private lateinit var remoteDataSource: ServerRemoteDataSource
+    private lateinit var localDataSource: ServerLocalDataSource
+    private lateinit var cachePolicy: CachePolicy
     private lateinit var repository: ServerRepository
 
     @BeforeTest
     fun setup() {
         remoteDataSource = mock<ServerRemoteDataSource>()
-        repository = ServerRepositoryImpl(remoteDataSource)
+        localDataSource = mock<ServerLocalDataSource>()
+        cachePolicy = CachePolicy()
+        repository = ServerRepositoryImpl(remoteDataSource, localDataSource, cachePolicy)
+
+        // Default behavior: cache miss (return null)
+        everySuspend { localDataSource.getServer(any()) } returns null
+        everySuspend { localDataSource.getLastFetchedAt(any()) } returns null
+        everySuspend { localDataSource.getAllServers() } returns emptyList()
+        everySuspend { localDataSource.insertServer(any()) } returns Unit
     }
 
     // ========================================
