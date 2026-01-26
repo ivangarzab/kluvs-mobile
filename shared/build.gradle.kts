@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.mokkery)
+    alias(libs.plugins.sentry)
 }
 
 kotlin {
@@ -79,5 +80,11 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+sentryKmp {
+    autoInstall {
+        enabled = true // Automatically adds the KMP dependency to commonMain
     }
 }

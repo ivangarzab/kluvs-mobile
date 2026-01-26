@@ -32,6 +32,7 @@ firebase-appdistribution="5.2.0"
 coil = "3.2.0"
 room = "2.8.4"
 sqlite = "2.6.2"
+sentry = "0.23.0"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "kotlin-coroutines" }
@@ -104,3 +105,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
 firebaseAppDistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebase-appdistribution" }
 androidxRoom = { id = "androidx.room", version.ref = "room" }
+sentry = { id = "io.sentry.kotlin.multiplatform.gradle", version.ref = "sentry" }
