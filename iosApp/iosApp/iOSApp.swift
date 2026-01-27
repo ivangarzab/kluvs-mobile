@@ -5,6 +5,7 @@ import Shared
 struct iOSApp: App {
 
     init() {
+        SentrySetupKt.initializeSentry()
         KoinHelperKt.doInitKoin()
     }
 
