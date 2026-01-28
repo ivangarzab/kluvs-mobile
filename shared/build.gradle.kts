@@ -102,6 +102,10 @@ buildkonfig {
             "SENTRY_DNS",
             sentryDns
         )
+        buildConfigField(Type.BOOLEAN, "DEBUG", "false")
+    }
+    defaultConfigs("debug") {
+        buildConfigField(Type.BOOLEAN, "DEBUG", "true")
     }
 
 }
