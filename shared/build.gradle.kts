@@ -30,6 +30,7 @@ kotlin {
             export(project(":feature:auth"))
             export(project(":feature:clubs"))
             export(project(":feature:member"))
+            export(libs.bark)
         }
     }
     
