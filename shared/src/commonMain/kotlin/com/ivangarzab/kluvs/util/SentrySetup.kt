@@ -5,7 +5,7 @@ import io.sentry.kotlin.multiplatform.Sentry
 
 
 fun initializeSentry() {
-    val isDebug = BuildKonfig.DEBUG
+    val isDebug = BuildKonfig.IS_DEBUG
 
     Sentry.init { options ->
         options.dsn = BuildKonfig.SENTRY_DNS
