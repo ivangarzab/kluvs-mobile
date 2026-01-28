@@ -1,7 +1,11 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type
+import utils.getPropertyOrEnvVar
+
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
     id("org.jetbrains.kotlinx.kover")
+    id("com.codingfeline.buildkonfig") version "+"
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.mokkery)
     alias(libs.plugins.sentry)
@@ -82,6 +86,24 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+
+buildkonfig {
+    packageName = "com.ivangarzab.kluvs.shared"
+    exposeObjectWithName = "BuildKonfig"
+
+    defaultConfigs {
+        val sentryDns = getPropertyOrEnvVar("SENTRY_DNS")
+        require(sentryDns.isNotEmpty()) {
+            "Make sure to provide the SENTRY_DNS in your global gradle.properties file."
+        }
+        buildConfigField(
+            Type.STRING,
+            "SENTRY_DNS",
+            sentryDns
+        )
+    }
+
 }
 
 sentryKmp {

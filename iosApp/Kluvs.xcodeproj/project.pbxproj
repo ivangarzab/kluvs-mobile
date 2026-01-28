@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E07199C72EE3A87800F5E515 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E07199C62EE3A87800F5E515 /* Localizable.xcstrings */; };
-		E081F2D02F284C0A00AFD427 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E081F2CF2F284C0A00AFD427 /* Sentry */; };
+		E081F2D02F284C0A00AFD427 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E081F2CF2F284C0A00AFD427 /* Sentry */; settings = {ATTRIBUTES = (Required, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,7 +86,6 @@
 				B9DA98002DC14AA900A4DA20 /* Configuration */,
 				B9DA97B32DC1472C00A4DA20 /* iosApp */,
 				E081F1F32F2025CB00AFD427 /* iosAppTests */,
-				E081F2D12F28872E00AFD427 /* Frameworks */,
 				B9DA97B22DC1472C00A4DA20 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,6 +110,7 @@
 				B9DA97AD2DC1472C00A4DA20 /* Sources */,
 				B9DA97AE2DC1472C00A4DA20 /* Frameworks */,
 				B9DA97AF2DC1472C00A4DA20 /* Resources */,
+				E081F3312F29BA9E00AFD427 /* Upload Sentry Symbols */,
 			);
 			buildRules = (
 			);
@@ -229,6 +229,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\n\n# Only override JAVA_HOME if we are in Xcode Cloud (CI)\nif [ -n \"$CI\" ]; then\n  echo \"🚀 Xcode Cloud detected. Setting up Homebrew Java...\"\n  export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home\n  export PATH=\"$JAVA_HOME/bin:$PATH\"\nelse\n  echo \"💻 Local build detected. Using existing system Java.\"\nfi\n\necho \"Using Java at: $JAVA_HOME\"\njava -version\n\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+		};
+		E081F3312F29BA9E00AFD427 /* Upload Sentry Symbols */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Upload Sentry Symbols";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# 1. Add common Homebrew paths so Xcode can find sentry-cli\nexport PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\"\n\n# 2. Point to your properties file (assumes iosApp is a sibling of the root)\nexport SENTRY_PROPERTIES=\"$SRCROOT/../sentry.properties\"\n\n# 3. Check if CLI exists\nif ! command -v sentry-cli &> /dev/null; then\n    echo \"error: sentry-cli not found. Try 'brew install sentry-cli' again.\"\n    exit 1\nfi\n\n# 4. Attempt the upload\necho \"Attempting to upload dSYMs for: $PRODUCT_NAME\"\nsentry-cli debug-files upload \"$DWARF_DSYM_FOLDER_PATH\" --include-sources\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
