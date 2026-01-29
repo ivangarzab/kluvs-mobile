@@ -11,6 +11,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 cd ../..
 
 # Setup Sentry -> Run Tests
-./gradlew setupSentryForCi iosSimulatorArm64Test '-PexcludeTests=**/*IntegrationTest*' --continue
+./gradlew setupSentryForCi
+./gradlew iosSimulatorArm64Test '-PexcludeTests=**/*IntegrationTest*' --continue
 
 echo "✅ KMP iOS tests passed"
