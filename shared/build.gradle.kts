@@ -1,4 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type
+import tasks.SetupSentryTask
 import utils.getPropertyOrEnvVar
 
 plugins {
@@ -110,12 +111,36 @@ buildkonfig {
 
 }
 
+val setupSentryTask = tasks.register<SetupSentryTask>("setupSentryForCi") {
+    group = "ci"
+    description = "Downloads Sentry binary matching Package.resolved for CI environments"
+
+    // Define INPUT: Where is your Package.resolved?
+    val resolvedPath = rootProject.file("iosApp/Kluvs.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved")
+    packageResolvedFile.set(resolvedPath)
+
+    // Define OUTPUT: Where should the framework go?
+    // We put it in the root 'build' folder to keep the root project clean
+    val outputDir = rootProject.layout.buildDirectory.dir("sentry-binary")
+    frameworkDestDir.set(outputDir)
+
+    // Safety: Only run if the output doesn't exist yet (Gradle handles this via outputs, but explicit check doesn't hurt)
+    onlyIf { !outputDir.get().asFile.exists() }
+}
+
+// 2. Configure the Plugin
 sentryKmp {
     autoInstall {
-        enabled = true // Automatically adds the KMP dependency to commonMain
-        linker { // Bridge the gap into the iOS env
+        enabled = true
+        linker {
             enabled = true
             xcodeprojPath = rootProject.file("iosApp/Kluvs.xcodeproj").absolutePath
+            // Check the specific frameworks output location
+            val ciFrameworkDir = setupSentryTask.get().frameworkDestDir.get().asFile.resolve("Sentry.xcframework")
+            if (ciFrameworkDir.exists()) {
+                // If the CI task downloaded it, use it.
+                frameworkPath.set(ciFrameworkDir.absolutePath)
+            }
         }
     }
 }
