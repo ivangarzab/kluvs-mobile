@@ -2,6 +2,7 @@ package com.ivangarzab.kluvs.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.auth.domain.AuthError
 import com.ivangarzab.kluvs.auth.domain.AuthRepository
 import com.ivangarzab.kluvs.model.User
@@ -26,13 +27,18 @@ class AuthViewModel(
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     init {
+        Bark.d("AuthViewModel initializing")
         viewModelScope.launch {
             authRepository.initialize()
             authRepository.currentUser.collect { user: User? ->
                 _state.update {
                     user?.let {
+                        Bark.i("Authentication state: Authenticated (User: ${it.email})")
                         AuthState.Authenticated(it)
-                    } ?: AuthState.Unauthenticated
+                    } ?: {
+                        Bark.d("Authentication state: Unauthenticated")
+                        AuthState.Unauthenticated
+                    }()
                 }
             }
         }
@@ -104,14 +110,17 @@ class AuthViewModel(
     }
 
     private fun signUp() = viewModelScope.launch {
+        Bark.d("Email sign up initiated")
         _state.update { AuthState.Loading }
         authRepository.signUpWithEmail(
             email = uiState.value.emailField,
             password = uiState.value.passwordField
         ).onSuccess { user ->
+            Bark.i("User signed up and authenticated (Email: ${user.email})")
             _state.update { AuthState.Authenticated(user) }
             clearForm()
         }.onFailure { error ->
+            Bark.e("Sign up failed. Check email format and try again.", error)
             _state.update {
                 AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
             }
@@ -119,14 +128,17 @@ class AuthViewModel(
     }
 
     private fun signIn() = viewModelScope.launch {
+        Bark.d("Email sign in initiated")
         _state.update { AuthState.Loading }
         authRepository.signInWithEmail(
             email = uiState.value.emailField,
             password = uiState.value.passwordField
         ).onSuccess { user ->
+            Bark.i("User signed in (Email: ${user.email})")
             _state.update { AuthState.Authenticated(user) }
             clearForm()
         }.onFailure { error ->
+            Bark.e("Sign in failed. Verify credentials and retry.", error)
             _state.update {
                 AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
             }
@@ -134,10 +146,15 @@ class AuthViewModel(
     }
 
     fun signOut() = viewModelScope.launch {
+        Bark.d("Sign out initiated")
         _state.update { AuthState.Loading }
         authRepository.signOut()
-            .onSuccess { _state.update { AuthState.Unauthenticated } }
+            .onSuccess {
+                Bark.i("User signed out")
+                _state.update { AuthState.Unauthenticated }
+            }
             .onFailure { error ->
+                Bark.e("Sign out failed. User session may still be active.", error)
                 _state.update {
                     AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
                 }
@@ -149,12 +166,15 @@ class AuthViewModel(
      * Emits [AuthState.OAuthPending] with the OAuth URL to open in browser.
      */
     fun signInWithDiscord() = viewModelScope.launch {
+        Bark.d("Discord OAuth initiated")
         _state.update { AuthState.Loading }
         authRepository.signInWithDiscord()
             .onSuccess { url ->
+                Bark.d("Discord OAuth URL generated")
                 _state.update { AuthState.OAuthPending(url) }
             }
             .onFailure { error ->
+                Bark.e("Discord OAuth failed. Sign in via Discord unavailable.", error)
                 _state.update {
                     AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
                 }
@@ -166,12 +186,15 @@ class AuthViewModel(
      * Emits [AuthState.OAuthPending] with the OAuth URL to open in browser.
      */
     fun signInWithGoogle() = viewModelScope.launch {
+        Bark.d("Google OAuth initiated")
         _state.update { AuthState.Loading }
         authRepository.signInWithGoogle()
             .onSuccess { url ->
+                Bark.d("Google OAuth URL generated")
                 _state.update { AuthState.OAuthPending(url) }
             }
             .onFailure { error ->
+                Bark.e("Google OAuth failed. Sign in via Google unavailable.", error)
                 _state.update {
                     AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
                 }
@@ -191,13 +214,16 @@ class AuthViewModel(
      * Should be called when the app receives an OAuth redirect.
      */
     fun handleOAuthCallback(callbackUrl: String) = viewModelScope.launch {
+        Bark.d("OAuth callback processing started")
         _state.update { AuthState.Loading }
         authRepository.handleOAuthCallback(callbackUrl)
             .onSuccess { user ->
+                Bark.i("User authenticated via OAuth (Email: ${user.email})")
                 _state.update { AuthState.Authenticated(user) }
                 clearForm()
             }
             .onFailure { error ->
+                Bark.e("OAuth callback processing failed. User will need to retry OAuth sign in.", error)
                 _state.update {
                     AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
                 }
@@ -209,13 +235,16 @@ class AuthViewModel(
      * Called from iOS after native Apple Sign In returns the identity token.
      */
     fun signInWithApple(idToken: String) = viewModelScope.launch {
+        Bark.d("Apple native sign in initiated")
         _state.update { AuthState.Loading }
         authRepository.signInWithAppleNative(idToken)
             .onSuccess { user ->
+                Bark.i("User authenticated via Apple ID (Email: ${user.email})")
                 _state.update { AuthState.Authenticated(user) }
                 clearForm()
             }
             .onFailure { error ->
+                Bark.e("Apple sign in failed. Please retry.", error)
                 _state.update {
                     AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
                 }

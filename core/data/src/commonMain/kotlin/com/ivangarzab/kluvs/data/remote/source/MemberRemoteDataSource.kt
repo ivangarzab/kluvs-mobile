@@ -62,9 +62,10 @@ class MemberRemoteDataSourceImpl(
     override suspend fun getMember(memberId: String): Result<Member> {
         return try {
             val dto = memberService.get(memberId)
+            Bark.i("Fetched member (ID: $memberId)")
             Result.success(dto.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to get member with id=$memberId", e)
+            Bark.e("Failed to fetch member (ID: $memberId). Serving cached data if available.", e)
             Result.failure(e)
         }
     }
@@ -72,9 +73,10 @@ class MemberRemoteDataSourceImpl(
     override suspend fun getMemberByUserId(userId: String): Result<Member> {
         return try {
             val dto = memberService.getByUserId(userId)
+            Bark.i("Fetched member by user ID (ID: $userId)")
             Result.success(dto.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to get member with id=$userId", e)
+            Bark.e("Failed to fetch member by user ID (ID: $userId). Serving cached data if available.", e)
             Result.failure(e)
         }
     }
@@ -82,9 +84,10 @@ class MemberRemoteDataSourceImpl(
     override suspend fun createMember(request: CreateMemberRequestDto): Result<Member> {
         return try {
             val response = memberService.create(request)
+            Bark.i("Member created (ID: ${response.member.id})")
             Result.success(response.member.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to create member", e)
+            Bark.e("Failed to create member. Please retry.", e)
             Result.failure(e)
         }
     }
@@ -92,9 +95,10 @@ class MemberRemoteDataSourceImpl(
     override suspend fun updateMember(request: UpdateMemberRequestDto): Result<Member> {
         return try {
             val response = memberService.update(request)
+            Bark.i("Member updated (ID: ${request.id})")
             Result.success(response.member.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to update member with id=${request.id}", e)
+            Bark.e("Failed to update member (ID: ${request.id}). Please retry.", e)
             Result.failure(e)
         }
     }
@@ -103,12 +107,13 @@ class MemberRemoteDataSourceImpl(
         return try {
             val response = memberService.delete(memberId)
             if (response.success) {
+                Bark.i("Member deleted (ID: $memberId)")
                 Result.success(response.message)
             } else {
                 Result.failure(Exception("Delete failed: ${response.message}"))
             }
         } catch (e: Exception) {
-            Bark.e("Failed to delete member with id=$memberId", e)
+            Bark.e("Failed to delete member (ID: $memberId). Please retry.", e)
             Result.failure(e)
         }
     }

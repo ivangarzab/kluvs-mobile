@@ -27,7 +27,7 @@ class AuthServiceImpl(
         get() = supabaseClient.auth
 
     override suspend fun signUpWithEmail(email: String, password: String): UserSession {
-        Bark.v("Signing up user with email: $email")
+        Bark.v("Email sign up initiated")
 
         return try {
             auth.signUpWith(Email) {
@@ -39,16 +39,16 @@ class AuthServiceImpl(
             val session = auth.currentSessionOrNull()
                 ?: throw IllegalStateException("Sign up succeeded but no session was created")
 
-            Bark.d("Sign up successful for email: $email")
+            Bark.i("User signed up and authenticated")
             session
         } catch (e: Exception) {
-            Bark.e("Sign up failed for email: $email", e)
+            Bark.e("Email sign up failed. User may need to retry.", e)
             throw e
         }
     }
 
     override suspend fun signInWithEmail(email: String, password: String): UserSession {
-        Bark.v("Signing in user with email: $email")
+        Bark.v("Email sign in initiated")
 
         return try {
             auth.signInWith(Email) {
@@ -59,16 +59,16 @@ class AuthServiceImpl(
             val session = auth.currentSessionOrNull()
                 ?: throw IllegalStateException("Sign in succeeded but no session was created")
 
-            Bark.d("Sign in successful for email: $email")
+            Bark.i("User signed in")
             session
         } catch (e: Exception) {
-            Bark.e("Sign in failed for email: $email", e)
+            Bark.e("Email sign in failed. Check credentials and retry.", e)
             throw e
         }
     }
 
     override suspend fun getOAuthUrl(provider: String): String {
-        Bark.v("Getting OAuth URL for provider: $provider")
+        Bark.v("Generating OAuth URL for provider: $provider")
 
         return try {
             val oAuthProvider = when (provider.lowercase()) {
@@ -80,16 +80,16 @@ class AuthServiceImpl(
 
             val url = auth.getOAuthUrl(oAuthProvider, redirectUrl = REDIRECT_URL)
 
-            Bark.v("Generated OAuth URL for $provider")
+            Bark.d("OAuth URL generated")
             url
         } catch (e: Exception) {
-            Bark.e("Failed to get OAuth URL for $provider", e)
+            Bark.e("Failed to generate OAuth URL. OAuth sign in will not be available.", e)
             throw e
         }
     }
 
     override suspend fun handleOAuthCallback(url: String): UserSession {
-        Bark.d("Handling OAuth callback URL: $url")
+        Bark.d("Processing OAuth callback")
 
         return try {
             // Parse the callback URL to extract tokens from the fragment
@@ -98,7 +98,7 @@ class AuthServiceImpl(
             val fragment = parsedUrl.fragment
 
             if (fragment.isBlank()) {
-                Bark.w("OAuth callback URL missing fragment. Full URL: $url")
+                Bark.w("OAuth callback missing token data. Callback URL is malformed.")
                 throw IllegalArgumentException("OAuth callback URL missing fragment with tokens")
             }
 
@@ -121,32 +121,32 @@ class AuthServiceImpl(
             // Wait for session status to confirm authentication (with timeout)
             // This handles the race condition where currentSessionOrNull() returns null
             // before the session is fully established internally
-            Bark.v("Waiting for session status to confirm authentication...")
+            Bark.v("Awaiting session confirmation (5s timeout)")
             val sessionResult = withTimeoutOrNull(5000L) {
                 auth.sessionStatus.first { status ->
-                    Bark.v("Session status update: $status")
+                    Bark.v("Session status: $status")
                     status is SessionStatus.Authenticated
                 }
             }
 
             if (sessionResult == null) {
-                Bark.e("Session status timeout: did not become Authenticated within 5 seconds")
+                Bark.e("OAuth session confirmation timed out after 5 seconds. Session may not be established.", null)
                 throw IllegalStateException("OAuth timeout: session not established")
             }
 
             val userSession = auth.currentSessionOrNull()
                 ?: throw IllegalStateException("OAuth succeeded but no session was created")
 
-            Bark.d("OAuth sign in successful")
+            Bark.i("User authenticated via OAuth")
             userSession
         } catch (e: Exception) {
-            Bark.e("Failed to handle OAuth callback", e)
+            Bark.e("OAuth callback processing failed. User will need to retry OAuth sign in.", e)
             throw e
         }
     }
 
     override suspend fun signInWithAppleIdToken(idToken: String): UserSession {
-        Bark.v("Signing in with Apple ID token")
+        Bark.v("Apple ID token sign in initiated")
 
         return try {
             auth.signInWith(IDToken) {
@@ -157,37 +157,37 @@ class AuthServiceImpl(
             val session = auth.currentSessionOrNull()
                 ?: throw IllegalStateException("Apple Sign In succeeded but no session was created")
 
-            Bark.d("Apple Sign In successful")
+            Bark.i("User authenticated via Apple ID")
             session
         } catch (e: Exception) {
-            Bark.e("Apple Sign In failed", e)
+            Bark.e("Apple ID sign in failed. Please retry.", e)
             throw e
         }
     }
 
     override suspend fun signOut() {
-        Bark.v("Signing out current user")
+        Bark.v("Sign out initiated")
 
         try {
             auth.signOut()
 
             // Wait for session status to confirm sign out (with timeout)
             // This ensures the session is fully cleared before returning
-            Bark.v("Waiting for session status to confirm sign out...")
+            Bark.v("Awaiting session confirmation (3s timeout)")
             val signOutResult = withTimeoutOrNull(3000L) {
                 auth.sessionStatus.first { status ->
-                    Bark.v("Session status update during sign out: $status")
+                    Bark.v("Session status: $status")
                     status is SessionStatus.NotAuthenticated
                 }
             }
 
             if (signOutResult == null) {
-                Bark.w("Sign out: session status did not become NotAuthenticated within 3 seconds, continuing anyway")
+                Bark.w("Sign out session confirmation timed out after 3 seconds. Proceeding anyway.")
             }
 
-            Bark.v("Sign out successful")
+            Bark.i("User signed out")
         } catch (e: Exception) {
-            Bark.e("Sign out failed", e)
+            Bark.e("Sign out failed. User session may still be active.", e)
             throw e
         }
     }
@@ -197,17 +197,17 @@ class AuthServiceImpl(
     }
 
     override suspend fun refreshSession(): UserSession {
-        Bark.v("Refreshing session")
+        Bark.v("Session refresh initiated")
 
         return try {
             auth.refreshCurrentSession()
             val session = auth.currentSessionOrNull()
                 ?: throw IllegalStateException("Session refresh succeeded but no session exists")
 
-            Bark.d("Session refresh successful")
+            Bark.d("Session refreshed")
             session
         } catch (e: Exception) {
-            Bark.e("Session refresh failed", e)
+            Bark.e("Session refresh failed. User may need to re-authenticate.", e)
             throw e
         }
     }
@@ -220,9 +220,9 @@ class AuthServiceImpl(
                 accessToken = accessToken,
                 refreshToken = refreshToken
             )
-            Bark.d("Session restored successfully")
+            Bark.d("Session restored")
         } catch (e: Exception) {
-            Bark.e("Failed to restore session", e)
+            Bark.e("Session restoration failed. Stored credentials may be invalid.", e)
             throw e
         }
     }

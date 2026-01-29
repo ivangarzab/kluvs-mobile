@@ -106,25 +106,25 @@ internal class SessionRepositoryImpl(
             val lastFetchedAt = sessionLocalDataSource.getLastFetchedAt(sessionId)
 
             if (cachedSession != null && !cachePolicy.isStale(lastFetchedAt, CacheTTL.SESSION)) {
-                Bark.d("Cache hit for session $sessionId")
+                Bark.d("Cache hit for session (ID: $sessionId)")
                 return Result.success(cachedSession)
             }
-            Bark.d("Cache miss for session $sessionId")
+            Bark.d("Cache miss for session (ID: $sessionId)")
         }
 
-        Bark.d("Fetching session $sessionId from remote")
+        Bark.d("Fetching session from remote (ID: $sessionId)")
         val result = sessionRemoteDataSource.getSession(sessionId)
 
         result.onSuccess { session ->
-            Bark.d("Caching session ${session.id}")
+            Bark.v("Persisting session to cache (ID: ${session.id})")
             try {
                 sessionLocalDataSource.insertSession(session)
-                Bark.d("Successfully cached session ${session.id}")
+                Bark.d("Session cached (ID: ${session.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache session ${session.id}", e)
+                Bark.e("Session cache failed. Will use remote data on next fetch.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to fetch session $sessionId", error)
+            Bark.e("Failed to fetch session. Cached data may be unavailable.", error)
         }
 
         return result
@@ -136,7 +136,7 @@ internal class SessionRepositoryImpl(
         dueDate: LocalDateTime?,
         discussions: List<Discussion>?
     ): Result<Session> {
-        Bark.d("Creating session for club $clubId with book '${book.title}'")
+        Bark.d("Creating session for club (ID: $clubId): ${book.title}")
         val result = sessionRemoteDataSource.createSession(
             CreateSessionRequestDto(
                 club_id = clubId,
@@ -154,15 +154,15 @@ internal class SessionRepositoryImpl(
         )
 
         result.onSuccess { session ->
-            Bark.d("Caching newly created session ${session.id}")
+            Bark.v("Persisting new session to cache (ID: ${session.id})")
             try {
                 sessionLocalDataSource.insertSession(session)
-                Bark.d("Successfully cached session ${session.id}")
+                Bark.i("Session created and cached (ID: ${session.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache session ${session.id}", e)
+                Bark.e("Session cache failed. Will fetch from remote if needed.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to create session for club $clubId", error)
+            Bark.e("Session creation failed. Check input and retry.", error)
         }
 
         return result
@@ -175,7 +175,7 @@ internal class SessionRepositoryImpl(
         discussions: List<Discussion>?,
         discussionIdsToDelete: List<String>?
     ): Result<Session> {
-        Bark.d("Updating session $sessionId")
+        Bark.d("Updating session (ID: $sessionId)")
         val result = sessionRemoteDataSource.updateSession(
             UpdateSessionRequestDto(
                 id = sessionId,
@@ -196,29 +196,30 @@ internal class SessionRepositoryImpl(
         )
 
         result.onSuccess { session ->
-            Bark.d("Updating cache for session ${session.id}")
+            Bark.v("Persisting updated session to cache (ID: ${session.id})")
             try {
                 sessionLocalDataSource.insertSession(session)
-                Bark.d("Successfully cached session ${session.id}")
+                Bark.i("Session updated and cached (ID: ${session.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache session ${session.id}", e)
+                Bark.e("Session cache failed. Will fetch updated data from remote.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to update session $sessionId", error)
+            Bark.e("Session update failed. Verify input and retry.", error)
         }
 
         return result
     }
 
     override suspend fun deleteSession(sessionId: String): Result<String> {
-        Bark.d("Deleting session $sessionId")
+        Bark.d("Deleting session (ID: $sessionId)")
         val result = sessionRemoteDataSource.deleteSession(sessionId)
 
         result.onSuccess {
-            Bark.d("Removing session $sessionId from cache")
+            Bark.v("Removing session from cache (ID: $sessionId)")
             sessionLocalDataSource.deleteSession(sessionId)
+            Bark.i("Session deleted (ID: $sessionId)")
         }.onFailure { error ->
-            Bark.e("Failed to delete session $sessionId", error)
+            Bark.e("Session deletion failed. Verify session exists and retry.", error)
         }
 
         return result

@@ -1,9 +1,15 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type
+import tasks.SetupSentryTask
+import utils.getPropertyOrEnvVar
+
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
     id("org.jetbrains.kotlinx.kover")
+    id("com.codingfeline.buildkonfig") version "+"
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.mokkery)
+    alias(libs.plugins.sentry)
 }
 
 kotlin {
@@ -29,6 +35,7 @@ kotlin {
             export(project(":feature:auth"))
             export(project(":feature:clubs"))
             export(project(":feature:member"))
+            export(libs.bark)
         }
     }
     
@@ -79,5 +86,61 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+buildkonfig {
+    packageName = "com.ivangarzab.kluvs.shared"
+    exposeObjectWithName = "BuildKonfig"
+
+    defaultConfigs {
+        val sentryDns = getPropertyOrEnvVar("SENTRY_DNS")
+        require(sentryDns.isNotEmpty()) {
+            "Make sure to provide the SENTRY_DNS in your global gradle.properties file."
+        }
+        buildConfigField(
+            Type.STRING,
+            "SENTRY_DNS",
+            sentryDns
+        )
+        buildConfigField(Type.BOOLEAN, "IS_DEBUG", "false")
+    }
+    defaultConfigs("debug") {
+        buildConfigField(Type.BOOLEAN, "IS_DEBUG", "true")
+    }
+
+}
+
+val setupSentryTask = tasks.register<SetupSentryTask>("setupSentryForCi") {
+    group = "ci"
+    description = "Downloads Sentry binary matching Package.resolved for CI environments"
+
+    // Define INPUT: Where is your Package.resolved?
+    val resolvedPath = rootProject.file("iosApp/Kluvs.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved")
+    packageResolvedFile.set(resolvedPath)
+
+    // Define OUTPUT: Where should the framework go?
+    // We put it in the root 'build' folder to keep the root project clean
+    val outputDir = rootProject.layout.buildDirectory.dir("sentry-binary")
+    frameworkDestDir.set(outputDir)
+
+    // Safety: Only run if the output doesn't exist yet (Gradle handles this via outputs, but explicit check doesn't hurt)
+    onlyIf { !outputDir.get().asFile.exists() }
+}
+
+// 2. Configure the Plugin
+sentryKmp {
+    autoInstall {
+        enabled = true
+        linker {
+            enabled = true
+            xcodeprojPath = rootProject.file("iosApp/Kluvs.xcodeproj").absolutePath
+            // Check the specific frameworks output location
+            val ciFrameworkDir = setupSentryTask.get().frameworkDestDir.get().asFile.resolve("Sentry.xcframework")
+            if (ciFrameworkDir.exists()) {
+                // If the CI task downloaded it, use it.
+                frameworkPath.set(ciFrameworkDir.absolutePath)
+            }
+        }
     }
 }

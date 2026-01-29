@@ -22,7 +22,7 @@ class SignOutUseCase(
     }
 
     private suspend fun clearLocalData() {
-        Bark.v("Clearing local database")
+        Bark.v("Clearing local database on sign out")
         database.clubDao().deleteAll()
         database.serverDao().deleteAll()
         database.memberDao().deleteAll()
@@ -30,6 +30,6 @@ class SignOutUseCase(
         database.sessionDao().deleteAll()
         database.bookDao().deleteAll()
         database.discussionDao().deleteAll()
-        Bark.v("Local database cleared successfully")
+        Bark.d("Local database cleared")
     }
 }

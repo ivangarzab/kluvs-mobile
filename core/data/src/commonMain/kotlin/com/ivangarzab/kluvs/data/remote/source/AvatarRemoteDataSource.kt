@@ -39,7 +39,7 @@ internal class AvatarRemoteDataSourceImpl(
         return try {
             avatarService.uploadAvatar(memberId, imageData)
         } catch (e: Exception) {
-            Bark.e("Failed to upload avatar for member=$memberId", e)
+            Bark.e("Avatar upload failed (Member ID: $memberId). User may need to retry.", e)
             Result.failure(e)
         }
     }
