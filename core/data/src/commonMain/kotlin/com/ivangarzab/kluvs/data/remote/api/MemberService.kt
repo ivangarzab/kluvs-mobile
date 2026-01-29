@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.data.remote.api
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.network.utils.JsonHelper.getJsonForSupabaseService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateMemberRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.DeleteResponseDto
@@ -24,43 +25,83 @@ interface MemberService {
 internal class MemberServiceImpl(private val supabase: SupabaseClient) : MemberService {
 
     override suspend fun get(memberId: String): MemberResponseDto {
-        return supabase.functions.invoke("member") {
-            method = HttpMethod.Get
-            url { parameters.append("id", memberId) }
-        }.body()
+        Bark.d("Fetching member (ID: $memberId)")
+        return try {
+            val response = supabase.functions.invoke("member") {
+                method = HttpMethod.Get
+                url { parameters.append("id", memberId) }
+            }.body<MemberResponseDto>()
+            Bark.v("Member fetched successfully (ID: $memberId)")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to fetch member (ID: $memberId). Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun getByUserId(userId: String): MemberResponseDto {
-        return supabase.functions.invoke("member") {
-            method = HttpMethod.Get
-            url { parameters.append("user_id", userId) }
-        }.body()
+        Bark.d("Fetching member by user ID (User: $userId)")
+        return try {
+            val response = supabase.functions.invoke("member") {
+                method = HttpMethod.Get
+                url { parameters.append("user_id", userId) }
+            }.body<MemberResponseDto>()
+            Bark.v("Member fetched by user ID successfully (User: $userId)")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to fetch member by user ID (User: $userId). Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun create(request: CreateMemberRequestDto): MemberSuccessResponseDto {
-        val json = getJsonForSupabaseService()
-        val jsonString = json.encodeToString(request)
+        Bark.d("Creating member")
+        return try {
+            val json = getJsonForSupabaseService()
+            val jsonString = json.encodeToString(request)
 
-        return supabase.functions.invoke("member") {
-            method = HttpMethod.Post
-            body = jsonString
-        }.body()
+            val response = supabase.functions.invoke("member") {
+                method = HttpMethod.Post
+                body = jsonString
+            }.body<MemberSuccessResponseDto>()
+            Bark.v("Member created successfully")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to create member. Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun update(request: UpdateMemberRequestDto): MemberSuccessResponseDto {
-        val json = getJsonForSupabaseService()
-        val jsonString = json.encodeToString(request)
+        Bark.d("Updating member (ID: ${request.id})")
+        return try {
+            val json = getJsonForSupabaseService()
+            val jsonString = json.encodeToString(request)
 
-        return supabase.functions.invoke("member") {
-            method = HttpMethod.Put
-            body = jsonString
-        }.body()
+            val response = supabase.functions.invoke("member") {
+                method = HttpMethod.Put
+                body = jsonString
+            }.body<MemberSuccessResponseDto>()
+            Bark.v("Member updated successfully (ID: ${request.id})")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to update member (ID: ${request.id}). Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun delete(memberId: String): DeleteResponseDto {
-        return supabase.functions.invoke("member") {
-            method = HttpMethod.Delete
-            url { parameters.append("id", memberId) }
-        }.body()
+        Bark.d("Deleting member (ID: $memberId)")
+        return try {
+            val response = supabase.functions.invoke("member") {
+                method = HttpMethod.Delete
+                url { parameters.append("id", memberId) }
+            }.body<DeleteResponseDto>()
+            Bark.v("Member deleted successfully (ID: $memberId)")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to delete member (ID: $memberId). Check network/API status and retry.", error)
+            throw error
+        }
     }
 }

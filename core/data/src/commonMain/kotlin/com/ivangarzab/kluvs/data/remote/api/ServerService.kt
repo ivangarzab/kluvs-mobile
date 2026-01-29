@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.data.remote.api
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.network.utils.JsonHelper.getJsonForSupabaseService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateServerRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.DeleteResponseDto
@@ -25,42 +26,82 @@ interface ServerService {
 internal class ServerServiceImpl(private val supabase: SupabaseClient) : ServerService {
 
     override suspend fun getAll(): ServersResponseDto {
-        return supabase.functions.invoke("server") {
-            method = HttpMethod.Get
-        }.body()
+        Bark.d("Fetching all servers")
+        return try {
+            val response = supabase.functions.invoke("server") {
+                method = HttpMethod.Get
+            }.body<ServersResponseDto>()
+            Bark.v("All servers fetched successfully (count: ${response.servers.size})")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to fetch all servers. Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun get(serverId: String): ServerResponseDto {
-        return supabase.functions.invoke("server") {
-            method = HttpMethod.Get
-            url { parameters.append("id", serverId) }
-        }.body()
+        Bark.d("Fetching server (ID: $serverId)")
+        return try {
+            val response = supabase.functions.invoke("server") {
+                method = HttpMethod.Get
+                url { parameters.append("id", serverId) }
+            }.body<ServerResponseDto>()
+            Bark.v("Server fetched successfully (ID: $serverId)")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to fetch server (ID: $serverId). Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun create(request: CreateServerRequestDto): ServerSuccessResponseDto {
-        val json = getJsonForSupabaseService()
-        val jsonString = json.encodeToString(request)
+        Bark.d("Creating server")
+        return try {
+            val json = getJsonForSupabaseService()
+            val jsonString = json.encodeToString(request)
 
-        return supabase.functions.invoke("server") {
-            method = HttpMethod.Post
-            body = jsonString
-        }.body()
+            val response = supabase.functions.invoke("server") {
+                method = HttpMethod.Post
+                body = jsonString
+            }.body<ServerSuccessResponseDto>()
+            Bark.v("Server created successfully")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to create server. Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun update(request: UpdateServerRequestDto): ServerSuccessResponseDto {
-        val json = getJsonForSupabaseService()
-        val jsonString = json.encodeToString(request)
+        Bark.d("Updating server (ID: ${request.id})")
+        return try {
+            val json = getJsonForSupabaseService()
+            val jsonString = json.encodeToString(request)
 
-        return supabase.functions.invoke("server") {
-            method = HttpMethod.Put
-            body = jsonString
-        }.body()
+            val response = supabase.functions.invoke("server") {
+                method = HttpMethod.Put
+                body = jsonString
+            }.body<ServerSuccessResponseDto>()
+            Bark.v("Server updated successfully (ID: ${request.id})")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to update server (ID: ${request.id}). Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun delete(serverId: String): DeleteResponseDto {
-        return supabase.functions.invoke("server") {
-            method = HttpMethod.Delete
-            url { parameters.append("id", serverId) }
-        }.body()
+        Bark.d("Deleting server (ID: $serverId)")
+        return try {
+            val response = supabase.functions.invoke("server") {
+                method = HttpMethod.Delete
+                url { parameters.append("id", serverId) }
+            }.body<DeleteResponseDto>()
+            Bark.v("Server deleted successfully (ID: $serverId)")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to delete server (ID: $serverId). Check network/API status and retry.", error)
+            throw error
+        }
     }
 }

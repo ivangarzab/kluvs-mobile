@@ -46,28 +46,46 @@ class SessionLocalDataSourceImpl(
     }
 
     override suspend fun insertSession(session: Session) {
-        Bark.v("Inserting session ${session.id} into database")
-        // First insert the book
-        bookDao.insertBook(session.book.toEntity())
-        // Then insert the session
-        sessionDao.insertSession(session.toEntity())
+        Bark.v("Inserting session (ID: ${session.id}) into database")
+        try {
+            // First insert the book
+            bookDao.insertBook(session.book.toEntity())
+            // Then insert the session
+            sessionDao.insertSession(session.toEntity())
+            Bark.d("Successfully inserted session (ID: ${session.id}) into database")
+        } catch (e: Exception) {
+            Bark.e("Failed to insert session (ID: ${session.id}) into database. Retry on next sync.", e)
+            throw e
+        }
     }
 
     override suspend fun insertSessions(sessions: List<Session>) {
         Bark.v("Inserting ${sessions.size} sessions into database")
-        // Insert all books first
-        val books = sessions.map { it.book }
-        bookDao.insertBooks(books.map { it.toEntity() })
+        try {
+            // Insert all books first
+            val books = sessions.map { it.book }
+            bookDao.insertBooks(books.map { it.toEntity() })
 
-        // Then insert all sessions
-        sessionDao.insertSessions(sessions.map { it.toEntity() })
+            // Then insert all sessions
+            sessionDao.insertSessions(sessions.map { it.toEntity() })
+            Bark.d("Successfully inserted ${sessions.size} sessions into database")
+        } catch (e: Exception) {
+            Bark.e("Failed to insert ${sessions.size} sessions into database. Retry on next sync.", e)
+            throw e
+        }
     }
 
     override suspend fun deleteSession(sessionId: String) {
         val entity = sessionDao.getSession(sessionId)
         if (entity != null) {
-            Bark.d("Deleting session $sessionId from database")
-            sessionDao.deleteSession(entity)
+            Bark.d("Deleting session (ID: $sessionId) from database")
+            try {
+                sessionDao.deleteSession(entity)
+                Bark.d("Successfully deleted session (ID: $sessionId) from database")
+            } catch (e: Exception) {
+                Bark.e("Failed to delete session (ID: $sessionId) from database. Retry on next sync.", e)
+                throw e
+            }
         }
     }
 
@@ -77,6 +95,12 @@ class SessionLocalDataSourceImpl(
 
     override suspend fun deleteAll() {
         Bark.d("Clearing all sessions from database")
-        sessionDao.deleteAll()
+        try {
+            sessionDao.deleteAll()
+            Bark.d("Successfully cleared all sessions from database")
+        } catch (e: Exception) {
+            Bark.e("Failed to clear all sessions from database. Retry on next sync.", e)
+            throw e
+        }
     }
 }

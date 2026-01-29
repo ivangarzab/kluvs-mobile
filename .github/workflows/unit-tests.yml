@@ -25,6 +25,7 @@ jobs:
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
       TEST_SUPABASE_KEY: ${{ secrets.TEST_SUPABASE_KEY }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
 
     steps:
       - name: Checkout Code
@@ -86,6 +87,7 @@ jobs:
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
       TEST_SUPABASE_KEY: ${{ secrets.TEST_SUPABASE_KEY }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
 
     steps:
       - name: Checkout Code

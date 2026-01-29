@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.clubs.domain
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.clubs.presentation.ActiveSessionDetails
 import com.ivangarzab.kluvs.clubs.presentation.BookInfo
 import com.ivangarzab.kluvs.clubs.presentation.ClubListItem
@@ -40,15 +41,17 @@ class GetActiveSessionUseCase(
      * @return Result containing [ActiveSessionDetails] if successful, null if no active session, or error if failed
      */
     suspend operator fun invoke(clubId: String): Result<ActiveSessionDetails?> {
+        Bark.d("Fetching active session (Club ID: $clubId)")
         return clubRepository.getClub(clubId).map { club: Club ->
             club.activeSession?.let { session ->
+                Bark.d("Found active session (Session ID: ${session.id})")
                 val now = now().toLocalDateTime(TimeZone.currentSystemDefault())
                 val sortedDiscussions = session.discussions.sortedBy { it.date }
 
                 // Find the index of the next discussion (first future discussion)
                 val nextDiscussionIndex = sortedDiscussions.indexOfFirst { it.date > now }
 
-                ActiveSessionDetails(
+                val details = ActiveSessionDetails(
                     sessionId = session.id,
                     book = BookInfo(
                         title = session.book.title,
@@ -71,7 +74,14 @@ class GetActiveSessionUseCase(
                         )
                     }
                 )
+                Bark.i("Loaded active session details (Book: ${session.book.title}, Discussions: ${sortedDiscussions.size})")
+                details
+            } ?: run {
+                Bark.d("No active session found for club (Club ID: $clubId)")
+                null
             }
+        }.onFailure { error ->
+            Bark.e("Failed to fetch active session (Club ID: $clubId). Returning null on error.", error)
         }
     }
 }
@@ -93,13 +103,18 @@ class GetMemberClubsUseCase(
      * @return Result containing list of [com.ivangarzab.kluvs.clubs.presentation.ClubListItem], or error if failed
      */
     suspend operator fun invoke(userId: String): Result<List<ClubListItem>> {
+        Bark.d("Fetching member clubs (User ID: $userId)")
         return memberRepository.getMemberByUserId(userId).map { member ->
-            member.clubs?.map { club ->
+            val clubItems = member.clubs?.map { club ->
                 ClubListItem(
                     id = club.id,
                     name = club.name
                 )
             } ?: emptyList()
+            Bark.i("Loaded member clubs (Count: ${clubItems.size})")
+            clubItems
+        }.onFailure { error ->
+            Bark.e("Failed to fetch member clubs (User ID: $userId). User will see empty clubs list.", error)
         }
     }
 

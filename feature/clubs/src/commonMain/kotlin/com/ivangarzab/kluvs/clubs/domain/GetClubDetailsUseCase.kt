@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.clubs.domain
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.clubs.presentation.BookInfo
 import com.ivangarzab.kluvs.clubs.presentation.ClubDetails
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionInfo
@@ -35,13 +36,17 @@ class GetClubDetailsUseCase(
      * @return Result containing [ClubDetails] if successful, or error if failed
      */
     suspend operator fun invoke(clubId: String): Result<ClubDetails> {
+        Bark.d("Fetching club details (Club ID: $clubId)")
         return clubRepository.getClub(clubId).map { club: Club ->
             val now = now().toLocalDateTime(TimeZone.currentSystemDefault())
+            val memberCount = club.members?.size ?: 0
+            val hasActiveSession = club.activeSession != null
+            val nextDiscussionCount = club.activeSession?.discussions?.count { it.date > now } ?: 0
 
-            ClubDetails(
+            val details = ClubDetails(
                 clubId = club.id,
                 clubName = club.name,
-                memberCount = club.members?.size ?: 0,
+                memberCount = memberCount,
                 foundedYear = club.foundedDate?.year?.toString(),
                 currentBook = club.activeSession?.book?.let {
                     BookInfo(
@@ -62,6 +67,10 @@ class GetClubDetailsUseCase(
                         )
                     }
             )
+            Bark.i("Loaded club details (Name: ${club.name}, Members: $memberCount, Active: $hasActiveSession, Next Discussions: $nextDiscussionCount)")
+            details
+        }.onFailure { error ->
+            Bark.e("Failed to fetch club details (Club ID: $clubId). User will see error state.", error)
         }
     }
 }

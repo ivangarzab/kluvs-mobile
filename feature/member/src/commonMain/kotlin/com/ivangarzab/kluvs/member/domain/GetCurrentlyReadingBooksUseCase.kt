@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.member.domain
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.member.presentation.CurrentlyReadingBook
@@ -45,12 +46,14 @@ class GetCurrentlyReadingBooksUseCase(
      * @return Result containing list of [com.ivangarzab.kluvs.presentation.models.CurrentlyReadingBook] if successful, or error if failed
      */
     suspend operator fun invoke(userId: String): Result<List<CurrentlyReadingBook>> {
+        Bark.d("Fetching currently reading books (User ID: $userId)")
         return memberRepository.getMemberByUserId(userId).mapCatching { member: Member ->
             val clubs = member.clubs ?: emptyList()
+            Bark.d("Found ${clubs.size} clubs for user (User ID: $userId)")
             val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
             // For each club, fetch the active session and create a currently reading entry
-            clubs.mapNotNull { club ->
+            val books = clubs.mapNotNull { club ->
                 // Fetch full club details to get active session
                 val fullClub = clubRepository.getClub(club.id).getOrNull()
                 fullClub?.activeSession?.let { session ->
@@ -63,14 +66,20 @@ class GetCurrentlyReadingBooksUseCase(
                         0.0f
                     }
 
-                    CurrentlyReadingBook(
+                    val book = CurrentlyReadingBook(
                         bookTitle = session.book.title,
                         clubName = club.name,
                         progress = progress,
                         dueDate = session.dueDate?.let { formatDateTime(it, DateTimeFormat.DATE_ONLY) }
                     )
+                    Bark.d("Added reading book (Title: ${session.book.title}, Club: ${club.name}, Progress: ${(progress * 100).toInt()}%)")
+                    book
                 }
             }
+            Bark.i("Loaded currently reading books (Count: ${books.size})")
+            books
+        }.onFailure { error ->
+            Bark.e("Failed to fetch currently reading books (User ID: $userId). User will see empty reading list.", error)
         }
     }
 }

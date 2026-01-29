@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.member.domain
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 
@@ -23,15 +24,18 @@ class UpdateAvatarUseCase(
      * @return Result with the new avatar URL on success
      */
     suspend operator fun invoke(memberId: String, imageData: ByteArray): Result<String> {
+        Bark.d("Updating avatar (Member ID: $memberId, Image size: ${imageData.size} bytes)")
+
         // 1. Upload to storage
         val uploadResult = avatarRepository.uploadAvatar(memberId, imageData)
         if (uploadResult.isFailure) {
-            return Result.failure(
-                uploadResult.exceptionOrNull() ?: Exception("Avatar upload failed")
-            )
+            val error = uploadResult.exceptionOrNull() ?: Exception("Avatar upload failed")
+            Bark.e("Failed to upload avatar to storage (Member ID: $memberId). Retrying with fallback.", error)
+            return Result.failure(error)
         }
 
         val avatarPath = uploadResult.getOrThrow()
+        Bark.d("Avatar uploaded to storage (Member ID: $memberId, Path: $avatarPath)")
 
         // 2. Update member record with new path
         val updateResult = memberRepository.updateMember(
@@ -40,13 +44,16 @@ class UpdateAvatarUseCase(
         )
 
         if (updateResult.isFailure) {
-            return Result.failure(
-                updateResult.exceptionOrNull() ?: Exception("Failed to update member")
-            )
+            val error = updateResult.exceptionOrNull() ?: Exception("Failed to update member")
+            Bark.e("Failed to update member record with new avatar (Member ID: $memberId). Avatar uploaded but member not updated.", error)
+            return Result.failure(error)
         }
+
+        Bark.d("Member record updated with new avatar path (Member ID: $memberId)")
 
         // 3. Return the public URL
         val avatarUrl = avatarRepository.getAvatarUrl(avatarPath)
+        Bark.i("Avatar updated successfully (Member ID: $memberId)")
         return Result.success(avatarUrl ?: "")
     }
 }

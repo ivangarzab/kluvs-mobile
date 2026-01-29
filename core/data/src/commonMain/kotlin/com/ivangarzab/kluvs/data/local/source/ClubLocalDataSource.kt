@@ -55,7 +55,7 @@ class ClubLocalDataSourceImpl(
                 activeSession = activeSession
             )
         } catch (e: Exception) {
-            Bark.e("Failed to load club ${clubId} from cache with relationships", e)
+            Bark.e("Failed to load club (ID: $clubId) from cache with relationships. Serving incomplete club data.", e)
             // Return just the basic club without relationships if loading fails
             clubEntity.toDomain()
         }
@@ -66,7 +66,7 @@ class ClubLocalDataSourceImpl(
     }
 
     override suspend fun insertClub(club: Club) {
-        Bark.v("Inserting club ${club.id} into database")
+        Bark.v("Inserting club (ID: ${club.id}) into database")
 
         try {
             // Insert club entity
@@ -77,7 +77,7 @@ class ClubLocalDataSourceImpl(
             // We cache them here so the club can show its member list, but MemberRepository
             // is responsible for caching complete member data.
             club.members?.let { members ->
-                Bark.v("Caching ${members.size} members for club ${club.id}")
+                Bark.v("Caching ${members.size} members for club (ID: ${club.id})")
                 memberDao.insertMembers(members.map { it.toEntity() })
                 members.forEach { member ->
                     memberDao.insertClubMemberCrossRef(
@@ -91,20 +91,20 @@ class ClubLocalDataSourceImpl(
 
             // Cache active session with book and discussions
             club.activeSession?.let { session ->
-                Bark.v("Caching active session ${session.id} for club ${club.id}")
+                Bark.v("Caching active session (ID: ${session.id}) for club (ID: ${club.id})")
 
                 // Cache the book
                 try {
                     bookDao.insertBook(session.book.toEntity())
                 } catch (e: Exception) {
-                    Bark.e("Failed to cache book for session ${session.id}: ${e.message}", e)
+                    Bark.e("Failed to cache book (ID: ${session.book.id}) for session (ID: ${session.id}). Retry on next sync.", e)
                 }
 
                 // Cache the session
                 try {
                     sessionDao.insertSession(session.toEntity())
                 } catch (e: Exception) {
-                    Bark.e("Failed to cache session ${session.id}: ${e.message}", e)
+                    Bark.e("Failed to cache session (ID: ${session.id}). Retry on next sync.", e)
                 }
 
                 // Cache discussions
@@ -112,26 +112,38 @@ class ClubLocalDataSourceImpl(
                     try {
                         discussionDao.insertDiscussion(discussion.toEntity())
                     } catch (e: Exception) {
-                        Bark.e("Failed to cache discussion ${discussion.id}: ${e.message}", e)
+                        Bark.e("Failed to cache discussion (ID: ${discussion.id}). Retry on next sync.", e)
                     }
                 }
             }
         } catch (e: Exception) {
-            Bark.e("Failed to insert club ${club.id} into database", e)
+            Bark.e("Failed to insert club (ID: ${club.id}) into database. Retry on next sync.", e)
             throw e
         }
     }
 
     override suspend fun insertClubs(clubs: List<Club>) {
         Bark.v("Inserting ${clubs.size} clubs into database")
-        clubDao.insertClubs(clubs.map { it.toEntity() })
+        try {
+            clubDao.insertClubs(clubs.map { it.toEntity() })
+            Bark.d("Successfully inserted ${clubs.size} clubs into database")
+        } catch (e: Exception) {
+            Bark.e("Failed to insert ${clubs.size} clubs into database. Retry on next sync.", e)
+            throw e
+        }
     }
 
     override suspend fun deleteClub(clubId: String) {
         val entity = clubDao.getClub(clubId)
         if (entity != null) {
-            Bark.v("Deleting club $clubId from database")
-            clubDao.deleteClub(entity)
+            Bark.v("Deleting club (ID: $clubId) from database")
+            try {
+                clubDao.deleteClub(entity)
+                Bark.d("Successfully deleted club (ID: $clubId) from database")
+            } catch (e: Exception) {
+                Bark.e("Failed to delete club (ID: $clubId) from database. Retry on next sync.", e)
+                throw e
+            }
         }
     }
 
@@ -141,6 +153,12 @@ class ClubLocalDataSourceImpl(
 
     override suspend fun deleteAll() {
         Bark.v("Clearing all clubs from database")
-        clubDao.deleteAll()
+        try {
+            clubDao.deleteAll()
+            Bark.d("Successfully cleared all clubs from database")
+        } catch (e: Exception) {
+            Bark.e("Failed to clear all clubs from database. Retry on next sync.", e)
+            throw e
+        }
     }
 }

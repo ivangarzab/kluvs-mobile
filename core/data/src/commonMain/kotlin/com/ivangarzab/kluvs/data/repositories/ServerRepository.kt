@@ -72,25 +72,25 @@ internal class ServerRepositoryImpl(
             val lastFetchedAt = serverLocalDataSource.getLastFetchedAt(serverId)
 
             if (cached != null && cachePolicy.isFresh(lastFetchedAt, CacheTTL.SERVER)) {
-                Bark.d("Cache hit for server $serverId")
+                Bark.d("Cache hit for server (ID: $serverId)")
                 return Result.success(cached)
             }
-            Bark.d("Cache miss for server $serverId")
+            Bark.d("Cache miss for server (ID: $serverId)")
         }
 
-        Bark.d("Fetching server $serverId from remote")
+        Bark.d("Fetching server (ID: $serverId) from remote")
         val result = serverRemoteDataSource.getServer(serverId)
 
         result.onSuccess { server ->
-            Bark.d("Caching server ${server.id}")
+            Bark.d("Caching server (ID: ${server.id})")
             try {
                 serverLocalDataSource.insertServer(server)
-                Bark.d("Successfully cached server ${server.id}")
+                Bark.d("Successfully cached server (ID: ${server.id})")
             } catch (e: Exception) {
-                Bark.e("Failed to cache server ${server.id}", e)
+                Bark.e("Failed to cache server (ID: ${server.id}). Retry on next fetch.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to fetch server $serverId", error)
+            Bark.e("Failed to fetch server (ID: $serverId). Serving cached data if available.", error)
         }
 
         return result
@@ -104,12 +104,12 @@ internal class ServerRepositoryImpl(
             Bark.d("Caching ${servers.size} servers")
             try {
                 servers.forEach { serverLocalDataSource.insertServer(it) }
-                Bark.d("Successfully cached ${servers.size} servers")
+                Bark.i("Successfully cached ${servers.size} servers")
             } catch (e: Exception) {
-                Bark.e("Failed to cache servers", e)
+                Bark.e("Failed to cache servers. Retry on next fetch.", e)
             }
         }.onFailure { error ->
-            Bark.e("Failed to fetch all servers", error)
+            Bark.e("Failed to fetch all servers. Serving cached data if available.", error)
         }
 
         return result

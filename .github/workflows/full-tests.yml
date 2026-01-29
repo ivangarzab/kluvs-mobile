@@ -21,9 +21,9 @@ jobs:
     name: Run All Tests
     runs-on: ubuntu-latest
     env:
-      # Production Supabase secrets needed for Gradle build configuration
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
 
     steps:
       - name: Checkout kluvs-mobile

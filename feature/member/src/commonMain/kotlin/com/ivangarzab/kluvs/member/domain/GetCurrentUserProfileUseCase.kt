@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.member.domain
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.member.presentation.UserProfile
@@ -31,16 +32,22 @@ class GetCurrentUserProfileUseCase(
      * @return Result containing [com.ivangarzab.kluvs.presentation.models.UserProfile] if successful, or error if failed
      */
     suspend operator fun invoke(userId: String): Result<UserProfile> {
+        Bark.d("Fetching current user profile (User ID: $userId)")
         return memberRepository.getMemberByUserId(userId).map { member: Member ->
-            UserProfile(
+            val handle = member.handle ?: generateHandleFromName(member.name)
+            val profile = UserProfile(
                 memberId = member.id,
                 name = member.name,
-                handle = member.handle ?: generateHandleFromName(member.name),
+                handle = handle,
                 joinDate = member.createdAt?.let {
                     formatDateTime(it, DateTimeFormat.YEAR_ONLY)
                 } ?: "2025",
                 avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath)
             )
+            Bark.i("Loaded user profile (Name: ${member.name}, Handle: $handle)")
+            profile
+        }.onFailure { error ->
+            Bark.e("Failed to fetch user profile (User ID: $userId). User will see error state.", error)
         }
     }
 

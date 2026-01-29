@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.presentation.util
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.presentation.state.DateTimeFormat
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -28,7 +29,8 @@ class FormatDateTimeUseCase {
      * - YEAR_ONLY: "2026"
      */
     operator fun invoke(dateTime: LocalDateTime, format: DateTimeFormat): String {
-        return when (format) {
+        Bark.d("Formatting date/time (Format: ${format.name}, Date: ${dateTime.date}, Time: ${dateTime.time})")
+        val result = when (format) {
             DateTimeFormat.FULL -> {
                 val date = dateTime.date
                 val time = dateTime.time
@@ -45,6 +47,8 @@ class FormatDateTimeUseCase {
                 dateTime.date.year.toString()
             }
         }
+        Bark.d("Date/time formatting completed (Result: $result)")
+        return result
     }
 
     /**

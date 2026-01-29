@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.clubs.domain
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.clubs.presentation.MemberListItemInfo
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
@@ -31,8 +32,9 @@ class GetClubMembersUseCase(
      * @return Result containing list of [MemberListItemInfo] if successful, or error if failed
      */
     suspend operator fun invoke(clubId: String): Result<List<MemberListItemInfo>> {
+        Bark.d("Fetching club members (Club ID: $clubId)")
         return clubRepository.getClub(clubId).map { club: Club ->
-            club.members?.map { member: Member ->
+            val memberItems = club.members?.map { member: Member ->
                 MemberListItemInfo(
                     memberId = member.id,
                     name = member.name,
@@ -41,6 +43,10 @@ class GetClubMembersUseCase(
                     avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath)
                 )
             }?.sortedByDescending { it.points } ?: emptyList()
+            Bark.i("Loaded club members (Count: ${memberItems.size}, sorted by points)")
+            memberItems
+        }.onFailure { error ->
+            Bark.e("Failed to fetch club members (Club ID: $clubId). User will see empty members list.", error)
         }
     }
 }

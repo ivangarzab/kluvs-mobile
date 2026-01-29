@@ -61,9 +61,10 @@ class ServerRemoteDataSourceImpl(
     override suspend fun getAllServers(): Result<List<Server>> {
         return try {
             val response = serverService.getAll()
+            Bark.i("Fetched all servers (count: ${response.servers.size})")
             Result.success(response.servers.map { it.toDomain() })
         } catch (e: Exception) {
-            Bark.e("Failed to fetch all servers list", e)
+            Bark.e("Failed to fetch all servers. Serving cached data if available.", e)
             Result.failure(e)
         }
     }
@@ -71,9 +72,10 @@ class ServerRemoteDataSourceImpl(
     override suspend fun getServer(serverId: String): Result<Server> {
         return try {
             val dto = serverService.get(serverId)
+            Bark.i("Fetched server (ID: $serverId)")
             Result.success(dto.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to fetch server with id=$serverId", e)
+            Bark.e("Failed to fetch server (ID: $serverId). Serving cached data if available.", e)
             Result.failure(e)
         }
     }
@@ -81,9 +83,10 @@ class ServerRemoteDataSourceImpl(
     override suspend fun createServer(request: CreateServerRequestDto): Result<Server> {
         return try {
             val response = serverService.create(request)
+            Bark.i("Server created (name: ${request.name})")
             Result.success(response.server.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to create server", e)
+            Bark.e("Failed to create server. Please retry.", e)
             Result.failure(e)
         }
     }
@@ -91,9 +94,10 @@ class ServerRemoteDataSourceImpl(
     override suspend fun updateServer(request: UpdateServerRequestDto): Result<Server> {
         return try {
             val response = serverService.update(request)
+            Bark.i("Server updated (ID: ${request.id})")
             Result.success(response.server.toDomain())
         } catch (e: Exception) {
-            Bark.e("Failed to update server with id=${request.id}", e)
+            Bark.e("Failed to update server (ID: ${request.id}). Please retry.", e)
             Result.failure(e)
         }
     }
@@ -102,12 +106,13 @@ class ServerRemoteDataSourceImpl(
         return try {
             val response = serverService.delete(serverId)
             if (response.success) {
+                Bark.i("Server deleted (ID: $serverId)")
                 Result.success(response.message)
             } else {
                 Result.failure(Exception("Delete failed: ${response.message}"))
             }
         } catch (e: Exception) {
-            Bark.e("Failed to delete server with id=$serverId", e)
+            Bark.e("Failed to delete server (ID: $serverId). Please retry.", e)
             Result.failure(e)
         }
     }

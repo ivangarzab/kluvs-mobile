@@ -53,53 +53,82 @@ class MemberLocalDataSourceImpl(
     }
 
     override suspend fun insertMember(member: Member) {
-        Bark.v("Inserting member ${member.id} into database")
+        Bark.v("Inserting member (ID: ${member.id}) into database")
         // Insert the member entity
-        memberDao.insertMember(member.toEntity())
+        try {
+            memberDao.insertMember(member.toEntity())
 
-        // Insert club-member relationships, but DON'T cache club entities here.
-        // Club entities should only be cached by ClubRepository with complete data.
-        // We'll insert relationships only if the club already exists (ignore foreign key errors).
-        member.clubs?.let { clubs ->
-            Bark.v("Processing ${clubs.size} club relationships for member ${member.id}")
-            var successCount = 0
-            clubs.forEach { club ->
-                try {
-                    memberDao.insertClubMemberCrossRef(
-                        ClubMemberCrossRef(clubId = club.id, memberId = member.id)
-                    )
-                    successCount++
-                } catch (e: Exception) {
-                    // Ignore foreign key violations - club will be cached later by ClubRepository
-                    Bark.v("Skipping relationship for club ${club.id} (not cached yet)")
+            // Insert club-member relationships, but DON'T cache club entities here.
+            // Club entities should only be cached by ClubRepository with complete data.
+            // We'll insert relationships only if the club already exists (ignore foreign key errors).
+            member.clubs?.let { clubs ->
+                Bark.v("Processing ${clubs.size} club relationships for member (ID: ${member.id})")
+                var successCount = 0
+                clubs.forEach { club ->
+                    try {
+                        memberDao.insertClubMemberCrossRef(
+                            ClubMemberCrossRef(clubId = club.id, memberId = member.id)
+                        )
+                        successCount++
+                    } catch (e: Exception) {
+                        // Ignore foreign key violations - club will be cached later by ClubRepository
+                        Bark.v("Skipping relationship for club (ID: ${club.id}) - not cached yet")
+                    }
                 }
+                Bark.v("Inserted $successCount/${clubs.size} relationships for member (ID: ${member.id})")
             }
-            Bark.v("Inserted $successCount/${clubs.size} relationships for member ${member.id}")
+        } catch (e: Exception) {
+            Bark.e("Failed to insert member (ID: ${member.id}) into database. Retry on next sync.", e)
+            throw e
         }
     }
 
     override suspend fun insertMembers(members: List<Member>) {
         Bark.d("Inserting ${members.size} members into database")
-        memberDao.insertMembers(members.map { it.toEntity() })
+        try {
+            memberDao.insertMembers(members.map { it.toEntity() })
+            Bark.d("Successfully inserted ${members.size} members into database")
+        } catch (e: Exception) {
+            Bark.e("Failed to insert ${members.size} members into database. Retry on next sync.", e)
+            throw e
+        }
     }
 
     override suspend fun insertClubMemberRelationship(clubId: String, memberId: String) {
-        Bark.d("Adding member $memberId to club $clubId")
-        memberDao.insertClubMemberCrossRef(
-            ClubMemberCrossRef(clubId = clubId, memberId = memberId)
-        )
+        Bark.d("Adding member (ID: $memberId) to club (ID: $clubId)")
+        try {
+            memberDao.insertClubMemberCrossRef(
+                ClubMemberCrossRef(clubId = clubId, memberId = memberId)
+            )
+            Bark.d("Successfully added member (ID: $memberId) to club (ID: $clubId)")
+        } catch (e: Exception) {
+            Bark.e("Failed to add member (ID: $memberId) to club (ID: $clubId). Retry on next sync.", e)
+            throw e
+        }
     }
 
     override suspend fun deleteClubMemberRelationship(clubId: String, memberId: String) {
-        Bark.d("Removing member $memberId from club $clubId")
-        memberDao.deleteClubMemberCrossRef(clubId, memberId)
+        Bark.d("Removing member (ID: $memberId) from club (ID: $clubId)")
+        try {
+            memberDao.deleteClubMemberCrossRef(clubId, memberId)
+            Bark.d("Successfully removed member (ID: $memberId) from club (ID: $clubId)")
+        } catch (e: Exception) {
+            Bark.e("Failed to remove member (ID: $memberId) from club (ID: $clubId). Retry on next sync.", e)
+            throw e
+        }
     }
 
     override suspend fun deleteMember(memberId: String) {
         val entity = memberDao.getMember(memberId)
         if (entity != null) {
-            Bark.d("Deleting member $memberId from database")
-            memberDao.deleteMember(entity)
+            Bark.d("Deleting member (ID: $memberId) from database")
+            try {
+                memberDao.deleteMember(entity)
+                Bark.d("Successfully deleted member (ID: $memberId) from database")
+            } catch (e: Exception) {
+                Bark.e("Failed to delete member (ID: $memberId) from database. Retry on next sync.", e)
+                throw e
+            }
         }
     }
 
@@ -109,7 +138,13 @@ class MemberLocalDataSourceImpl(
 
     override suspend fun deleteAll() {
         Bark.d("Clearing all members from database")
-        memberDao.deleteAll()
-        memberDao.deleteAllCrossRefs()
+        try {
+            memberDao.deleteAll()
+            memberDao.deleteAllCrossRefs()
+            Bark.d("Successfully cleared all members from database")
+        } catch (e: Exception) {
+            Bark.e("Failed to clear all members from database. Retry on next sync.", e)
+            throw e
+        }
     }
 }

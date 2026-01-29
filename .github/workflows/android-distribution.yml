@@ -12,6 +12,7 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
       # Path where we will store the service account JSON
       FIREBASE_CREDENTIALS_FILE: ${{ github.workspace }}/firebase-key.json
 

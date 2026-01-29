@@ -42,18 +42,18 @@ class ClubDetailsViewModel(
                     _state.update { it.copy(availableClubs = clubListItems) }
 
                     if (clubListItems.isNotEmpty()) {
-                        Bark.v("User has ${clubListItems.size} club(s), loading first club details")
+                        Bark.i("Loaded ${clubListItems.size} club(s) for user (ID: $userId)")
                         // Load full details for the first club only
                         loadClubData(clubListItems.first().id)
                     } else {
-                        Bark.v("User has no clubs, showing empty state")
+                        Bark.i("User has no clubs (ID: $userId)")
                         _state.update {
                             it.copy(isLoading = false)
                         }
                     }
                 }
                 .onFailure { error ->
-                    Bark.e("Failed to load member clubs", error)
+                    Bark.e("Failed to load member clubs for user (ID: $userId). Please retry.", error)
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -92,8 +92,8 @@ class ClubDetailsViewModel(
                 else -> "Multiple errors occurred"
             }
             error?.let { e ->
-                Bark.e("Error fetching club details: $e")
-            } ?: Bark.v("Got club details successfully")
+                Bark.e("Failed to fetch club details (ID: $clubId). Serving cached data if available.", Exception(e))
+            } ?: Bark.i("Successfully loaded club details (ID: $clubId)")
 
             // Update state with all results
             _state.update {
@@ -109,7 +109,7 @@ class ClubDetailsViewModel(
     }
 
     fun refresh() {
-        Bark.v("Refreshing club data")
+        Bark.d("Refreshing club data")
         currentClubId?.let { loadClubData(it) }
     }
 }

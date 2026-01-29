@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.data.remote.api
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.network.utils.JsonHelper.getJsonForSupabaseService
 import com.ivangarzab.kluvs.data.remote.dtos.CreateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.dtos.DeleteResponseDto
@@ -23,36 +24,68 @@ interface SessionService {
 internal class SessionServiceImpl(private val supabase: SupabaseClient) : SessionService {
 
     override suspend fun get(sessionId: String): SessionResponseDto {
-        return supabase.functions.invoke("session") {
-            method = HttpMethod.Get
-            url { parameters.append("id", sessionId) }
-        }.body()
+        Bark.d("Fetching session (ID: $sessionId)")
+        return try {
+            val response = supabase.functions.invoke("session") {
+                method = HttpMethod.Get
+                url { parameters.append("id", sessionId) }
+            }.body<SessionResponseDto>()
+            Bark.v("Session fetched successfully (ID: $sessionId)")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to fetch session (ID: $sessionId). Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun create(request: CreateSessionRequestDto): SessionSuccessResponseDto {
-        val json = getJsonForSupabaseService()
-        val jsonString = json.encodeToString(request)
+        Bark.d("Creating session")
+        return try {
+            val json = getJsonForSupabaseService()
+            val jsonString = json.encodeToString(request)
 
-        return supabase.functions.invoke("session") {
-            method = HttpMethod.Post
-            body = jsonString
-        }.body()
+            val response = supabase.functions.invoke("session") {
+                method = HttpMethod.Post
+                body = jsonString
+            }.body<SessionSuccessResponseDto>()
+            Bark.v("Session created successfully")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to create session. Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun update(request: UpdateSessionRequestDto): SessionSuccessResponseDto {
-        val json = getJsonForSupabaseService()
-        val jsonString = json.encodeToString(request)
+        Bark.d("Updating session (ID: ${request.id})")
+        return try {
+            val json = getJsonForSupabaseService()
+            val jsonString = json.encodeToString(request)
 
-        return supabase.functions.invoke("session") {
-            method = HttpMethod.Put
-            body = jsonString
-        }.body()
+            val response = supabase.functions.invoke("session") {
+                method = HttpMethod.Put
+                body = jsonString
+            }.body<SessionSuccessResponseDto>()
+            Bark.v("Session updated successfully (ID: ${request.id})")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to update session (ID: ${request.id}). Check network/API status and retry.", error)
+            throw error
+        }
     }
 
     override suspend fun delete(sessionId: String): DeleteResponseDto {
-        return supabase.functions.invoke("session") {
-            method = HttpMethod.Delete
-            url { parameters.append("id", sessionId) }
-        }.body()
+        Bark.d("Deleting session (ID: $sessionId)")
+        return try {
+            val response = supabase.functions.invoke("session") {
+                method = HttpMethod.Delete
+                url { parameters.append("id", sessionId) }
+            }.body<DeleteResponseDto>()
+            Bark.v("Session deleted successfully (ID: $sessionId)")
+            response
+        } catch (error: Exception) {
+            Bark.e("Failed to delete session (ID: $sessionId). Check network/API status and retry.", error)
+            throw error
+        }
     }
 }

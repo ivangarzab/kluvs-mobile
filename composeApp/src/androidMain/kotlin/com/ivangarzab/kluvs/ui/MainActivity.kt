@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
         val uri = intent?.data ?: return
 
         if (uri.scheme == "kluvs" && uri.host == "auth" && uri.path == "/callback") {
-            Bark.v("Received OAuth callback: $uri")
+            Bark.d("Processing OAuth callback from deep link")
             OAuthCallbackHandler.handleCallback(uri.toString())
         }
     }

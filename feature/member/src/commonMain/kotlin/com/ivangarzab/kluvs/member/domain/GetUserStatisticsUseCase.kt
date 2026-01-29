@@ -1,5 +1,6 @@
 package com.ivangarzab.kluvs.member.domain
 
+import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.member.presentation.UserStatistics
 import com.ivangarzab.kluvs.model.Member
@@ -24,12 +25,17 @@ class GetUserStatisticsUseCase(
      * @return Result containing [com.ivangarzab.kluvs.presentation.models.UserStatistics] if successful, or error if failed
      */
     suspend operator fun invoke(userId: String): Result<UserStatistics> {
+        Bark.d("Fetching user statistics (User ID: $userId)")
         return memberRepository.getMemberByUserId(userId).map { member: Member ->
-            UserStatistics(
+            val stats = UserStatistics(
                 clubsCount = member.clubs?.size ?: 0,
                 totalPoints = member.points,
                 booksRead = member.booksRead
             )
+            Bark.i("Loaded user statistics (Clubs: ${stats.clubsCount}, Points: ${stats.totalPoints}, Books: ${stats.booksRead})")
+            stats
+        }.onFailure { error ->
+            Bark.e("Failed to fetch user statistics (User ID: $userId). User will see default stats.", error)
         }
     }
 }
