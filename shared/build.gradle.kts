@@ -115,7 +115,7 @@ sentryKmp {
         enabled = true // Automatically adds the KMP dependency to commonMain
         linker { // Bridge the gap into the iOS env
             enabled = true
-            xcodeprojPath = "../iosApp/Kluvs.xcodeproj"
+            xcodeprojPath = rootProject.file("iosApp/Kluvs.xcodeproj").absolutePath
         }
     }
 }
