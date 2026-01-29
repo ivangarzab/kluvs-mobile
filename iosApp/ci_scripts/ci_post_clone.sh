@@ -1,5 +1,4 @@
 #!/bin/sh
-# Exit on any error and print commands for the logs
 set -e
 set -x
 
@@ -27,4 +26,14 @@ else
     exit 1
 fi
 
-echo "🏁 Environment ready. Returning to build..."
+# 5. SETUP SENTRY (Must happen first!)
+# This ensures the .xcframework is downloaded and ready for the test linking
+echo "⬇️ Fetching Sentry Framework..."
+./gradlew setupSentryForCi
+
+# 6. RUN TESTS
+# We run this here to gate the build. If this fails, the build stops.
+echo "🧪 Running KMP Simulator Tests..."
+./gradlew iosSimulatorArm64Test '-PexcludeTests=**/*IntegrationTest*' --continue
+
+echo "✅ Post-clone complete. Tests Passed. Environment ready for Xcode build. 🏁"
