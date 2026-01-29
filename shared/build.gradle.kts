@@ -116,6 +116,7 @@ sentryKmp {
         linker { // Bridge the gap into the iOS env
             enabled = true
             xcodeprojPath = "iosApp/Kluvs.xcodeproj"
+            frameworkPath.set("Sentry.xcframework")
         }
     }
 }
