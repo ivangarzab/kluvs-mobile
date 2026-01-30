@@ -10,6 +10,10 @@ plugins {
 // Global test exclusion support - allows excluding tests via -PexcludeTests="**/*IntegrationTest.class"
 subprojects {
     tasks.withType<Test>().configureEach {
+        filter {
+            // Don't fail when --tests filter matches zero tests
+            isFailOnNoMatchingTests = false
+        }
         if (project.hasProperty("excludeTests")) {
             val exclusions = project.property("excludeTests").toString().split(",")
             exclude(exclusions)
