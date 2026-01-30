@@ -39,6 +39,11 @@ kover {
             filters {
                 excludes {
                     classes("*.BuildConfig", "*.BuildKonfig") // Filter out generated code
+                    classes("**.SentrySetupKt") // Sentry configuration - side-effect only, hard to unit test
+                    classes("**.ScreenState*") // Sealed interface - no logic to test
+                    classes("**.LoginNavigation*") // Sealed class - no logic to test
+                    classes("**.AuthMode*") // Enum - no logic to test
+                    classes("**.CacheTTL") // Constants object - no logic to test
                     packages("**.di", "**.dtos") // Filter out DI and DTOs globally
                 }
             }
