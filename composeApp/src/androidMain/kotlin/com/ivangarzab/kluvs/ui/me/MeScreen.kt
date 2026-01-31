@@ -260,7 +260,7 @@ private fun ProfileSection(
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Edit, //TODO: Add custom icon
+                        painterResource(R.drawable.ic_edit),
                         contentDescription = stringResource(R.string.edit_profile_picture),
                         modifier = Modifier.size(14.dp)
                     )

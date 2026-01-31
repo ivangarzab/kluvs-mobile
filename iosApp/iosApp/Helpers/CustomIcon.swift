@@ -13,6 +13,7 @@ enum CustomIcon: String {
     case logout = "ic_logout"
     case email = "ic_email"
     case password = "ic_password"
+    case edit = "ic_edit"
     
     case discord = "ic_discord"
     case google = "ic_google"

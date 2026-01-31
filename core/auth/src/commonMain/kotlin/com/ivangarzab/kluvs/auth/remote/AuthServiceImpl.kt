@@ -218,7 +218,8 @@ class AuthServiceImpl(
         try {
             auth.importAuthToken(
                 accessToken = accessToken,
-                refreshToken = refreshToken
+                refreshToken = refreshToken,
+                retrieveUser = true
             )
             Bark.d("Session restored")
         } catch (e: Exception) {

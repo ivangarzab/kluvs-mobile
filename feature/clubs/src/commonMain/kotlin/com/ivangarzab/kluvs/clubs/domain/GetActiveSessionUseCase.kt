@@ -49,7 +49,8 @@ class GetActiveSessionUseCase(
                 val sortedDiscussions = session.discussions.sortedBy { it.date }
 
                 // Find the index of the next discussion (first future discussion)
-                val nextDiscussionIndex = sortedDiscussions.indexOfFirst { it.date > now }
+                // Compare dates only - discussions remain active until the day passes
+                val nextDiscussionIndex = sortedDiscussions.indexOfFirst { it.date.date > now.date }
 
                 val details = ActiveSessionDetails(
                     sessionId = session.id,

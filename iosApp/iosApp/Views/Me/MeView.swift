@@ -109,7 +109,7 @@ struct ProfileSection: View {
                             .fill(Color.brandOrange.opacity(0.9))
                             .frame(width: 24, height: 24)
 
-                        Image(systemName: "pencil")
+                        Image.custom(CustomIcon.edit)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 12, height: 12)
