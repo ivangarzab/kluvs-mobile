@@ -38,14 +38,6 @@ kotlin {
             export(project(":feature:member"))
             export(libs.bark)
         }
-        iosTarget.compilations.all {
-            if (compilationName == "test" && target.platformType == KotlinPlatformType.native) {
-                compilerOptions.configure {
-                    freeCompilerArgs.add("-linker-options")
-                    freeCompilerArgs.add("-F/your/path/Carthage/Build/Sentry.xcframework/ios-arm64_x86_64-simulator/")
-                }
-            }
-        }
     }
     
     sourceSets {
@@ -149,6 +141,21 @@ sentryKmp {
             if (ciFrameworkDir.exists()) {
                 // If the CI task downloaded it, use it.
                 frameworkPath.set(ciFrameworkDir.absolutePath)
+            }
+        }
+    }
+}
+
+// Override linker behavior for test binaries to avoid Swift compatibility errors
+// This makes Sentry symbols optional/undefined at link time for tests only
+kotlin {
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        binaries.all {
+            // For test binaries: make undefined symbols non-fatal
+            // This prevents "swiftCompatibility56 not found" linker errors in CI
+            if (name.contains("Test", ignoreCase = true)) {
+                linkerOpts("-Wl,-U,__swift_FORCE_LOAD_\$_swiftCompatibility56")
+                linkerOpts("-Wl,-U,__swift_FORCE_LOAD_\$_swiftCompatibilityConcurrency")
             }
         }
     }
