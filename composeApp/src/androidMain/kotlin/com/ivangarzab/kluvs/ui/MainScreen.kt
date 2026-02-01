@@ -155,7 +155,8 @@ fun MainScreenContent(
             state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            userScrollEnabled = false // Disable swipe navigation for main tabs
         ) { page ->
             val contentModifier = Modifier
                 .fillMaxSize()

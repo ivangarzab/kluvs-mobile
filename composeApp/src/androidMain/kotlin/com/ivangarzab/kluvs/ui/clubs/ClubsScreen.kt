@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -20,13 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.clubs.presentation.ClubDetailsState
 import com.ivangarzab.kluvs.clubs.presentation.ClubDetailsViewModel
@@ -104,7 +105,11 @@ fun ClubsScreenContent(
                 }
             }
             is ScreenState.Content -> {
-                var selectedTabIndex by remember { mutableIntStateOf(0) }
+                val scope = rememberCoroutineScope()
+                val pagerState = rememberPagerState(
+                    pageCount = { 3 },
+                    initialPage = 0
+                )
                 val tabs = listOf(
                     stringResource(R.string.general),
                     stringResource(R.string.active_session),
@@ -113,13 +118,17 @@ fun ClubsScreenContent(
 
                 Column(modifier = modifier) {
                     TabRow(
-                        selectedTabIndex = selectedTabIndex,
+                        selectedTabIndex = pagerState.currentPage,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         tabs.forEachIndexed { index, title ->
                             Tab(
-                                selected = selectedTabIndex == index,
-                                onClick = { selectedTabIndex = index },
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
                                 text = { Text(title) }
                             )
                         }
@@ -129,11 +138,17 @@ fun ClubsScreenContent(
                         .background(color = MaterialTheme.colorScheme.surface)
                         .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
-                    // Tab content
-                    when (selectedTabIndex) {
-                        0 -> GeneralTab(tabModifier, state.currentClubDetails)
-                        1 -> ActiveSessionTab(tabModifier, state.activeSession)
-                        2 -> MembersTab(tabModifier, state.members)
+
+                    // Swipeable tab content
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { page ->
+                        when (page) {
+                            0 -> GeneralTab(tabModifier, state.currentClubDetails)
+                            1 -> ActiveSessionTab(tabModifier, state.activeSession)
+                            2 -> MembersTab(tabModifier, state.members)
+                        }
                     }
                 }
             }

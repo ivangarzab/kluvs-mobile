@@ -198,6 +198,8 @@ struct FooterItem: View {
         self.iconColor = iconColor
         self.action = action
     }
+    
+    var iconSize = 18.0
 
     var body: some View {
         Button(action: {
@@ -205,8 +207,9 @@ struct FooterItem: View {
         }) {
             HStack(spacing: 12) {
                 Image.custom(icon)
-                    .font(.system(size: 20))
-                    .frame(width: 20, height: 20)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: iconSize, height: iconSize)
                     .foregroundColor(iconColor)
 
                 Text(label)
