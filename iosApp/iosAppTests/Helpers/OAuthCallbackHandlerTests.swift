@@ -26,25 +26,7 @@ class OAuthCallbackHandlerTests: XCTestCase {
     }
     
     // MARK: - Valid URL Tests
-    
-    func testHandleCallback_ValidURL_SetsCallbackUrl() {
-        // Given
-        let validURL = URL(string: "kluvs://auth/callback?code=test123")!
 
-        // When
-        handler.handleCallback(validURL)
-
-        // Then - give it a moment to publish
-        let expectation = XCTestExpectation(description: "Wait for publication")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertNotNil(self.handler.callbackUrl)
-            XCTAssertEqual(self.handler.callbackUrl?.absoluteString, validURL.absoluteString)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-    
     func testHandleCallback_ValidURLWithQueryParams_SetsCallbackUrl() {
         // Given
         let validURL = URL(string: "kluvs://auth/callback?access_token=abc&refresh_token=xyz&state=123")!

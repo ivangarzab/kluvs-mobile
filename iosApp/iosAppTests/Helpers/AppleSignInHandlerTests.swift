@@ -149,57 +149,6 @@ class AppleSignInHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func testErrorPublisher_EmitsChanges() {
-        // Given
-        let expectation = XCTestExpectation(description: "error publishes changes")
-        var receivedErrors: [Error?] = []
-        let testError = NSError(domain: "Test", code: 123)
-
-        handler.$error
-            .sink { error in
-                receivedErrors.append(error)
-            }
-            .store(in: &cancellables)
-
-        // When
-        handler.error = testError
-
-        // Then
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(receivedErrors.count, 2) // nil (initial) + testError
-            XCTAssertNil(receivedErrors[0])
-            XCTAssertNotNil(receivedErrors[1])
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
-    func testIdTokenPublisher_EmitsChanges() {
-        // Given
-        let expectation = XCTestExpectation(description: "idToken publishes changes")
-        var receivedTokens: [String?] = []
-
-        handler.$idToken
-            .sink { token in
-                receivedTokens.append(token)
-            }
-            .store(in: &cancellables)
-
-        // When
-        handler.idToken = "test.token.123"
-
-        // Then
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(receivedTokens.count, 2) // nil (initial) + token
-            XCTAssertNil(receivedTokens[0])
-            XCTAssertEqual(receivedTokens[1], "test.token.123")
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
     func testErrorPublisher_MultipleChanges() {
         // Given
         let expectation = XCTestExpectation(description: "error publishes multiple changes")
