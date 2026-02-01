@@ -1,4 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import tasks.SetupSentryTask
 import utils.getPropertyOrEnvVar
 
@@ -36,6 +37,14 @@ kotlin {
             export(project(":feature:clubs"))
             export(project(":feature:member"))
             export(libs.bark)
+        }
+        iosTarget.compilations.all {
+            if (compilationName == "test" && target.platformType == KotlinPlatformType.native) {
+                compilerOptions.configure {
+                    freeCompilerArgs.add("-linker-options")
+                    freeCompilerArgs.add("-F/your/path/Carthage/Build/Sentry.xcframework/ios-arm64_x86_64-simulator/")
+                }
+            }
         }
     }
     
