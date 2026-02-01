@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -297,62 +295,56 @@ private fun FooterSection(
     onHelpClick: () -> Unit,
     onSignOutClick: () -> Unit,
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
+        FooterItem(
+            label = stringResource(R.string.settings),
+            icon = R.drawable.ic_settings,
+            onClick = onSettingsClick
+        )
+
+        Divider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            color = MaterialTheme.colorScheme.inverseOnSurface
+        )
+
+        FooterItem(
+            label = stringResource(R.string.help_and_support),
+            icon = R.drawable.ic_help,
+            onClick = onHelpClick
+        )
+
+        Divider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            color = MaterialTheme.colorScheme.inverseOnSurface
+        )
+
+        FooterItem(
+            label = stringResource(R.string.sign_out),
+            labelColor = MaterialTheme.colorScheme.error,
+            icon = R.drawable.ic_signout,
+            iconColor = MaterialTheme.colorScheme.error,
+            onClick = onSignOutClick
+        )
+
+        Divider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            color = MaterialTheme.colorScheme.inverseOnSurface
+        )
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
         ) {
-            FooterItem(
-                label = stringResource(R.string.settings),
-                icon = R.drawable.ic_settings,
-                onClick = onSettingsClick
+            Text(
+                text = stringResource(R.string.version_x, "0.0.1"),
+                color = MaterialTheme.colorScheme.inverseOnSurface,
+                style = MaterialTheme.typography.bodySmall,
+                fontStyle = FontStyle.Italic
             )
-
-            Divider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.inverseOnSurface
-            )
-
-            FooterItem(
-                label = stringResource(R.string.help_and_support),
-                icon = R.drawable.ic_help,
-                onClick = onHelpClick
-            )
-
-            Divider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.inverseOnSurface
-            )
-
-            FooterItem(
-                label = stringResource(R.string.sign_out),
-                icon = R.drawable.ic_signout,
-                iconColor = MaterialTheme.colorScheme.error,
-                onClick = onSignOutClick
-            )
-
-            Divider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.inverseOnSurface
-            )
-
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Text(
-                    text = stringResource(R.string.version_x, "0.0.1"),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontStyle = FontStyle.Italic
-                )
-            }
         }
     }
 }
@@ -363,7 +355,7 @@ private fun FooterItem(
     label: String,
     labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     @DrawableRes icon: Int,
-    iconColor: Color = MaterialTheme.colorScheme.primary,
+    iconColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: () -> Unit,
 ) {
     Row(
@@ -372,7 +364,7 @@ private fun FooterItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(20.dp),
             painter = painterResource(icon),
             contentDescription = null,
             tint = iconColor

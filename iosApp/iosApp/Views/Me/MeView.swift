@@ -41,9 +41,6 @@ struct MeView: View {
 
                         CurrentlyReadingSection(currentReadings: viewModel.currentlyReading)
 
-                        Divider()
-                            .padding(.vertical, 8)
-
                         FooterSection(onSignOut: {
                             viewModel.onSignOutClicked()
                         })
@@ -152,24 +149,27 @@ struct FooterSection: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Divider()
+                .padding(.vertical, 12)
+            
             FooterItem(label: String(localized: "button_settings"), icon: .settings, action: {
                 // TODO: Navigate to settings
             })
 
             Divider()
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
 
             FooterItem(label: String(localized: "button_help_support"), icon: .help, action: {
                 // TODO: Navigate to help & support
             })
 
             Divider()
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
 
-            FooterItem(label: String(localized: "sign_out"), icon: .logout, action: onSignOut)
+            FooterItem(label: String(localized: "sign_out"), icon: .logout, labelColor: .red, iconColor: .red, action: onSignOut)
 
             Divider()
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
 
             HStack {
                 Spacer()
@@ -188,10 +188,14 @@ struct FooterItem: View {
     let label: String
     let icon: CustomIcon
     let action: (() -> Void)?
+    var labelColor: Color = .primary
+    var iconColor: Color = .primary
 
-    init(label: String, icon: CustomIcon, action: (() -> Void)? = nil) {
+    init(label: String, icon: CustomIcon, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
         self.label = label
         self.icon = icon
+        self.labelColor = labelColor
+        self.iconColor = iconColor
         self.action = action
     }
 
@@ -202,12 +206,12 @@ struct FooterItem: View {
             HStack(spacing: 12) {
                 Image.custom(icon)
                     .font(.system(size: 20))
-                    .foregroundColor(.brandOrange)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(iconColor)
 
                 Text(label)
                     .font(.body)
-                    .foregroundColor(.primary)
+                    .foregroundColor(labelColor)
 
                 Spacer()
             }
