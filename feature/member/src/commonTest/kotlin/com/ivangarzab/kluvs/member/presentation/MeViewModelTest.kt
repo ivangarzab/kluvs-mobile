@@ -178,6 +178,7 @@ class MeViewModelTest {
 
         // When
         viewModel.loadUserData(userId)
+        testScheduler.advanceUntilIdle()
 
         // Then
         val state = viewModel.state.value
