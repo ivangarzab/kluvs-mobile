@@ -1,4 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import tasks.SetupSentryTask
 import utils.getPropertyOrEnvVar
 
@@ -140,6 +141,21 @@ sentryKmp {
             if (ciFrameworkDir.exists()) {
                 // If the CI task downloaded it, use it.
                 frameworkPath.set(ciFrameworkDir.absolutePath)
+            }
+        }
+    }
+}
+
+// Override linker behavior for test binaries to avoid Swift compatibility errors
+// This makes Sentry symbols optional/undefined at link time for tests only
+kotlin {
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        binaries.all {
+            // For test binaries: make undefined symbols non-fatal
+            // This prevents "swiftCompatibility56 not found" linker errors in CI
+            if (name.contains("Test", ignoreCase = true)) {
+                linkerOpts("-Wl,-U,__swift_FORCE_LOAD_\$_swiftCompatibility56")
+                linkerOpts("-Wl,-U,__swift_FORCE_LOAD_\$_swiftCompatibilityConcurrency")
             }
         }
     }

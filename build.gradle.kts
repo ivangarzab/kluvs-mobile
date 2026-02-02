@@ -10,6 +10,10 @@ plugins {
 // Global test exclusion support - allows excluding tests via -PexcludeTests="**/*IntegrationTest.class"
 subprojects {
     tasks.withType<Test>().configureEach {
+        filter {
+            // Don't fail when --tests filter matches zero tests
+            isFailOnNoMatchingTests = false
+        }
         if (project.hasProperty("excludeTests")) {
             val exclusions = project.property("excludeTests").toString().split(",")
             exclude(exclusions)
@@ -35,6 +39,11 @@ kover {
             filters {
                 excludes {
                     classes("*.BuildConfig", "*.BuildKonfig") // Filter out generated code
+                    classes("**.SentrySetupKt") // Sentry configuration - side-effect only, hard to unit test
+                    classes("**.ScreenState*") // Sealed interface - no logic to test
+                    classes("**.LoginNavigation*") // Sealed class - no logic to test
+                    classes("**.AuthMode*") // Enum - no logic to test
+                    classes("**.CacheTTL") // Constants object - no logic to test
                     packages("**.di", "**.dtos") // Filter out DI and DTOs globally
                 }
             }

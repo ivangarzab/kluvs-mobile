@@ -350,7 +350,7 @@ class ClubDetailsViewModelTest {
             id = "d2",
             sessionId = "s1",
             title = "Chapter 2",
-            date = LocalDateTime(2026, 2, 1, 19, 0),
+            date = LocalDateTime(2032, 2, 1, 19, 0),
             location = "Discord"
         )
         val activeSession = Session(

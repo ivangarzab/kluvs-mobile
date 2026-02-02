@@ -42,15 +42,18 @@ struct StatisticsItem: View {
     let icon: CustomIcon
     let label: String
     let value: String
+    
+    var iconSize = 28.0
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 8) {
             Image.custom(icon)
-                .font(.system(size: 24))
+                .resizable()
+                .scaledToFit()
                 .foregroundColor(.brandOrange)
-                .frame(width: 28, height: 28)
+                .frame(width: iconSize, height: iconSize)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text(label)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
