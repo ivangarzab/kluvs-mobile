@@ -149,22 +149,22 @@ class MeViewModelTest {
             id = "s1",
             clubId = "club-1",
             book = book1,
-            dueDate = LocalDateTime(2026, 3, 15, 0, 0),
+            dueDate = LocalDateTime(2027, 3, 15, 0, 0),
             discussions = listOf(
-                Discussion("d1", "s1", "Chapter 1", LocalDateTime(2024, 1, 1, 19, 0), null),
-                Discussion("d2", "s1", "Chapter 2", LocalDateTime(2026, 2, 1, 19, 0), null)
+                Discussion("d1", "s1", "Chapter 1", LocalDateTime(2024, 1, 1, 19, 0), null),  // Clearly past
+                Discussion("d2", "s1", "Chapter 2", LocalDateTime(2027, 2, 15, 19, 0), null)  // Clearly future
             )
         )
         val session2 = Session(
             id = "s2",
             clubId = "club-2",
             book = book2,
-            dueDate = LocalDateTime(2026, 4, 1, 0, 0),
+            dueDate = LocalDateTime(2027, 4, 1, 0, 0),
             discussions = listOf(
-                Discussion("d3", "s2", "Part 1", LocalDateTime(2026, 3, 1, 19, 0), null),
-                Discussion("d4", "s2", "Part 2", LocalDateTime(2026, 3, 15, 19, 0), null),
-                Discussion("d5", "s2", "Part 3", LocalDateTime(2026, 3, 29, 19, 0), null),
-                Discussion("d6", "s2", "Part 4", LocalDateTime(2026, 4, 12, 19, 0), null)
+                Discussion("d3", "s2", "Part 1", LocalDateTime(2027, 3, 1, 19, 0), null),  // Clearly future
+                Discussion("d4", "s2", "Part 2", LocalDateTime(2027, 3, 15, 19, 0), null), // Clearly future
+                Discussion("d5", "s2", "Part 3", LocalDateTime(2027, 3, 29, 19, 0), null), // Clearly future
+                Discussion("d6", "s2", "Part 4", LocalDateTime(2027, 4, 12, 19, 0), null)  // Clearly future
             )
         )
 
@@ -270,12 +270,12 @@ class MeViewModelTest {
             id = "s1",
             clubId = "club-1",
             book = book,
-            dueDate = LocalDateTime(2026, 12, 31, 0, 0),
+            dueDate = LocalDateTime(2027, 12, 31, 0, 0),
             discussions = listOf(
-                Discussion("d1", "s1", "Part 1", LocalDateTime(2024, 1, 1, 19, 0), null), // Past
-                Discussion("d2", "s1", "Part 2", LocalDateTime(2024, 2, 1, 19, 0), null), // Past
-                Discussion("d3", "s1", "Part 3", LocalDateTime(2024, 3, 1, 19, 0), null), // Past
-                Discussion("d4", "s1", "Part 4", LocalDateTime(2026, 4, 1, 19, 0), null)  // Future
+                Discussion("d1", "s1", "Part 1", LocalDateTime(2024, 1, 1, 19, 0), null),
+                Discussion("d2", "s1", "Part 2", LocalDateTime(2024, 2, 1, 19, 0), null),
+                Discussion("d3", "s1", "Part 3", LocalDateTime(2024, 3, 1, 19, 0), null),
+                Discussion("d4", "s1", "Part 4", LocalDateTime(2027, 5, 1, 19, 0), null)
             )
         )
 
