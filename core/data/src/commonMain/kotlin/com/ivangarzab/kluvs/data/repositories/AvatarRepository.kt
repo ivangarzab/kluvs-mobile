@@ -23,6 +23,14 @@ interface AvatarRepository {
      * @return Result with the storage path on success
      */
     suspend fun uploadAvatar(memberId: String, imageData: ByteArray): Result<String>
+
+    /**
+     * Deletes an avatar from storage.
+     *
+     * @param avatarPath The storage path to delete (e.g., "123/1234567890.png")
+     * @return Result indicating success or failure
+     */
+    suspend fun deleteAvatar(avatarPath: String): Result<Unit>
 }
 
 internal class AvatarRepositoryImpl(
@@ -35,5 +43,9 @@ internal class AvatarRepositoryImpl(
 
     override suspend fun uploadAvatar(memberId: String, imageData: ByteArray): Result<String> {
         return avatarRemoteDataSource.uploadAvatar(memberId, imageData)
+    }
+
+    override suspend fun deleteAvatar(avatarPath: String): Result<Unit> {
+        return avatarRemoteDataSource.deleteAvatar(avatarPath)
     }
 }

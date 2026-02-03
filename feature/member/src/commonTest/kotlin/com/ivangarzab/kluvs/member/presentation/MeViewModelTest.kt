@@ -416,7 +416,7 @@ class MeViewModelTest {
     }
 
     @Test
-    fun `uploadAvatar succeeds and refreshes profile`() = runTest {
+    fun `uploadAvatar succeeds and updates avatar URL in state`() = runTest {
         // Given
         val userId = "user-123"
         val memberId = "member-1"
@@ -431,13 +431,12 @@ class MeViewModelTest {
         every { avatarRepository.getAvatarUrl(null) } returns null
         viewModel.loadUserData(userId)
 
-        // Setup avatar upload mocks
+        // Setup avatar upload mocks — getMember is called by the use case to capture the old path
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(memberWithoutAvatar)
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.success(storagePath)
         everySuspend { memberRepository.updateMember(memberId, avatarPath = storagePath) } returns Result.success(memberWithAvatar)
-
-        // Setup refresh after upload - return member with avatar
-        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(memberWithAvatar)
         every { avatarRepository.getAvatarUrl(storagePath) } returns avatarUrl
+        // oldAvatarPath is null, so deleteAvatar is not called
 
         // When
         viewModel.uploadAvatar(imageData)
@@ -446,6 +445,7 @@ class MeViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.isUploadingAvatar)
         assertNull(state.snackbarError)
+        assertEquals(avatarUrl, state.profile?.avatarUrl)
     }
 
     @Test
@@ -474,7 +474,8 @@ class MeViewModelTest {
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
         viewModel.loadUserData(userId)
 
-        // Setup avatar upload to fail
+        // Setup avatar upload to fail — getMember is called by the use case before the upload attempt
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(member)
         val exception = Exception("Upload failed")
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
 
@@ -498,6 +499,8 @@ class MeViewModelTest {
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
         viewModel.loadUserData(userId)
 
+        // getMember is called by the use case before the upload attempt
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(member)
         val exception = Exception("Upload failed")
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
         viewModel.uploadAvatar(imageData)
