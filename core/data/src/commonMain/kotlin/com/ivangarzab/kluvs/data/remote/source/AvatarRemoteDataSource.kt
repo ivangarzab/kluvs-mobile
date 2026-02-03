@@ -25,6 +25,14 @@ interface AvatarRemoteDataSource {
      * @return Result with the storage path on success
      */
     suspend fun uploadAvatar(memberId: String, imageData: ByteArray): Result<String>
+
+    /**
+     * Deletes an avatar from storage.
+     *
+     * @param avatarPath The storage path to delete (e.g., "123/1234567890.png")
+     * @return Result indicating success or failure
+     */
+    suspend fun deleteAvatar(avatarPath: String): Result<Unit>
 }
 
 internal class AvatarRemoteDataSourceImpl(
@@ -40,6 +48,15 @@ internal class AvatarRemoteDataSourceImpl(
             avatarService.uploadAvatar(memberId, imageData)
         } catch (e: Exception) {
             Bark.e("Avatar upload failed (Member ID: $memberId). User may need to retry.", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteAvatar(avatarPath: String): Result<Unit> {
+        return try {
+            avatarService.deleteAvatar(avatarPath)
+        } catch (e: Exception) {
+            Bark.e("Avatar delete failed (path: $avatarPath). Orphaned file in storage.", e)
             Result.failure(e)
         }
     }
