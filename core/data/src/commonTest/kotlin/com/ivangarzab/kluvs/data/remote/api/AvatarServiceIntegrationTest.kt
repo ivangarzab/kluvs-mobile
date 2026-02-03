@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -111,27 +112,23 @@ class AvatarServiceIntegrationTest {
         // Given: A specific member ID and some dummy image bytes
         val memberId = "test-integration-member"
         val dummyImageBytes = byteArrayOf(0x89.toByte(), 0x50.toByte(), 0x4E.toByte(), 0x47.toByte()) // Fake PNG header
-        val expectedPath = "$memberId/avatar.png"
+        var uploadedPath: String? = null
 
         try {
             // ==========================================
             // 1. Test Upload
             // ==========================================
 
-            // When: Uploading avatar
-            println("Attempting upload to bucket '$bucketName' with path '$expectedPath'...")
+            println("Attempting upload to bucket '$bucketName' for member '$memberId'...")
             val uploadResult = avatarService.uploadAvatar(memberId, dummyImageBytes)
 
-            // Then: Result should be success and return the correct path
             if (uploadResult.isFailure) {
                 val error = uploadResult.exceptionOrNull()
                 println("✗ Upload FAILED")
                 println("  Error message: ${error?.message}")
-//                println("  Error type: ${error?.javaClass?.simpleName}")
                 println("  Stack trace:")
                 error?.printStackTrace()
 
-                // Try to get more details from the error
                 if (error?.message?.contains("404") == true) {
                     println("\n  → This suggests the bucket doesn't exist or the path is wrong")
                 } else if (error?.message?.contains("403") == true || error?.message?.contains("Unauthorized") == true) {
@@ -141,77 +138,119 @@ class AvatarServiceIntegrationTest {
                 println("✓ Upload succeeded")
             }
             assertTrue(uploadResult.isSuccess, "Upload should return success. Error: ${uploadResult.exceptionOrNull()?.message}")
-            assertEquals(expectedPath, uploadResult.getOrNull())
 
-            // Verify: Check if file actually exists in Supabase Storage using the raw client
-            // (This confirms the integration actually touched the server)
+            // Path is now $memberId/$timestamp.png — verify structure, not exact value
+            val path = uploadResult.getOrNull()
+            assertNotNull(path)
+            uploadedPath = path
+            assertTrue(path.startsWith("$memberId/"), "Path should be under the member's folder")
+            assertTrue(path.endsWith(".png"), "Path should end with .png")
+
+            // Verify: file actually exists in Supabase Storage
+            val fileName = path.substringAfter("$memberId/")
             val files = supabaseClient.storage.from(bucketName).list(memberId)
-            assertTrue(files.any { it.name == "avatar.png" }, "File should exist in the bucket folder")
+            assertTrue(files.any { it.name == fileName }, "File '$fileName' should exist in the bucket folder")
 
             // ==========================================
             // 2. Test Get URL
             // ==========================================
 
-            // When: requesting the public URL
-            val url = avatarService.getAvatarUrl(expectedPath)
+            val url = avatarService.getAvatarUrl(uploadedPath)
 
-            // Then: URL should be formed correctly
             assertNotNull(url)
             assertTrue(url.startsWith(BuildKonfig.TEST_SUPABASE_URL), "URL should start with supabase URL")
-            assertTrue(url.contains("/storage/v1/object/public/$bucketName/$expectedPath"), "URL should point to the specific public asset")
+            assertTrue(url.contains("/storage/v1/object/public/$bucketName/$uploadedPath"), "URL should point to the specific public asset")
 
         } finally {
             // Cleanup: Remove the test file so the test is repeatable
-            try {
-                supabaseClient.storage.from(bucketName).delete(listOf(expectedPath))
-                println("Successfully cleaned up test file: $expectedPath")
-            } catch (e: Exception) {
-                println("Warning: Failed to clean up test avatar: ${e.message}")
-                e.printStackTrace()
+            uploadedPath?.let {
+                try {
+                    supabaseClient.storage.from(bucketName).delete(listOf(it))
+                    println("Successfully cleaned up test file: $it")
+                } catch (e: Exception) {
+                    println("Warning: Failed to clean up test avatar: ${e.message}")
+                }
             }
         }
     }
 
     @Test
-    fun testOverwriteAvatar() = runTest {
-        // Given: An existing file
-        val memberId = "test-integration-overwrite"
+    fun testSuccessiveUploadsCreateUniqueFiles() = runTest {
+        // Given: Two uploads for the same member
+        val memberId = "test-integration-successive"
         val data1 = byteArrayOf(1, 2, 3)
         val data2 = byteArrayOf(4, 5, 6)
+        val uploadedPaths = mutableListOf<String>()
 
         try {
             // Upload first version
             val firstUpload = avatarService.uploadAvatar(memberId, data1)
-            if (firstUpload.isFailure) {
-                println("First upload failed: ${firstUpload.exceptionOrNull()?.message}")
-                firstUpload.exceptionOrNull()?.printStackTrace()
-            }
             assertTrue(firstUpload.isSuccess, "First upload failed: ${firstUpload.exceptionOrNull()?.message}")
+            uploadedPaths.add(firstUpload.getOrThrow())
 
-            // When: Uploading different data to the same member ID
-            val result = avatarService.uploadAvatar(memberId, data2)
+            // Upload second version
+            val secondUpload = avatarService.uploadAvatar(memberId, data2)
+            assertTrue(secondUpload.isSuccess, "Second upload failed: ${secondUpload.exceptionOrNull()?.message}")
+            uploadedPaths.add(secondUpload.getOrThrow())
 
-            // Then: Should succeed (because upsert = true in implementation)
-            if (result.isFailure) {
-                println("Second upload failed: ${result.exceptionOrNull()?.message}")
-                result.exceptionOrNull()?.printStackTrace()
-            }
-            assertTrue(result.isSuccess, "Second upload failed: ${result.exceptionOrNull()?.message}")
+            // Then: Each upload produced a unique path (different timestamps)
+            assertNotEquals(uploadedPaths[0], uploadedPaths[1], "Each upload should produce a unique path")
 
-            // Verify: Download to ensure content changed
-            val downloadedBytes = supabaseClient.storage.from(bucketName)
-                .downloadPublic("$memberId/avatar.png")
-
-            // Note: simple content check
-            assertEquals(data2.size, downloadedBytes.size)
-            assertEquals(data2[0], downloadedBytes[0])
+            // Verify: both files coexist in storage
+            val files = supabaseClient.storage.from(bucketName).list(memberId)
+            val fileNames = files.map { it.name }
+            assertTrue(fileNames.contains(uploadedPaths[0].substringAfter("$memberId/")), "First file should still exist")
+            assertTrue(fileNames.contains(uploadedPaths[1].substringAfter("$memberId/")), "Second file should exist")
 
         } finally {
-            try {
-                supabaseClient.storage.from(bucketName).delete(listOf("$memberId/avatar.png"))
-                println("Successfully cleaned up overwrite test file")
-            } catch (e: Exception) {
-                println("Warning: Failed to clean up overwrite test: ${e.message}")
+            if (uploadedPaths.isNotEmpty()) {
+                try {
+                    supabaseClient.storage.from(bucketName).delete(uploadedPaths)
+                    println("Successfully cleaned up successive upload test files")
+                } catch (e: Exception) {
+                    println("Warning: Failed to clean up successive upload test: ${e.message}")
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testDeleteAvatar() = runTest {
+        // Given: An uploaded avatar
+        val memberId = "test-integration-delete"
+        val dummyImageBytes = byteArrayOf(1, 2, 3, 4)
+        var uploadedPath: String? = null
+
+        try {
+            val uploadResult = avatarService.uploadAvatar(memberId, dummyImageBytes)
+            assertTrue(uploadResult.isSuccess, "Upload failed: ${uploadResult.exceptionOrNull()?.message}")
+            val path = uploadResult.getOrThrow()
+            uploadedPath = path
+
+            // Verify it exists before deletion
+            val fileName = path.substringAfter("$memberId/")
+            val filesBefore = supabaseClient.storage.from(bucketName).list(memberId)
+            assertTrue(filesBefore.any { it.name == fileName }, "File should exist before deletion")
+
+            // When: Deleting the avatar
+            val deleteResult = avatarService.deleteAvatar(path)
+
+            // Then: Delete should succeed and file should be gone
+            assertTrue(deleteResult.isSuccess, "Delete failed: ${deleteResult.exceptionOrNull()?.message}")
+            val filesAfter = supabaseClient.storage.from(bucketName).list(memberId)
+            assertTrue(filesAfter.none { it.name == fileName }, "File should not exist after deletion")
+
+            // Successfully cleaned up by the test itself
+            uploadedPath = null
+
+        } finally {
+            // Cleanup in case the test failed before the delete step
+            uploadedPath?.let {
+                try {
+                    supabaseClient.storage.from(bucketName).delete(listOf(it))
+                } catch (e: Exception) {
+                    println("Warning: Failed to clean up delete test: ${e.message}")
+                }
             }
         }
     }
