@@ -139,4 +139,38 @@ class AvatarRepositoryTest {
         assertEquals(storagePath, result.getOrNull())
         verifySuspend { remoteDataSource.uploadAvatar(memberId, largeImageData) }
     }
+
+    // ========================================
+    // DELETE AVATAR
+    // ========================================
+
+    @Test
+    fun `deleteAvatar success returns Result success`() = runTest {
+        // Given: RemoteDataSource returns success
+        val avatarPath = "member-123/1234567890.png"
+        everySuspend { remoteDataSource.deleteAvatar(avatarPath) } returns Result.success(Unit)
+
+        // When: Deleting avatar
+        val result = repository.deleteAvatar(avatarPath)
+
+        // Then: Result is success
+        assertTrue(result.isSuccess)
+        verifySuspend { remoteDataSource.deleteAvatar(avatarPath) }
+    }
+
+    @Test
+    fun `deleteAvatar failure returns Result failure`() = runTest {
+        // Given: RemoteDataSource returns failure
+        val avatarPath = "member-123/1234567890.png"
+        val exception = Exception("Delete failed")
+        everySuspend { remoteDataSource.deleteAvatar(avatarPath) } returns Result.failure(exception)
+
+        // When: Deleting avatar
+        val result = repository.deleteAvatar(avatarPath)
+
+        // Then: Result is failure
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
+        verifySuspend { remoteDataSource.deleteAvatar(avatarPath) }
+    }
 }
