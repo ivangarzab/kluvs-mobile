@@ -55,7 +55,7 @@ class ClubLocalDataSourceTest {
         setup()
         val clubId = "club-1"
         val clubEntity = ClubEntity(clubId, null, "Fantasy Club", null, null, 0)
-        val memberEntity = MemberEntity("member-1", "user-1", "Alice", "alice", null, 100, 5, null, null, 0)
+        val memberEntity = MemberEntity("member-1", "user-1", "Alice", "alice", null, 5, null, null, 0)
         val bookEntity = BookEntity("book-1", "The Hobbit", "Tolkien", null, 1937, null, null, 0)
         val sessionEntity = SessionEntity("session-1", clubId, "book-1", "2026-03-15", 0)
 
@@ -96,7 +96,7 @@ class ClubLocalDataSourceTest {
         setup()
         val book = Book("book-1", "The Hobbit", "Tolkien", null, 1937, null)
         val session = Session("session-1", "club-1", book, null, emptyList())
-        val member = Member("member-1", "user-1", "Alice", "", 100, 5, null)
+        val member = Member("member-1", "user-1", "Alice", "", 5, null)
         val club = Club(
             id = "club-1",
             name = "Fantasy Club",
@@ -162,7 +162,6 @@ class ClubLocalDataSourceTest {
         name = name,
         handle = null,
         avatarPath = avatarPath,
-        points = points,
         booksRead = booksRead,
         role = null,
         createdAt = null,

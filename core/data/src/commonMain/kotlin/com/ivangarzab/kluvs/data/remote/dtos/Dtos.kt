@@ -38,7 +38,6 @@ data class MemberDto(
     val name: String? = null,  // Nullable to handle incomplete API responses
     val handle: String? = null,
     val avatar_path: String? = null,
-    val points: Int = 0,
     val books_read: Int = 0,
     val user_id: String? = null,
     val role: String? = null,
@@ -149,7 +148,6 @@ data class MemberResponseDto(
     val name: String,
     val handle: String? = null,
     val avatar_path: String? = null,
-    val points: Int,
     val books_read: Int,
     val user_id: String?,
     val role: String?,
@@ -163,7 +161,6 @@ data class CreateMemberRequestDto(
     @Serializable(with = NullableIntToStringSerializer::class)
     val id: String? = null,
     val name: String,
-    val points: Int = 0,
     val books_read: Int = 0,
     val user_id: String? = null,
     val role: String? = null,
@@ -176,7 +173,6 @@ data class UpdateMemberRequestDto(
     val id: String,
     val name: String? = null,
     val avatar_path: String? = null,
-    val points: Int? = null,
     val books_read: Int? = null,
     val user_id: String? = null,
     val role: String? = null,

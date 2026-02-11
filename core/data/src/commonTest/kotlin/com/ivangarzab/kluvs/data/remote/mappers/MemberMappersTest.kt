@@ -16,7 +16,6 @@ class MemberMappersTest {
         val dto = MemberDto(
             id = "1",
             name = "Jane Doe",
-            points = 150,
             books_read = 10,
             user_id = "user-123",
             role = "member",
@@ -29,7 +28,6 @@ class MemberMappersTest {
         // Then: Basic fields are mapped, relations are null
         assertEquals("1", domain.id)
         assertEquals("Jane Doe", domain.name)
-        assertEquals(150, domain.points)
         assertEquals(10, domain.booksRead)
         assertEquals("user-123", domain.userId)
         assertEquals("member", domain.role)
@@ -57,7 +55,6 @@ class MemberMappersTest {
         val dto = MemberResponseDto(
             id = "2",
             name = "John Smith",
-            points = 200,
             books_read = 15,
             user_id = "user-456",
             role = "admin",
@@ -71,7 +68,6 @@ class MemberMappersTest {
         // Then: All nested relations are mapped
         assertEquals("2", domain.id)
         assertEquals("John Smith", domain.name)
-        assertEquals(200, domain.points)
         assertEquals(15, domain.booksRead)
         assertEquals("user-456", domain.userId)
         assertEquals("admin", domain.role)
@@ -91,7 +87,6 @@ class MemberMappersTest {
         val dto = MemberResponseDto(
             id = "3",
             name = "New Member",
-            points = 0,
             books_read = 0,
             user_id = null,
             role = null,
@@ -116,7 +111,6 @@ class MemberMappersTest {
         val dto = MemberDto(
             id = "4",
             name = "Anonymous",
-            points = 0,
             books_read = 0,
             user_id = null,
             role = null,
@@ -141,7 +135,6 @@ class MemberMappersTest {
             name = "Test Member",
             handle = "testuser",
             avatar_path = "member-1/avatar.png",
-            points = 100,
             books_read = 5,
             user_id = "user-123",
             role = "member",
@@ -164,7 +157,6 @@ class MemberMappersTest {
             name = "Test Member",
             handle = "testuser",
             avatar_path = null,
-            points = 100,
             books_read = 5,
             user_id = "user-123",
             role = "member",
@@ -187,7 +179,6 @@ class MemberMappersTest {
             name = "John Smith",
             handle = "johnsmith",
             avatar_path = "member-2/avatar.png",
-            points = 200,
             books_read = 15,
             user_id = "user-456",
             role = "admin",
@@ -211,7 +202,6 @@ class MemberMappersTest {
             name = "John Smith",
             handle = "johnsmith",
             avatar_path = null,
-            points = 200,
             books_read = 15,
             user_id = "user-456",
             role = "admin",
@@ -234,7 +224,6 @@ class MemberMappersTest {
             id = "1",
             name = "Test Member",
             handle = null,
-            points = 0,
             books_read = 0,
             user_id = null,
             role = null,
@@ -261,7 +250,6 @@ class MemberMappersTest {
             id = "1",
             name = "Test Member",
             handle = null,
-            points = 0,
             books_read = 0,
             user_id = null,
             role = null,
@@ -283,7 +271,6 @@ class MemberMappersTest {
             id = "1",
             name = "Test Member",
             handle = "testuser",
-            points = 0,
             books_read = 0,
             user_id = null,
             role = null,
@@ -305,7 +292,6 @@ class MemberMappersTest {
             id = "1",
             name = "Test Member",
             handle = null,
-            points = 0,
             books_read = 0,
             user_id = null,
             role = null,
@@ -327,7 +313,6 @@ class MemberMappersTest {
             id = "2",
             name = "John Smith",
             handle = "johnsmith",
-            points = 200,
             books_read = 15,
             user_id = "user-456",
             role = "admin",
