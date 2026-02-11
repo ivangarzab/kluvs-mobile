@@ -28,7 +28,7 @@ class SessionLocalDataSourceTest {
         setup()
         val sessionId = "session-1"
         val bookId = "book-1"
-        val bookEntity = BookEntity(bookId, "The Hobbit", "Tolkien", null, 1937, null, null, 0)
+        val bookEntity = BookEntity(bookId, "The Hobbit", "Tolkien", null, 1937, null, null, null, null, 0)
         val sessionEntity = SessionEntity(sessionId, "club-1", bookId, "2026-03-15", 0)
 
         everySuspend { fixture.sessionDao.getSession(sessionId) } returns sessionEntity
@@ -70,7 +70,7 @@ class SessionLocalDataSourceTest {
     fun `getSessionsForClub returns sessions for club`() = runTest {
         setup()
         val clubId = "club-1"
-        val bookEntity = BookEntity("book-1", "Dune", "Herbert", null, 1965, null, null, 0)
+        val bookEntity = BookEntity("book-1", "Dune", "Herbert", null, 1965, null, null, null, null, 0)
         val sessions = listOf(
             SessionEntity("session-1", clubId, "book-1", "2026-04-01", 0)
         )
@@ -121,6 +121,8 @@ class SessionLocalDataSourceTest {
         year = year,
         isbn = isbn,
         pageCount = null,
+        imageUrl = null,
+        externalGoogleId = null,
         lastFetchedAt = 0
     )
 

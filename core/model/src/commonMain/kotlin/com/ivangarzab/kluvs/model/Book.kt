@@ -17,5 +17,9 @@ data class Book(
 
     val isbn: String?,
 
-    val pageCount: Int? = null
+    val pageCount: Int? = null,
+
+    val imageUrl: String? = null,
+
+    val externalGoogleId: String? = null
 )

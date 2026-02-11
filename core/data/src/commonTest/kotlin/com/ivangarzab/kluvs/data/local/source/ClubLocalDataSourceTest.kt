@@ -56,7 +56,7 @@ class ClubLocalDataSourceTest {
         val clubId = "club-1"
         val clubEntity = ClubEntity(clubId, null, "Fantasy Club", null, null, 0)
         val memberEntity = MemberEntity("member-1", "user-1", "Alice", "alice", null, 5, null, null, 0)
-        val bookEntity = BookEntity("book-1", "The Hobbit", "Tolkien", null, 1937, null, null, 0)
+        val bookEntity = BookEntity("book-1", "The Hobbit", "Tolkien", null, 1937, null, null, imageUrl = null, externalGoogleId = null, lastFetchedAt = 0)
         val sessionEntity = SessionEntity("session-1", clubId, "book-1", "2026-03-15", 0)
 
         everySuspend { fixture.clubDao.getClub(clubId) } returns clubEntity
@@ -176,7 +176,9 @@ class ClubLocalDataSourceTest {
         year = year,
         isbn = isbn,
         pageCount = null,
-        lastFetchedAt = 0
+        lastFetchedAt = 0,
+        imageUrl = imageUrl,
+        externalGoogleId = externalGoogleId
     )
 
     private fun Session.toEntity() = SessionEntity(

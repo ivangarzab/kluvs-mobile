@@ -19,7 +19,9 @@ data class BookDto(
     val edition: String? = null,
     val year: Int? = null,
     val isbn: String? = null,
-    val page_count: Int? = null
+    val page_count: Int? = null,
+    val image_url: String? = null,
+    val external_google_id: String? = null
 )
 
 @Serializable
