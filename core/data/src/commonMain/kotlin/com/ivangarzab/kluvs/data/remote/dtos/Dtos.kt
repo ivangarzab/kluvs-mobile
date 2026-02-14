@@ -207,7 +207,8 @@ data class SessionResponseDto(
 data class CreateSessionRequestDto(
     val id: String? = null,
     val club_id: String,
-    val book: BookDto,
+    val book_id: String? = null,
+    val book: BookDto? = null,
     val due_date: String? = null,
     val discussions: List<DiscussionDto>? = null
 )
@@ -281,4 +282,27 @@ data class ServerSuccessResponseDto(
     val success: Boolean,
     val message: String,
     val server: ServerDto
+)
+
+// ========================================
+// BOOK SPECIFIC REQUESTS / RESPONSES
+// ========================================
+
+@Serializable
+data class CreateBookRequestDto(
+    val title: String,
+    val author: String,
+    val year: Int? = null,
+    val isbn: String? = null,
+    val page_count: Int? = null,
+    val image_url: String? = null,
+    val external_google_id: String? = null
+)
+
+@Serializable
+data class BookRegistrationResponseDto(
+    val success: Boolean,
+    val book: BookDto,
+    val created: Boolean,
+    val message: String? = null
 )
