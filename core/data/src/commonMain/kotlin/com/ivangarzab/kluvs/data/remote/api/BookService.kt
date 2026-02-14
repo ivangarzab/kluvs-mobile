@@ -2,7 +2,9 @@ package com.ivangarzab.kluvs.data.remote.api
 
 import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.remote.dtos.BookDto
+import com.ivangarzab.kluvs.data.remote.dtos.BookLookupResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.BookRegistrationResponseDto
+import com.ivangarzab.kluvs.data.remote.dtos.BookSearchResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.CreateBookRequestDto
 import com.ivangarzab.kluvs.network.utils.JsonHelper.getJsonForSupabaseService
 import io.github.jan.supabase.SupabaseClient
@@ -34,9 +36,9 @@ internal class BookServiceImpl(private val supabase: SupabaseClient) : BookServi
                     parameters.append("q", query)
                     if (limit != null) parameters.append("limit", limit.toString())
                 }
-            }.body<List<BookDto>>()
-            Bark.v("Book search returned ${response.size} results")
-            response
+            }.body<BookSearchResponseDto>()
+            Bark.v("Book search returned ${response.books.size} results")
+            response.books
         } catch (error: Exception) {
             Bark.e("Failed to search books (query: \"$query\"). Check network/API status.", error)
             throw error
@@ -49,9 +51,9 @@ internal class BookServiceImpl(private val supabase: SupabaseClient) : BookServi
             val response = supabase.functions.invoke("book") {
                 method = HttpMethod.Get
                 url { parameters.append("isbn", isbn) }
-            }.body<BookDto>()
+            }.body<BookLookupResponseDto>()
             Bark.v("Book lookup by ISBN succeeded (ISBN: $isbn)")
-            response
+            response.book
         } catch (error: Exception) {
             Bark.e("Failed to look up book by ISBN ($isbn). Check network/API status.", error)
             throw error

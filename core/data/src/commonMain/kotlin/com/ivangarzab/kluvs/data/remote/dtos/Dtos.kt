@@ -306,3 +306,16 @@ data class BookRegistrationResponseDto(
     val created: Boolean,
     val message: String? = null
 )
+
+@Serializable
+data class BookSearchResponseDto(
+    val success: Boolean,
+    val books: List<BookDto>,
+    val total: Int? = null
+)
+
+@Serializable
+data class BookLookupResponseDto(
+    val success: Boolean,
+    val book: BookDto
+)
