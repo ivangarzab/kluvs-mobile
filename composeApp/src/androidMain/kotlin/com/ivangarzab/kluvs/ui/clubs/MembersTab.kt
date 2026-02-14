@@ -121,8 +121,7 @@ fun Preview_MembersTab() = KluvsTheme {
     MembersTab(
         modifier = Modifier
             .background(color = MaterialTheme.colorScheme.surface)
-            .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .fillMaxSize(),
         members = listOf(
             MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", ""),
             MemberListItemInfo("1", "Monica Michelle Morales", "@monica", ""),
