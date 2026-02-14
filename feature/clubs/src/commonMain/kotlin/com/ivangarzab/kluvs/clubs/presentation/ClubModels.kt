@@ -81,6 +81,5 @@ data class MemberListItemInfo(
     val memberId: String,
     val name: String,
     val handle: String,
-    val points: Int,
     val avatarUrl: String?
 )
