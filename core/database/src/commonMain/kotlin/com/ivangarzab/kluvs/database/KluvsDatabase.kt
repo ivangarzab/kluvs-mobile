@@ -45,7 +45,7 @@ interface KluvsDatabase {
         BookEntity::class,
         DiscussionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @ConstructedBy(KluvsDatabaseConstructor::class)

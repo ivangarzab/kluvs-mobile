@@ -17,7 +17,9 @@ class BookMappersTest {
             edition = "First Edition",
             year = 1937,
             isbn = "978-0-395-07122-1",
-            page_count = 310
+            page_count = 310,
+            image_url = "https://example.com/hobbit.jpg",
+            external_google_id = "goog-123"
         )
 
         // When: Mapping to domain
@@ -31,6 +33,8 @@ class BookMappersTest {
         assertEquals(1937, domain.year)
         assertEquals("978-0-395-07122-1", domain.isbn)
         assertEquals(310, domain.pageCount)
+        assertEquals("https://example.com/hobbit.jpg", domain.imageUrl)
+        assertEquals("goog-123", domain.externalGoogleId)
     }
 
     @Test
@@ -57,5 +61,7 @@ class BookMappersTest {
         assertNull(domain.year)
         assertNull(domain.isbn)
         assertNull(domain.pageCount)
+        assertNull(domain.imageUrl)
+        assertNull(domain.externalGoogleId)
     }
 }

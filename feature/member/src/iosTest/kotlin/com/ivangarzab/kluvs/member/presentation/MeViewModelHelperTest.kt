@@ -134,7 +134,6 @@ class MeViewModelHelperTest {
             id = "member-1",
             name = "John Doe",
             handle = "@john",
-            points = 100,
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
@@ -170,7 +169,6 @@ class MeViewModelHelperTest {
             id = "member-1",
             name = "John Doe",
             handle = "@john",
-            points = 100,
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
@@ -195,7 +193,6 @@ class MeViewModelHelperTest {
             id = "member-1",
             name = "Test User",
             handle = "@test",
-            points = 0,
             userId = userId,
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
@@ -218,7 +215,6 @@ class MeViewModelHelperTest {
             id = "member-1",
             name = "Test User",
             handle = "@test",
-            points = 0,
             userId = userId,
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
@@ -255,7 +251,6 @@ class MeViewModelHelperTest {
             id = "member-1",
             name = "John Doe",
             handle = "@john",
-            points = 100,
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )
@@ -294,7 +289,6 @@ class MeViewModelHelperTest {
             id = "member-1",
             name = "John Doe",
             handle = "@john",
-            points = 100,
             userId = "user-1",
             createdAt = LocalDateTime(2024, 1, 1, 0, 0)
         )

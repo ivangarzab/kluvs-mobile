@@ -25,7 +25,7 @@ class BookLocalDataSourceTest {
     fun `getBook returns book when it exists`() = runTest {
         setup()
         val bookId = "book-1"
-        val entity = BookEntity(bookId, "The Hobbit", "Tolkien", null, 1937, null, null, 0)
+        val entity = BookEntity(bookId, "The Hobbit", "Tolkien", null, 1937, null, null, null, null, 0)
         everySuspend { fixture.bookDao.getBook(bookId) } returns entity
 
         val result = dataSource.getBook(bookId)
@@ -45,8 +45,8 @@ class BookLocalDataSourceTest {
     fun `getAllBooks returns all books`() = runTest {
         setup()
         val books = listOf(
-            BookEntity("book-1", "The Hobbit", "Tolkien", null, 1937, null, null, 0),
-            BookEntity("book-2", "Dune", "Herbert", null, 1965, null, null, 0)
+            BookEntity("book-1", "The Hobbit", "Tolkien", null, 1937, null, null, null, null, 0),
+            BookEntity("book-2", "Dune", "Herbert", null, 1965, null, null, null, null, 0)
         )
         everySuspend { fixture.bookDao.getAllBooks() } returns books
 
@@ -67,7 +67,7 @@ class BookLocalDataSourceTest {
     @Test
     fun `deleteBook deletes existing book`() = runTest {
         setup()
-        val entity = BookEntity("book-1", "The Hobbit", "Tolkien", null, 1937, null, null, 0)
+        val entity = BookEntity("book-1", "The Hobbit", "Tolkien", null, 1937, null, null, null, null, 0)
         everySuspend { fixture.bookDao.getBook("book-1") } returns entity
         everySuspend { fixture.bookDao.deleteBook(entity) } returns Unit
 
@@ -89,6 +89,8 @@ class BookLocalDataSourceTest {
         year = year,
         isbn = isbn,
         pageCount = null,
+        imageUrl = null,
+        externalGoogleId = null,
         lastFetchedAt = 0
     )
 }

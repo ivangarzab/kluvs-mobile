@@ -140,14 +140,7 @@ internal class SessionRepositoryImpl(
         val result = sessionRemoteDataSource.createSession(
             CreateSessionRequestDto(
                 club_id = clubId,
-                book = BookDto(
-                    id = book.id,
-                    title = book.title,
-                    author = book.author,
-                    edition = book.edition,
-                    year = book.year,
-                    isbn = book.isbn
-                ),
+                book_id = book.id,
                 due_date = dueDate?.toString(),
                 discussions = discussions?.map { it.toDto() }
             )

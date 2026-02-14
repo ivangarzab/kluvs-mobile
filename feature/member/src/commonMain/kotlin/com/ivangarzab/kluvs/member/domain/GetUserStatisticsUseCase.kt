@@ -29,10 +29,9 @@ class GetUserStatisticsUseCase(
         return memberRepository.getMemberByUserId(userId).map { member: Member ->
             val stats = UserStatistics(
                 clubsCount = member.clubs?.size ?: 0,
-                totalPoints = member.points,
                 booksRead = member.booksRead
             )
-            Bark.i("Loaded user statistics (Clubs: ${stats.clubsCount}, Points: ${stats.totalPoints}, Books: ${stats.booksRead})")
+            Bark.i("Loaded user statistics (Clubs: ${stats.clubsCount}, Books: ${stats.booksRead})")
             stats
         }.onFailure { error ->
             Bark.e("Failed to fetch user statistics (User ID: $userId). User will see default stats.", error)

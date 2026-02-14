@@ -101,8 +101,8 @@ class ClubDetailsViewModelTest {
             discussions = listOf(futureDiscussion)
         )
         val members = listOf(
-            Member(id = "m1", userId = "u1", name = "Alice", points = 100, booksRead = 5, clubs = null),
-            Member(id = "m2", userId = "u2", name = "Bob", points = 50, booksRead = 3, clubs = null)
+            Member(id = "m1", userId = "u1", name = "Alice", booksRead = 5, clubs = null),
+            Member(id = "m2", userId = "u2", name = "Bob", booksRead = 3, clubs = null)
         )
         val club = Club(
             id = clubId,
@@ -129,7 +129,6 @@ class ClubDetailsViewModelTest {
         assertEquals("session-1", state.activeSession?.sessionId)
         assertEquals(2, state.members.size)
         assertEquals("Alice", state.members[0].name)
-        assertEquals(100, state.members[0].points)
     }
 
     @Test
@@ -203,45 +202,13 @@ class ClubDetailsViewModelTest {
     }
 
     @Test
-    fun `loadClubData sorts members by points descending`() = runTest {
-        // Given
-        val clubId = "club-123"
-        val members = listOf(
-            Member(id = "m1", userId = "u1", name = "Alice", points = 50, booksRead = 3, clubs = null),
-            Member(id = "m2", userId = "u2", name = "Bob", points = 150, booksRead = 8, clubs = null),
-            Member(id = "m3", userId = "u3", name = "Charlie", points = 100, booksRead = 5, clubs = null)
-        )
-        val club = Club(
-            id = clubId,
-            name = "Test Club",
-            serverId = null,
-            discordChannel = null,
-            members = members,
-            activeSession = null,
-            pastSessions = emptyList(),
-            shameList = emptyList()
-        )
-        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
-
-        // When
-        viewModel.loadClubData(clubId)
-
-        // Then
-        val state = viewModel.state.value
-        assertEquals(3, state.members.size)
-        assertEquals("Bob", state.members[0].name)      // 150 points
-        assertEquals("Charlie", state.members[1].name)  // 100 points
-        assertEquals("Alice", state.members[2].name)    // 50 points
-    }
-
-    @Test
     fun `loadClubData calculates member count correctly`() = runTest {
         // Given
         val clubId = "club-123"
         val members = listOf(
-            Member(id = "m1", userId = "u1", name = "Alice", points = 100, booksRead = 5, clubs = null),
-            Member(id = "m2", userId = "u2", name = "Bob", points = 50, booksRead = 3, clubs = null),
-            Member(id = "m3", userId = "u3", name = "Charlie", points = 75, booksRead = 4, clubs = null)
+            Member(id = "m1", userId = "u1", name = "Alice", booksRead = 5, clubs = null),
+            Member(id = "m2", userId = "u2", name = "Bob", booksRead = 3, clubs = null),
+            Member(id = "m3", userId = "u3", name = "Charlie", booksRead = 4, clubs = null)
         )
         val club = Club(
             id = clubId,

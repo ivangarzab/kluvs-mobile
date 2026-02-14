@@ -43,7 +43,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             name = "John Doe",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = null
         )
@@ -70,7 +69,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             name = "John Doe",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = listOf(club1, club2)
         )
@@ -135,7 +133,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             name = "John Doe",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = listOf(club)
         )
@@ -191,7 +188,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             name = "John Doe",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = listOf(club)
         )
@@ -234,7 +230,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             name = "John Doe",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = listOf(club1, club2)
         )
@@ -279,7 +274,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             name = "John Doe",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = listOf(club)
         )

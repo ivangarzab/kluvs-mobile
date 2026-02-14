@@ -17,7 +17,6 @@ fun MemberDto.toDomain(): Member {
         name = name ?: "",  // Provide default if backend doesn't return name
         handle = handle,
         avatarPath = avatar_path,
-        points = points,
         booksRead = books_read,
         userId = user_id,
         role = role,
@@ -40,7 +39,6 @@ fun MemberResponseDto.toDomain(): Member {
         name = name,
         handle = handle,
         avatarPath = avatar_path,
-        points = points,
         booksRead = books_read,
         userId = user_id,
         role = role,

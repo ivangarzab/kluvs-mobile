@@ -19,7 +19,9 @@ data class BookDto(
     val edition: String? = null,
     val year: Int? = null,
     val isbn: String? = null,
-    val page_count: Int? = null
+    val page_count: Int? = null,
+    val image_url: String? = null,
+    val external_google_id: String? = null
 )
 
 @Serializable
@@ -38,7 +40,6 @@ data class MemberDto(
     val name: String? = null,  // Nullable to handle incomplete API responses
     val handle: String? = null,
     val avatar_path: String? = null,
-    val points: Int = 0,
     val books_read: Int = 0,
     val user_id: String? = null,
     val role: String? = null,
@@ -149,7 +150,6 @@ data class MemberResponseDto(
     val name: String,
     val handle: String? = null,
     val avatar_path: String? = null,
-    val points: Int,
     val books_read: Int,
     val user_id: String?,
     val role: String?,
@@ -163,7 +163,6 @@ data class CreateMemberRequestDto(
     @Serializable(with = NullableIntToStringSerializer::class)
     val id: String? = null,
     val name: String,
-    val points: Int = 0,
     val books_read: Int = 0,
     val user_id: String? = null,
     val role: String? = null,
@@ -176,7 +175,6 @@ data class UpdateMemberRequestDto(
     val id: String,
     val name: String? = null,
     val avatar_path: String? = null,
-    val points: Int? = null,
     val books_read: Int? = null,
     val user_id: String? = null,
     val role: String? = null,
@@ -209,7 +207,8 @@ data class SessionResponseDto(
 data class CreateSessionRequestDto(
     val id: String? = null,
     val club_id: String,
-    val book: BookDto,
+    val book_id: String? = null,
+    val book: BookDto? = null,
     val due_date: String? = null,
     val discussions: List<DiscussionDto>? = null
 )
@@ -283,4 +282,40 @@ data class ServerSuccessResponseDto(
     val success: Boolean,
     val message: String,
     val server: ServerDto
+)
+
+// ========================================
+// BOOK SPECIFIC REQUESTS / RESPONSES
+// ========================================
+
+@Serializable
+data class CreateBookRequestDto(
+    val title: String,
+    val author: String,
+    val year: Int? = null,
+    val isbn: String? = null,
+    val page_count: Int? = null,
+    val image_url: String? = null,
+    val external_google_id: String? = null
+)
+
+@Serializable
+data class BookRegistrationResponseDto(
+    val success: Boolean,
+    val book: BookDto,
+    val created: Boolean,
+    val message: String? = null
+)
+
+@Serializable
+data class BookSearchResponseDto(
+    val success: Boolean,
+    val books: List<BookDto>,
+    val total: Int? = null
+)
+
+@Serializable
+data class BookLookupResponseDto(
+    val success: Boolean,
+    val book: BookDto
 )

@@ -16,7 +16,9 @@ fun BookEntity.toDomain(): Book {
         edition = edition,
         year = year,
         isbn = isbn,
-        pageCount = pageCount
+        pageCount = pageCount,
+        imageUrl = imageUrl,
+        externalGoogleId = externalGoogleId
     )
 }
 
@@ -34,6 +36,8 @@ fun Book.toEntity(): BookEntity {
         year = year,
         isbn = isbn,
         pageCount = pageCount,
+        imageUrl = imageUrl,
+        externalGoogleId = externalGoogleId,
         lastFetchedAt = Clock.System.now().toEpochMilliseconds()
     )
 }

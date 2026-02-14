@@ -38,7 +38,6 @@ class GetUserStatisticsUseCaseTest {
             name = "John Doe",
             userId = userId,
             role = null,
-            points = 150,
             booksRead = 20,
             clubs = clubs
         )
@@ -51,7 +50,6 @@ class GetUserStatisticsUseCaseTest {
         assertTrue(result.isSuccess)
         val stats = result.getOrNull()!!
         assertEquals(3, stats.clubsCount)
-        assertEquals(150, stats.totalPoints)
         assertEquals(20, stats.booksRead)
         verifySuspend { memberRepository.getMemberByUserId(userId) }
     }
@@ -65,7 +63,6 @@ class GetUserStatisticsUseCaseTest {
             name = "Jane Doe",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = null
         )
@@ -78,7 +75,6 @@ class GetUserStatisticsUseCaseTest {
         assertTrue(result.isSuccess)
         val stats = result.getOrNull()!!
         assertEquals(0, stats.clubsCount)
-        assertEquals(0, stats.totalPoints)
         assertEquals(0, stats.booksRead)
         verifySuspend { memberRepository.getMemberByUserId(userId) }
     }
@@ -92,7 +88,6 @@ class GetUserStatisticsUseCaseTest {
             name = "New User",
             userId = userId,
             role = null,
-            points = 0,
             booksRead = 0,
             clubs = emptyList()
         )
@@ -105,7 +100,6 @@ class GetUserStatisticsUseCaseTest {
         assertTrue(result.isSuccess)
         val stats = result.getOrNull()!!
         assertEquals(0, stats.clubsCount)
-        assertEquals(0, stats.totalPoints)
         assertEquals(0, stats.booksRead)
         verifySuspend { memberRepository.getMemberByUserId(userId) }
     }

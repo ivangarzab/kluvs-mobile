@@ -14,7 +14,6 @@ class MemberEntityTest {
             name = "John Doe",
             handle = "@johndoe",
             avatarPath = "/avatars/johndoe.png",
-            points = 100,
             booksRead = 5,
             role = "admin",
             createdAt = "2024-01-01T12:00:00Z",
@@ -27,7 +26,6 @@ class MemberEntityTest {
         assertEquals("John Doe", memberEntity.name)
         assertEquals("@johndoe", memberEntity.handle)
         assertEquals("/avatars/johndoe.png", memberEntity.avatarPath)
-        assertEquals(100, memberEntity.points)
         assertEquals(5, memberEntity.booksRead)
         assertEquals("admin", memberEntity.role)
         assertEquals("2024-01-01T12:00:00Z", memberEntity.createdAt)
@@ -43,7 +41,6 @@ class MemberEntityTest {
             name = null,
             handle = null,
             avatarPath = null,
-            points = 0,
             booksRead = 0,
             role = null,
             createdAt = null,
@@ -58,7 +55,6 @@ class MemberEntityTest {
         assertEquals(null, memberEntity.avatarPath)
         assertEquals(null, memberEntity.role)
         assertEquals(null, memberEntity.createdAt)
-        assertEquals(0, memberEntity.points)
         assertEquals(0, memberEntity.booksRead)
     }
 
@@ -71,7 +67,6 @@ class MemberEntityTest {
             name = "John Doe",
             handle = "@johndoe",
             avatarPath = "/avatars/johndoe.png",
-            points = 100,
             booksRead = 5,
             role = "member",
             createdAt = "2024-01-01T12:00:00Z",
@@ -80,14 +75,12 @@ class MemberEntityTest {
 
         // When
         val updated = original.copy(
-            points = 150,
             booksRead = 6,
             lastFetchedAt = 9876543210L
         )
 
         // Then
         assertEquals("member-1", updated.id)
-        assertEquals(150, updated.points)
         assertEquals(6, updated.booksRead)
         assertEquals("2024-01-01T12:00:00Z", updated.createdAt)
         assertEquals(9876543210L, updated.lastFetchedAt)
@@ -102,7 +95,6 @@ class MemberEntityTest {
             name = "John Doe",
             handle = "@johndoe",
             avatarPath = "/avatars/johndoe.png",
-            points = 100,
             booksRead = 5,
             role = "member",
             createdAt = "2024-01-01T12:00:00Z",
@@ -115,7 +107,6 @@ class MemberEntityTest {
             name = "John Doe",
             handle = "@johndoe",
             avatarPath = "/avatars/johndoe.png",
-            points = 100,
             booksRead = 5,
             role = "member",
             createdAt = "2024-01-01T12:00:00Z",
@@ -128,7 +119,6 @@ class MemberEntityTest {
             name = "Jane Doe",
             handle = "@janedoe",
             avatarPath = "/avatars/janedoe.png",
-            points = 50,
             booksRead = 3,
             role = "member",
             createdAt = "2024-01-15T12:00:00Z",

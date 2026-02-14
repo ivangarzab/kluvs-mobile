@@ -42,7 +42,6 @@ class ClubRemoteDataSourceTest {
                 MemberDto(
                     id = "1",
                     name = "John",
-                    points = 100,
                     books_read = 5,
                     user_id = null,
                     role = null,

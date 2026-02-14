@@ -20,8 +20,6 @@ data class Member(
 
     val avatarPath: String? = null,
 
-    val points: Int = 0,
-
     val booksRead: Int = 0,
 
     /** The User ID related to Auth. */
