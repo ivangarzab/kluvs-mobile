@@ -81,11 +81,13 @@ android {
         }
 
         getByName("debug") {
+            // https://firebase.google.com/docs/app-distribution/android/distribute-gradle?apptype=apk
             firebaseAppDistribution {
                 serviceCredentialsFile = System.getenv("FIREBASE_CREDENTIALS_FILE")
                     ?: "${System.getProperty("user.home")}/.config/firebase/kluvs-app-distribution.json"
                 artifactType = "APK"
                 groups = "og"
+//                releaseNotes = ""
             }
         }
     }
