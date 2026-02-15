@@ -52,12 +52,6 @@ struct MemberListItem: View {
             }
 
             Spacer()
-
-            VStack(alignment: .trailing, spacing: 0) {
-                Text(String(format: NSLocalizedString("label_points", comment: ""), member.points))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
         }
         .padding(.vertical, 12)
     }

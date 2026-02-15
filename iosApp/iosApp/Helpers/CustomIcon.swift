@@ -5,7 +5,6 @@ enum CustomIcon: String {
     case clubs = "ic_clubs"
     case user = "ic_user"
     case book = "ic_book"
-    case points = "ic_points"
     case location = "ic_location"
     case settings = "ic_settings"
     case help = "ic_help"
