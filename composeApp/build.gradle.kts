@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
