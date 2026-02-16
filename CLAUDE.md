@@ -17,13 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Plan file location:** All implementation plans should be saved to `.claude/plans/` (gitignored).
 
-**Phased approach for KMP features:** When implementing features that span shared code and platform-specific code, follow this order:
-1. **Phase 1: Shared code (Data Layer)** - Models, DTOs, Services, RemoteDataSources, Repositories, Mappers
-2. **Phase 2: Shared code (Feature Layer)** - UseCases, ViewModels, expect declarations
-3. **Phase 3: Android** - actual declarations, UI components
-4. **Phase 4: iOS** - actual declarations, platform-specific UI
-
-**STOP after each phase** for user verification before proceeding.
+**New KMP features** follow a strict 4-phase approach. Use the `new-kmp-feature` skill — it owns the file map, coding conventions, and phase gate rules.
 
 **Plans and agents must NOT run builds or tests.** When a plan includes verification steps:
 - List the test files to create/update
