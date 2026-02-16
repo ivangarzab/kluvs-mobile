@@ -173,19 +173,6 @@ struct FooterSection: View {
                 .padding(.vertical, 12)
 
             FooterItem(label: String(localized: "sign_out"), icon: .logout, labelColor: .red, iconColor: .red, action: onSignOut)
-
-            Divider()
-                .padding(.vertical, 12)
-
-            HStack {
-                Spacer()
-                Text(String(format: NSLocalizedString("app_version", comment: ""), Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""))
-                    .font(.caption)
-                    .italic()
-                    .foregroundColor(.secondary)
-                    .padding(.top, 8)
-            }
-            .padding(.horizontal, 16)
         }
     }
 }
