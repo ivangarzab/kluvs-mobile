@@ -20,7 +20,6 @@ data class MemberEntity(
     val name: String?,
     val handle: String?,
     val avatarPath: String?,
-    val points: Int,
     val booksRead: Int,
     val role: String?,
     val createdAt: String?, // ISO-8601 datetime string

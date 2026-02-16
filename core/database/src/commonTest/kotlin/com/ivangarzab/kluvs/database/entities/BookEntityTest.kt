@@ -17,6 +17,8 @@ class BookEntityTest {
             year = 1937,
             isbn = "978-0547928227",
             pageCount = 310,
+            imageUrl = "https://example.com/hobbit.jpg",
+            externalGoogleId = "goog-123",
             lastFetchedAt = 1234567890L
         )
 
@@ -28,6 +30,8 @@ class BookEntityTest {
         assertEquals(1937, bookEntity.year)
         assertEquals("978-0547928227", bookEntity.isbn)
         assertEquals(310, bookEntity.pageCount)
+        assertEquals("https://example.com/hobbit.jpg", bookEntity.imageUrl)
+        assertEquals("goog-123", bookEntity.externalGoogleId)
         assertEquals(1234567890L, bookEntity.lastFetchedAt)
     }
 
@@ -42,6 +46,8 @@ class BookEntityTest {
             year = null,
             isbn = null,
             pageCount = null,
+            imageUrl = null,
+            externalGoogleId = null,
             lastFetchedAt = 1234567890L
         )
 
@@ -53,6 +59,8 @@ class BookEntityTest {
         assertEquals(null, bookEntity.year)
         assertEquals(null, bookEntity.isbn)
         assertEquals(null, bookEntity.pageCount)
+        assertEquals(null, bookEntity.imageUrl)
+        assertEquals(null, bookEntity.externalGoogleId)
     }
 
     @Test
@@ -66,6 +74,8 @@ class BookEntityTest {
             year = 1937,
             isbn = "978-0547928227",
             pageCount = 310,
+            imageUrl = null,
+            externalGoogleId = null,
             lastFetchedAt = 1234567890L
         )
 
@@ -97,6 +107,8 @@ class BookEntityTest {
             year = 1937,
             isbn = "978-0547928227",
             pageCount = 310,
+            imageUrl = null,
+            externalGoogleId = null,
             lastFetchedAt = 1234567890L
         )
 
@@ -108,6 +120,8 @@ class BookEntityTest {
             year = 1937,
             isbn = "978-0547928227",
             pageCount = 310,
+            imageUrl = null,
+            externalGoogleId = null,
             lastFetchedAt = 1234567890L
         )
 
@@ -119,6 +133,8 @@ class BookEntityTest {
             year = 1949,
             isbn = "978-0451524935",
             pageCount = 328,
+            imageUrl = null,
+            externalGoogleId = null,
             lastFetchedAt = 1234567890L
         )
 

@@ -17,5 +17,7 @@ data class BookEntity(
     val year: Int?,
     val isbn: String?,
     val pageCount: Int?,
+    val imageUrl: String?,
+    val externalGoogleId: String?,
     val lastFetchedAt: Long // Timestamp in milliseconds for TTL check
 )

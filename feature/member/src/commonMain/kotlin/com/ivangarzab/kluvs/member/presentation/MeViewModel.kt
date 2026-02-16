@@ -111,10 +111,11 @@ class MeViewModel(
             }
 
             updateAvatarUseCase(memberId, imageData)
-                .onSuccess {
+                .onSuccess { newAvatarUrl ->
                     Bark.i("Avatar uploaded successfully (ID: $memberId)")
-                    // Refresh profile to show new avatar
-                    currentUserId?.let { userId -> loadUserData(userId) }
+                    _state.update {
+                        it.copy(profile = it.profile?.copy(avatarUrl = newAvatarUrl))
+                    }
                 }
                 .onFailure { error ->
                     Bark.e("Failed to upload avatar (ID: $memberId). Please retry.", error)

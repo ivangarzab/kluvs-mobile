@@ -19,6 +19,8 @@ class BookMappersTest {
             year = 1937,
             isbn = "978-0547928227",
             pageCount = 310,
+            imageUrl = "https://example.com/hobbit.jpg",
+            externalGoogleId = "goog-456",
             lastFetchedAt = 1234567890L
         )
 
@@ -33,6 +35,8 @@ class BookMappersTest {
         assertEquals(1937, domain.year)
         assertEquals("978-0547928227", domain.isbn)
         assertEquals(310, domain.pageCount)
+        assertEquals("https://example.com/hobbit.jpg", domain.imageUrl)
+        assertEquals("goog-456", domain.externalGoogleId)
     }
 
     @Test
@@ -45,7 +49,9 @@ class BookMappersTest {
             edition = "First Edition",
             year = 1937,
             isbn = "978-0547928227",
-            pageCount = 310
+            pageCount = 310,
+            imageUrl = "https://example.com/hobbit.jpg",
+            externalGoogleId = "goog-456"
         )
 
         // When
@@ -59,6 +65,8 @@ class BookMappersTest {
         assertEquals(1937, entity.year)
         assertEquals("978-0547928227", entity.isbn)
         assertEquals(310, entity.pageCount)
+        assertEquals("https://example.com/hobbit.jpg", entity.imageUrl)
+        assertEquals("goog-456", entity.externalGoogleId)
         // lastFetchedAt should be set to current time
         assertNotNull(entity.lastFetchedAt)
     }
@@ -74,6 +82,8 @@ class BookMappersTest {
             year = null,
             isbn = null,
             pageCount = null,
+            imageUrl = null,
+            externalGoogleId = null,
             lastFetchedAt = 1234567890L
         )
 

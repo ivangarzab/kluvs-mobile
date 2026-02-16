@@ -28,7 +28,7 @@ class MemberLocalDataSourceTest {
     fun `getMember returns member with clubs`() = runTest {
         setup()
         val memberId = "member-1"
-        val memberEntity = MemberEntity(memberId, "user-1", "Alice", "alice", null, 100, 5, null, null, 0)
+        val memberEntity = MemberEntity(memberId, "user-1", "Alice", "alice", null, 5, null, null, 0)
         val clubEntities = listOf(
             ClubEntity("club-1", null, "Fantasy Club", null, null, 0)
         )
@@ -55,7 +55,7 @@ class MemberLocalDataSourceTest {
         setup()
         val userId = "user-1"
         val memberId = "member-1"
-        val memberEntity = MemberEntity(memberId, userId, "Bob", "bob", null, 50, 2, null, null, 0)
+        val memberEntity = MemberEntity(memberId, userId, "Bob", "bob", null, 2, null, null, 0)
         val clubEntities = listOf(
             ClubEntity("club-1", null, "Book Club", null, null, 0)
         )
@@ -82,8 +82,8 @@ class MemberLocalDataSourceTest {
         setup()
         val clubId = "club-1"
         val members = listOf(
-            MemberEntity("member-1", "user-1", "Alice", "alice", null, 100, 5, null, null, 0),
-            MemberEntity("member-2", "user-2", "Bob", "bob", null, 50, 2, null, null, 0)
+            MemberEntity("member-1", "user-1", "Alice", "alice", null, 5, null, null, 0),
+            MemberEntity("member-2", "user-2", "Bob", "bob", null, 2, null, null, 0)
         )
 
         everySuspend { fixture.memberDao.getMembersForClub(clubId) } returns members
@@ -103,7 +103,6 @@ class MemberLocalDataSourceTest {
             name = "user-1",
             handle = "Alice",
             avatarPath = "path",
-            points = 100,
             booksRead = 5,
             clubs = listOf(Club("club-1", "Fantasy Club", null, null, null, emptyList(), null, null, emptyList()))
         )
@@ -122,8 +121,8 @@ class MemberLocalDataSourceTest {
     fun `insertMembers inserts multiple members`() = runTest {
         setup()
         val members = listOf(
-            Member("member-1", "user-1", "Alice", "", 100, 5, null),
-            Member("member-2", "user-2", "Bob", "", 50, 2, null)
+            Member("member-1", "user-1", "Alice", "", 5, null),
+            Member("member-2", "user-2", "Bob", "", 2, null)
         )
 
         everySuspend {
@@ -158,7 +157,7 @@ class MemberLocalDataSourceTest {
     @Test
     fun `deleteMember deletes existing member`() = runTest {
         setup()
-        val entity = MemberEntity("member-1", "user-1", "Alice", "alice", null, 100, 5, null, null, 0)
+        val entity = MemberEntity("member-1", "user-1", "Alice", "alice", null, 5, null, null, 0)
         everySuspend { fixture.memberDao.getMember("member-1") } returns entity
         everySuspend { fixture.memberDao.deleteMember(entity) } returns Unit
 
@@ -178,7 +177,6 @@ class MemberLocalDataSourceTest {
         name = name,
         handle = null,
         avatarPath = avatarPath,
-        points = points,
         booksRead = booksRead,
         role = null,
         createdAt = null,

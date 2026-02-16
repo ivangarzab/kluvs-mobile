@@ -400,7 +400,7 @@ fun Preview_MeScreen() = KluvsTheme {
                 joinDate = "2025",
                 avatarUrl = null
             ),
-            statistics = UserStatistics(clubsCount = 6, totalPoints = 100, booksRead = 2),
+            statistics = UserStatistics(clubsCount = 6, booksRead = 2),
             currentlyReading = listOf(
                 CurrentlyReadingBook(
                     bookTitle = "1984",

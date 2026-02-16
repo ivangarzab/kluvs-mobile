@@ -49,7 +49,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = memberId,
             name = "John Doe",
-            points = 100,
             booksRead = 5,
             userId = "user-789",
             role = "Reader"
@@ -61,7 +60,6 @@ class MemberRepositoryTest {
         assertTrue(result.isSuccess)
         assertEquals(expectedMember, result.getOrNull())
         assertEquals("John Doe", result.getOrNull()?.name)
-        assertEquals(100, result.getOrNull()?.points)
         assertEquals(5, result.getOrNull()?.booksRead)
         verifySuspend { remoteDataSource.getMember(memberId) }
     }
@@ -101,7 +99,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = "member-123",
             name = "John",
-            points = 50,
             booksRead = 3,
             userId = userId
         )
@@ -143,7 +140,6 @@ class MemberRepositoryTest {
             name = memberName,
             userId = userId,
             role = role,
-            points = 0,
             booksRead = 0
         )
         everySuspend { remoteDataSource.createMember(any()) } returns Result.success(expectedMember)
@@ -162,7 +158,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = "member-new",
             name = memberName,
-            points = 0,
             booksRead = 0
         )
         everySuspend { remoteDataSource.createMember(any()) } returns Result.success(expectedMember)
@@ -181,7 +176,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = "member-no-clubs",
             name = memberName,
-            points = 0,
             booksRead = 0
         )
         everySuspend { remoteDataSource.createMember(any()) } returns Result.success(expectedMember)
@@ -200,7 +194,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = "member-new",
             name = memberName,
-            points = 0,
             booksRead = 0
         )
         everySuspend { remoteDataSource.createMember(any()) } returns Result.success(expectedMember)
@@ -233,14 +226,12 @@ class MemberRepositoryTest {
         val newName = "Updated Name"
         val newUserId = "user-new"
         val newRole = "Moderator"
-        val newPoints = 200
         val newBooksRead = 15
         val expectedMember = Member(
             id = memberId,
             name = newName,
             userId = newUserId,
             role = newRole,
-            points = newPoints,
             booksRead = newBooksRead
         )
         everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)
@@ -250,13 +241,11 @@ class MemberRepositoryTest {
             name = newName,
             userId = newUserId,
             role = newRole,
-            points = newPoints,
             booksRead = newBooksRead
         )
 
         assertTrue(result.isSuccess)
         assertEquals(newName, result.getOrNull()?.name)
-        assertEquals(newPoints, result.getOrNull()?.points)
         assertEquals(newBooksRead, result.getOrNull()?.booksRead)
         verifySuspend { remoteDataSource.updateMember(any()) }
     }
@@ -267,35 +256,14 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = memberId,
             name = "Unchanged",
-            points = 150,
             booksRead = 10
         )
         everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)
 
-        val result = repository.updateMember(memberId = memberId, name = null, points = 150)
+        val result = repository.updateMember(memberId = memberId, name = null)
 
         assertTrue(result.isSuccess)
         assertEquals("Unchanged", result.getOrNull()?.name)
-        assertEquals(150, result.getOrNull()?.points)
-        verifySuspend { remoteDataSource.updateMember(any()) }
-    }
-
-    @Test
-    fun `updateMember with null points does not update points`() = runTest {
-        val memberId = "member-123"
-        val expectedMember = Member(
-            id = memberId,
-            name = "Updated Name",
-            points = 100,
-            booksRead = 5
-        )
-        everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)
-
-        val result = repository.updateMember(memberId = memberId, name = "Updated Name", points = null)
-
-        assertTrue(result.isSuccess)
-        assertEquals("Updated Name", result.getOrNull()?.name)
-        assertEquals(100, result.getOrNull()?.points)
         verifySuspend { remoteDataSource.updateMember(any()) }
     }
 
@@ -306,7 +274,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = memberId,
             name = "Member",
-            points = 100,
             booksRead = 5
         )
         everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)
@@ -324,7 +291,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = memberId,
             name = "Member",
-            points = 100,
             booksRead = 5
         )
         everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)
@@ -341,7 +307,6 @@ class MemberRepositoryTest {
         val expectedMember = Member(
             id = memberId,
             name = "Updated Name",
-            points = 100,
             booksRead = 5
         )
         everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)

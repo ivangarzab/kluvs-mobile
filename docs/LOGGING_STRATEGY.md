@@ -1,5 +1,7 @@
 # Logging Strategy
 
+**NOTE:** This docs has been spiritually migrated into .claude/skills/bark-logging.md
+
 This project uses [**barK**](http://github.com/ivangarzab/barK) for all logging. 
 
 To maintain a clean and actionable Logcat, all contributors (including AI agents) must adhere to these guidelines.

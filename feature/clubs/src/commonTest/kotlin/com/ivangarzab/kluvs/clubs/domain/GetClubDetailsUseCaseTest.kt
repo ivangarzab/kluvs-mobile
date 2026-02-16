@@ -42,8 +42,8 @@ class GetClubDetailsUseCaseTest {
             serverId = null,
             discordChannel = null,
             members = listOf(
-                Member(id = "m1", name = "Alice", userId = null, role = null, points = 10, booksRead = 5),
-                Member(id = "m2", name = "Bob", userId = null, role = null, points = 20, booksRead = 3)
+                Member(id = "m1", name = "Alice", userId = null, role = null, booksRead = 5),
+                Member(id = "m2", name = "Bob", userId = null, role = null, booksRead = 3)
             ),
             activeSession = null,
             pastSessions = emptyList(),
@@ -90,7 +90,7 @@ class GetClubDetailsUseCaseTest {
             name = "Test Club",
             serverId = null,
             discordChannel = null,
-            members = listOf(Member(id = "m1", name = "Alice", userId = null, role = null, points = 10, booksRead = 5)),
+            members = listOf(Member(id = "m1", name = "Alice", userId = null, role = null, booksRead = 5)),
             activeSession = session,
             pastSessions = emptyList(),
             shameList = emptyList()

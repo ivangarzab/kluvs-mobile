@@ -58,18 +58,6 @@ fun StatisticsSection(
             Spacer(Modifier.padding(4.dp))
 
             StatisticsItem(
-                icon = R.drawable.ic_points,
-                label = stringResource(R.string.points),
-                value = data?.totalPoints.let { totalPoints ->
-                    if (totalPoints != null && totalPoints > 0) {
-                        totalPoints.toString()
-                    } else stringResource(R.string.na)
-                }
-            )
-
-            Spacer(Modifier.padding(4.dp))
-
-            StatisticsItem(
                 icon = R.drawable.ic_book,
                 label = stringResource(R.string.books_read),
                 value = data?.booksRead.let { booksRead ->
@@ -133,7 +121,6 @@ private fun Preview_StatisticsSection() = KluvsTheme {
         modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
         data = UserStatistics(
             clubsCount = 1,
-            totalPoints = 100,
             booksRead = 2
         )
     )

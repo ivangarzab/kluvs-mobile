@@ -44,7 +44,6 @@ class ClubMappersTest {
         val memberDto = MemberDto(
             id = "1",
             name = "John Doe",
-            points = 100,
             books_read = 5,
             user_id = "user-1",
             role = "admin",

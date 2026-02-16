@@ -2,6 +2,7 @@ package com.ivangarzab.kluvs.data.repositories
 
 import com.ivangarzab.kluvs.data.local.cache.CachePolicy
 import com.ivangarzab.kluvs.data.local.source.SessionLocalDataSource
+import com.ivangarzab.kluvs.data.remote.dtos.CreateSessionRequestDto
 import com.ivangarzab.kluvs.data.remote.source.SessionRemoteDataSource
 import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.Discussion
@@ -9,6 +10,7 @@ import com.ivangarzab.kluvs.model.Session
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.matching
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
@@ -213,6 +215,28 @@ class SessionRepositoryTest {
         assertTrue(result.isSuccess)
         assertEquals(0, result.getOrNull()?.discussions?.size)
         verifySuspend { remoteDataSource.createSession(any()) }
+    }
+
+    @Test
+    fun `createSession sends book_id instead of inline book`() = runTest {
+        val expectedSession = Session(
+            id = "session-new",
+            clubId = "club-456",
+            book = testBook,
+            dueDate = testDueDate
+        )
+        everySuspend { remoteDataSource.createSession(any()) } returns Result.success(expectedSession)
+
+        val result = repository.createSession("club-456", testBook, testDueDate, null)
+
+        assertTrue(result.isSuccess)
+        verifySuspend {
+            remoteDataSource.createSession(
+                matching<CreateSessionRequestDto> { dto ->
+                    dto.book_id == "book-123" && dto.book == null
+                }
+            )
+        }
     }
 
     @Test

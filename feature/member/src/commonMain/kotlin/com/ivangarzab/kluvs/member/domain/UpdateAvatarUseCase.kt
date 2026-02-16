@@ -26,7 +26,13 @@ class UpdateAvatarUseCase(
     suspend operator fun invoke(memberId: String, imageData: ByteArray): Result<String> {
         Bark.d("Updating avatar (Member ID: $memberId, Image size: ${imageData.size} bytes)")
 
-        // 1. Upload to storage
+        // 1. Capture the current avatar path so we can delete it after the swap
+        val oldAvatarPath = memberRepository
+            .getMember(memberId)
+            .getOrNull()
+            ?.avatarPath
+
+        // 2. Upload to storage
         val uploadResult = avatarRepository.uploadAvatar(memberId, imageData)
         if (uploadResult.isFailure) {
             val error = uploadResult.exceptionOrNull() ?: Exception("Avatar upload failed")
@@ -37,7 +43,7 @@ class UpdateAvatarUseCase(
         val avatarPath = uploadResult.getOrThrow()
         Bark.d("Avatar uploaded to storage (Member ID: $memberId, Path: $avatarPath)")
 
-        // 2. Update member record with new path
+        // 3. Update member record with new path
         val updateResult = memberRepository.updateMember(
             memberId = memberId,
             avatarPath = avatarPath
@@ -51,7 +57,16 @@ class UpdateAvatarUseCase(
 
         Bark.d("Member record updated with new avatar path (Member ID: $memberId)")
 
-        // 3. Return the public URL
+        // 4. Delete the old avatar now that the member record points to the new one.
+        //    Failure here is non-fatal — it just leaves an orphaned file in storage.
+        if (oldAvatarPath != null) {
+            avatarRepository.deleteAvatar(oldAvatarPath)
+                .onFailure { error ->
+                    Bark.e("Failed to delete old avatar (path: $oldAvatarPath). Orphaned file in storage.", error)
+                }
+        }
+
+        // 5. Return the public URL
         val avatarUrl = avatarRepository.getAvatarUrl(avatarPath)
         Bark.i("Avatar updated successfully (Member ID: $memberId)")
         return Result.success(avatarUrl ?: "")

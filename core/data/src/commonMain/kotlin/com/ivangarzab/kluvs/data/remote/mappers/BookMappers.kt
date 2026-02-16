@@ -14,6 +14,8 @@ fun BookDto.toDomain(): Book {
         edition = edition,
         year = year,
         isbn = isbn,
-        pageCount = page_count
+        pageCount = page_count,
+        imageUrl = image_url,
+        externalGoogleId = external_google_id
     )
 }

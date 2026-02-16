@@ -140,4 +140,54 @@ class AvatarRemoteDataSourceTest {
         // Then: Service is called with correct parameters
         verifySuspend { avatarService.uploadAvatar(memberId, imageData) }
     }
+
+    // ========================================
+    // DELETE AVATAR
+    // ========================================
+
+    @Test
+    fun `deleteAvatar success returns Result success`() = runTest {
+        // Given: Service returns success
+        val avatarPath = "member-123/1234567890.png"
+        everySuspend { avatarService.deleteAvatar(avatarPath) } returns Result.success(Unit)
+
+        // When: Deleting avatar
+        val result = dataSource.deleteAvatar(avatarPath)
+
+        // Then: Result is success
+        assertTrue(result.isSuccess)
+        verifySuspend { avatarService.deleteAvatar(avatarPath) }
+    }
+
+    @Test
+    fun `deleteAvatar failure returns Result failure`() = runTest {
+        // Given: Service returns failure
+        val avatarPath = "member-123/1234567890.png"
+        val exception = Exception("Delete failed")
+        everySuspend { avatarService.deleteAvatar(avatarPath) } returns Result.failure(exception)
+
+        // When: Deleting avatar
+        val result = dataSource.deleteAvatar(avatarPath)
+
+        // Then: Result is failure
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
+        verifySuspend { avatarService.deleteAvatar(avatarPath) }
+    }
+
+    @Test
+    fun `deleteAvatar catches service exception and returns failure`() = runTest {
+        // Given: Service throws exception
+        val avatarPath = "member-123/1234567890.png"
+        val exception = RuntimeException("Network error")
+        everySuspend { avatarService.deleteAvatar(avatarPath) } throws exception
+
+        // When: Deleting avatar
+        val result = dataSource.deleteAvatar(avatarPath)
+
+        // Then: Result is failure with caught exception
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
+        verifySuspend { avatarService.deleteAvatar(avatarPath) }
+    }
 }

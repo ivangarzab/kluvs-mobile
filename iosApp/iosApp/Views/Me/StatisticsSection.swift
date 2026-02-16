@@ -23,12 +23,6 @@ struct StatisticsSection: View {
             )
 
             StatisticsItem(
-                icon: .points,
-                label: String(localized: "stat_points"),
-                value: statistics.totalPoints > 0 ? "\(statistics.totalPoints)" : String(localized: "label_not_available")
-            )
-
-            StatisticsItem(
                 icon: .book,
                 label: String(localized: "stat_books_read"),
                 value: statistics.booksRead > 0 ? "\(statistics.booksRead)" : String(localized: "label_not_available")

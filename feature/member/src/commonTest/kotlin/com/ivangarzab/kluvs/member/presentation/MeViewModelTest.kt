@@ -130,7 +130,6 @@ class MeViewModelTest {
             id = "member-1",
             userId = userId,
             name = "Alice Johnson",
-            points = 150,
             booksRead = 12,
             clubs = listOf(
                 Club("club-1", "Fantasy Readers", null, null, null, emptyList(), null, null, emptyList()),
@@ -192,7 +191,6 @@ class MeViewModelTest {
 
         // Statistics
         assertEquals(3, state.statistics?.clubsCount)
-        assertEquals(150, state.statistics?.totalPoints)
         assertEquals(12, state.statistics?.booksRead)
 
         // Currently reading books
@@ -231,7 +229,6 @@ class MeViewModelTest {
             id = "member-1",
             userId = userId,
             name = "New User",
-            points = 0,
             booksRead = 0,
             clubs = emptyList()
         )
@@ -258,7 +255,6 @@ class MeViewModelTest {
             id = "member-1",
             userId = userId,
             name = "Alice",
-            points = 100,
             booksRead = 5,
             clubs = listOf(
                 Club("club-1", "Test Club", null, null, null, emptyList(), null, null, emptyList())
@@ -301,7 +297,6 @@ class MeViewModelTest {
             id = "member-1",
             userId = userId,
             name = "Alice",
-            points = 100,
             booksRead = 5,
             clubs = emptyList()
         )
@@ -348,7 +343,6 @@ class MeViewModelTest {
         val member = Member(
             id = "member-1",
             name = "Alice",
-            points = 100,
             booksRead = 5,
             userId = userId,
             clubs = emptyList()
@@ -369,7 +363,6 @@ class MeViewModelTest {
         val member = Member(
             id = "member-1",
             name = "John Doe",
-            points = 50,
             booksRead = 2,
             userId = userId,
             clubs = emptyList()
@@ -391,7 +384,6 @@ class MeViewModelTest {
             id = "member-1",
             userId = userId,
             name = "Alice",
-            points = 100,
             booksRead = 5,
             clubs = listOf(
                 Club("club-1", "Inactive Club", null, null, null, emptyList(), null, null, emptyList())
@@ -416,14 +408,14 @@ class MeViewModelTest {
     }
 
     @Test
-    fun `uploadAvatar succeeds and refreshes profile`() = runTest {
+    fun `uploadAvatar succeeds and updates avatar URL in state`() = runTest {
         // Given
         val userId = "user-123"
         val memberId = "member-1"
         val imageData = ByteArray(100) { it.toByte() }
         val storagePath = "$memberId/avatar.png"
         val avatarUrl = "https://storage.example.com/$storagePath"
-        val memberWithoutAvatar = Member(id = memberId, name = "Alice", userId = userId, points = 100, booksRead = 5, clubs = emptyList())
+        val memberWithoutAvatar = Member(id = memberId, name = "Alice", userId = userId, booksRead = 5, clubs = emptyList())
         val memberWithAvatar = memberWithoutAvatar.copy(avatarPath = storagePath)
 
         // Load initial profile (no avatar)
@@ -431,13 +423,12 @@ class MeViewModelTest {
         every { avatarRepository.getAvatarUrl(null) } returns null
         viewModel.loadUserData(userId)
 
-        // Setup avatar upload mocks
+        // Setup avatar upload mocks — getMember is called by the use case to capture the old path
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(memberWithoutAvatar)
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.success(storagePath)
         everySuspend { memberRepository.updateMember(memberId, avatarPath = storagePath) } returns Result.success(memberWithAvatar)
-
-        // Setup refresh after upload - return member with avatar
-        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(memberWithAvatar)
         every { avatarRepository.getAvatarUrl(storagePath) } returns avatarUrl
+        // oldAvatarPath is null, so deleteAvatar is not called
 
         // When
         viewModel.uploadAvatar(imageData)
@@ -446,6 +437,7 @@ class MeViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.isUploadingAvatar)
         assertNull(state.snackbarError)
+        assertEquals(avatarUrl, state.profile?.avatarUrl)
     }
 
     @Test
@@ -468,13 +460,14 @@ class MeViewModelTest {
         val userId = "user-123"
         val memberId = "member-1"
         val imageData = ByteArray(100)
-        val member = Member(id = memberId, name = "Alice", userId = userId, points = 100, booksRead = 5, clubs = emptyList())
+        val member = Member(id = memberId, name = "Alice", userId = userId, booksRead = 5, clubs = emptyList())
 
         // Load initial profile
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
         viewModel.loadUserData(userId)
 
-        // Setup avatar upload to fail
+        // Setup avatar upload to fail — getMember is called by the use case before the upload attempt
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(member)
         val exception = Exception("Upload failed")
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
 
@@ -493,11 +486,13 @@ class MeViewModelTest {
         val userId = "user-123"
         val memberId = "member-1"
         val imageData = ByteArray(100)
-        val member = Member(id = memberId, name = "Alice", userId = userId, points = 100, booksRead = 5, clubs = emptyList())
+        val member = Member(id = memberId, name = "Alice", userId = userId, booksRead = 5, clubs = emptyList())
 
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
         viewModel.loadUserData(userId)
 
+        // getMember is called by the use case before the upload attempt
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(member)
         val exception = Exception("Upload failed")
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
         viewModel.uploadAvatar(imageData)

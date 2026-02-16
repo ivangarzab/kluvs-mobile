@@ -36,7 +36,6 @@ class MemberRemoteDataSourceTest {
         val dto = MemberResponseDto(
             id = "1",
             name = "Alice",
-            points = 250,
             books_read = 12,
             user_id = "user-123",
             role = "admin",
@@ -56,7 +55,6 @@ class MemberRemoteDataSourceTest {
         val member = result.getOrNull()!!
         assertEquals("1", member.id)
         assertEquals("Alice", member.name)
-        assertEquals(250, member.points)
         assertEquals(12, member.booksRead)
         assertEquals(1, member.clubs?.size)
         assertEquals("Fiction Club", member.clubs?.first()?.name)
@@ -86,7 +84,6 @@ class MemberRemoteDataSourceTest {
         val dto = MemberResponseDto(
             id = "2",
             name = "Bob",
-            points = 100,
             books_read = 5,
             user_id = "user-456",
             role = "member",
@@ -112,7 +109,6 @@ class MemberRemoteDataSourceTest {
         // Given: Service returns success response
         val request = CreateMemberRequestDto(
             name = "Charlie",
-            points = 0,
             books_read = 0,
             user_id = "user-789",
             role = "member"
@@ -124,7 +120,6 @@ class MemberRemoteDataSourceTest {
             member = MemberDto(
                 id = "3",
                 name = "Charlie",
-                points = 0,
                 books_read = 0,
                 user_id = "user-789",
                 role = "member",
@@ -151,8 +146,7 @@ class MemberRemoteDataSourceTest {
         // Given: Service returns success response
         val request = UpdateMemberRequestDto(
             id = "1",
-            name = "Alice Updated",
-            points = 300
+            name = "Alice Updated"
         )
 
         val responseDto = MemberSuccessResponseDto(
@@ -161,7 +155,6 @@ class MemberRemoteDataSourceTest {
             member = MemberDto(
                 id = "1",
                 name = "Alice Updated",
-                points = 300,
                 books_read = 12,
                 user_id = "user-123",
                 role = "admin",
@@ -177,7 +170,6 @@ class MemberRemoteDataSourceTest {
         // Then: Result is success
         assertTrue(result.isSuccess)
         assertEquals("Alice Updated", result.getOrNull()?.name)
-        assertEquals(300, result.getOrNull()?.points)
 
         verifySuspend { memberService.update(request) }
     }

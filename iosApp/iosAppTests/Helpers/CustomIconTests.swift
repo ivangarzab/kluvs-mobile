@@ -16,7 +16,6 @@ class CustomIconTests: XCTestCase {
         XCTAssertEqual(CustomIcon.clubs.rawValue, "ic_clubs")
         XCTAssertEqual(CustomIcon.user.rawValue, "ic_user")
         XCTAssertEqual(CustomIcon.book.rawValue, "ic_book")
-        XCTAssertEqual(CustomIcon.points.rawValue, "ic_points")
         XCTAssertEqual(CustomIcon.location.rawValue, "ic_location")
         XCTAssertEqual(CustomIcon.settings.rawValue, "ic_settings")
         XCTAssertEqual(CustomIcon.help.rawValue, "ic_help")
@@ -35,7 +34,7 @@ class CustomIconTests: XCTestCase {
     func testAllIconsReturnNonNilImages() {
         // Test that all icon cases can create images without crashing
         let allIcons: [CustomIcon] = [
-            .club, .clubs, .user, .book, .points, .location,
+            .club, .clubs, .user, .book, .location,
             .settings, .help, .checkmark, .logout, .email,
             .password, .edit, .discord, .google, .apple
         ]
@@ -60,7 +59,7 @@ class CustomIconTests: XCTestCase {
     func testNonAppleIconsUseCustomAssets() {
         // All non-apple icons should use custom asset names with "ic_" prefix
         let customAssetIcons: [CustomIcon] = [
-            .club, .clubs, .user, .book, .points, .location,
+            .club, .clubs, .user, .book, .location,
             .settings, .help, .checkmark, .logout, .email,
             .password, .edit, .discord, .google
         ]
@@ -102,7 +101,7 @@ class CustomIconTests: XCTestCase {
     
     func testContentIcons() {
         // Content-related icons
-        let contentIcons: [CustomIcon] = [.book, .points, .location]
+        let contentIcons: [CustomIcon] = [.book, .location]
         for icon in contentIcons {
             XCTAssertNotNil(icon.image)
         }

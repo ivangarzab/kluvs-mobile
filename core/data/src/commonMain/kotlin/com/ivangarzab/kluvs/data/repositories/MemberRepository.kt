@@ -63,7 +63,6 @@ interface MemberRepository {
      * @param name Optional new name for the member (null to keep current value)
      * @param userId Optional new Discord user ID (null to keep current value)
      * @param role Optional new role (null to keep current value)
-     * @param points Optional new points value (null to keep current value)
      * @param booksRead Optional new books read count (null to keep current value)
      * @param avatarPath Optional new avatar path (null to keep current value)
      * @param clubIds Optional list of club IDs to set as the member's clubs (null to keep current clubs).
@@ -75,7 +74,6 @@ interface MemberRepository {
         name: String? = null,
         userId: String? = null,
         role: String? = null,
-        points: Int? = null,
         booksRead: Int? = null,
         avatarPath: String? = null,
         clubIds: List<String>? = null
@@ -210,7 +208,6 @@ internal class MemberRepositoryImpl(
         name: String?,
         userId: String?,
         role: String?,
-        points: Int?,
         booksRead: Int?,
         avatarPath: String?,
         clubIds: List<String>?
@@ -222,7 +219,6 @@ internal class MemberRepositoryImpl(
                 name = name,
                 user_id = userId,
                 role = role,
-                points = points,
                 books_read = booksRead,
                 avatar_path = avatarPath,
                 clubs = clubIds

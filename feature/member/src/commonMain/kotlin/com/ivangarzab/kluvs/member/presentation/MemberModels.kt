@@ -18,7 +18,6 @@ data class UserProfile(
  */
 data class UserStatistics(
     val clubsCount: Int,
-    val totalPoints: Int,
     val booksRead: Int
 )
 

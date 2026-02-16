@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -59,8 +60,8 @@ android {
         applicationId = "com.ivangarzab.kluvs"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = 2
+        versionName = "0.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
@@ -81,11 +82,13 @@ android {
         }
 
         getByName("debug") {
+            // https://firebase.google.com/docs/app-distribution/android/distribute-gradle?apptype=apk
             firebaseAppDistribution {
                 serviceCredentialsFile = System.getenv("FIREBASE_CREDENTIALS_FILE")
                     ?: "${System.getProperty("user.home")}/.config/firebase/kluvs-app-distribution.json"
                 artifactType = "APK"
                 groups = "og"
+//                releaseNotes = ""
             }
         }
     }
