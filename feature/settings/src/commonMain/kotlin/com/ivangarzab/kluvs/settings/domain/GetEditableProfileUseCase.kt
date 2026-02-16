@@ -22,7 +22,7 @@ class GetEditableProfileUseCase(
     suspend operator fun invoke(userId: String): Result<EditableProfile> {
         Bark.d("Fetching editable profile (User ID: $userId)")
         return memberRepository.getMemberByUserId(userId).map { member ->
-            val handle = member.handle ?: generateHandleFromName(member.name)
+            val handle = (member.handle ?: generateHandleFromName(member.name)).removePrefix("@")
             EditableProfile(
                 memberId = member.id,
                 name = member.name,

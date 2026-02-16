@@ -38,11 +38,12 @@ class UpdateUserProfileUseCase(
             )
         }
 
-        Bark.d("Updating user profile (Member ID: $memberId, Name: $name, Handle: $handle)")
+        val fullHandle = "@$handle"
+        Bark.d("Updating user profile (Member ID: $memberId, Name: $name, Handle: $fullHandle)")
         return memberRepository.updateMember(
             memberId = memberId,
             name = name,
-            handle = handle
+            handle = fullHandle
         ).map { }.onFailure { error ->
             Bark.e("Failed to update profile (Member ID: $memberId).", error)
         }
