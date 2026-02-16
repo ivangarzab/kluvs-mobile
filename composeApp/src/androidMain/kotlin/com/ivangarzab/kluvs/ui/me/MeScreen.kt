@@ -63,6 +63,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun MeScreen(
     modifier: Modifier = Modifier,
     userId: String,
+    onNavigateToSettings: () -> Unit = {},
     viewModel: MeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -105,7 +106,7 @@ fun MeScreen(
             modifier = Modifier,
             state = state,
             onRetry = viewModel::refresh,
-            onSettingsClick = { /* TODO() */ },
+            onSettingsClick = onNavigateToSettings,
             onHelpClick = { /* TODO() */ },
             onSignOutClick = viewModel::onSignOutClicked,
             onAvatarClick = {
