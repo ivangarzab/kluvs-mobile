@@ -22,6 +22,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.splashscreen)
+            implementation(libs.androidx.browser)
         }
         androidInstrumentedTest.dependencies {
             implementation(libs.androidx.test.junit)

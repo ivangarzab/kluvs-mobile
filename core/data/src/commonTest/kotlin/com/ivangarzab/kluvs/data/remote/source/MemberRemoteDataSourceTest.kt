@@ -175,6 +175,41 @@ class MemberRemoteDataSourceTest {
     }
 
     @Test
+    fun `updateMember with handle passes handle in DTO`() = runTest {
+        // Given: Request includes a handle
+        val request = UpdateMemberRequestDto(
+            id = "1",
+            name = "Alice",
+            handle = "alice_reads"
+        )
+
+        val responseDto = MemberSuccessResponseDto(
+            success = true,
+            message = "Updated",
+            member = MemberDto(
+                id = "1",
+                name = "Alice",
+                handle = "alice_reads",
+                books_read = 12,
+                user_id = "user-123",
+                role = "admin",
+                clubs = emptyList()
+            )
+        )
+
+        everySuspend { memberService.update(request) } returns responseDto
+
+        // When: Updating member
+        val result = dataSource.updateMember(request)
+
+        // Then: Result is success and handle is returned
+        assertTrue(result.isSuccess)
+        assertEquals("alice_reads", result.getOrNull()?.handle)
+
+        verifySuspend { memberService.update(request) }
+    }
+
+    @Test
     fun `deleteMember success returns success message`() = runTest {
         // Given: Service returns success response
         val response = DeleteResponseDto(
