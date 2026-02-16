@@ -262,6 +262,10 @@ Tests are co-located with their implementations in each module:
 
 **Always use barK** (`Bark.*`) for all log statements — never `println` or `Log.*`. Follow the `bark-logging` skill for level selection, message formatting, and exception handling rules.
 
+### Code Review
+
+Use the `code-review` skill (`/code-review`) to perform a project-aware review of staged changes, a file, or a module. It checks architecture boundaries, Koin registration, Bark usage, KMP hygiene, test coverage, and conventional commit format.
+
 ## CI/CD
 
 The project uses GitHub Actions:
