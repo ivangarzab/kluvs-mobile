@@ -17,13 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Plan file location:** All implementation plans should be saved to `.claude/plans/` (gitignored).
 
-**Phased approach for KMP features:** When implementing features that span shared code and platform-specific code, follow this order:
-1. **Phase 1: Shared code (Data Layer)** - Models, DTOs, Services, RemoteDataSources, Repositories, Mappers
-2. **Phase 2: Shared code (Feature Layer)** - UseCases, ViewModels, expect declarations
-3. **Phase 3: Android** - actual declarations, UI components
-4. **Phase 4: iOS** - actual declarations, platform-specific UI
-
-**STOP after each phase** for user verification before proceeding.
+**New KMP features** follow a strict 4-phase approach. Use the `new-kmp-feature` skill — it owns the file map, coding conventions, and phase gate rules.
 
 **Plans and agents must NOT run builds or tests.** When a plan includes verification steps:
 - List the test files to create/update
@@ -264,9 +258,13 @@ Tests are co-located with their implementations in each module:
   - Require local Supabase instance running
   - Excluded from quick test runs via `excludeTests` property
 
-### Logging in Tests
+### Logging
 
-Tests use barK logging with a custom test rule (`BarkTestRule`) in `shared/src/commonTest/`. Platform-specific implementations exist for Android and iOS.
+**Always use barK** (`Bark.*`) for all log statements — never `println` or `Log.*`. Follow the `bark-logging` skill for level selection, message formatting, and exception handling rules.
+
+### Code Review
+
+Use the `code-review` skill (`/code-review`) to perform a project-aware review of staged changes, a file, or a module. It checks architecture boundaries, Koin registration, Bark usage, KMP hygiene, test coverage, and conventional commit format.
 
 ## CI/CD
 
