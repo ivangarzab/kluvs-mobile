@@ -264,9 +264,9 @@ Tests are co-located with their implementations in each module:
   - Require local Supabase instance running
   - Excluded from quick test runs via `excludeTests` property
 
-### Logging in Tests
+### Logging
 
-Tests use barK logging with a custom test rule (`BarkTestRule`) in `shared/src/commonTest/`. Platform-specific implementations exist for Android and iOS.
+**Always use barK** (`Bark.*`) for all log statements — never `println` or `Log.*`. Follow the `bark-logging` skill for level selection, message formatting, and exception handling rules.
 
 ## CI/CD
 
