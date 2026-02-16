@@ -9,6 +9,7 @@ kotlin {
             implementation(project(":core:model"))
             implementation(project(":core:data"))
             implementation(project(":core:auth"))
+            implementation(project(":core:presentation"))
 
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
