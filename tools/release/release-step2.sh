@@ -13,9 +13,9 @@ VERSION_NAME="$1"
 
 echo "2️⃣ Updating app versions to $VERSION_NAME..."
 
-chmod +x tools/update-app-version.sh
+chmod +x tools/update-app-versions.sh
 
-if ! ./tools/update-app-version.sh "$VERSION_NAME"; then
+if ! ./tools/update-app-versions.sh "$VERSION_NAME"; then
   echo "Error: Failed to update app versions"
   exit 1
 fi
