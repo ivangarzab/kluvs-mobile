@@ -61,7 +61,6 @@ fun MembersTab(
                     MemberListItem(
                         name = member.name,
                         handle = member.handle,
-                        points = member.points,
                         avatarUrl = member.avatarUrl
                     )
                     if (index < members.size - 1) {
@@ -78,7 +77,6 @@ private fun MemberListItem(
     modifier: Modifier = Modifier,
     name: String,
     handle: String,
-    points: Int,
     avatarUrl: String? = null
 ) {
     Row(
@@ -109,11 +107,6 @@ private fun MemberListItem(
                 )
             }
         }
-        Text(
-            text = stringResource(R.string.x_points, points),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium
-        )
     }
 }
 
@@ -128,15 +121,14 @@ fun Preview_MembersTab() = KluvsTheme {
     MembersTab(
         modifier = Modifier
             .background(color = MaterialTheme.colorScheme.surface)
-            .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .fillMaxSize(),
         members = listOf(
-            MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", 166, ""),
-            MemberListItemInfo("1", "Monica Michelle Morales", "@monica", 100, ""),
-            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "@chitho23", 143, ""),
-            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "@keto92", 42, ""),
-            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "@josalinas", 0, ""),
-            MemberListItemInfo("5", "Ginseng Joaquin Guzman", "gino1", 69, ""),
+            MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", ""),
+            MemberListItemInfo("1", "Monica Michelle Morales", "@monica", ""),
+            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "@chitho23", ""),
+            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "@keto92", ""),
+            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "@josalinas", ""),
+            MemberListItemInfo("5", "Ginseng Joaquin Guzman", "gino1", ""),
         )
     )
 }

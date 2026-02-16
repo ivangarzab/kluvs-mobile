@@ -36,9 +36,9 @@ class GetClubMembersUseCaseTest {
         // Given
         val clubId = "club-123"
         val members = listOf(
-            Member(id = "m1", name = "Alice", userId = null, role = null, points = 10, booksRead = 5),
-            Member(id = "m2", name = "Bob", userId = null, role = null, points = 30, booksRead = 3),
-            Member(id = "m3", name = "Charlie", userId = null, role = null, points = 20, booksRead = 7)
+            Member(id = "m1", name = "Alice", userId = null, role = null, booksRead = 5),
+            Member(id = "m2", name = "Bob", userId = null, role = null, booksRead = 3),
+            Member(id = "m3", name = "Charlie", userId = null, role = null, booksRead = 7)
         )
         val club = Club(
             id = clubId,
@@ -61,15 +61,9 @@ class GetClubMembersUseCaseTest {
         val memberList = result.getOrNull()!!
         assertEquals(3, memberList.size)
 
-        // Should be sorted by points descending
-        assertEquals("Bob", memberList[0].name)
-        assertEquals(30, memberList[0].points)
-
-        assertEquals("Charlie", memberList[1].name)
-        assertEquals(20, memberList[1].points)
-
-        assertEquals("Alice", memberList[2].name)
-        assertEquals(10, memberList[2].points)
+        assertEquals("Alice", memberList[0].name)
+        assertEquals("Bob", memberList[1].name)
+        assertEquals("Charlie", memberList[2].name)
 
         verifySuspend { clubRepository.getClub(clubId) }
     }
@@ -104,7 +98,7 @@ class GetClubMembersUseCaseTest {
         // Given
         val clubId = "club-123"
         val members = listOf(
-            Member(id = "m1", name = "Alice", userId = "u1", role = "admin", points = 100, booksRead = 10)
+            Member(id = "m1", name = "Alice", userId = "u1", role = "admin", booksRead = 10)
         )
         val club = Club(
             id = clubId,
@@ -128,7 +122,6 @@ class GetClubMembersUseCaseTest {
         assertEquals(1, memberList.size)
         assertEquals("m1", memberList[0].memberId)
         assertEquals("Alice", memberList[0].name)
-        assertEquals(100, memberList[0].points)
         assertEquals(null, memberList[0].avatarUrl)
         verifySuspend { clubRepository.getClub(clubId) }
     }
@@ -138,9 +131,9 @@ class GetClubMembersUseCaseTest {
         // Given
         val clubId = "club-123"
         val members = listOf(
-            Member(id = "m1", name = "Alice", userId = null, role = null, points = 10, booksRead = 5),
-            Member(id = "m2", name = "Bob", userId = null, role = null, points = 10, booksRead = 3),
-            Member(id = "m3", name = "Charlie", userId = null, role = null, points = 10, booksRead = 7)
+            Member(id = "m1", name = "Alice", userId = null, role = null, booksRead = 5),
+            Member(id = "m2", name = "Bob", userId = null, role = null, booksRead = 3),
+            Member(id = "m3", name = "Charlie", userId = null, role = null, booksRead = 7)
         )
         val club = Club(
             id = clubId,
@@ -163,10 +156,7 @@ class GetClubMembersUseCaseTest {
         assertTrue(result.isSuccess)
         val memberList = result.getOrNull()!!
         assertEquals(3, memberList.size)
-        // All should have same points
-        assertEquals(10, memberList[0].points)
-        assertEquals(10, memberList[1].points)
-        assertEquals(10, memberList[2].points)
+        assertEquals(3, memberList.size)
         verifySuspend { clubRepository.getClub(clubId) }
     }
 
@@ -195,8 +185,8 @@ class GetClubMembersUseCaseTest {
         val avatarUrl1 = "https://storage.example.com/$avatarPath1"
         val avatarUrl2 = "https://storage.example.com/$avatarPath2"
         val members = listOf(
-            Member(id = "m1", name = "Alice", avatarPath = avatarPath1, points = 100, booksRead = 10),
-            Member(id = "m2", name = "Bob", avatarPath = avatarPath2, points = 50, booksRead = 5)
+            Member(id = "m1", name = "Alice", avatarPath = avatarPath1, booksRead = 10),
+            Member(id = "m2", name = "Bob", avatarPath = avatarPath2, booksRead = 5)
         )
         val club = Club(
             id = clubId,
@@ -232,8 +222,8 @@ class GetClubMembersUseCaseTest {
         val avatarPath1 = "member-1/avatar.png"
         val avatarUrl1 = "https://storage.example.com/$avatarPath1"
         val members = listOf(
-            Member(id = "m1", name = "Alice", avatarPath = avatarPath1, points = 100, booksRead = 10),
-            Member(id = "m2", name = "Bob", avatarPath = null, points = 50, booksRead = 5)
+            Member(id = "m1", name = "Alice", avatarPath = avatarPath1, booksRead = 10),
+            Member(id = "m2", name = "Bob", avatarPath = null, booksRead = 5)
         )
         val club = Club(
             id = clubId,

@@ -36,7 +36,7 @@ class UpdateAvatarUseCaseTest {
         val oldAvatarPath = "$memberId/old-avatar.png"
         val storagePath = "$memberId/avatar.png"
         val avatarUrl = "https://storage.example.com/$storagePath"
-        val existingMember = Member(id = memberId, name = "Test User", avatarPath = oldAvatarPath, points = 0, booksRead = 0)
+        val existingMember = Member(id = memberId, name = "Test User", avatarPath = oldAvatarPath, booksRead = 0)
         val updatedMember = existingMember.copy(avatarPath = storagePath)
 
         everySuspend { memberRepository.getMember(memberId) } returns Result.success(existingMember)
@@ -64,7 +64,7 @@ class UpdateAvatarUseCaseTest {
         val memberId = "member-123"
         val imageData = ByteArray(100)
         val exception = Exception("Upload failed")
-        val existingMember = Member(id = memberId, name = "Test User", avatarPath = null, points = 0, booksRead = 0)
+        val existingMember = Member(id = memberId, name = "Test User", avatarPath = null, booksRead = 0)
 
         everySuspend { memberRepository.getMember(memberId) } returns Result.success(existingMember)
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
@@ -87,7 +87,7 @@ class UpdateAvatarUseCaseTest {
         val imageData = ByteArray(100)
         val storagePath = "$memberId/avatar.png"
         val exception = Exception("Failed to update member")
-        val existingMember = Member(id = memberId, name = "Test User", avatarPath = null, points = 0, booksRead = 0)
+        val existingMember = Member(id = memberId, name = "Test User", avatarPath = null, booksRead = 0)
 
         everySuspend { memberRepository.getMember(memberId) } returns Result.success(existingMember)
         everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.success(storagePath)
@@ -112,7 +112,7 @@ class UpdateAvatarUseCaseTest {
         val imageData = ByteArray(100)
         val oldAvatarPath = "$memberId/old-avatar.png"
         val storagePath = "$memberId/avatar.png"
-        val existingMember = Member(id = memberId, name = "Test User", avatarPath = oldAvatarPath, points = 0, booksRead = 0)
+        val existingMember = Member(id = memberId, name = "Test User", avatarPath = oldAvatarPath, booksRead = 0)
         val updatedMember = existingMember.copy(avatarPath = storagePath)
 
         everySuspend { memberRepository.getMember(memberId) } returns Result.success(existingMember)
@@ -137,7 +137,7 @@ class UpdateAvatarUseCaseTest {
         val imageData = ByteArray(100) { it.toByte() }
         val storagePath = "$memberId/avatar.png"
         val avatarUrl = "https://storage.example.com/$storagePath"
-        val existingMember = Member(id = memberId, name = "Test User", avatarPath = null, points = 0, booksRead = 0)
+        val existingMember = Member(id = memberId, name = "Test User", avatarPath = null, booksRead = 0)
         val updatedMember = existingMember.copy(avatarPath = storagePath)
 
         everySuspend { memberRepository.getMember(memberId) } returns Result.success(existingMember)
@@ -162,7 +162,7 @@ class UpdateAvatarUseCaseTest {
         val oldAvatarPath = "$memberId/old-avatar.png"
         val storagePath = "$memberId/avatar.png"
         val avatarUrl = "https://storage.example.com/$storagePath"
-        val existingMember = Member(id = memberId, name = "Test User", avatarPath = oldAvatarPath, points = 0, booksRead = 0)
+        val existingMember = Member(id = memberId, name = "Test User", avatarPath = oldAvatarPath, booksRead = 0)
         val updatedMember = existingMember.copy(avatarPath = storagePath)
 
         everySuspend { memberRepository.getMember(memberId) } returns Result.success(existingMember)

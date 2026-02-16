@@ -52,7 +52,6 @@ class MemberServiceIntegrationTest {
         // Then: should return correct member data
         assertEquals("1", response.id)
         assertEquals("Ivan Garza", response.name)
-        assertTrue(response.points >= 0, "Points should be non-negative")
         assertTrue(response.books_read >= 0, "Books read should be non-negative")
 
         // Should have clubs
@@ -120,7 +119,6 @@ class MemberServiceIntegrationTest {
         // Given: a new member request
         val request = CreateMemberRequestDto(
             name = "Test Member Create",
-            points = 0,
             books_read = 0,
             role = "member"
         )
@@ -133,7 +131,6 @@ class MemberServiceIntegrationTest {
             // Then: should return success
             assertTrue(response.success, "Member creation should succeed")
             assertEquals("Test Member Create", response.member.name)
-            assertEquals(0, response.member.points)
             assertEquals(0, response.member.books_read)
             assertNotNull(response.member.id, "Should have generated ID")
             memberId = response.member.id
@@ -156,7 +153,6 @@ class MemberServiceIntegrationTest {
         // Given: a test member exists
         val createRequest = CreateMemberRequestDto(
             name = "Original Member Name",
-            points = 10,
             books_read = 1
         )
         val created = memberService.create(createRequest)
@@ -167,7 +163,6 @@ class MemberServiceIntegrationTest {
             val updateRequest = UpdateMemberRequestDto(
                 id = memberId,
                 name = "Updated Member Name",
-                points = 50,
                 books_read = 5
             )
             val response = memberService.update(updateRequest)
@@ -175,13 +170,11 @@ class MemberServiceIntegrationTest {
             // Then: should return success
             assertTrue(response.success, "Member update should succeed")
             assertEquals("Updated Member Name", response.member.name)
-            assertEquals(50, response.member.points)
             assertEquals(5, response.member.books_read)
 
             // Verify changes persisted
             val retrieved = memberService.get(memberId)
             assertEquals("Updated Member Name", retrieved.name)
-            assertEquals(50, retrieved.points)
             assertEquals(5, retrieved.books_read)
         } finally {
             // Cleanup
@@ -196,7 +189,6 @@ class MemberServiceIntegrationTest {
         // Given: a test member exists
         val createRequest = CreateMemberRequestDto(
             name = "Member To Delete",
-            points = 0,
             books_read = 0
         )
         val created = memberService.create(createRequest)
@@ -219,7 +211,6 @@ class MemberServiceIntegrationTest {
         // Given: a test member exists
         val createRequest = CreateMemberRequestDto(
             name = "Member With Clubs",
-            points = 0,
             books_read = 0
         )
         val created = memberService.create(createRequest)
@@ -256,7 +247,6 @@ class MemberServiceIntegrationTest {
         // Given: a member with user_id
         val request = CreateMemberRequestDto(
             name = "User Linked Member",
-            points = 0,
             books_read = 0,
             user_id = "test-user-123"
         )
@@ -293,7 +283,6 @@ class MemberServiceIntegrationTest {
         // Given: a member with initial stats
         val request = CreateMemberRequestDto(
             name = "Stats Member",
-            points = 100,
             books_read = 10
         )
         val created = memberService.create(request)
@@ -301,20 +290,17 @@ class MemberServiceIntegrationTest {
 
         try {
             // Verify initial stats
-            assertEquals(100, created.member.points)
             assertEquals(10, created.member.books_read)
 
             // When: incrementing stats
             val updateRequest = UpdateMemberRequestDto(
                 id = memberId,
-                points = 150,
                 books_read = 15
             )
             memberService.update(updateRequest)
 
             // Then: stats should be updated
             val retrieved = memberService.get(memberId)
-            assertEquals(150, retrieved.points)
             assertEquals(15, retrieved.books_read)
         } finally {
             // Cleanup

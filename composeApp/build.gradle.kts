@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -81,11 +82,13 @@ android {
         }
 
         getByName("debug") {
+            // https://firebase.google.com/docs/app-distribution/android/distribute-gradle?apptype=apk
             firebaseAppDistribution {
                 serviceCredentialsFile = System.getenv("FIREBASE_CREDENTIALS_FILE")
                     ?: "${System.getProperty("user.home")}/.config/firebase/kluvs-app-distribution.json"
                 artifactType = "APK"
                 groups = "og"
+//                releaseNotes = ""
             }
         }
     }

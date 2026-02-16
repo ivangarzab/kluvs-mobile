@@ -39,11 +39,10 @@ class GetClubMembersUseCase(
                     memberId = member.id,
                     name = member.name,
                     handle = member.handle ?: "@",
-                    points = member.points,
                     avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath)
                 )
-            }?.sortedByDescending { it.points } ?: emptyList()
-            Bark.i("Loaded club members (Count: ${memberItems.size}, sorted by points)")
+            } ?: emptyList()
+            Bark.i("Loaded club members (Count: ${memberItems.size})")
             memberItems
         }.onFailure { error ->
             Bark.e("Failed to fetch club members (Club ID: $clubId). User will see empty members list.", error)
