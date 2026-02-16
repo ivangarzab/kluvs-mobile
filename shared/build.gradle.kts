@@ -36,6 +36,7 @@ kotlin {
             export(project(":feature:auth"))
             export(project(":feature:clubs"))
             export(project(":feature:member"))
+            export(project(":feature:settings"))
             export(libs.bark)
         }
     }
@@ -51,6 +52,7 @@ kotlin {
             api(project(":feature:auth"))
             api(project(":feature:clubs"))
             api(project(":feature:member"))
+            api(project(":feature:settings"))
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization)
