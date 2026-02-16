@@ -61,6 +61,7 @@ interface MemberRepository {
      *
      * @param memberId The ID of the member to update
      * @param name Optional new name for the member (null to keep current value)
+     * @param handle Optional new handle (null to keep current value)
      * @param userId Optional new Discord user ID (null to keep current value)
      * @param role Optional new role (null to keep current value)
      * @param booksRead Optional new books read count (null to keep current value)
@@ -72,6 +73,7 @@ interface MemberRepository {
     suspend fun updateMember(
         memberId: String,
         name: String? = null,
+        handle: String? = null,
         userId: String? = null,
         role: String? = null,
         booksRead: Int? = null,
@@ -206,6 +208,7 @@ internal class MemberRepositoryImpl(
     override suspend fun updateMember(
         memberId: String,
         name: String?,
+        handle: String?,
         userId: String?,
         role: String?,
         booksRead: Int?,
@@ -217,6 +220,7 @@ internal class MemberRepositoryImpl(
             UpdateMemberRequestDto(
                 id = memberId,
                 name = name,
+                handle = handle,
                 user_id = userId,
                 role = role,
                 books_read = booksRead,

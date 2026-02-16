@@ -319,6 +319,25 @@ class MemberRepositoryTest {
     }
 
     @Test
+    fun `updateMember with handle updates handle`() = runTest {
+        val memberId = "member-123"
+        val newHandle = "alice_reads"
+        val expectedMember = Member(
+            id = memberId,
+            name = "Alice",
+            handle = newHandle,
+            booksRead = 5
+        )
+        everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)
+
+        val result = repository.updateMember(memberId = memberId, handle = newHandle)
+
+        assertTrue(result.isSuccess)
+        assertEquals(newHandle, result.getOrNull()?.handle)
+        verifySuspend { remoteDataSource.updateMember(any()) }
+    }
+
+    @Test
     fun `updateMember failure returns Result failure`() = runTest {
         val exception = Exception("Failed to update member")
         everySuspend { remoteDataSource.updateMember(any()) } returns Result.failure(exception)

@@ -174,6 +174,7 @@ data class UpdateMemberRequestDto(
     @Serializable(with = IntToStringSerializer::class)
     val id: String,
     val name: String? = null,
+    val handle: String? = null,
     val avatar_path: String? = null,
     val books_read: Int? = null,
     val user_id: String? = null,
