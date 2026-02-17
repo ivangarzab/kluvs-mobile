@@ -10,18 +10,15 @@ struct GeneralTab: View {
                 VStack(spacing: 12) {
                     // Club Info Card
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(clubDetails.clubName)
-                            .font(.headline)
-
-                        Text(String(format: NSLocalizedString("label_members_count", comment: ""), clubDetails.memberCount))
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-
                         if let foundedYear = clubDetails.foundedYear {
                             Text(String(format: NSLocalizedString("label_founded_in", comment: ""), foundedYear))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
+
+                        Text(String(format: NSLocalizedString("label_members_count", comment: ""), clubDetails.memberCount))
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
