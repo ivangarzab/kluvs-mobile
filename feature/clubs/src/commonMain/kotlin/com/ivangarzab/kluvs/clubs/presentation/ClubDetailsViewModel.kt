@@ -75,7 +75,16 @@ class ClubDetailsViewModel(
         currentClubId = clubId
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            // Reset state for subsequent calls
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    currentClubDetails = null,
+                    activeSession = null,
+                    members = emptyList()
+                )
+            }
 
             // Launch all 3 UseCase calls in parallel
             val deferredDetails = async { getClubDetails(clubId) }
