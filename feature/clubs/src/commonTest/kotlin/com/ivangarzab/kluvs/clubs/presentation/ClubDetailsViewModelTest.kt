@@ -29,6 +29,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -299,6 +300,114 @@ class ClubDetailsViewModelTest {
 
         // Then - Error should be cleared
         assertNull(viewModel.state.value.error)
+    }
+
+    @Test
+    fun `selectClub updates selectedClubId in state`() = runTest {
+        // Given
+        val clubId = "club-456"
+        val club = Club(
+            id = clubId,
+            name = "New Club",
+            serverId = null,
+            discordChannel = null,
+            members = emptyList(),
+            activeSession = null,
+            pastSessions = emptyList(),
+            shameList = emptyList()
+        )
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+
+        // When
+        viewModel.selectClub(clubId)
+
+        // Then
+        assertEquals(clubId, viewModel.state.value.selectedClubId)
+    }
+
+    @Test
+    fun `selectClub triggers data load for the new club`() = runTest {
+        // Given
+        val clubId = "club-789"
+        val club = Club(
+            id = clubId,
+            name = "Another Club",
+            serverId = null,
+            discordChannel = null,
+            members = emptyList(),
+            activeSession = null,
+            pastSessions = emptyList(),
+            shameList = emptyList()
+        )
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+
+        // When
+        viewModel.selectClub(clubId)
+
+        // Then - club data should be loaded
+        val state = viewModel.state.value
+        assertFalse(state.isLoading)
+        assertEquals("Another Club", state.currentClubDetails?.clubName)
+    }
+
+    @Test
+    fun `selectedClubId is set after loadUserClubs completes`() = runTest {
+        // Given
+        val userId = "user-1"
+        val clubId = "club-123"
+        val club = Club(
+            id = clubId,
+            name = "Test Club",
+            serverId = null,
+            discordChannel = null,
+            members = emptyList(),
+            activeSession = null,
+            pastSessions = emptyList(),
+            shameList = emptyList()
+        )
+        val member = Member(
+            id = "m1",
+            userId = userId,
+            name = "Alice",
+            booksRead = 0,
+            clubs = listOf(club)
+        )
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+
+        // When
+        viewModel.loadUserClubs(userId)
+
+        // Then
+        assertNotNull(viewModel.state.value.selectedClubId)
+        assertEquals(clubId, viewModel.state.value.selectedClubId)
+    }
+
+    @Test
+    fun `selectedClubId persists through loading cycles`() = runTest {
+        // Given
+        val clubId = "club-123"
+        val club = Club(
+            id = clubId,
+            name = "Test Club",
+            serverId = null,
+            discordChannel = null,
+            members = emptyList(),
+            activeSession = null,
+            pastSessions = emptyList(),
+            shameList = emptyList()
+        )
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+
+        // Load data first time
+        viewModel.selectClub(clubId)
+        assertEquals(clubId, viewModel.state.value.selectedClubId)
+
+        // When - reload (refresh)
+        viewModel.refresh()
+
+        // Then - selectedClubId should still be set
+        assertEquals(clubId, viewModel.state.value.selectedClubId)
     }
 
     @Test

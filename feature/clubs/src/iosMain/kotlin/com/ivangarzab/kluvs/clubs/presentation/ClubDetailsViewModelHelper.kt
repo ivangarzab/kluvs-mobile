@@ -31,5 +31,7 @@ class ClubDetailsViewModelHelper : KoinComponent {
 
     fun loadClubData(clubId: String) = viewModel.loadClubData(clubId)
 
+    fun selectClub(clubId: String) = viewModel.selectClub(clubId)
+
     fun refresh() = viewModel.refresh()
 }
