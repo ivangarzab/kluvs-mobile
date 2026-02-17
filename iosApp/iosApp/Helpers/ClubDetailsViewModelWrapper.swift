@@ -7,10 +7,17 @@
 import Swift
 import Shared
 
+enum ClubScreenState {
+    case loading
+    case error(String)
+    case empty
+    case content
+}
+
 @MainActor
 class ClubDetailsViewModelWrapper: ObservableObject {
+    @Published var screenState: ClubScreenState = .loading
     @Published var isLoading: Bool = false
-    @Published var error: String? = nil
     @Published var availableClubs: [Shared.ClubListItem] = []
     @Published var selectedClubId: String? = nil
     @Published var clubDetails: Shared.ClubDetails? = nil
@@ -28,8 +35,13 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     private func startObserving() {
         let stateCancellable = helper.observeState { [weak self] state in
             DispatchQueue.main.async {
+                self?.screenState = {
+                    if !state.availableClubs.isEmpty { return .content }
+                    if state.isLoading { return .loading }
+                    if let error = state.error { return .error(error) }
+                    return .empty
+                }()
                 self?.isLoading = state.isLoading
-                self?.error = state.error
                 self?.availableClubs = state.availableClubs
                 self?.selectedClubId = state.selectedClubId
                 self?.clubDetails = state.currentClubDetails

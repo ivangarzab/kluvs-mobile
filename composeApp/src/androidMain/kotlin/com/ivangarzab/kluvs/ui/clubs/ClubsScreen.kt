@@ -49,6 +49,13 @@ fun ClubsScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val screenState = when {
+        state.availableClubs.isNotEmpty() -> ScreenState.Content
+        state.isLoading -> ScreenState.Loading
+        state.error != null -> ScreenState.Error(state.error!!)
+        else -> ScreenState.Empty
+    }
+
     LaunchedEffect(userId) {
         viewModel.loadUserClubs(userId)
     }
@@ -56,6 +63,7 @@ fun ClubsScreen(
     ClubsScreenContent(
         modifier = modifier,
         state = state,
+        screenState = screenState,
         onRetry = viewModel::refresh,
         onClubSelected = viewModel::selectClub
     )
@@ -65,16 +73,10 @@ fun ClubsScreen(
 fun ClubsScreenContent(
     modifier: Modifier = Modifier,
     state: ClubDetailsState,
+    screenState: ScreenState,
     onRetry: () -> Unit,
     onClubSelected: (String) -> Unit = {},
 ) {
-    val screenState = when {
-        state.isLoading && state.availableClubs.isEmpty() -> ScreenState.Loading
-        state.error != null && state.availableClubs.isEmpty() -> ScreenState.Error(state.error!!)
-        state.availableClubs.isEmpty() && !state.isLoading -> ScreenState.Empty
-        else -> ScreenState.Content
-    }
-
     var showBottomSheet by remember { mutableStateOf(false) }
 
     AnimatedContent(
@@ -199,6 +201,7 @@ fun Preview_ClubsScreen() = KluvsTheme {
         state = ClubDetailsState(
             isLoading = false
         ),
+        screenState = ScreenState.Content,
         onRetry = { }
     )
 }

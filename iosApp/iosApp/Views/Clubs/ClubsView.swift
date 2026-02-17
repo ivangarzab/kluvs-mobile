@@ -9,16 +9,16 @@ struct ClubsView: View {
 
     var body: some View {
         ZStack {
-            if viewModel.isLoading && viewModel.availableClubs.isEmpty {
+            switch viewModel.screenState {
+            case .loading:
                 LoadingView()
                     .transition(.opacity)
-            } else if let error = viewModel.error, viewModel.availableClubs.isEmpty {
-                ErrorView(message: error, onRetry: {
+            case .error(let message):
+                ErrorView(message: message, onRetry: {
                     viewModel.loadUserClubs(userId: userId)
                 })
                 .transition(.opacity)
-            } else if viewModel.availableClubs.isEmpty && !viewModel.isLoading {
-                // Empty state - user has no clubs
+            case .empty:
                 VStack(spacing: 8) {
                     Text(String(localized: "empty_no_clubs"))
                         .font(.title2)
@@ -29,7 +29,7 @@ struct ClubsView: View {
                         .foregroundColor(.secondary)
                 }
                 .transition(.opacity)
-            } else {
+            case .content:
                 VStack(spacing: 0) {
                     ClubSelectorRow(
                         clubName: viewModel.clubDetails?.clubName ?? "",
@@ -72,8 +72,7 @@ struct ClubsView: View {
                 .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
-        .animation(.easeInOut(duration: 0.3), value: viewModel.error)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.availableClubs.isEmpty)
         .onAppear {
             viewModel.loadUserClubs(userId: userId)
         }
