@@ -12,6 +12,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: String? = nil
     @Published var availableClubs: [Shared.ClubListItem] = []
+    @Published var selectedClubId: String? = nil
     @Published var clubDetails: Shared.ClubDetails? = nil
     @Published var activeSession: Shared.ActiveSessionDetails? = nil
     @Published var members: [Shared.MemberListItemInfo] = []
@@ -30,6 +31,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
                 self?.isLoading = state.isLoading
                 self?.error = state.error
                 self?.availableClubs = state.availableClubs
+                self?.selectedClubId = state.selectedClubId
                 self?.clubDetails = state.currentClubDetails
                 self?.activeSession = state.activeSession
                 self?.members = state.members
@@ -44,6 +46,10 @@ class ClubDetailsViewModelWrapper: ObservableObject {
 
     func loadClubData(clubId: String) {
         helper.loadClubData(clubId: clubId)
+    }
+
+    func selectClub(clubId: String) {
+        helper.selectClub(clubId: clubId)
     }
 
     func refresh() {
