@@ -109,6 +109,12 @@ private struct ClubSelectorRow: View {
                 .font(.headline)
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .id(clubName)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                    removal: .move(edge: .top).combined(with: .opacity)
+                ))
+                .animation(.easeInOut(duration: 0.3), value: clubName)
 
             // TODO: Impl once we have club/ create feature w/uiux
             // Image(systemName: "plus")

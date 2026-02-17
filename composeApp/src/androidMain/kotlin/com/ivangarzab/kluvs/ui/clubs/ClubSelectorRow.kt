@@ -1,12 +1,14 @@
 package com.ivangarzab.kluvs.ui.clubs
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,12 +47,20 @@ fun ClubSelectorRow(
             )
         }
 
-        Text(
-            text = clubName,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+        AnimatedContent(
+            targetState = clubName,
+            transitionSpec = {
+                slideInVertically { -it } togetherWith slideOutVertically { it }
+            },
+            label = "club_name_animation",
             modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
-        )
+        ) { name ->
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
 
         /* TODO: Impl once we have club/ create feature w/uiux
         Icon(
