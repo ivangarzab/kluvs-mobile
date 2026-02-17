@@ -52,11 +52,12 @@ fun ClubSelectorRow(
             modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
         )
 
+        /* TODO: Impl once we have club/ create feature w/uiux
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Add club",
             tint = MaterialTheme.colorScheme.onSurface
-        )
+        )*/
     }
 }
 

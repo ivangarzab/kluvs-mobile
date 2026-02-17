@@ -110,8 +110,9 @@ private struct ClubSelectorRow: View {
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Image(systemName: "plus")
-                .foregroundColor(.primary)
+            // TODO: Impl once we have club/ create feature w/uiux
+            // Image(systemName: "plus")
+            //     .foregroundColor(.primary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
