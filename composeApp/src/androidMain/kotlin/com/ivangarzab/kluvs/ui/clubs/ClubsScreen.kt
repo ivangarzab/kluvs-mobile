@@ -22,7 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -45,6 +49,13 @@ fun ClubsScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val screenState = when {
+        state.availableClubs.isNotEmpty() -> ScreenState.Content
+        state.isLoading -> ScreenState.Loading
+        state.error != null -> ScreenState.Error(state.error!!)
+        else -> ScreenState.Empty
+    }
+
     LaunchedEffect(userId) {
         viewModel.loadUserClubs(userId)
     }
@@ -52,7 +63,9 @@ fun ClubsScreen(
     ClubsScreenContent(
         modifier = modifier,
         state = state,
-        onRetry = viewModel::refresh
+        screenState = screenState,
+        onRetry = viewModel::refresh,
+        onClubSelected = viewModel::selectClub
     )
 }
 
@@ -60,14 +73,11 @@ fun ClubsScreen(
 fun ClubsScreenContent(
     modifier: Modifier = Modifier,
     state: ClubDetailsState,
+    screenState: ScreenState,
     onRetry: () -> Unit,
+    onClubSelected: (String) -> Unit = {},
 ) {
-    val screenState = when {
-        state.isLoading -> ScreenState.Loading
-        state.error != null -> ScreenState.Error(state.error!!)
-        state.availableClubs.isEmpty() -> ScreenState.Empty
-        else -> ScreenState.Content
-    }
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     AnimatedContent(
         targetState = screenState,
@@ -117,6 +127,12 @@ fun ClubsScreenContent(
                 )
 
                 Column(modifier = modifier) {
+                    ClubSelectorRow(
+                        clubName = state.currentClubDetails?.clubName ?: "",
+                        hasMultipleClubs = state.availableClubs.size > 1,
+                        onSelectorClick = { showBottomSheet = true }
+                    )
+
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
                         modifier = Modifier.fillMaxWidth()
@@ -134,22 +150,43 @@ fun ClubsScreenContent(
                         }
                     }
 
-                    val tabModifier = Modifier
-                        .background(color = MaterialTheme.colorScheme.surface)
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                    if (state.isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        val tabModifier = Modifier
+                            .background(color = MaterialTheme.colorScheme.surface)
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
 
-                    // Swipeable tab content
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize()
-                    ) { page ->
-                        when (page) {
-                            0 -> GeneralTab(tabModifier, state.currentClubDetails)
-                            1 -> ActiveSessionTab(tabModifier, state.activeSession)
-                            2 -> MembersTab(tabModifier, state.members)
+                        // Swipeable tab content
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize()
+                        ) { page ->
+                            when (page) {
+                                0 -> GeneralTab(tabModifier, state.currentClubDetails)
+                                1 -> ActiveSessionTab(tabModifier, state.activeSession)
+                                2 -> MembersTab(tabModifier, state.members)
+                            }
                         }
                     }
+                }
+
+                if (showBottomSheet) {
+                    ClubSelectorBottomSheet(
+                        clubs = state.availableClubs,
+                        selectedClubId = state.selectedClubId,
+                        onClubSelected = { clubId ->
+                            onClubSelected(clubId)
+                            showBottomSheet = false
+                        },
+                        onDismiss = { showBottomSheet = false }
+                    )
                 }
             }
         }
@@ -164,6 +201,7 @@ fun Preview_ClubsScreen() = KluvsTheme {
         state = ClubDetailsState(
             isLoading = false
         ),
+        screenState = ScreenState.Content,
         onRetry = { }
     )
 }

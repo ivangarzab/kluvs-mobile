@@ -54,24 +54,20 @@ fun GeneralTab(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = clubDetails.clubName,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.x_members, clubDetails.memberCount),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
                     text = stringResource(
                         R.string.founded_in_x,
                         clubDetails.foundedYear ?: stringResource(R.string.na)
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium,
+                )
+
+                Spacer(Modifier.height(4.dp))
+
+                Text(
+                    text = stringResource(R.string.x_members, clubDetails.memberCount),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }

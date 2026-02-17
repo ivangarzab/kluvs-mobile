@@ -44,7 +44,9 @@ class ClubDetailsViewModel(
                     if (clubListItems.isNotEmpty()) {
                         Bark.i("Loaded ${clubListItems.size} club(s) for user (ID: $userId)")
                         // Load full details for the first club only
-                        loadClubData(clubListItems.first().id)
+                        val firstClubId = clubListItems.first().id
+                        _state.update { it.copy(selectedClubId = firstClubId) }
+                        loadClubData(firstClubId)
                     } else {
                         Bark.i("User has no clubs (ID: $userId)")
                         _state.update {
@@ -64,11 +66,25 @@ class ClubDetailsViewModel(
         }
     }
 
+    fun selectClub(clubId: String) {
+        _state.update { it.copy(selectedClubId = clubId) }
+        loadClubData(clubId)
+    }
+
     fun loadClubData(clubId: String) {
         currentClubId = clubId
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            // Reset state for subsequent calls
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    currentClubDetails = null,
+                    activeSession = null,
+                    members = emptyList()
+                )
+            }
 
             // Launch all 3 UseCase calls in parallel
             val deferredDetails = async { getClubDetails(clubId) }
@@ -100,6 +116,7 @@ class ClubDetailsViewModel(
                 it.copy(
                     isLoading = false,
                     error = error,
+                    selectedClubId = clubId,
                     currentClubDetails = detailsResult.getOrNull(),
                     activeSession = sessionResult.getOrNull(),
                     members = membersResult.getOrNull() ?: emptyList()
