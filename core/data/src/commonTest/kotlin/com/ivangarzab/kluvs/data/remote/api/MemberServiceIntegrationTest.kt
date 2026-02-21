@@ -119,8 +119,7 @@ class MemberServiceIntegrationTest {
         // Given: a new member request
         val request = CreateMemberRequestDto(
             name = "Test Member Create",
-            books_read = 0,
-            role = "member"
+            books_read = 0
         )
 
         var memberId: String? = null
