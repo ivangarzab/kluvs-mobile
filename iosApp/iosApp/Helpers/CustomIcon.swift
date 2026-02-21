@@ -14,6 +14,7 @@ enum CustomIcon: String {
     case password = "ic_password"
     case edit = "ic_edit"
     case back = "ic_back"
+    case info = "ic_info"
     case crown = "ic_crown"
     case shield = "ic_shield"
     
