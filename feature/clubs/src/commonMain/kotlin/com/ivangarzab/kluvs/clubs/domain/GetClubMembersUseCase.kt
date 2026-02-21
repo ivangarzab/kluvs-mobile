@@ -5,12 +5,12 @@ import com.ivangarzab.kluvs.clubs.presentation.MemberListItemInfo
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.model.Club
-import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.kluvs.model.ClubMember
 
 /**
  * UseCase for fetching club members sorted by points for MembersTab.
  *
- * Transforms domain [Member] models into UI-friendly [MemberListItemInfo] with:
+ * Transforms domain [ClubMember] models into UI-friendly [MemberListItemInfo] with:
  * - Member information
  * - Points for ranking
  * - Sorted by points (descending)
@@ -34,7 +34,8 @@ class GetClubMembersUseCase(
     suspend operator fun invoke(clubId: String): Result<List<MemberListItemInfo>> {
         Bark.d("Fetching club members (Club ID: $clubId)")
         return clubRepository.getClub(clubId).map { club: Club ->
-            val memberItems = club.members?.map { member: Member ->
+            val memberItems = club.members?.map { clubMember: ClubMember ->
+                val member = clubMember.member
                 MemberListItemInfo(
                     memberId = member.id,
                     name = member.name,

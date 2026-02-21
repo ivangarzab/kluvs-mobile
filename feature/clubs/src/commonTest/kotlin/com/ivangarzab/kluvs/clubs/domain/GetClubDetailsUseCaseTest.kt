@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.kluvs.model.ClubMember
 import com.ivangarzab.kluvs.model.Discussion
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.model.Session
@@ -42,8 +43,14 @@ class GetClubDetailsUseCaseTest {
             serverId = null,
             discordChannel = null,
             members = listOf(
-                Member(id = "m1", name = "Alice", userId = null, role = null, booksRead = 5),
-                Member(id = "m2", name = "Bob", userId = null, role = null, booksRead = 3)
+                ClubMember(
+                    role = "member",
+                    member = Member(id = "m1", name = "Alice", userId = null, booksRead = 5)
+                ),
+                ClubMember(
+                    role = "member",
+                    member = Member(id = "m2", name = "Bob", userId = null, booksRead = 3)
+                )
             ),
             activeSession = null,
             pastSessions = emptyList(),
@@ -90,7 +97,12 @@ class GetClubDetailsUseCaseTest {
             name = "Test Club",
             serverId = null,
             discordChannel = null,
-            members = listOf(Member(id = "m1", name = "Alice", userId = null, role = null, booksRead = 5)),
+            members = listOf(
+                ClubMember(
+                    role = "member",
+                    member = Member(id = "m1", name = "Alice", userId = null, booksRead = 5)
+                )
+            ),
             activeSession = session,
             pastSessions = emptyList(),
             shameList = emptyList()
