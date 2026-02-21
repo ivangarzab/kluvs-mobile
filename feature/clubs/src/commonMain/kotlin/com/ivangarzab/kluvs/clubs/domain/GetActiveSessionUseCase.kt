@@ -109,7 +109,8 @@ class GetMemberClubsUseCase(
             val clubItems = member.clubs?.map { club ->
                 ClubListItem(
                     id = club.id,
-                    name = club.name
+                    name = club.name,
+                    role = club.role
                 )
             } ?: emptyList()
             Bark.i("Loaded member clubs (Count: ${clubItems.size})")
