@@ -20,6 +20,7 @@ fun ClubDto.toDomain(): Club {
         serverId = server_id,
         foundedDate = parseDateOnlyString(founded_date),
         shameList = emptyList(),
+        role = role,
         members = null,
         activeSession = null,
         pastSessions = null
@@ -43,6 +44,7 @@ fun ClubResponseDto.toDomain(): Club {
         serverId = server_id,
         foundedDate = parseDateOnlyString(founded_date),
         shameList = shame_list,
+        role = null,
         // Map nested DTOs to domain models using their respective mappers
         members = members.map { it.toDomain() },
         activeSession = active_session?.toDomain(),
@@ -71,6 +73,7 @@ fun ServerClubDto.toDomain(): Club {
         serverId = null, // Not available in ServerClubDto
         foundedDate = parseDateOnlyString(founded_date),
         shameList = emptyList(),
+        role = null,
         members = null,
         activeSession = latest_session?.toDomain(),
         pastSessions = null
