@@ -44,7 +44,8 @@ class GetClubMembersUseCase(
                         name = member.name,
                         handle = member.handle ?: "@",
                         avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath),
-                        role = clubMember.role
+                        role = clubMember.role,
+                        userId = member.userId
                     )
                 } ?: emptyList()
             Bark.i("Loaded club members (Count: ${memberItems.size})")

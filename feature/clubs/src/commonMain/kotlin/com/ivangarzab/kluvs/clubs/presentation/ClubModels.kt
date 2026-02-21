@@ -80,13 +80,17 @@ data class DiscussionInfo(
 
 /**
  * UI model for member displayed in MembersTab list.
+ *
+ * [userId] mirrors [com.ivangarzab.kluvs.model.Member.userId] and is used by the UI to
+ * identify the currently signed-in user's own row so self-action controls can be hidden.
  */
 data class MemberListItemInfo(
     val memberId: String,
     val name: String,
     val handle: String,
     val avatarUrl: String?,
-    val role: Role
+    val role: Role,
+    val userId: String? = null
 )
 
 /**
