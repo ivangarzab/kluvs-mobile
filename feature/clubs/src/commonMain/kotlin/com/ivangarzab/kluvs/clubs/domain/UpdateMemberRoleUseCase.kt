@@ -21,6 +21,7 @@ class UpdateMemberRoleUseCase(
 
     data class Params(
         val memberId: String,
+        val clubId: String,
         val currentMemberId: String,
         val newRole: Role
     )
@@ -32,12 +33,12 @@ class UpdateMemberRoleUseCase(
         if (params.newRole == Role.OWNER) {
             return Result.failure(IllegalArgumentException("Cannot assign the OWNER role"))
         }
-        Bark.d("Updating member role (Member ID: ${params.memberId}, New Role: ${params.newRole})")
+        Bark.d("Updating member role (Member ID: ${params.memberId}, Club ID: ${params.clubId}, New Role: ${params.newRole})")
         return memberRepository.updateMember(
             memberId = params.memberId,
-            role = params.newRole.name.lowercase()
+            clubRoles = mapOf(params.clubId to params.newRole.name.lowercase())
         )
-            .onSuccess { Bark.i("Member role updated (Member ID: ${params.memberId}, Role: ${params.newRole})") }
-            .onFailure { Bark.e("Failed to update member role (Member ID: ${params.memberId}). Retry.", it) }
+            .onSuccess { Bark.i("Member role updated (Member ID: ${params.memberId}, Club ID: ${params.clubId}, Role: ${params.newRole})") }
+            .onFailure { Bark.e("Failed to update member role (Member ID: ${params.memberId}, Club ID: ${params.clubId}). Retry.", it) }
     }
 }

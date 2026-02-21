@@ -19,13 +19,14 @@ class UpdateMemberRoleUseCaseTest {
     private val stubMember = Member(id = "m2", userId = "u2", name = "Bob", booksRead = 0, clubs = null)
     private val params = UpdateMemberRoleUseCase.Params(
         memberId = "m2",
+        clubId = "club-1",
         currentMemberId = "m1",
         newRole = Role.ADMIN
     )
 
     @Test
     fun `invoke succeeds when OWNER promotes member to ADMIN`() = runTest {
-        everySuspend { memberRepository.updateMember(memberId = "m2", role = "admin") } returns Result.success(stubMember)
+        everySuspend { memberRepository.updateMember(memberId = "m2", clubRoles = mapOf("club-1" to "admin")) } returns Result.success(stubMember)
 
         val result = useCase(params, Role.OWNER)
 
@@ -34,7 +35,7 @@ class UpdateMemberRoleUseCaseTest {
 
     @Test
     fun `invoke succeeds when ADMIN promotes member to ADMIN`() = runTest {
-        everySuspend { memberRepository.updateMember(memberId = "m2", role = "admin") } returns Result.success(stubMember)
+        everySuspend { memberRepository.updateMember(memberId = "m2", clubRoles = mapOf("club-1" to "admin")) } returns Result.success(stubMember)
 
         val result = useCase(params, Role.ADMIN)
 
@@ -53,6 +54,7 @@ class UpdateMemberRoleUseCaseTest {
     fun `invoke fails when trying to assign OWNER role`() = runTest {
         val ownerParams = UpdateMemberRoleUseCase.Params(
             memberId = "m2",
+            clubId = "club-1",
             currentMemberId = "m1",
             newRole = Role.OWNER
         )
@@ -67,6 +69,7 @@ class UpdateMemberRoleUseCaseTest {
     fun `invoke fails when trying to change own role`() = runTest {
         val selfParams = UpdateMemberRoleUseCase.Params(
             memberId = "m1",
+            clubId = "club-1",
             currentMemberId = "m1",
             newRole = Role.ADMIN
         )
@@ -79,7 +82,7 @@ class UpdateMemberRoleUseCaseTest {
 
     @Test
     fun `invoke propagates repository failure`() = runTest {
-        everySuspend { memberRepository.updateMember(memberId = "m2", role = "admin") } returns
+        everySuspend { memberRepository.updateMember(memberId = "m2", clubRoles = mapOf("club-1" to "admin")) } returns
             Result.failure(RuntimeException("Network error"))
 
         val result = useCase(params, Role.OWNER)
