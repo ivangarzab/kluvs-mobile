@@ -50,8 +50,7 @@ class MemberRepositoryTest {
             id = memberId,
             name = "John Doe",
             booksRead = 5,
-            userId = "user-789",
-            role = "Reader"
+            userId = "user-789"
         )
         everySuspend { remoteDataSource.getMember(memberId) } returns Result.success(expectedMember)
 
@@ -139,7 +138,6 @@ class MemberRepositoryTest {
             id = "member-new",
             name = memberName,
             userId = userId,
-            role = role,
             booksRead = 0
         )
         everySuspend { remoteDataSource.createMember(any()) } returns Result.success(expectedMember)
@@ -231,7 +229,6 @@ class MemberRepositoryTest {
             id = memberId,
             name = newName,
             userId = newUserId,
-            role = newRole,
             booksRead = newBooksRead
         )
         everySuspend { remoteDataSource.updateMember(any()) } returns Result.success(expectedMember)

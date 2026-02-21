@@ -12,6 +12,8 @@ import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
+import com.ivangarzab.kluvs.model.ClubMember
+import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -102,8 +104,8 @@ class ClubDetailsViewModelTest {
             discussions = listOf(futureDiscussion)
         )
         val members = listOf(
-            Member(id = "m1", userId = "u1", name = "Alice", booksRead = 5, clubs = null),
-            Member(id = "m2", userId = "u2", name = "Bob", booksRead = 3, clubs = null)
+            ClubMember(role = Role.OWNER, Member(id = "m1", userId = "u1", name = "Alice", booksRead = 5, clubs = null)),
+            ClubMember(role = Role.MEMBER, Member(id = "m2", userId = "u2", name = "Bob", booksRead = 3, clubs = null))
         )
         val club = Club(
             id = clubId,
@@ -207,9 +209,9 @@ class ClubDetailsViewModelTest {
         // Given
         val clubId = "club-123"
         val members = listOf(
-            Member(id = "m1", userId = "u1", name = "Alice", booksRead = 5, clubs = null),
-            Member(id = "m2", userId = "u2", name = "Bob", booksRead = 3, clubs = null),
-            Member(id = "m3", userId = "u3", name = "Charlie", booksRead = 4, clubs = null)
+            ClubMember(role = Role.OWNER, Member(id = "m1", userId = "u1", name = "Alice", booksRead = 5, clubs = null)),
+            ClubMember(role = Role.OWNER, Member(id = "m2", userId = "u2", name = "Bob", booksRead = 3, clubs = null)),
+            ClubMember(role = Role.OWNER, Member(id = "m3", userId = "u3", name = "Charlie", booksRead = 4, clubs = null)),
         )
         val club = Club(
             id = clubId,

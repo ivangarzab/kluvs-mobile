@@ -42,7 +42,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             id = "member-456",
             name = "John Doe",
             userId = userId,
-            role = null,
             booksRead = 0,
             clubs = null
         )
@@ -68,7 +67,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             id = "member-456",
             name = "John Doe",
             userId = userId,
-            role = null,
             booksRead = 0,
             clubs = listOf(club1, club2)
         )
@@ -132,7 +130,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             id = "member-456",
             name = "John Doe",
             userId = userId,
-            role = null,
             booksRead = 0,
             clubs = listOf(club)
         )
@@ -187,7 +184,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             id = "member-456",
             name = "John Doe",
             userId = userId,
-            role = null,
             booksRead = 0,
             clubs = listOf(club)
         )
@@ -229,7 +225,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             id = "member-456",
             name = "John Doe",
             userId = userId,
-            role = null,
             booksRead = 0,
             clubs = listOf(club1, club2)
         )
@@ -273,7 +268,6 @@ class GetCurrentlyReadingBooksUseCaseTest {
             id = "member-456",
             name = "John Doe",
             userId = userId,
-            role = null,
             booksRead = 0,
             clubs = listOf(club)
         )
