@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.clubs.presentation.MemberListItemInfo
+import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import com.ivangarzab.kluvs.ui.components.MemberAvatar
 import com.ivangarzab.kluvs.ui.components.NoTabData
@@ -47,7 +48,7 @@ fun MembersTab(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(0.dp)) {
             Text(
                 text = stringResource(R.string.members_x, members.size),
                 color = MaterialTheme.colorScheme.onSurface,
@@ -123,12 +124,12 @@ fun Preview_MembersTab() = KluvsTheme {
             .background(color = MaterialTheme.colorScheme.surface)
             .fillMaxSize(),
         members = listOf(
-            MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", ""),
-            MemberListItemInfo("1", "Monica Michelle Morales", "@monica", ""),
-            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "@chitho23", ""),
-            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "@keto92", ""),
-            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "@josalinas", ""),
-            MemberListItemInfo("5", "Ginseng Joaquin Guzman", "gino1", ""),
+            MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", "", role = Role.OWNER),
+            MemberListItemInfo("1", "Monica Michelle Morales", "@monica", "", role = Role.ADMIN),
+            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "@chitho23", "", role = Role.MEMBER),
+            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "@keto92", "", role = Role.MEMBER),
+            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "@josalinas", "", role = Role.MEMBER),
+            MemberListItemInfo("5", "Ginseng Joaquin Guzman", "gino1", "", role = Role.MEMBER),
         )
     )
 }

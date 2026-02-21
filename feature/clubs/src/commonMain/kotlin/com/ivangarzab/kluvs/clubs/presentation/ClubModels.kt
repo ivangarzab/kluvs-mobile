@@ -1,5 +1,7 @@
 package com.ivangarzab.kluvs.clubs.presentation
 
+import com.ivangarzab.kluvs.model.Role
+
 /**
  * Lightweight UI model for club selection/listing.
  *
@@ -81,5 +83,6 @@ data class MemberListItemInfo(
     val memberId: String,
     val name: String,
     val handle: String,
-    val avatarUrl: String?
+    val avatarUrl: String?,
+    val role: Role
 )
