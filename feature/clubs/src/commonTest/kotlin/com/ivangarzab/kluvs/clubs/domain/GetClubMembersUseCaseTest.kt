@@ -250,8 +250,8 @@ class GetClubMembersUseCaseTest {
         val avatarPath1 = "member-1/avatar.png"
         val avatarUrl1 = "https://storage.example.com/$avatarPath1"
         val members = listOf(
-            Member(id = "m1", name = "Alice", avatarPath = avatarPath1, booksRead = 10),
-            Member(id = "m2", name = "Bob", avatarPath = null, booksRead = 5)
+            ClubMember(role = "owner", member = Member(id = "m1", name = "Alice", avatarPath = avatarPath1, booksRead = 10)),
+            ClubMember(role = "member", Member(id = "m2", name = "Bob", avatarPath = null, booksRead = 5))
         )
         val club = Club(
             id = clubId,

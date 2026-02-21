@@ -110,7 +110,7 @@ class MemberLocalDataSourceTest {
             handle = "Alice",
             avatarPath = "path",
             booksRead = 5,
-            clubs = listOf(Club("club-1", "Fantasy Club", null, null, null, null, role = "admin", null, null, emptyList()))
+            clubs = listOf(Club("club-1", "Fantasy Club", null, null, null, emptyList(), null, null, null, emptyList()))
         )
 
         everySuspend { fixture.memberDao.insertMember(member.toEntity()) } returns Unit

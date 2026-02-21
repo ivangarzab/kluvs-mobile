@@ -38,7 +38,6 @@ class MemberRemoteDataSourceTest {
             name = "Alice",
             books_read = 12,
             user_id = "user-123",
-            role = "admin",
             clubs = listOf(
                 ClubDto("club-1", "Fiction Club", "123456789", "server-1")
             ),
@@ -86,7 +85,6 @@ class MemberRemoteDataSourceTest {
             name = "Bob",
             books_read = 5,
             user_id = "user-456",
-            role = "member",
             clubs = emptyList(),
             shame_clubs = emptyList()
         )
@@ -110,8 +108,7 @@ class MemberRemoteDataSourceTest {
         val request = CreateMemberRequestDto(
             name = "Charlie",
             books_read = 0,
-            user_id = "user-789",
-            role = "member"
+            user_id = "user-789"
         )
 
         val responseDto = MemberSuccessResponseDto(
@@ -122,7 +119,6 @@ class MemberRemoteDataSourceTest {
                 name = "Charlie",
                 books_read = 0,
                 user_id = "user-789",
-                role = "member",
                 clubs = emptyList()
             )
         )
@@ -157,7 +153,6 @@ class MemberRemoteDataSourceTest {
                 name = "Alice Updated",
                 books_read = 12,
                 user_id = "user-123",
-                role = "admin",
                 clubs = emptyList()
             )
         )
@@ -192,7 +187,6 @@ class MemberRemoteDataSourceTest {
                 handle = "alice_reads",
                 books_read = 12,
                 user_id = "user-123",
-                role = "admin",
                 clubs = emptyList()
             )
         )
