@@ -1,9 +1,12 @@
 package com.ivangarzab.kluvs.clubs.presentation
 
+import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.Closeable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.datetime.LocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -34,4 +37,29 @@ class ClubDetailsViewModelHelper : KoinComponent {
     fun selectClub(clubId: String) = viewModel.selectClub(clubId)
 
     fun refresh() = viewModel.refresh()
+
+    // General tab
+    fun onUpdateClubName(newName: String) = viewModel.onUpdateClubName(newName)
+    fun onDeleteClub() = viewModel.onDeleteClub()
+
+    // Session tab
+    fun onCreateSession(book: Book, dueDate: LocalDateTime?) = viewModel.onCreateSession(book, dueDate)
+    fun onUpdateSession(book: Book?, dueDate: LocalDateTime?) = viewModel.onUpdateSession(book, dueDate)
+    fun onDeleteSession() = viewModel.onDeleteSession()
+
+    // Discussion operations
+    fun onCreateDiscussion(title: String, location: String, date: LocalDateTime) =
+        viewModel.onCreateDiscussion(title, location, date)
+    fun onUpdateDiscussion(discussionId: String, title: String?, location: String?, date: LocalDateTime?) =
+        viewModel.onUpdateDiscussion(discussionId, title, location, date)
+    fun onDeleteDiscussion(discussionId: String) = viewModel.onDeleteDiscussion(discussionId)
+
+    // Member operations
+    fun onUpdateMemberRole(memberId: String, currentMemberId: String, newRole: Role) =
+        viewModel.onUpdateMemberRole(memberId, currentMemberId, newRole)
+    fun onRemoveMember(memberId: String, currentMemberId: String) =
+        viewModel.onRemoveMember(memberId, currentMemberId)
+
+    // UI event consumption
+    fun onConsumeOperationResult() = viewModel.onConsumeOperationResult()
 }

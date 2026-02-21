@@ -7,10 +7,12 @@ import com.ivangarzab.kluvs.model.Role
  *
  * Contains minimal data needed to display and select clubs.
  * Used for multi-club support where user can switch between clubs.
+ * [role] is the current user's role in this club, populated from the member's clubs list.
  */
 data class ClubListItem(
     val id: String,
-    val name: String
+    val name: String,
+    val role: Role? = null
 )
 
 /**
@@ -86,3 +88,12 @@ data class MemberListItemInfo(
     val avatarUrl: String?,
     val role: Role
 )
+
+/**
+ * Represents the outcome of a mutation operation (create/update/delete).
+ * The ViewModel maps UseCase Result<T> into this for the UI layer.
+ */
+sealed interface OperationResult {
+    data class Success(val message: String) : OperationResult
+    data class Error(val message: String) : OperationResult
+}
