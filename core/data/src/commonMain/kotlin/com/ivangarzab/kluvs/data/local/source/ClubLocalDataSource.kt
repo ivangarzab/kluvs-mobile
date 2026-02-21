@@ -5,6 +5,7 @@ import com.ivangarzab.kluvs.data.local.mappers.toEntity
 import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.model.ClubMember
+import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.bark.Bark
 
 /**
@@ -45,7 +46,7 @@ class ClubLocalDataSourceImpl(
                 val roleMap = crossRefs.associate { it.memberId to it.role }
                 memberEntities.map { memberEntity ->
                     ClubMember(
-                        role = roleMap[memberEntity.id] ?: "member", // Default to "member" if not found
+                        role = Role.fromString(roleMap[memberEntity.id] ?: "member"),
                         member = memberEntity.toDomain()
                     )
                 }
@@ -94,7 +95,7 @@ class ClubLocalDataSourceImpl(
                         com.ivangarzab.kluvs.database.entities.ClubMemberCrossRef(
                             clubId = club.id,
                             memberId = clubMember.member.id,
-                            role = clubMember.role
+                            role = clubMember.role.name
                         )
                     )
                 }

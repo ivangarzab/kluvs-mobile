@@ -6,6 +6,7 @@ import com.ivangarzab.kluvs.data.local.mappers.toEntity
 import com.ivangarzab.kluvs.database.KluvsDatabase
 import com.ivangarzab.kluvs.database.entities.ClubMemberCrossRef
 import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.kluvs.model.Role
 
 /**
  * Local data source for Member entities.
@@ -41,7 +42,7 @@ class MemberLocalDataSourceImpl(
             val crossRefs = memberDao.getClubMemberCrossRefsForMember(memberId)
             val roleMap = crossRefs.associate { it.clubId to it.role }
             clubEntities.map { clubEntity ->
-                clubEntity.toDomain().copy(role = roleMap[clubEntity.id])
+                clubEntity.toDomain().copy(role = roleMap[clubEntity.id]?.let { Role.fromString(it) })
             }
         } else null
         return memberEntity.toDomain().copy(clubs = clubs)
@@ -54,7 +55,7 @@ class MemberLocalDataSourceImpl(
             val crossRefs = memberDao.getClubMemberCrossRefsForMember(memberEntity.id)
             val roleMap = crossRefs.associate { it.clubId to it.role }
             clubEntities.map { clubEntity ->
-                clubEntity.toDomain().copy(role = roleMap[clubEntity.id])
+                clubEntity.toDomain().copy(role = roleMap[clubEntity.id]?.let { Role.fromString(it) })
             }
         } else null
         return memberEntity.toDomain().copy(clubs = clubs)
@@ -82,7 +83,7 @@ class MemberLocalDataSourceImpl(
                             ClubMemberCrossRef(
                                 clubId = club.id,
                                 memberId = member.id,
-                                role = club.role ?: "member" // Use club's role or default to "member"
+                                role = club.role?.name?.lowercase() ?: "member" // Convert Role enum to string or default to "member"
                             )
                         )
                         successCount++

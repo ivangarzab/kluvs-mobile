@@ -3,6 +3,7 @@ package com.ivangarzab.kluvs.data.remote.mappers
 import com.ivangarzab.kluvs.data.remote.dtos.ClubMemberDto
 import com.ivangarzab.kluvs.model.ClubMember
 import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.network.utils.parseDateTimeString
 
 /**
@@ -13,7 +14,7 @@ import com.ivangarzab.kluvs.network.utils.parseDateTimeString
  */
 fun ClubMemberDto.toDomain(): ClubMember {
     return ClubMember(
-        role = role,
+        role = Role.fromString(role),
         member = Member(
             id = id,
             name = name ?: "",

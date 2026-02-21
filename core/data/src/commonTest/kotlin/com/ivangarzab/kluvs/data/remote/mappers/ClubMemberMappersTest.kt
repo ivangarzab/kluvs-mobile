@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.data.remote.mappers
 
 import com.ivangarzab.kluvs.data.remote.dtos.ClubMemberDto
+import com.ivangarzab.kluvs.model.Role
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -27,7 +28,7 @@ class ClubMemberMappersTest {
         val domain = dto.toDomain()
 
         // Then: ClubMember is created with role and member
-        assertEquals("owner", domain.role)
+        assertEquals(Role.OWNER, domain.role)
         assertEquals("1", domain.member.id)
         assertEquals("Jane Doe", domain.member.name)
         assertEquals("janedoe", domain.member.handle)
@@ -75,9 +76,9 @@ class ClubMemberMappersTest {
         val member = memberDto.toDomain()
 
         // Then: Each has correct role
-        assertEquals("owner", owner.role)
-        assertEquals("admin", admin.role)
-        assertEquals("member", member.role)
+        assertEquals(Role.OWNER, owner.role)
+        assertEquals(Role.ADMIN, admin.role)
+        assertEquals(Role.MEMBER, member.role)
     }
 
     @Test
@@ -99,7 +100,7 @@ class ClubMemberMappersTest {
         val domain = dto.toDomain()
 
         // Then: Nullable fields are handled correctly
-        assertEquals("member", domain.role)
+        assertEquals(Role.MEMBER, domain.role)
         assertEquals("4", domain.member.id)
         assertEquals("", domain.member.name) // Default empty string for null name
         assertNull(domain.member.handle)

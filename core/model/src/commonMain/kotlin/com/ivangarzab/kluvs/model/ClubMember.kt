@@ -7,10 +7,10 @@ package com.ivangarzab.kluvs.model
  * is always available when working with club members. Use this when displaying
  * club member lists where roles need to be shown.
  *
- * @property role The member's role in the club ("owner", "admin", or "member")
+ * @property role The member's role in the club
  * @property member The underlying member entity
  */
 data class ClubMember(
-    val role: String,
+    val role: Role,
     val member: Member
 )

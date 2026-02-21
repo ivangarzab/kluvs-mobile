@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.data.remote.dtos.ClubDto
 import com.ivangarzab.kluvs.data.remote.dtos.ClubResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.ServerClubDto
 import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.network.utils.parseDateOnlyString
 
 /**
@@ -20,7 +21,7 @@ fun ClubDto.toDomain(): Club {
         serverId = server_id,
         foundedDate = parseDateOnlyString(founded_date),
         shameList = emptyList(),
-        role = role,
+        role = role?.let { Role.fromString(it) },
         members = null,
         activeSession = null,
         pastSessions = null

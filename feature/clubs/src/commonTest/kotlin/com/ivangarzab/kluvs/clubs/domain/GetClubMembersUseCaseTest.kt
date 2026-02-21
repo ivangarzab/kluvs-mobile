@@ -6,6 +6,7 @@ import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.model.ClubMember
 import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.kluvs.model.Role
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -38,15 +39,15 @@ class GetClubMembersUseCaseTest {
         val clubId = "club-123"
         val members = listOf(
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m1", name = "Alice", userId = null, booksRead = 5)
             ),
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m2", name = "Bob", userId = null, booksRead = 3)
             ),
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m3", name = "Charlie", userId = null, booksRead = 7)
             )
         )
@@ -109,7 +110,7 @@ class GetClubMembersUseCaseTest {
         val clubId = "club-123"
         val members = listOf(
             ClubMember(
-                role = "admin",
+                role = Role.ADMIN,
                 member = Member(id = "m1", name = "Alice", userId = "u1", booksRead = 10)
             )
         )
@@ -145,15 +146,15 @@ class GetClubMembersUseCaseTest {
         val clubId = "club-123"
         val members = listOf(
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m1", name = "Alice", userId = null, booksRead = 5)
             ),
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m2", name = "Bob", userId = null, booksRead = 3)
             ),
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m3", name = "Charlie", userId = null, booksRead = 7)
             )
         )
@@ -208,11 +209,11 @@ class GetClubMembersUseCaseTest {
         val avatarUrl2 = "https://storage.example.com/$avatarPath2"
         val members = listOf(
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m1", name = "Alice", avatarPath = avatarPath1, booksRead = 10)
             ),
             ClubMember(
-                role = "member",
+                role = Role.MEMBER,
                 member = Member(id = "m2", name = "Bob", avatarPath = avatarPath2, booksRead = 5)
             )
         )
@@ -250,8 +251,8 @@ class GetClubMembersUseCaseTest {
         val avatarPath1 = "member-1/avatar.png"
         val avatarUrl1 = "https://storage.example.com/$avatarPath1"
         val members = listOf(
-            ClubMember(role = "owner", member = Member(id = "m1", name = "Alice", avatarPath = avatarPath1, booksRead = 10)),
-            ClubMember(role = "member", Member(id = "m2", name = "Bob", avatarPath = null, booksRead = 5))
+            ClubMember(role = Role.OWNER, member = Member(id = "m1", name = "Alice", avatarPath = avatarPath1, booksRead = 10)),
+            ClubMember(role = Role.MEMBER, Member(id = "m2", name = "Bob", avatarPath = null, booksRead = 5))
         )
         val club = Club(
             id = clubId,

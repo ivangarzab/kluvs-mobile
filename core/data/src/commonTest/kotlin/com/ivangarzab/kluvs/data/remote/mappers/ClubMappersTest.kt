@@ -6,6 +6,7 @@ import com.ivangarzab.kluvs.data.remote.dtos.ClubMemberDto
 import com.ivangarzab.kluvs.data.remote.dtos.ClubResponseDto
 import com.ivangarzab.kluvs.data.remote.dtos.ServerClubDto
 import com.ivangarzab.kluvs.data.remote.dtos.SessionDto
+import com.ivangarzab.kluvs.model.Role
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -84,7 +85,7 @@ class ClubMappersTest {
         assertEquals("Full Club", domain.name)
         assertNotNull(domain.members)
         assertEquals(1, domain.members?.size)
-        assertEquals("admin", domain.members?.first()?.role)
+        assertEquals(Role.ADMIN, domain.members?.first()?.role)
         assertEquals("John Doe", domain.members?.first()?.member?.name)
         assertNotNull(domain.activeSession)
         assertEquals("session-1", domain.activeSession?.id)

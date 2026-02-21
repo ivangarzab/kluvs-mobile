@@ -7,6 +7,7 @@ import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.model.ClubMember
 import com.ivangarzab.kluvs.model.Discussion
 import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.model.Session
 import com.ivangarzab.kluvs.presentation.util.FormatDateTimeUseCase
 import dev.mokkery.answering.returns
@@ -44,11 +45,11 @@ class GetClubDetailsUseCaseTest {
             discordChannel = null,
             members = listOf(
                 ClubMember(
-                    role = "member",
+                    role = Role.MEMBER,
                     member = Member(id = "m1", name = "Alice", userId = null, booksRead = 5)
                 ),
                 ClubMember(
-                    role = "member",
+                    role = Role.MEMBER,
                     member = Member(id = "m2", name = "Bob", userId = null, booksRead = 3)
                 )
             ),
@@ -99,7 +100,7 @@ class GetClubDetailsUseCaseTest {
             discordChannel = null,
             members = listOf(
                 ClubMember(
-                    role = "member",
+                    role = Role.MEMBER,
                     member = Member(id = "m1", name = "Alice", userId = null, booksRead = 5)
                 )
             ),

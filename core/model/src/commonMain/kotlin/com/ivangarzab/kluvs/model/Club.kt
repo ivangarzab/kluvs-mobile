@@ -32,7 +32,7 @@ data class Club(
      * Only populated when this club is returned as part of a member's clubs list.
      * Null in other contexts (e.g., server club list, standalone club fetch).
      */
-    val role: String? = null,
+    val role: Role? = null,
 
     /**
      * List of [ClubMember]s in this club.
