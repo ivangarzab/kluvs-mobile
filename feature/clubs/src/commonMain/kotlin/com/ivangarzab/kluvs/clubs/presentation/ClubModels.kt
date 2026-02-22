@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.clubs.presentation
 
 import com.ivangarzab.kluvs.model.Role
+import kotlinx.datetime.LocalDateTime
 
 /**
  * Lightweight UI model for club selection/listing.
@@ -38,6 +39,7 @@ data class ActiveSessionDetails(
     val sessionId: String,
     val book: BookInfo,
     val dueDate: String,
+    val rawDueDate: LocalDateTime?,
     val discussions: List<DiscussionTimelineItemInfo>
 )
 
@@ -51,6 +53,7 @@ data class DiscussionTimelineItemInfo(
     val title: String,
     val location: String,
     val date: String,
+    val rawDate: LocalDateTime,
     val isPast: Boolean,
     val isNext: Boolean
 )

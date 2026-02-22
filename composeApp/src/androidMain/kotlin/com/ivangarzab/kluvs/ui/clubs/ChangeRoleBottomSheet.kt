@@ -39,7 +39,8 @@ fun ChangeRoleBottomSheet(
     onSave: (newRole: Role) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedRole by remember { mutableStateOf(currentRole.takeIf { it in assignableRoles } ?: Role.MEMBER) }
+    val initialSelectedRole = remember { currentRole.takeIf { it in assignableRoles } ?: Role.MEMBER }
+    var selectedRole by remember { mutableStateOf(initialSelectedRole) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
@@ -97,7 +98,8 @@ fun ChangeRoleBottomSheet(
                 onClick = { onSave(selectedRole) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
+                enabled = selectedRole != initialSelectedRole
             ) {
                 Text(
                     text = "Save",

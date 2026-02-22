@@ -28,6 +28,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,8 +52,8 @@ import com.ivangarzab.kluvs.clubs.presentation.BookInfo
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionTimelineItemInfo
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.theme.KluvsTheme
-import com.ivangarzab.kluvs.ui.components.NextDiscussionCard
 import com.ivangarzab.kluvs.ui.components.NoTabData
+import kotlinx.datetime.LocalDateTime
 
 @Composable
 fun ActiveSessionTab(
@@ -190,7 +191,7 @@ fun ActiveSessionTab(
 
             if (isAdminOrAbove) {
                 Spacer(Modifier.height(8.dp))
-                Button(
+                OutlinedButton(
                     onClick = onCreateDiscussion,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -202,7 +203,7 @@ fun ActiveSessionTab(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "Add Discussion",
-                        color = MaterialTheme.colorScheme.background
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 Spacer(Modifier.height(8.dp))
@@ -231,7 +232,8 @@ private fun DiscussionTimelineItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(color = rowColor, shape = RoundedCornerShape(8.dp))
+            .background(color = rowColor, shape = RoundedCornerShape(8.dp)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier.width(32.dp),
@@ -266,7 +268,7 @@ private fun DiscussionTimelineItem(
             // Circle indicator positioned at top with padding
             Box(
                 modifier = Modifier
-                    .padding(top = 28.dp)
+                    .padding(top = 38.dp)
                     .size(24.dp)
                     .background(
                         color = if (discussion.isPast || discussion.isNext) {
@@ -400,11 +402,12 @@ fun Preview_ActiveSessionTab() = KluvsTheme {
             sessionId = "0",
             book = BookInfo(title = "1984", author = "George Orwell", year = "1948", pageCount = null),
             dueDate = "January 1st, 2030",
+            rawDueDate = null,
             discussions = listOf(
-                DiscussionTimelineItemInfo(id = "0", title = "Discussion #1", location = "Coffee Shop", date = "Jan 15, 2025 at 7:00 PM", isPast = true, isNext = false),
-                DiscussionTimelineItemInfo(id = "1", title = "Discussion #2", location = "Library", date = "Jan 29, 2025 at 7:00 PM", isPast = true, isNext = false),
-                DiscussionTimelineItemInfo(id = "2", title = "Discussion #3", location = "Book Store", date = "Feb 12, 2025 at 7:00 PM", isPast = false, isNext = true),
-                DiscussionTimelineItemInfo(id = "3", title = "Discussion #4", location = "Community Center", date = "Feb 26, 2025 at 7:00 PM", isPast = false, isNext = false),
+                DiscussionTimelineItemInfo(id = "0", title = "Discussion #1", location = "Coffee Shop", date = "Jan 15, 2025 at 7:00 PM", isPast = true, isNext = false, rawDate = LocalDateTime(2025, 1, 15, 19, 0)),
+                DiscussionTimelineItemInfo(id = "1", title = "Discussion #2", location = "Library", date = "Jan 29, 2025 at 7:00 PM", isPast = true, isNext = false, rawDate = LocalDateTime(2025, 1, 29, 19, 0)),
+                DiscussionTimelineItemInfo(id = "2", title = "Discussion #3", location = "Book Store", date = "Feb 12, 2025 at 7:00 PM", isPast = false, isNext = true, rawDate = LocalDateTime(2025, 2, 12, 19, 0)),
+                DiscussionTimelineItemInfo(id = "3", title = "Discussion #4", location = "Community Center", date = "Feb 26, 2025 at 7:00 PM", isPast = false, isNext = false, rawDate = LocalDateTime(2025, 2, 26, 19, 0)),
             )
         ),
         userRole = Role.OWNER

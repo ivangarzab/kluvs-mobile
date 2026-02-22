@@ -324,6 +324,7 @@ fun ClubsScreenContent(
                 if (showEditSessionSheet) {
                     EditSessionBottomSheet(
                         currentBook = state.activeSession?.book,
+                        initialDueDate = state.activeSession?.rawDueDate,
                         onSave = { book, dueDate ->
                             onUpdateSession(book, dueDate)
                             showEditSessionSheet = false
@@ -349,6 +350,7 @@ fun ClubsScreenContent(
                     DiscussionBottomSheet(
                         initialTitle = discussion?.title ?: "",
                         initialLocation = discussion?.location ?: "",
+                        initialDate = discussion?.rawDate,
                         onSave = { title, location, date ->
                             onUpdateDiscussion(discussionId, title, location, date)
                             editingDiscussionId = null

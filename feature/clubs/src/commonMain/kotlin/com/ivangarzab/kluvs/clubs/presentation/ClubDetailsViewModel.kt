@@ -95,7 +95,7 @@ class ClubDetailsViewModel(
         loadClubData(clubId)
     }
 
-    fun loadClubData(clubId: String) {
+    fun loadClubData(clubId: String, forceRefresh: Boolean = false) {
         currentClubId = clubId
 
         viewModelScope.launch {
@@ -111,9 +111,9 @@ class ClubDetailsViewModel(
             }
 
             // Launch all 3 UseCase calls in parallel
-            val deferredDetails = async { getClubDetails(clubId) }
-            val deferredSession = async { getActiveSession(clubId) }
-            val deferredMembers = async { getClubMembers(clubId) }
+            val deferredDetails = async { getClubDetails(clubId, forceRefresh) }
+            val deferredSession = async { getActiveSession(clubId, forceRefresh) }
+            val deferredMembers = async { getClubMembers(clubId, forceRefresh) }
 
             // Await all results
             val detailsResult = deferredDetails.await()
@@ -149,9 +149,9 @@ class ClubDetailsViewModel(
         }
     }
 
-    fun refresh() {
-        Bark.d("Refreshing club data")
-        currentClubId?.let { loadClubData(it) }
+    fun refresh(forceRefresh: Boolean = false) {
+        Bark.d("Refreshing club data (forceRefresh=$forceRefresh)")
+        currentClubId?.let { loadClubData(it, forceRefresh) }
     }
 
     // -------------------------------------------------------------------------
@@ -279,7 +279,7 @@ class ClubDetailsViewModel(
                             operationResult = OperationResult.Success(successMessage)
                         )
                     }
-                    refresh()
+                    refresh(forceRefresh = true)
                 }
                 .onFailure { error ->
                     Bark.e("Operation failed: $successMessage. ${error.message}", error)

@@ -62,7 +62,7 @@ fun EditClubBottomSheet(
             Button(
                 onClick = { onSave(name.trim()) },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = name.isNotBlank()
+                enabled = name.isNotBlank() && name.trim() != currentName
             ) {
                 Text(
                     text = "Save",

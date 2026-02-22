@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -15,47 +15,52 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import com.ivangarzab.kluvs.clubs.presentation.BookInfo
 import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.theme.KluvsTheme
 import kotlinx.datetime.LocalDateTime
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 /**
  * Bottom sheet for editing an existing reading session.
  *
  * Pre-fills book title and author from the current session.
- * The due date is entered fresh via a date picker (current formatted date is displayed
- * as a hint below the picker field).
+ * The due date/time are entered fresh via pickers.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditSessionBottomSheet(
     currentBook: BookInfo?,
+    initialDueDate: LocalDateTime? = null,
     onSave: (book: Book?, dueDate: LocalDateTime?) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val initialDueDateMillis = remember { initialDueDate?.let { localDateTimeToDateMillis(it) } }
     var bookTitle by remember { mutableStateOf(currentBook?.title ?: "") }
     var bookAuthor by remember { mutableStateOf(currentBook?.author ?: "") }
     var showDatePicker by remember { mutableStateOf(false) }
-    var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
-    var timeText by remember { mutableStateOf("") }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var selectedDateMillis by remember { mutableStateOf<Long?>(initialDueDateMillis) }
+    var selectedHour by remember { mutableStateOf(initialDueDate?.hour ?: 19) }
+    var selectedMinute by remember { mutableStateOf(initialDueDate?.minute ?: 0) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val dateDisplayText = selectedDateMillis?.let { formatDateMillis(it) } ?: ""
+    val timeDisplayText = selectedDateMillis?.let {
+        "${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}"
+    } ?: ""
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -89,11 +94,7 @@ fun EditSessionBottomSheet(
                 singleLine = true
             )
 
-            val dateDisplayText = selectedDateMillis?.let { millis ->
-                val dt = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC)
-                "${dt.year}-${dt.monthNumber.toString().padStart(2, '0')}-${dt.dayOfMonth.toString().padStart(2, '0')}"
-            } ?: ""
-
+            // Read-only field that opens the date picker on tap
             Box {
                 OutlinedTextField(
                     value = dateDisplayText,
@@ -110,28 +111,41 @@ fun EditSessionBottomSheet(
                 ) { }
             }
 
+            // Time picker field, shown only after a date is picked
             if (selectedDateMillis != null) {
-                OutlinedTextField(
-                    value = timeText,
-                    onValueChange = { timeText = it },
-                    label = { Text("Time (HH:MM, optional)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+                Box {
+                    OutlinedTextField(
+                        value = timeDisplayText,
+                        onValueChange = {},
+                        label = { Text("Time (optional)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        readOnly = true,
+                        singleLine = true
+                    )
+                    TextButton(
+                        onClick = { showTimePicker = true },
+                        modifier = Modifier.matchParentSize()
+                    ) { }
+                }
             }
 
+            val hasChanges = bookTitle.trim() != (currentBook?.title ?: "") ||
+                bookAuthor.trim() != (currentBook?.author ?: "") ||
+                selectedDateMillis != initialDueDateMillis ||
+                selectedHour != (initialDueDate?.hour ?: 19) ||
+                selectedMinute != (initialDueDate?.minute ?: 0)
             Button(
                 onClick = {
                     val book = if (bookTitle.isNotBlank() && bookAuthor.isNotBlank()) {
                         Book(id = "", title = bookTitle.trim(), author = bookAuthor.trim(), isbn = null)
                     } else null
                     val dueDate = selectedDateMillis?.let { millis ->
-                        buildEditSessionDateTime(millis, timeText)
+                        buildLocalDateTime(millis, selectedHour, selectedMinute)
                     }
                     onSave(book, dueDate)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = hasChanges
             ) {
                 Text(
                     text = "Save",
@@ -142,41 +156,45 @@ fun EditSessionBottomSheet(
     }
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState()
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDateMillis)
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
                     selectedDateMillis = datePickerState.selectedDateMillis
                     showDatePicker = false
-                }) {
-                    Text("OK")
-                }
+                }) { Text("OK") }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
-                }
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
             }
         ) {
             DatePicker(state = datePickerState)
         }
     }
-}
 
-@OptIn(ExperimentalTime::class)
-private fun buildEditSessionDateTime(epochMillis: Long, timeText: String): LocalDateTime {
-    val date = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.UTC)
-    val parts = timeText.split(":")
-    val hour = parts.getOrNull(0)?.trim()?.toIntOrNull() ?: 0
-    val minute = parts.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
-    return LocalDateTime(
-        year = date.year,
-        month = date.month,
-        day = date.day,
-        hour = hour.coerceIn(0, 23),
-        minute = minute.coerceIn(0, 59)
-    )
+    if (showTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = selectedHour,
+            initialMinute = selectedMinute,
+            is24Hour = false
+        )
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = { Text("Select Time") },
+            text = { TimePicker(state = timePickerState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedHour = timePickerState.hour
+                    selectedMinute = timePickerState.minute
+                    showTimePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+            }
+        )
+    }
 }
 
 @PreviewLightDark
