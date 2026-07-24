@@ -30,57 +30,17 @@ struct BookDetailActionsView: View {
                     contentDescription: String(localized: isLiked ? "unlike_book" : "like_book"),
                     enabled: !isMutationInProgress
                 )
-                ShelfPill(shelfStatus: shelfStatus, enabled: !isMutationInProgress, onShelfChange: onShelfChange)
+                Dropdown(
+                    options: assignableShelfStatuses,
+                    selected: shelfStatus,
+                    onSelect: onShelfChange,
+                    label: shelfLabel,
+                    placeholder: String(localized: "shelf_add_to_shelf"),
+                    clearLabel: String(localized: "shelf_none"),
+                    enabled: !isMutationInProgress
+                )
             }
         }
-    }
-}
-
-private struct ShelfPill: View {
-    let shelfStatus: Shared.ShelfStatus?
-    let enabled: Bool
-    let onShelfChange: (Shared.ShelfStatus?) -> Void
-
-    private var active: Bool { shelfStatus != nil }
-    private var tint: Color { active ? .brandOrange : .secondary }
-    private var borderColor: Color { active ? .brandOrange : Color.secondary.opacity(0.4) }
-
-    var body: some View {
-        Menu {
-            Button {
-                onShelfChange(nil)
-            } label: {
-                if shelfStatus == nil {
-                    Label(String(localized: "shelf_none"), systemImage: "checkmark")
-                } else {
-                    Text(String(localized: "shelf_none"))
-                }
-            }
-            ForEach(assignableShelfStatuses, id: \.ordinal) { status in
-                Button {
-                    onShelfChange(status)
-                } label: {
-                    if shelfStatus == status {
-                        Label(shelfLabel(status), systemImage: "checkmark")
-                    } else {
-                        Text(shelfLabel(status))
-                    }
-                }
-            }
-        } label: {
-            HStack(spacing: 8) {
-                Text(shelfStatus.map(shelfLabel) ?? String(localized: "shelf_add_to_shelf"))
-                    .font(.kluvsButtonSecondary)
-                    .foregroundColor(tint)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 11))
-                    .foregroundColor(tint)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .overlay(Capsule().stroke(borderColor, lineWidth: 1))
-        }
-        .disabled(!enabled)
     }
 }
 
