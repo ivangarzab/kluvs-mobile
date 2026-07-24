@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 private let noteMaxLength = 4000
 
@@ -52,12 +53,14 @@ struct DiscussionNoteSheet: View {
             content = note?.content ?? ""
             isEditing = newNoteId == nil
         }
-        .alert("Delete Note", isPresented: $showDeleteConfirmation) {
-            Button("Delete", role: .destructive, action: onDelete)
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Are you sure you want to delete this note?")
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $showDeleteConfirmation,
+            title: "Delete Note",
+            message: "Are you sure you want to delete this note?",
+            confirmLabel: "Delete",
+            isDestructive: true,
+            onConfirm: onDelete
+        )
     }
 
     @ViewBuilder

@@ -273,12 +273,14 @@ private struct ClubDetailView: View {
             )
         }
         // Delete club confirmation
-        .alert("Delete Club", isPresented: $showDeleteClubAlert) {
-            Button("Delete", role: .destructive) { viewModel.onDeleteClub() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Are you sure you want to delete \"\(viewModel.clubDetails?.clubName ?? "this club")\"? This action cannot be undone.")
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $showDeleteClubAlert,
+            title: "Delete Club",
+            message: "Are you sure you want to delete \"\(viewModel.clubDetails?.clubName ?? "this club")\"? This action cannot be undone.",
+            confirmLabel: "Delete",
+            isDestructive: true,
+            onConfirm: { viewModel.onDeleteClub() }
+        )
         // Create session
         .sheet(isPresented: $showCreateSessionSheet) {
             CreateSessionSheet(
@@ -302,16 +304,20 @@ private struct ClubDetailView: View {
             )
         }
         // End session confirmation
-        .alert("End Session", isPresented: $showEndSessionAlert) {
-            Button("Confirm End", role: .destructive) { viewModel.onEndSession() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            let readingCount = viewModel.activeSession?.participants.filter { $0.isReading }.count ?? 0
-            let creditMessage = readingCount > 0
-                ? "\(readingCount) member\(readingCount != 1 ? "s" : "") will receive credit."
-                : "No members are marked as reading — no credit will be awarded."
-            Text("Are you sure you want to end the current reading session for \"\(viewModel.activeSession?.book.title ?? "")\"?\n\n\(creditMessage)")
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $showEndSessionAlert,
+            title: "End Session",
+            message: {
+                let readingCount = viewModel.activeSession?.participants.filter { $0.isReading }.count ?? 0
+                let creditMessage = readingCount > 0
+                    ? "\(readingCount) member\(readingCount != 1 ? "s" : "") will receive credit."
+                    : "No members are marked as reading — no credit will be awarded."
+                return "Are you sure you want to end the current reading session for \"\(viewModel.activeSession?.book.title ?? "")\"?\n\n\(creditMessage)"
+            }(),
+            confirmLabel: "Confirm End",
+            isDestructive: true,
+            onConfirm: { viewModel.onEndSession() }
+        )
         // Update reading progress
         .sheet(isPresented: $showProgressSheet) {
             if let session = viewModel.activeSession {
@@ -358,20 +364,23 @@ private struct ClubDetailView: View {
             )
         }
         // Delete discussion confirmation
-        .alert("Delete Discussion", isPresented: Binding(
-            get: { deletingDiscussionId != nil },
-            set: { if !$0 { deletingDiscussionId = nil } }
-        )) {
-            Button("Delete", role: .destructive) {
+        .kluvsConfirmationDialog(
+            isPresented: Binding(
+                get: { deletingDiscussionId != nil },
+                set: { _ in }
+            ),
+            title: "Delete Discussion",
+            message: "Are you sure you want to delete this discussion?",
+            confirmLabel: "Delete",
+            isDestructive: true,
+            onDismiss: { deletingDiscussionId = nil },
+            onConfirm: {
                 if let id = deletingDiscussionId {
                     viewModel.onDeleteDiscussion(discussionId: id)
                 }
                 deletingDiscussionId = nil
             }
-            Button("Cancel", role: .cancel) { deletingDiscussionId = nil }
-        } message: {
-            Text("Are you sure you want to delete this discussion?")
-        }
+        )
         // Discussion note
         .sheet(item: $openNoteDiscussionId) { wrapper in
             let discussionId = wrapper.id
@@ -403,21 +412,26 @@ private struct ClubDetailView: View {
             )
         }
         // Remove member confirmation
-        .alert("Remove Member", isPresented: Binding(
-            get: { removingMemberId != nil },
-            set: { if !$0 { removingMemberId = nil } }
-        )) {
-            Button("Remove", role: .destructive) {
+        .kluvsConfirmationDialog(
+            isPresented: Binding(
+                get: { removingMemberId != nil },
+                set: { _ in }
+            ),
+            title: "Remove Member",
+            message: {
+                let memberName = viewModel.members.first { $0.memberId == removingMemberId }?.name ?? "this member"
+                return "Are you sure you want to remove \(memberName) from the club?"
+            }(),
+            confirmLabel: "Remove",
+            isDestructive: true,
+            onDismiss: { removingMemberId = nil },
+            onConfirm: {
                 if let memberId = removingMemberId, let mid = currentMemberId {
                     viewModel.onRemoveMember(memberId: memberId, currentMemberId: mid)
                 }
                 removingMemberId = nil
             }
-            Button("Cancel", role: .cancel) { removingMemberId = nil }
-        } message: {
-            let memberName = viewModel.members.first { $0.memberId == removingMemberId }?.name ?? "this member"
-            Text("Are you sure you want to remove \(memberName) from the club?")
-        }
+        )
     }
 }
 

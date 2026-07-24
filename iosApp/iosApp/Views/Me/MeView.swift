@@ -86,18 +86,16 @@ struct MeView: View {
         .onAppear {
             viewModel.loadUserData(userId: userId)
         }
-        .alert(isPresented: $viewModel.showLogoutConfirmation) {
-            Alert(
-                title: Text(NSLocalizedString("logout_confirmation_title", comment: "")),
-                message: Text(NSLocalizedString("logout_confirmation_message", comment: "")),
-                primaryButton: .destructive(Text(NSLocalizedString("yes", comment: ""))) {
-                    viewModel.onSignOutDialogConfirmed()
-                },
-                secondaryButton: .cancel(Text(NSLocalizedString("no", comment: ""))) {
-                    viewModel.onSignOutDialogDismissed()
-                }
-            )
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $viewModel.showLogoutConfirmation,
+            title: NSLocalizedString("logout_confirmation_title", comment: ""),
+            message: NSLocalizedString("logout_confirmation_message", comment: ""),
+            confirmLabel: NSLocalizedString("yes", comment: ""),
+            dismissLabel: NSLocalizedString("no", comment: ""),
+            isDestructive: true,
+            onDismiss: { viewModel.onSignOutDialogDismissed() },
+            onConfirm: { viewModel.onSignOutDialogConfirmed() }
+        )
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView(userId: userId)

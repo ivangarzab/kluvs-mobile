@@ -14,13 +14,15 @@ import SwiftUI
 /// - Parameter isDestructive: true for irreversible actions (delete/remove) — tints the title and
 ///   confirm label danger-red instead of copper. Sign-out-style confirmations (reversible, just
 ///   disruptive) should pass false.
+/// - Parameter dismissLabel: nil renders a single-button dialog (e.g. informational/error alerts
+///   that have nothing to cancel) — the confirm button becomes the sole, trailing-aligned action.
 struct ConfirmationDialog: View {
     let title: String
     let message: String
     let onConfirm: () -> Void
     let onDismiss: () -> Void
     var confirmLabel: String = "Confirm"
-    var dismissLabel: String = "Cancel"
+    var dismissLabel: String? = "Cancel"
     var isDestructive: Bool = false
 
     private var accentColor: Color { isDestructive ? KluvsTheme.colors.danger : KluvsTheme.colors.accent }
@@ -46,9 +48,13 @@ struct ConfirmationDialog: View {
             Rectangle().fill(KluvsTheme.colors.divider).frame(height: 1)
 
             HStack {
-                Button(dismissLabel, action: onDismiss)
-                    .foregroundColor(KluvsTheme.colors.contentMuted)
-                Spacer()
+                if let dismissLabel {
+                    Button(dismissLabel, action: onDismiss)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
+                    Spacer()
+                } else {
+                    Spacer()
+                }
                 Button(confirmLabel, action: onConfirm)
                     .foregroundColor(accentColor)
             }
@@ -65,13 +71,18 @@ public extension View {
     /// Presents a `ConfirmationDialog` as a custom scrim + card overlay when `isPresented` is
     /// true. `onConfirm` and dismissal (confirm, cancel, or tapping the scrim) all set
     /// `isPresented` back to false automatically — callers only need to react to `onConfirm`.
+    ///
+    /// `onDismiss` is optional and fires on cancel/scrim-tap only (not on confirm) — needed when
+    /// `isPresented` mirrors state owned elsewhere (e.g. a shared KMP view model) that must be
+    /// told explicitly the dialog was dismissed without confirming, not just flipped locally.
     func kluvsConfirmationDialog(
         isPresented: Binding<Bool>,
         title: String,
         message: String,
         confirmLabel: String = "Confirm",
-        dismissLabel: String = "Cancel",
+        dismissLabel: String? = "Cancel",
         isDestructive: Bool = false,
+        onDismiss: (() -> Void)? = nil,
         onConfirm: @escaping () -> Void
     ) -> some View {
         overlay {
@@ -79,7 +90,10 @@ public extension View {
                 ZStack {
                     Color.black.opacity(0.4)
                         .ignoresSafeArea()
-                        .onTapGesture { isPresented.wrappedValue = false }
+                        .onTapGesture {
+                            isPresented.wrappedValue = false
+                            onDismiss?()
+                        }
                     ConfirmationDialog(
                         title: title,
                         message: message,
@@ -87,7 +101,10 @@ public extension View {
                             isPresented.wrappedValue = false
                             onConfirm()
                         },
-                        onDismiss: { isPresented.wrappedValue = false },
+                        onDismiss: {
+                            isPresented.wrappedValue = false
+                            onDismiss?()
+                        },
                         confirmLabel: confirmLabel,
                         dismissLabel: dismissLabel,
                         isDestructive: isDestructive
@@ -121,6 +138,19 @@ public extension View {
         onConfirm: {},
         onDismiss: {},
         confirmLabel: "Sign Out"
+    )
+    .padding()
+    .background(KluvsTheme.colors.background)
+}
+
+#Preview("Single Button") {
+    ConfirmationDialog(
+        title: "Authentication Error",
+        message: "An unexpected error occurred.",
+        onConfirm: {},
+        onDismiss: {},
+        confirmLabel: "OK",
+        dismissLabel: nil
     )
     .padding()
     .background(KluvsTheme.colors.background)

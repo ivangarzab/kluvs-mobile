@@ -100,11 +100,14 @@ struct ForgotPasswordView: View {
                 showErrorAlert = true
             }
         }
-        .alert("Authentication Error", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(viewModel.forgotPasswordErrorMessage ?? "An unexpected error occurred")
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $showErrorAlert,
+            title: "Authentication Error",
+            message: viewModel.forgotPasswordErrorMessage ?? "An unexpected error occurred",
+            confirmLabel: "OK",
+            dismissLabel: nil,
+            onConfirm: {}
+        )
     }
 }
 

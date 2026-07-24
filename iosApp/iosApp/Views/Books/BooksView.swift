@@ -4,6 +4,7 @@
 //
 import SwiftUI
 import Shared
+import DesignSystem
 
 private let shelfSections: [Shared.ShelfStatus] = [.currentlyReading, .read, .wantToRead, .notFinished]
 private let searchDebounceNanoseconds: UInt64 = 400_000_000
@@ -81,16 +82,18 @@ struct BooksView: View {
                 viewModel.search(query)
             }
         }
-        .alert("Result", isPresented: Binding(
-            get: { viewModel.operationError != nil },
-            set: { if !$0 { viewModel.onConsumeOperationError() } }
-        )) {
-            Button("OK") { viewModel.onConsumeOperationError() }
-        } message: {
-            if let error = viewModel.operationError {
-                Text(error)
-            }
-        }
+        .kluvsConfirmationDialog(
+            isPresented: Binding(
+                get: { viewModel.operationError != nil },
+                set: { _ in }
+            ),
+            title: "Result",
+            message: viewModel.operationError ?? "",
+            confirmLabel: "OK",
+            dismissLabel: nil,
+            onDismiss: { viewModel.onConsumeOperationError() },
+            onConfirm: { viewModel.onConsumeOperationError() }
+        )
     }
 }
 

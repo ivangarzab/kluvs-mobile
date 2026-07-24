@@ -190,11 +190,14 @@ struct AuthFormView: View {
                 showErrorAlert = true
             }
         }
-        .alert("Authentication Error", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(errorMessage ?? "An unexpected error occurred")
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $showErrorAlert,
+            title: "Authentication Error",
+            message: errorMessage ?? "An unexpected error occurred",
+            confirmLabel: "OK",
+            dismissLabel: nil,
+            onConfirm: {}
+        )
     }
 }
 
