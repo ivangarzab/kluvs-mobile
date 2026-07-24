@@ -30,15 +30,14 @@ struct ForgotPasswordView: View {
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
 
-                    InputFieldView(
+                    InputField(
                         label: String(localized: "label_email"),
-                        text: Binding(
+                        value: Binding(
                             get: { viewModel.forgotPasswordEmailField },
                             set: { viewModel.onForgotPasswordEmailChanged($0) }
                         ),
-                        icon: .email,
-                        supportingText: viewModel.forgotPasswordEmailError ?? String(localized: "hint_email"),
-                        supportingTextColor: viewModel.forgotPasswordEmailError != nil ? .red : .gray,
+                        error: viewModel.forgotPasswordEmailError,
+                        helperText: viewModel.forgotPasswordEmailError == nil ? String(localized: "hint_email") : nil,
                         keyboardType: .emailAddress,
                         submitLabel: .go,
                         onSubmit: { viewModel.sendPasswordResetEmail() }

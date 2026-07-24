@@ -86,15 +86,14 @@ struct AuthFormView: View {
                 TextDividerView(text: String(localized: "hint_or_continue_email"))
 
                 // Email field
-                InputFieldView(
+                InputField(
                     label: String(localized: "label_email"),
-                    text: Binding(
+                    value: Binding(
                         get: { viewModel.emailField },
                         set: { viewModel.onEmailChanged($0) }
                     ),
-                    icon: .email,
-                    supportingText: viewModel.emailError ?? String(localized: "hint_email"),
-                    supportingTextColor: viewModel.emailError != nil ? .red : .gray,
+                    error: viewModel.emailError,
+                    helperText: viewModel.emailError == nil ? String(localized: "hint_email") : nil,
                     keyboardType: .emailAddress,
                     submitLabel: .next,
                     onSubmit: { focusedField = .password }
@@ -102,16 +101,14 @@ struct AuthFormView: View {
                 .focused($focusedField, equals: .email)
 
                 // Password field
-                InputFieldView(
+                PasswordField(
                     label: String(localized: "label_password"),
-                    text: Binding(
+                    value: Binding(
                         get: { viewModel.passwordField },
                         set: { viewModel.onPasswordChanged($0) }
                     ),
-                    icon: .password,
-                    supportingText: viewModel.passwordError ?? (mode == .login ? String(localized: "hint_password_login") : String(localized: "hint_password_signup")),
-                    supportingTextColor: viewModel.passwordError != nil ? .red : .gray,
-                    isPassword: true,
+                    error: viewModel.passwordError,
+                    helperText: viewModel.passwordError == nil ? (mode == .login ? String(localized: "hint_password_login") : String(localized: "hint_password_signup")) : nil,
                     submitLabel: mode == .login ? .go : .next,
                     onSubmit: {
                         if mode == .login {
@@ -125,16 +122,14 @@ struct AuthFormView: View {
 
                 // Confirm password (signup only)
                 if mode == .signup {
-                    InputFieldView(
+                    PasswordField(
                         label: String(localized: "label_confirm_password"),
-                        text: Binding(
+                        value: Binding(
                             get: { viewModel.confirmPasswordField },
                             set: { viewModel.onConfirmPasswordChanged($0) }
                         ),
-                        icon: .password,
-                        supportingText: viewModel.confirmPasswordError ?? String(localized: "hint_confirm_password"),
-                        supportingTextColor: viewModel.confirmPasswordError != nil ? .red : .gray,
-                        isPassword: true,
+                        error: viewModel.confirmPasswordError,
+                        helperText: viewModel.confirmPasswordError == nil ? String(localized: "hint_confirm_password") : nil,
                         submitLabel: .go,
                         onSubmit: { viewModel.signUp() }
                     )
