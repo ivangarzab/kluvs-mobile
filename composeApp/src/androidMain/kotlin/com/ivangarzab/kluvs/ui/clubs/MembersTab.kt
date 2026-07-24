@@ -2,7 +2,6 @@ package com.ivangarzab.kluvs.ui.clubs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,17 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,8 +33,8 @@ import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
@@ -205,11 +197,12 @@ private fun MemberListItem(
             ) {
                 RoleEyebrow(role = role)
                 if (showAdminActions || showRemove) {
-                    MemberOverflowMenu(
-                        showChangeRole = showAdminActions,
-                        showRemove = showRemove,
-                        onChangeRole = onChangeRole,
-                        onRemove = onRemove
+                    ActionMenu(
+                        items = buildList {
+                            if (showAdminActions) add(ActionMenuItem(label = "Change Role", onClick = onChangeRole))
+                            if (showRemove) add(ActionMenuItem(label = "Remove", onClick = onRemove, isDestructive = true))
+                        },
+                        contentDescription = "Member options"
                     )
                 }
             }
@@ -224,58 +217,6 @@ private fun MemberListItem(
                         KluvsTheme.colors.contentMuted
                     },
                     style = MaterialTheme.typography.labelSmall
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MemberOverflowMenu(
-    showChangeRole: Boolean,
-    showRemove: Boolean,
-    onChangeRole: () -> Unit,
-    onRemove: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(
-            onClick = { expanded = true },
-            modifier = Modifier.size(20.dp)
-        ) {
-            Icon(
-                type = IconType.MoreVert,
-                contentDescription = "Member options",
-                tint = KluvsTheme.colors.contentMuted,
-                modifier = Modifier.size(16.dp)
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            if (showChangeRole) {
-                DropdownMenuItem(
-                    text = { Text("Change Role") },
-                    onClick = {
-                        expanded = false
-                        onChangeRole()
-                    }
-                )
-            }
-            if (showRemove) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "Remove",
-                            color = KluvsTheme.colors.danger
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        onRemove()
-                    }
                 )
             }
         }

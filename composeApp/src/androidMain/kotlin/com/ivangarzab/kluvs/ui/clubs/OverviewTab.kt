@@ -2,7 +2,6 @@ package com.ivangarzab.kluvs.ui.clubs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,17 +15,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +45,8 @@ import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlacehold
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.designsystem.components.progress.OwnProgressRow
 import kotlinx.datetime.LocalDateTime
@@ -189,9 +181,12 @@ private fun SessionSummary(
                         )
                     }
                     if (isAdminOrAbove) {
-                        SessionOverflowMenu(
-                            onEditSession = onEditSession,
-                            onEndSession = onEndSession
+                        ActionMenu(
+                            items = listOf(
+                                ActionMenuItem(label = "Edit Session", onClick = onEditSession),
+                                ActionMenuItem(label = "End Session", onClick = onEndSession, isDestructive = true)
+                            ),
+                            contentDescription = "Session options"
                         )
                     }
                 }
@@ -322,48 +317,6 @@ private fun UpNextTeaser(
             style = MaterialTheme.typography.labelSmall,
             color = KluvsTheme.colors.accent
         )
-    }
-}
-
-@Composable
-private fun SessionOverflowMenu(
-    onEditSession: () -> Unit,
-    onEndSession: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                type = IconType.MoreVert,
-                contentDescription = "Session options",
-                tint = KluvsTheme.colors.contentMuted
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Edit Session") },
-                onClick = {
-                    expanded = false
-                    onEditSession()
-                }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = "End Session",
-                        color = KluvsTheme.colors.danger
-                    )
-                },
-                onClick = {
-                    expanded = false
-                    onEndSession()
-                }
-            )
-        }
     }
 }
 

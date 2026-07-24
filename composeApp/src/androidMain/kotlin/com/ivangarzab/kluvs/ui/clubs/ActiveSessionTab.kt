@@ -19,17 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -57,6 +51,8 @@ import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import kotlinx.datetime.LocalDateTime
 
 /** Translation at the boundary into the hollow [AttendanceControl] — see its call site below. */
@@ -358,54 +354,15 @@ private fun DiscussionTimelineItem(
                     )
                 }
                 if (showAdminActions) {
-                    DiscussionOverflowMenu(
-                        onEdit = onEdit,
-                        onDelete = onDelete
+                    ActionMenu(
+                        items = listOf(
+                            ActionMenuItem(label = "Edit", onClick = onEdit),
+                            ActionMenuItem(label = "Delete", onClick = onDelete, isDestructive = true)
+                        ),
+                        contentDescription = "Discussion options"
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun DiscussionOverflowMenu(
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                type = IconType.MoreVert,
-                contentDescription = "Discussion options",
-                tint = KluvsTheme.colors.contentMuted
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Edit") },
-                onClick = {
-                    expanded = false
-                    onEdit()
-                }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = "Delete",
-                        color = KluvsTheme.colors.danger
-                    )
-                },
-                onClick = {
-                    expanded = false
-                    onDelete()
-                }
-            )
         }
     }
 }

@@ -19,8 +19,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +59,8 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
@@ -353,14 +353,30 @@ fun ClubsScreenContent(
                                 )
                             }
                             if (state.userRole == Role.OWNER || state.userRole == Role.ADMIN) {
-                                ClubOverflowMenu(
-                                    canManageClub = state.userRole == Role.OWNER,
-                                    onEdit = { showEditClubSheet = true },
-                                    onDelete = { showDeleteClubDialog = true },
-                                    onShare = {
-                                        onOpenShareSheet()
-                                        showShareClubSheet = true
-                                    }
+                                val canManageClub = state.userRole == Role.OWNER
+                                ActionMenu(
+                                    items = buildList {
+                                        add(
+                                            ActionMenuItem(
+                                                label = "Share",
+                                                onClick = {
+                                                    onOpenShareSheet()
+                                                    showShareClubSheet = true
+                                                }
+                                            )
+                                        )
+                                        if (canManageClub) {
+                                            add(ActionMenuItem(label = "Edit", onClick = { showEditClubSheet = true }))
+                                            add(
+                                                ActionMenuItem(
+                                                    label = "Delete",
+                                                    onClick = { showDeleteClubDialog = true },
+                                                    isDestructive = true
+                                                )
+                                            )
+                                        }
+                                    },
+                                    contentDescription = "Club options"
                                 )
                             }
                         }
@@ -698,59 +714,6 @@ private fun MetaDot() {
             .size(3.dp)
             .background(color = KluvsTheme.colors.contentMuted, shape = CircleShape)
     )
-}
-
-@Composable
-private fun ClubOverflowMenu(
-    canManageClub: Boolean,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    onShare: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                type = IconType.MoreVert,
-                contentDescription = "Club options",
-                tint = KluvsTheme.colors.contentMuted
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Share") },
-                onClick = {
-                    expanded = false
-                    onShare()
-                }
-            )
-            if (canManageClub) {
-                DropdownMenuItem(
-                    text = { Text("Edit") },
-                    onClick = {
-                        expanded = false
-                        onEdit()
-                    }
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "Delete",
-                            color = KluvsTheme.colors.danger
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        onDelete()
-                    }
-                )
-            }
-        }
-    }
 }
 
 @PreviewLightDark
