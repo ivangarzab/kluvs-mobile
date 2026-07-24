@@ -16,16 +16,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 /**
- * Editable form-field primitive covering every real editable shape found across the app
- * (design-system "Inputs", see design-system/docs/inputs.md) — plain text, prefix/suffix-
- * decorated (e.g. "#" page number, "%" percentage), and multiline — as parameter combinations
- * on one component, not separate variant types. For a read-only field that opens a picker or
- * dialog instead of accepting keyboard input, see [PickerField].
+ * Editable form-field primitive for password entry (design-system "Inputs", see
+ * design-system/docs/inputs.md) — always single-line, always masked via
+ * [PasswordVisualTransformation], with no show/hide reveal toggle. This is a categorically
+ * different input mode from [InputField] (masked keyboard input vs. plain text), matching the
+ * same split this package already draws between [InputField] and [PickerField].
  *
  * @param error non-null shows a red border/label and this text below the field (no "Error:"
  * prefix added here — callers supply the full message, matching real usage).
@@ -33,20 +34,15 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
  * [error] is also set.
  */
 @Composable
-fun InputField(
+fun PasswordField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    prefix: String? = null,
-    suffix: String? = null,
     error: String? = null,
     helperText: String? = null,
-    singleLine: Boolean = true,
-    minLines: Int = 1,
-    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     enabled: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
     OutlinedTextField(
@@ -55,13 +51,10 @@ fun InputField(
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
         label = { Text(label) },
-        prefix = prefix?.let { { Text(it) } },
-        suffix = suffix?.let { { Text(it) } },
         isError = error != null,
         supportingText = (error ?: helperText)?.let { { Text(it) } },
-        singleLine = singleLine,
-        minLines = minLines,
-        maxLines = maxLines,
+        singleLine = true,
+        visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         shape = RoundedCornerShape(8.dp),
@@ -81,20 +74,21 @@ fun InputField(
 
 @PreviewLightDark
 @Composable
-private fun Preview_InputField() = KluvsTheme {
-    var text by remember { mutableStateOf("") }
+private fun Preview_PasswordField() = KluvsTheme {
+    var password by remember { mutableStateOf("") }
+    var badPassword by remember { mutableStateOf("short") }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        InputField(
-            label = "Email",
-            value = text,
-            onValueChange = { text = it },
-            helperText = "We'll never share this.",
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        PasswordField(
+            label = "Password",
+            value = password,
+            onValueChange = { password = it },
+            helperText = "Minimum 8 characters.",
         )
-        InputField(label = "Page", value = "42", onValueChange = {}, prefix = "#", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-        InputField(label = "Progress", value = "70", onValueChange = {}, suffix = "%", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-        InputField(label = "Note", value = "", onValueChange = {}, singleLine = false, minLines = 3)
-        InputField(label = "Email", value = "not-an-email", onValueChange = {}, error = "Enter a valid email address.")
-        InputField(label = "Email", value = "disabled@kluvs.app", onValueChange = {}, enabled = false)
+        PasswordField(
+            label = "Password",
+            value = badPassword,
+            onValueChange = { badPassword = it },
+            error = "Must be at least 8 characters.",
+        )
     }
 }
