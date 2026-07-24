@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +69,7 @@ fun AuthorSection(
                             text = name,
                             fontFamily = ebGaramond,
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = KluvsTheme.colors.content
                         )
                     }
                 }
@@ -77,7 +78,7 @@ fun AuthorSection(
                     Text(
                         text = bio,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = KluvsTheme.colors.content
                     )
                 }
             }
@@ -98,7 +99,7 @@ private fun AuthorSectionShimmer(modifier: Modifier = Modifier) {
         ),
         label = "AuthorShimmerAlpha"
     )
-    val shimmerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
+    val shimmerColor = KluvsTheme.colors.contentMuted.copy(alpha = alpha)
 
     Column(
         modifier = modifier,

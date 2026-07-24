@@ -99,7 +99,7 @@ fun ActiveSessionTab(
                 Text(
                     text = stringResource(R.string.no_session_details),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
                 Button(onClick = onCreateSession) {
                     Icon(
@@ -129,7 +129,7 @@ fun ActiveSessionTab(
             if (sessionDetails.discussions.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.x_discussions_scheduled, sessionDetails.discussions.size),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
@@ -151,7 +151,7 @@ fun ActiveSessionTab(
             if (discussions.isEmpty()) {
                 Text(
                     text = "No discussions scheduled yet.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
@@ -199,7 +199,7 @@ private fun DiscussionTimelineItem(
     // A dot/line is "lit" (copper) once its discussion is past or is the current next one —
     // this is what makes the rail read as a continuous copper thread through completed items.
     val isLit = discussion.isPast || discussion.isNext
-    val neutralLineColor = MaterialTheme.colorScheme.surfaceVariant
+    val neutralLineColor = KluvsTheme.colors.cardAlt
     val litLineColor = brandPrimary.copy(alpha = 0.4f)
 
     Row(
@@ -253,7 +253,7 @@ private fun DiscussionTimelineItem(
                         )
                         .then(
                             if (!discussion.isPast && !discussion.isNext) {
-                                Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                                Modifier.border(1.dp, KluvsTheme.colors.divider, CircleShape)
                             } else Modifier
                         ),
                     contentAlignment = Alignment.Center
@@ -262,7 +262,7 @@ private fun DiscussionTimelineItem(
                         Icon(
                             type = IconType.Checkmark,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.background,
+                            tint = KluvsTheme.colors.background,
                             modifier = Modifier.size(10.dp)
                         )
                     }
@@ -287,8 +287,8 @@ private fun DiscussionTimelineItem(
 
         Spacer(Modifier.width(12.dp))
 
-        val textColor = MaterialTheme.colorScheme.onSurface
-        val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        val textColor = KluvsTheme.colors.content
+        val secondaryTextColor = KluvsTheme.colors.contentMuted
 
         Row(
             modifier = Modifier
@@ -301,7 +301,7 @@ private fun DiscussionTimelineItem(
                 if (discussion.isNext) {
                     Text(
                         text = "UP NEXT",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = KluvsTheme.colors.accent,
                         style = MaterialTheme.typography.labelSmall
                     )
                     Spacer(Modifier.height(2.dp))
@@ -354,7 +354,7 @@ private fun DiscussionTimelineItem(
                     Icon(
                         type = IconType.Edit,
                         contentDescription = "Discussion note",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = KluvsTheme.colors.contentMuted
                     )
                 }
                 if (showAdminActions) {
@@ -380,7 +380,7 @@ private fun DiscussionOverflowMenu(
             Icon(
                 type = IconType.MoreVert,
                 contentDescription = "Discussion options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = KluvsTheme.colors.contentMuted
             )
         }
         DropdownMenu(
@@ -398,7 +398,7 @@ private fun DiscussionOverflowMenu(
                 text = {
                     Text(
                         text = "Delete",
-                        color = MaterialTheme.colorScheme.error
+                        color = KluvsTheme.colors.danger
                     )
                 },
                 onClick = {
@@ -415,7 +415,7 @@ private fun DiscussionOverflowMenu(
 fun Preview_ActiveSessionTab() = KluvsTheme {
     ActiveSessionTab(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         sessionDetails = ActiveSessionDetails(

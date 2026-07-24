@@ -74,14 +74,14 @@ fun BookCard(
                 Text(
                     text = book.title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = KluvsTheme.colors.content,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = book.author,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -89,7 +89,7 @@ fun BookCard(
                     Text(
                         text = book.year.toString(),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = KluvsTheme.colors.contentMuted
                     )
                 }
             }
@@ -102,7 +102,7 @@ fun BookCard(
 fun Preview_BookCard() = KluvsTheme {
     Box(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
     ) {
         BookCard(
             book = Book(

@@ -281,12 +281,12 @@ fun ClubsScreenContent(
                         Text(
                             text = "No clubs yet",
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = KluvsTheme.colors.content
                         )
                         Text(
                             text = "Join a club to get started",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                     }
                 }
@@ -304,7 +304,7 @@ fun ClubsScreenContent(
                 )
 
                 Column(
-                    modifier = modifier.background(color = MaterialTheme.colorScheme.background)
+                    modifier = modifier.background(color = KluvsTheme.colors.background)
                 ) {
                     // Operation in-progress indicator
                     if (state.isOperationInProgress) {
@@ -321,13 +321,13 @@ fun ClubsScreenContent(
                             Icon(
                                 type = IconType.ArrowBack,
                                 contentDescription = stringResource(R.string.navigate_back),
-                                tint = MaterialTheme.colorScheme.onSurface
+                                tint = KluvsTheme.colors.content
                             )
                         }
                         Text(
                             text = stringResource(R.string.club_eyebrow).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                     }
 
@@ -343,7 +343,7 @@ fun ClubsScreenContent(
                                 Text(
                                     text = clubDetails.clubName,
                                     style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = KluvsTheme.colors.content
                                 )
                                 Spacer(Modifier.height(12.dp))
                                 ClubMetaRow(
@@ -370,13 +370,13 @@ fun ClubsScreenContent(
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
                         modifier = Modifier.fillMaxWidth(),
-                        containerColor = MaterialTheme.colorScheme.background,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        containerColor = KluvsTheme.colors.background,
+                        contentColor = KluvsTheme.colors.contentMuted,
                         indicator = { tabPositions ->
                             if (pagerState.currentPage < tabPositions.size) {
                                 TabRowDefaults.SecondaryIndicator(
                                     modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = KluvsTheme.colors.accent
                                 )
                             }
                         }
@@ -395,9 +395,9 @@ fun ClubsScreenContent(
                                         text = title,
                                         style = MaterialTheme.typography.labelLarge,
                                         color = if (selected) {
-                                            MaterialTheme.colorScheme.primary
+                                            KluvsTheme.colors.accent
                                         } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                            KluvsTheme.colors.contentMuted
                                         }
                                     )
                                 }
@@ -414,7 +414,7 @@ fun ClubsScreenContent(
                         }
                     } else {
                         val tabModifier = Modifier
-                            .background(color = MaterialTheme.colorScheme.background)
+                            .background(color = KluvsTheme.colors.background)
                             .fillMaxSize()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
 
@@ -679,14 +679,14 @@ private fun ClubMetaRow(
             Text(
                 text = stringResource(R.string.founded_x, foundedYear).uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = KluvsTheme.colors.contentMuted
             )
             MetaDot()
         }
         Text(
             text = stringResource(R.string.x_members, memberCount).uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = KluvsTheme.colors.contentMuted
         )
     }
 }
@@ -696,7 +696,7 @@ private fun MetaDot() {
     Box(
         modifier = Modifier
             .size(3.dp)
-            .background(color = MaterialTheme.colorScheme.onSurfaceVariant, shape = CircleShape)
+            .background(color = KluvsTheme.colors.contentMuted, shape = CircleShape)
     )
 }
 
@@ -714,7 +714,7 @@ private fun ClubOverflowMenu(
             Icon(
                 type = IconType.MoreVert,
                 contentDescription = "Club options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = KluvsTheme.colors.contentMuted
             )
         }
         DropdownMenu(
@@ -740,7 +740,7 @@ private fun ClubOverflowMenu(
                     text = {
                         Text(
                             text = "Delete",
-                            color = MaterialTheme.colorScheme.error
+                            color = KluvsTheme.colors.danger
                         )
                     },
                     onClick = {
@@ -757,7 +757,7 @@ private fun ClubOverflowMenu(
 @Composable
 fun Preview_ClubsScreen() = KluvsTheme {
     ClubsScreenContent(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         state = ClubDetailsState(
             isLoading = false
         ),

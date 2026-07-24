@@ -49,14 +49,14 @@ fun MeTopBar(
         Text(
             text = stringResource(R.string.me),
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
         Box {
             IconButton(onClick = { showMenu = true }) {
                 Icon(
                     type = IconType.MoreVert,
                     contentDescription = stringResource(R.string.profile_menu),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = KluvsTheme.colors.contentMuted
                 )
             }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {

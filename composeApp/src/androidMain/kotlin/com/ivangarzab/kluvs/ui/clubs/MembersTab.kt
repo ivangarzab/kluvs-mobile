@@ -78,7 +78,7 @@ fun MembersTab(
         ) {
             Text(
                 text = stringResource(R.string.x_members, members.size),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = KluvsTheme.colors.contentMuted,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
@@ -127,7 +127,7 @@ fun MembersTab(
                 Text(
                     text = stringResource(R.string.invite_others_cta),
                     style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(16.dp))
@@ -177,20 +177,20 @@ private fun MemberListItem(
             ) {
                 Text(
                     text = name,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = KluvsTheme.colors.content,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 if (isSelf) {
                     Text(
                         text = stringResource(R.string.you).uppercase(),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = KluvsTheme.colors.accent,
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
             }
             Text(
                 text = handle,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = KluvsTheme.colors.contentMuted,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -219,9 +219,9 @@ private fun MemberListItem(
                 Text(
                     text = if (reading) "Reading" else "Skipping",
                     color = if (reading) {
-                        MaterialTheme.colorScheme.primary
+                        KluvsTheme.colors.accent
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        KluvsTheme.colors.contentMuted
                     },
                     style = MaterialTheme.typography.labelSmall
                 )
@@ -247,7 +247,7 @@ private fun MemberOverflowMenu(
             Icon(
                 type = IconType.MoreVert,
                 contentDescription = "Member options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = KluvsTheme.colors.contentMuted,
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -269,7 +269,7 @@ private fun MemberOverflowMenu(
                     text = {
                         Text(
                             text = "Remove",
-                            color = MaterialTheme.colorScheme.error
+                            color = KluvsTheme.colors.danger
                         )
                     },
                     onClick = {
@@ -284,7 +284,7 @@ private fun MemberOverflowMenu(
 
 @Composable
 private fun MemberDivider() {
-    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+    HorizontalDivider(color = KluvsTheme.colors.cardAlt)
 }
 
 @PreviewLightDark
@@ -292,7 +292,7 @@ private fun MemberDivider() {
 fun Preview_MembersTab() = KluvsTheme {
     MembersTab(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         members = listOf(
             MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", "", role = Role.OWNER, userId = "u0"),

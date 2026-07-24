@@ -34,7 +34,7 @@ fun EditProfileSection(
         Text(
             text = stringResource(R.string.edit_profile),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
 
         Spacer(modifier = Modifier.padding(vertical = 4.dp))
@@ -62,7 +62,7 @@ fun EditProfileSection(
             Spacer(Modifier.height(8.dp))
             Text(
                 text = saveError,
-                color = MaterialTheme.colorScheme.error,
+                color = KluvsTheme.colors.danger,
                 style = MaterialTheme.typography.bodySmall,
             )
         }

@@ -93,7 +93,7 @@ private fun JoinScreenContent(
         Text(
             text = "Join a club",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
 
         OutlinedTextField(
@@ -111,7 +111,7 @@ private fun JoinScreenContent(
         ) {
             Text(
                 text = "Preview",
-                color = MaterialTheme.colorScheme.background
+                color = KluvsTheme.colors.background
             )
         }
 
@@ -123,7 +123,7 @@ private fun JoinScreenContent(
             Text(
                 text = error,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error
+                color = KluvsTheme.colors.danger
             )
         }
 
@@ -131,14 +131,14 @@ private fun JoinScreenContent(
             Text(
                 text = preview.name,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = KluvsTheme.colors.content
             )
 
             state.joinError?.let { error ->
                 Text(
                     text = error,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
+                    color = KluvsTheme.colors.danger
                 )
             }
 
@@ -149,7 +149,7 @@ private fun JoinScreenContent(
             ) {
                 Text(
                     text = if (state.isJoining) "Joining..." else "Join",
-                    color = MaterialTheme.colorScheme.background
+                    color = KluvsTheme.colors.background
                 )
             }
         }

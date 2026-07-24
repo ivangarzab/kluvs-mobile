@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.model.ShelfStatus
 
 /**
@@ -101,8 +102,8 @@ private fun LikeToggle(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    val tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    val borderColor = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+    val tint = if (isLiked) KluvsTheme.colors.accent else KluvsTheme.colors.contentMuted
+    val borderColor = if (isLiked) KluvsTheme.colors.accent else KluvsTheme.colors.divider
 
     Box(
         modifier = Modifier
@@ -133,8 +134,8 @@ private fun ShelfPill(
     onClick: () -> Unit
 ) {
     val active = shelfStatus != null
-    val tint = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    val borderColor = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+    val tint = if (active) KluvsTheme.colors.accent else KluvsTheme.colors.contentMuted
+    val borderColor = if (active) KluvsTheme.colors.accent else KluvsTheme.colors.divider
     val chevronRotation by animateFloatAsState(if (expanded) 180f else 0f, label = "ShelfChevronRotation")
 
     Row(
@@ -169,7 +170,7 @@ private fun SelectedCheck() {
     Icon(
         type = IconType.Check,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary
+        tint = KluvsTheme.colors.accent
     )
 }
 

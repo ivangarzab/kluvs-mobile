@@ -82,9 +82,9 @@ fun AuthFormContent(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    actionColor = MaterialTheme.colorScheme.error
+                    containerColor = KluvsTheme.colors.dangerContainer,
+                    contentColor = KluvsTheme.colors.onAccentContainer,
+                    actionColor = KluvsTheme.colors.danger
                 )
             }
         },
@@ -99,7 +99,7 @@ fun AuthFormContent(
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = "Welcome to your Kluvs",
-                color = MaterialTheme.colorScheme.onSurface,
+                color = KluvsTheme.colors.content,
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -114,7 +114,7 @@ fun AuthFormContent(
                         R.string.create_a_new_account
                     }
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = KluvsTheme.colors.contentMuted,
                 style = MaterialTheme.typography.bodyLarge,
             )
 
@@ -156,7 +156,7 @@ fun AuthFormContent(
                 supportingText = state.emailError
                     ?: stringResource(R.string.enter_valid_email_address),
                 supportingTextColor = if (state.emailError != null) {
-                    MaterialTheme.colorScheme.error
+                    KluvsTheme.colors.danger
                 } else {
                     Color.Gray
                 },
@@ -179,7 +179,7 @@ fun AuthFormContent(
                 supportingText = state.passwordError
                     ?: stringResource(R.string.min_eight_characters),
                 supportingTextColor = if (state.emailError != null) {
-                    MaterialTheme.colorScheme.error
+                    KluvsTheme.colors.danger
                 } else {
                     Color.Gray
                 },
@@ -210,7 +210,7 @@ fun AuthFormContent(
                     supportingText = state.confirmPasswordError
                         ?: stringResource(R.string.match_password_above),
                     supportingTextColor = if (state.emailError != null) {
-                        MaterialTheme.colorScheme.error
+                        KluvsTheme.colors.danger
                     } else {
                         Color.Gray
                     },
@@ -233,7 +233,7 @@ fun AuthFormContent(
                         Text(
                             text = stringResource(R.string.forgot_password),
                             textAlign = TextAlign.Right,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = KluvsTheme.colors.accent,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     },
@@ -254,7 +254,7 @@ fun AuthFormContent(
                         stringResource(R.string.sign_up)
                     },
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.background
+                    color = KluvsTheme.colors.background
                 )
             }
 
@@ -271,7 +271,7 @@ fun AuthFormContent(
                     } else {
                         stringResource(R.string.already_have_an_account)
                     },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -293,7 +293,7 @@ fun AuthFormContent(
                     } else {
                         stringResource(R.string.sign_in)
                     },
-                    color = MaterialTheme.colorScheme.primary,
+                    color = KluvsTheme.colors.accent,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
@@ -307,7 +307,7 @@ fun AuthFormContent(
 fun Preview_LoginScreen() = KluvsTheme {
     AuthFormContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         mode = AuthMode.LOGIN,
         state = AuthUiState(),
@@ -325,7 +325,7 @@ fun Preview_LoginScreen() = KluvsTheme {
 fun Preview_SignupScreen() = KluvsTheme {
     AuthFormContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         mode = AuthMode.SIGNUP,
         state = AuthUiState(),

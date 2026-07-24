@@ -65,7 +65,7 @@ fun InputField(
 fun Preview_InputField() = KluvsTheme {
     InputField(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .padding(8.dp),
         label = "Test input",
         value = "",
@@ -81,7 +81,7 @@ fun Preview_InputField() = KluvsTheme {
 fun Preview_PasswordInputField() = KluvsTheme {
     InputField(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .padding(8.dp),
         isPassword = true,
         label = "Test password input",

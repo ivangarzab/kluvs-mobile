@@ -36,26 +36,26 @@ fun UpNextSection(
         ) {
             Text(
                 text = stringResource(R.string.up_next_eyebrow).uppercase(),
-                color = MaterialTheme.colorScheme.primary,
+                color = KluvsTheme.colors.accent,
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
                 text = upNext.date,
-                color = MaterialTheme.colorScheme.primary,
+                color = KluvsTheme.colors.accent,
                 style = MaterialTheme.typography.labelSmall
             )
         }
 
         Text(
             text = upNext.title,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = KluvsTheme.colors.content,
             style = MaterialTheme.typography.titleLarge,
             fontStyle = FontStyle.Italic
         )
 
         Text(
             text = listOfNotNull(upNext.clubName, upNext.location).joinToString(" — "),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = KluvsTheme.colors.contentMuted,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -65,7 +65,7 @@ fun UpNextSection(
 @Composable
 private fun Preview_UpNextSection() = KluvsTheme {
     UpNextSection(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         upNext = UpNextItem(
             title = "End-of-Year Check-in",
             clubName = "Showcase Kluv",

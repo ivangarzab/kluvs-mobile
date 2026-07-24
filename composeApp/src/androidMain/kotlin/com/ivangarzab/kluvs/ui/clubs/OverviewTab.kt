@@ -121,9 +121,9 @@ fun OverviewTab(
 
             val nextDiscussion = sessionDetails.discussions.firstOrNull { it.isNext }
             if (nextDiscussion != null) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = KluvsTheme.colors.cardAlt)
                 UpNextTeaser(discussion = nextDiscussion)
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = KluvsTheme.colors.cardAlt)
             }
         } else {
             NoActiveSessionState(
@@ -177,7 +177,7 @@ private fun SessionSummary(
                         Text(
                             text = stringResource(R.string.active_session_eyebrow).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = KluvsTheme.colors.accent
                         )
 
                         Spacer(Modifier.height(4.dp))
@@ -185,7 +185,7 @@ private fun SessionSummary(
                         Text(
                             text = sessionDetails.book.title,
                             style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = KluvsTheme.colors.content
                         )
                     }
                     if (isAdminOrAbove) {
@@ -198,7 +198,7 @@ private fun SessionSummary(
                 Text(
                     text = sessionDetails.book.author,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
             }
         }
@@ -219,14 +219,14 @@ private fun SessionSummary(
                     Text(
                         text = stringResource(R.string.x_of_y_reading, readingCount, totalMemberCount),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = KluvsTheme.colors.contentMuted
                     )
                 }
             } else {
                 Text(
                     text = stringResource(R.string.no_participants_yet),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
             }
 
@@ -271,13 +271,13 @@ private fun NoActiveSessionState(
         Text(
             text = stringResource(R.string.no_session_yet_eyebrow).uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = KluvsTheme.colors.contentMuted
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.start_reading_together),
             style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
-            color = MaterialTheme.colorScheme.onSurface,
+            color = KluvsTheme.colors.content,
             textAlign = TextAlign.Center
         )
         if (isAdminOrAbove) {
@@ -303,24 +303,24 @@ private fun UpNextTeaser(
             Text(
                 text = stringResource(R.string.up_next_eyebrow).uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+                color = KluvsTheme.colors.accent
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = discussion.title,
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = KluvsTheme.colors.content
             )
             Text(
                 text = discussion.location,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = KluvsTheme.colors.contentMuted
             )
         }
         Text(
             text = discussion.date,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = KluvsTheme.colors.accent
         )
     }
 }
@@ -337,7 +337,7 @@ private fun SessionOverflowMenu(
             Icon(
                 type = IconType.MoreVert,
                 contentDescription = "Session options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = KluvsTheme.colors.contentMuted
             )
         }
         DropdownMenu(
@@ -355,7 +355,7 @@ private fun SessionOverflowMenu(
                 text = {
                     Text(
                         text = "End Session",
-                        color = MaterialTheme.colorScheme.error
+                        color = KluvsTheme.colors.danger
                     )
                 },
                 onClick = {
@@ -372,7 +372,7 @@ private fun SessionOverflowMenu(
 fun Preview_OverviewTab() = KluvsTheme {
     OverviewTab(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxSize(),
         clubDetails = ClubDetails(

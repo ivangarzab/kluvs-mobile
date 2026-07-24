@@ -108,9 +108,9 @@ fun ForgotPasswordScreenContent(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    actionColor = MaterialTheme.colorScheme.error
+                    containerColor = KluvsTheme.colors.dangerContainer,
+                    contentColor = KluvsTheme.colors.onAccentContainer,
+                    actionColor = KluvsTheme.colors.danger
                 )
             }
         },
@@ -123,7 +123,7 @@ fun ForgotPasswordScreenContent(
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = stringResource(R.string.forgot_it),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = KluvsTheme.colors.content,
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -133,7 +133,7 @@ fun ForgotPasswordScreenContent(
                 Text(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     text = stringResource(R.string.reset_password_subhead),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.bodyLarge,
                 )
 
@@ -149,7 +149,7 @@ fun ForgotPasswordScreenContent(
                     supportingText = state.emailError
                         ?: stringResource(R.string.enter_valid_email_address),
                     supportingTextColor = if (state.emailError != null) {
-                        MaterialTheme.colorScheme.error
+                        KluvsTheme.colors.danger
                     } else {
                         Color.Gray
                     },
@@ -176,14 +176,14 @@ fun ForgotPasswordScreenContent(
                         } else {
                             stringResource(R.string.send_reset_link)
                         },
-                        color = MaterialTheme.colorScheme.background
+                        color = KluvsTheme.colors.background
                     )
                 }
             } else {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = KluvsTheme.colors.cardAlt
                     ),
                 ) {
                     Column(
@@ -194,20 +194,20 @@ fun ForgotPasswordScreenContent(
                     ) {
                         Text(
                             text = stringResource(R.string.reset_link_sent_to),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = KluvsTheme.colors.contentMuted,
                             style = MaterialTheme.typography.labelMedium,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = state.emailField,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = KluvsTheme.colors.content,
                             fontWeight = FontWeight.Medium,
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = stringResource(R.string.reset_link_sent_body),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = KluvsTheme.colors.contentMuted,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -222,7 +222,7 @@ fun ForgotPasswordScreenContent(
                     TextButton(onClick = onNavigateBack) {
                         Text(
                             text = stringResource(R.string.back_to_sign_in),
-                            color = MaterialTheme.colorScheme.primary,
+                            color = KluvsTheme.colors.accent,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -237,7 +237,7 @@ fun ForgotPasswordScreenContent(
 fun Preview_ForgotPasswordScreen() = KluvsTheme {
     ForgotPasswordScreenContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         state = ForgotPasswordUiState(),
         onEmailFieldChange = {},
@@ -251,7 +251,7 @@ fun Preview_ForgotPasswordScreen() = KluvsTheme {
 fun Preview_ForgotPasswordScreen_EmailSent() = KluvsTheme {
     ForgotPasswordScreenContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         state = ForgotPasswordUiState(
             emailField = "test@example.com",

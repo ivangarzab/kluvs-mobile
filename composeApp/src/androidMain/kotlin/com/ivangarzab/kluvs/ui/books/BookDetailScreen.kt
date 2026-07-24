@@ -118,7 +118,7 @@ fun BookDetailScreenContent(
 
     Column(
         modifier = modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
@@ -131,7 +131,7 @@ fun BookDetailScreenContent(
                 Icon(
                     type = IconType.ArrowBack,
                     contentDescription = stringResource(R.string.navigate_back),
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = KluvsTheme.colors.content
                 )
             }
         }
@@ -163,20 +163,20 @@ fun BookDetailScreenContent(
                         fontFamily = ebGaramond,
                         fontStyle = FontStyle.Italic,
                         style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = KluvsTheme.colors.content
                     )
                     volumeInfo?.subtitle?.let { subtitle ->
                         Text(
                             text = subtitle,
                             fontFamily = ebGaramond,
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                     }
                     Text(
                         text = metaLine(book, volumeInfo),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = KluvsTheme.colors.contentMuted
                     )
                 }
             }
@@ -211,9 +211,9 @@ fun BookDetailScreenContent(
                     style = MaterialTheme.typography.bodyMedium,
                     fontStyle = if (description == null) FontStyle.Italic else FontStyle.Normal,
                     color = if (description == null) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        KluvsTheme.colors.contentMuted
                     } else {
-                        MaterialTheme.colorScheme.onSurface
+                        KluvsTheme.colors.content
                     }
                 )
             }
@@ -266,7 +266,7 @@ private fun SectionEyebrow(text: String) {
     Text(
         text = text.uppercase(),
         style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = KluvsTheme.colors.contentMuted
     )
 }
 
@@ -275,10 +275,10 @@ private fun CategoryChip(text: String) {
     Text(
         text = text,
         modifier = Modifier
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+            .border(1.dp, KluvsTheme.colors.divider, CircleShape)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = KluvsTheme.colors.contentMuted
     )
 }
 
@@ -294,12 +294,12 @@ private fun DetailRow(label: String, value: String) {
             text = label,
             modifier = Modifier.width(90.dp),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = KluvsTheme.colors.contentMuted
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
     }
 }
@@ -348,7 +348,7 @@ private fun displayLanguage(code: String): String {
 @Composable
 fun Preview_BookDetailScreen() = KluvsTheme {
     BookDetailScreenContent(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         state = BookDetailsState(
             book = Book(id = "1", title = "The Hobbit", author = "J.R.R. Tolkien", year = 1937, isbn = "978-0-395-07122-1"),
             isLoadingEnrichment = false,

@@ -66,12 +66,12 @@ private fun StatColumn(
     ) {
         Text(
             text = value,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = KluvsTheme.colors.content,
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
             text = label.uppercase(),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = KluvsTheme.colors.contentMuted,
             style = MaterialTheme.typography.labelSmall
         )
     }
@@ -83,7 +83,7 @@ private fun StatDivider(modifier: Modifier = Modifier) {
         modifier = modifier
             .width(1.dp)
             .height(40.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(KluvsTheme.colors.cardAlt)
     )
 }
 
@@ -91,7 +91,7 @@ private fun StatDivider(modifier: Modifier = Modifier) {
 @Composable
 private fun Preview_StatisticsSection() = KluvsTheme {
     StatisticsSection(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         data = UserStatistics(clubsCount = 3, booksRead = 3),
         joinDate = "2025"
     )

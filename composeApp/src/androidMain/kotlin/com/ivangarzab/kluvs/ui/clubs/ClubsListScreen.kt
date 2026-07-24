@@ -92,13 +92,13 @@ fun ClubsListScreen(
                         Text(
                             text = stringResource(R.string.your_eyebrow).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = stringResource(R.string.clubs),
                             style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = KluvsTheme.colors.content
                         )
                     }
                     TextButton(onClick = onJoinWithCode) {
@@ -112,7 +112,7 @@ fun ClubsListScreen(
                             club = club,
                             onClick = { onClubSelected(club.id) }
                         )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        HorizontalDivider(color = KluvsTheme.colors.cardAlt)
                     }
                 }
             }
@@ -174,7 +174,7 @@ private fun ClubListRow(
                 Text(
                     text = club.name,
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = KluvsTheme.colors.content
                 )
                 club.role?.let { RoleEyebrow(role = it) }
             }
@@ -186,7 +186,7 @@ private fun ClubListRow(
                         fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
                         fontStyle = FontStyle.Italic
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
             }
 
@@ -200,7 +200,7 @@ private fun ClubListRow(
         Icon(
             type = IconType.ChevronRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = KluvsTheme.colors.contentMuted
         )
     }
 }
@@ -224,12 +224,12 @@ private fun ClubsListEmptyState(modifier: Modifier = Modifier, onJoinWithCode: (
             Text(
                 text = "No clubs yet",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = KluvsTheme.colors.content
             )
             Text(
                 text = "Join a club to get started",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = KluvsTheme.colors.contentMuted
             )
             TextButton(onClick = onJoinWithCode) {
                 Text("Join with a code")

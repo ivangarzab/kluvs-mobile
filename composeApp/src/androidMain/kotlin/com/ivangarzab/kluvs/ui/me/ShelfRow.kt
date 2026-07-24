@@ -66,7 +66,7 @@ fun ShelfRow(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.bookTitle,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = KluvsTheme.colors.content,
                         style = MaterialTheme.typography.titleMedium,
                         fontStyle = FontStyle.Italic,
                         maxLines = 1,
@@ -74,7 +74,7 @@ fun ShelfRow(
                     )
                     Text(
                         text = item.bookAuthor,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = KluvsTheme.colors.contentMuted,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -82,7 +82,7 @@ fun ShelfRow(
                 }
                 Text(
                     text = item.clubName.uppercase(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.labelSmall
                 )
             }
@@ -103,7 +103,7 @@ fun ShelfRow(
 @Composable
 private fun Preview_ShelfRow() = KluvsTheme {
     ShelfRow(
-        modifier = Modifier.background(MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(KluvsTheme.colors.background),
         item = ShelfItem(
             sessionId = "s0",
             bookId = "b0",
