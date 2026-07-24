@@ -7,7 +7,7 @@ import Shared
 //
 //  Main auth form UI (equivalent to Android's AuthFormContent)
 //
-import KluvsDesignSystem
+import DesignSystem
 
 struct AuthFormView: View {
     let mode: AuthMode

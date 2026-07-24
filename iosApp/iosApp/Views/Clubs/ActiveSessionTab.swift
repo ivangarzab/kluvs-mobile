@@ -1,6 +1,6 @@
 import SwiftUI
 import Shared
-import KluvsDesignSystem
+import DesignSystem
 
 struct ActiveSessionTab: View {
     let sessionDetails: Shared.ActiveSessionDetails?

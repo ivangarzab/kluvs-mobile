@@ -1,7 +1,7 @@
 import SwiftUI
 import Shared
 import PhotosUI
-import KluvsDesignSystem
+import DesignSystem
 
 struct MeView: View {
     let userId: String

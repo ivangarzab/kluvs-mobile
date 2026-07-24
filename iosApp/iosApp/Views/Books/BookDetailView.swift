@@ -4,7 +4,7 @@ import Shared
 //  BookDetailView.swift
 //  iosApp
 //
-import KluvsDesignSystem
+import DesignSystem
 
 private let languageDisplayNames: [String: String] = [
     "en": "English", "es": "Spanish", "fr": "French", "de": "German",

@@ -1,6 +1,6 @@
 import SwiftUI
 import Shared
-import KluvsDesignSystem
+import DesignSystem
 
 private struct IDWrapper: Identifiable {
     let id: String

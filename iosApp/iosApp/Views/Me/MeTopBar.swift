@@ -1,5 +1,5 @@
 import SwiftUI
-import KluvsDesignSystem
+import DesignSystem
 
 /// Root-mode top bar for the Me tab — mirrors `BooksTopBar`'s self-owned layout
 /// (title left, one trailing utility icon right). Reading Log is the screen's

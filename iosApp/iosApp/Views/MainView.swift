@@ -1,5 +1,5 @@
 import SwiftUI
-import KluvsDesignSystem
+import DesignSystem
 
 struct MainView: View {
     let userId: String

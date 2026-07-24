@@ -2,20 +2,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "KluvsDesignSystem",
+    name: "DesignSystem",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "KluvsDesignSystem",
-            targets: ["KluvsDesignSystem"]
+            name: "DesignSystem",
+            targets: ["DesignSystem"]
         )
     ],
     targets: [
         .target(
-            name: "KluvsDesignSystem",
-            path: "Sources/KluvsDesignSystem"
+            name: "DesignSystem",
+            path: "Sources/DesignSystem"
         )
     ]
 )
