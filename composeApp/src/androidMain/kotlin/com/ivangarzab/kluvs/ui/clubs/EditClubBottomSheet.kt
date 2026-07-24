@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
@@ -25,6 +26,7 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
  * layer support (the view model only exposes a derived, display-only founded year today) rather
  * than being a pure UI-shell change, so both are deferred.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditClubBottomSheet(
     currentName: String,
