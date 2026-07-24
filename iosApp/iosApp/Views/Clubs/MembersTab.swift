@@ -29,7 +29,7 @@ struct MembersTab: View {
                             .foregroundColor(.secondary)
                         Spacer()
                         if isAdminOrAbove {
-                            GhostButton(text: "+ Invite", onClick: onInviteMember)
+                            OutlinedButton(text: "+ Invite", action: onInviteMember)
                         }
                     }
                     .padding(.bottom, 12)

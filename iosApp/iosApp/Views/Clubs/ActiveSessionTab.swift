@@ -29,7 +29,7 @@ struct ActiveSessionTab: View {
                         }
                         Spacer()
                         if isAdminOrAbove {
-                            GhostButton(text: "+ Add", onClick: onCreateDiscussion)
+                            OutlinedButton(text: "+ Add", action: onCreateDiscussion)
                         }
                     }
                     .padding(.bottom, 12)

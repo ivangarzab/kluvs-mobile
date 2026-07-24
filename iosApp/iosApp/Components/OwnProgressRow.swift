@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// The signed-in member's progress on a session book: thin bar, status label,
 /// and the entry point to `ReadingProgressSheet`. Shared between the Clubs
@@ -16,7 +17,7 @@ struct OwnProgressRow: View {
             HStack(spacing: 12) {
                 ProgressView(value: Double(ownProgress?.percent ?? 0), total: 100)
                     .tint(.brandOrange)
-                GhostButton(text: ownProgress != nil ? "Update" : "Track Progress", onClick: onUpdateProgress)
+                OutlinedButton(text: ownProgress != nil ? "Update" : "Track Progress", action: onUpdateProgress)
             }
             HStack {
                 Text(leftLabel)

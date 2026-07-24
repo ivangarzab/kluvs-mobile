@@ -126,9 +126,9 @@ struct OverviewTab: View {
             Spacer()
 
             if canToggle {
-                GhostButton(
+                OutlinedButton(
                     text: ownReading ? "Opt out" : "Join this Read",
-                    onClick: { onToggleParticipation(!ownReading) }
+                    action: { onToggleParticipation(!ownReading) }
                 )
             }
         }
@@ -155,7 +155,7 @@ struct OverviewTab: View {
             HStack(spacing: 12) {
                 ProgressView(value: Double(ownProgress?.percent ?? 0), total: 100)
                     .tint(.brandOrange)
-                GhostButton(text: ownProgress != nil ? "Update" : "Track Progress", onClick: onUpdateProgress)
+                OutlinedButton(text: ownProgress != nil ? "Update" : "Track Progress", action: onUpdateProgress)
             }
             HStack {
                 Text("\(completed) of \(total) discussions")
