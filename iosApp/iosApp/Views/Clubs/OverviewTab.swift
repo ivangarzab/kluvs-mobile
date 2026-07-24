@@ -141,13 +141,10 @@ struct OverviewTab: View {
     }
 
     private var sessionOverflowMenu: some View {
-        Menu {
-            Button("Edit Session", action: onEditSession)
-            Button("End Session", role: .destructive, action: onEndSession)
-        } label: {
-            Image(systemName: "ellipsis")
-                .foregroundColor(.secondary)
-        }
+        ActionMenu(items: [
+            ActionMenuItem(label: "Edit Session", action: onEditSession),
+            ActionMenuItem(label: "End Session", action: onEndSession, isDestructive: true),
+        ])
     }
 
     // MARK: - No Active Session

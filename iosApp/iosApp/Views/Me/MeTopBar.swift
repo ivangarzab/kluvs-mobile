@@ -15,14 +15,9 @@ struct MeTopBar: View {
                 .font(.title2)
                 .fontWeight(.bold)
             Spacer()
-            Menu {
-                Button(String(localized: "reading_log")) {
-                    onReadingLogClick()
-                }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .foregroundColor(.secondary)
-            }
+            ActionMenu(items: [
+                ActionMenuItem(label: String(localized: "reading_log"), action: onReadingLogClick)
+            ])
         }
         .padding(.horizontal, 16)
         .frame(height: 56)

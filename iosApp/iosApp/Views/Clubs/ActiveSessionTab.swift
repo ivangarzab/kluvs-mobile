@@ -178,14 +178,10 @@ struct DiscussionTimelineItem: View {
                     }
 
                     if showAdminActions {
-                        Menu {
-                            Button("Edit") { onEdit() }
-                            Button("Delete", role: .destructive) { onDelete() }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .foregroundColor(.secondary)
-                                .padding(.vertical, 12)
-                        }
+                        ActionMenu(items: [
+                            ActionMenuItem(label: "Edit", action: onEdit),
+                            ActionMenuItem(label: "Delete", action: onDelete, isDestructive: true),
+                        ])
                     }
                 }
             }

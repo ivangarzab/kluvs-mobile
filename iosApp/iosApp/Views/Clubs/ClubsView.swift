@@ -152,19 +152,19 @@ private struct ClubDetailView: View {
                         )
                         Spacer()
                         if viewModel.userRole == .owner || viewModel.userRole == .admin {
-                            Menu {
-                                Button("Share") {
-                                    viewModel.refresh()
-                                    showShareClubSheet = true
-                                }
+                            ActionMenu(items: {
+                                var items = [
+                                    ActionMenuItem(label: "Share", action: {
+                                        viewModel.refresh()
+                                        showShareClubSheet = true
+                                    })
+                                ]
                                 if viewModel.userRole == .owner {
-                                    Button("Edit") { showEditClubSheet = true }
-                                    Button("Delete", role: .destructive) { showDeleteClubAlert = true }
+                                    items.append(ActionMenuItem(label: "Edit", action: { showEditClubSheet = true }))
+                                    items.append(ActionMenuItem(label: "Delete", action: { showDeleteClubAlert = true }, isDestructive: true))
                                 }
-                            } label: {
-                                Image(systemName: "ellipsis")
-                                    .foregroundColor(.secondary)
-                            }
+                                return items
+                            }())
                         }
                     }
                 }
