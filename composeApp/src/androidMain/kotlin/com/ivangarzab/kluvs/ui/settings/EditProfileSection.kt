@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 @Composable
@@ -39,23 +39,21 @@ fun EditProfileSection(
 
         Spacer(modifier = Modifier.padding(vertical = 4.dp))
 
-        OutlinedTextField(
+        InputField(
             modifier = Modifier.fillMaxWidth(),
+            label = stringResource(R.string.label_name),
             value = editedName,
             onValueChange = onNameChanged,
-            label = { Text(stringResource(R.string.label_name)) },
-            singleLine = true,
         )
 
         Spacer(Modifier.height(8.dp))
 
-        OutlinedTextField(
+        InputField(
             modifier = Modifier.fillMaxWidth(),
+            label = stringResource(R.string.label_handle),
             value = editedHandle,
             onValueChange = onHandleChanged,
-            label = { Text(stringResource(R.string.label_handle)) },
-            prefix = { Text("@") },
-            singleLine = true,
+            prefix = "@",
         )
 
         if (saveError != null) {
