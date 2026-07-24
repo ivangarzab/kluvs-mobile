@@ -22,17 +22,20 @@ struct BooksView: View {
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 BooksTopBar(
-                    isSearchActive: isSearchActive,
+                    isSearchActive: Binding(
+                        get: { isSearchActive },
+                        set: { newValue in
+                            isSearchActive = newValue
+                            // Closing search also clears the query — matches the old
+                            // onBackClick behavior this binding replaces.
+                            if !newValue { viewModel.onQueryChange("") }
+                        }
+                    ),
                     isSearching: viewModel.isSearching,
                     query: Binding(
                         get: { viewModel.query },
                         set: { viewModel.onQueryChange($0) }
-                    ),
-                    onSearchClick: { isSearchActive = true },
-                    onBackClick: {
-                        isSearchActive = false
-                        viewModel.onQueryChange("")
-                    }
+                    )
                 )
 
                 if viewModel.isMutationInProgress {
