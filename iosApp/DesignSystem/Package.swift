@@ -17,7 +17,8 @@ let package = Package(
             name: "DesignSystem",
             path: "Sources/DesignSystem",
             resources: [
-                .process("Resources/Icons.xcassets")
+                .process("Resources/Icons.xcassets"),
+                .process("Resources/Loading.xcassets")
             ]
         )
     ]
