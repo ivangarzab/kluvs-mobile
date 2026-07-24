@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE0653EFE97CD16788A5128F /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 2B456756F536AAFE6A53A475 /* DesignSystem */; };
 		E07199C72EE3A87800F5E515 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E07199C62EE3A87800F5E515 /* Localizable.xcstrings */; };
 		E081F2D02F284C0A00AFD427 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E081F2CF2F284C0A00AFD427 /* Sentry */; settings = {ATTRIBUTES = (Required, ); }; };
-		BE0653EFE97CD16788A5128F /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 2B456756F536AAFE6A53A475 /* DesignSystem */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -578,15 +578,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		E081F2CF2F284C0A00AFD427 /* Sentry */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E081F2CE2F284C0900AFD427 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
-			productName = Sentry;
-		};
 		2B456756F536AAFE6A53A475 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 99D39893AA7BB5CEA8250D9C /* XCLocalSwiftPackageReference "DesignSystem" */;
 			productName = DesignSystem;
+		};
+		E081F2CF2F284C0A00AFD427 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E081F2CE2F284C0900AFD427 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

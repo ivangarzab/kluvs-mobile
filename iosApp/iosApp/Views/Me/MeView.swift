@@ -164,7 +164,7 @@ struct ProfileSection: View {
                             .fill(Color.brandOrange.opacity(0.9))
                             .frame(width: 24, height: 24)
 
-                        Image.custom(CustomIcon.edit)
+                        IconType.edit.image
                             .resizable()
                             .scaledToFit()
                             .frame(width: 12, height: 12)
@@ -219,19 +219,19 @@ struct FooterSection: View {
             Divider()
                 .padding(.vertical, 12)
 
-            FooterItem(label: String(localized: "sign_out"), icon: .logout, labelColor: .red, iconColor: .red, action: onSignOut)
+            FooterItem(label: String(localized: "sign_out"), icon: .signOut, labelColor: .red, iconColor: .red, action: onSignOut)
         }
     }
 }
 
 struct FooterItem: View {
     let label: String
-    let icon: CustomIcon
+    let icon: IconType
     let action: (() -> Void)?
     var labelColor: Color = .primary
     var iconColor: Color = .primary
 
-    init(label: String, icon: CustomIcon, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
+    init(label: String, icon: IconType, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
         self.label = label
         self.icon = icon
         self.labelColor = labelColor
@@ -246,7 +246,7 @@ struct FooterItem: View {
             action?()
         }) {
             HStack(spacing: 12) {
-                Image.custom(icon)
+                icon.image
                     .resizable()
                     .scaledToFit()
                     .frame(width: iconSize, height: iconSize)

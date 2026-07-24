@@ -5,11 +5,12 @@
 //  Reusable text field component matching Android's InputField
 //
 import SwiftUI
+import DesignSystem
 
 struct InputFieldView: View {
     let label: String
     @Binding var text: String
-    let icon: CustomIcon
+    let icon: IconType
     let supportingText: String
     let supportingTextColor: Color
     let isPassword: Bool
@@ -22,7 +23,7 @@ struct InputFieldView: View {
     init(
         label: String,
         text: Binding<String>,
-        icon: CustomIcon,
+        icon: IconType,
         supportingText: String,
         supportingTextColor: Color = .gray,
         isPassword: Bool = false,
@@ -45,7 +46,7 @@ struct InputFieldView: View {
         VStack(alignment: .leading, spacing: 4) {
             // Text field with icon
             HStack(spacing: 12) {
-                Image.custom(icon)
+                icon.image
                     .foregroundColor(.gray)
                     .frame(width: 20, height: 20)
 

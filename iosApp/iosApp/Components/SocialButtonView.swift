@@ -5,10 +5,11 @@
 //  OAuth provider button component
 //
 import SwiftUI
+import DesignSystem
 
 struct SocialButtonView: View {
     let text: String
-    let iconName: CustomIcon
+    let iconName: IconType
     let iconSize: CGFloat
     let backgroundColor: Color
     let textColor: Color
@@ -19,14 +20,14 @@ struct SocialButtonView: View {
             HStack(spacing: 12) {
                 // Apple uses template mode (white icon), others use original colors
                 if iconName == .apple {
-                    Image.custom(iconName)
+                    iconName.image
                         .resizable()
                         .renderingMode(.template)
                         .scaledToFit()
                         .frame(width: iconSize, height: iconSize)
                         .foregroundColor(.white)
                 } else {
-                    Image.custom(iconName)
+                    iconName.image
                         .resizable()
                         .renderingMode(.original)
                         .scaledToFit()
@@ -50,7 +51,7 @@ struct SocialButtonView: View {
     VStack(spacing: 16) {
         SocialButtonView(
             text: "Continue with Discord",
-            iconName: CustomIcon.discord,
+            iconName: IconType.discord,
             iconSize: 24,
             backgroundColor: .discordBlue,
             textColor: .white,
@@ -59,7 +60,7 @@ struct SocialButtonView: View {
 
         SocialButtonView(
             text: "Continue with Google",
-            iconName: CustomIcon.discord,
+            iconName: IconType.discord,
             iconSize: 24,
             backgroundColor: .googleGray,
             textColor: .googleTextGray,

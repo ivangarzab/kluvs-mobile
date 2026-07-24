@@ -39,7 +39,7 @@ struct AuthFormView: View {
 
                 SocialButtonView(
                     text: String(localized: "button_continue_apple"),
-                    iconName: CustomIcon.apple,
+                    iconName: IconType.apple,
                     iconSize: 20,
                     backgroundColor: .black,
                     textColor: .white,
@@ -63,7 +63,7 @@ struct AuthFormView: View {
 
                 SocialButtonView(
                     text: String(localized: "button_continue_discord"),
-                    iconName: CustomIcon.discord,
+                    iconName: IconType.discord,
                     iconSize: 20,
                     backgroundColor: .discordBlue,
                     textColor: .white,
@@ -74,7 +74,7 @@ struct AuthFormView: View {
 
                 SocialButtonView(
                     text: String(localized: "button_continue_google"),
-                    iconName: CustomIcon.google,
+                    iconName: IconType.google,
                     iconSize: 24,
                     backgroundColor: .googleGray,
                     textColor: .googleTextGray,
