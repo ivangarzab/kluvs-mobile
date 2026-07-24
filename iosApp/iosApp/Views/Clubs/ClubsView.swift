@@ -95,6 +95,7 @@ private struct ClubDetailView: View {
 
     // Sheet / alert state
     @State private var showEditClubSheet = false
+    @State private var editClubName = ""
     @State private var showShareClubSheet = false
     @State private var showDeleteClubAlert = false
     @State private var showCreateSessionSheet = false
@@ -160,7 +161,10 @@ private struct ClubDetailView: View {
                                     })
                                 ]
                                 if viewModel.userRole == .owner {
-                                    items.append(ActionMenuItem(label: "Edit", action: { showEditClubSheet = true }))
+                                    items.append(ActionMenuItem(label: "Edit", action: {
+                                        editClubName = viewModel.clubDetails?.clubName ?? ""
+                                        showEditClubSheet = true
+                                    }))
                                     items.append(ActionMenuItem(label: "Delete", action: { showDeleteClubAlert = true }, isDestructive: true))
                                 }
                                 return items
@@ -262,14 +266,27 @@ private struct ClubDetailView: View {
             )
         }
         // Edit club name
-        .sheet(isPresented: $showEditClubSheet) {
-            EditClubSheet(
+        .kluvsBottomSheet(isPresented: $showEditClubSheet, header: "Edit Club") {
+            EditClubFields(
                 currentName: viewModel.clubDetails?.clubName ?? "",
-                onSave: { newName in
-                    viewModel.onUpdateClubName(newName)
+                name: $editClubName,
+                onDeleteClub: {
+                    showEditClubSheet = false
+                    showDeleteClubAlert = true
+                }
+            )
+        } footer: {
+            BottomSheetFooter(
+                actionLabel: "Save",
+                onAction: {
+                    viewModel.onUpdateClubName(editClubName.trimmingCharacters(in: .whitespaces))
                     showEditClubSheet = false
                 },
-                onDismiss: { showEditClubSheet = false }
+                onCancel: { showEditClubSheet = false },
+                actionEnabled: {
+                    let trimmed = editClubName.trimmingCharacters(in: .whitespaces)
+                    return !trimmed.isEmpty && trimmed != (viewModel.clubDetails?.clubName ?? "")
+                }()
             )
         }
         // Delete club confirmation
