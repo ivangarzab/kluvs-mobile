@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -47,7 +45,7 @@ import com.ivangarzab.kluvs.designsystem.theme.contentDarkPrimary
 import com.ivangarzab.kluvs.designsystem.theme.providerDiscordBg
 import com.ivangarzab.kluvs.designsystem.theme.providerGoogleBg
 import com.ivangarzab.kluvs.designsystem.theme.providerGoogleText
-import com.ivangarzab.kluvs.ui.components.InputField
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.buttons.SocialButton
 import com.ivangarzab.kluvs.ui.components.TextDivider
@@ -151,14 +149,11 @@ fun AuthFormContent(
                 label = stringResource(R.string.email),
                 value = state.emailField,
                 onValueChange = onEmailFieldChange,
-                icon = IconType.Email,
-                iconDescription = stringResource(R.string.description_email_text_field),
-                supportingText = state.emailError
-                    ?: stringResource(R.string.enter_valid_email_address),
-                supportingTextColor = if (state.emailError != null) {
-                    KluvsTheme.colors.danger
+                error = state.emailError,
+                helperText = if (state.emailError == null) {
+                    stringResource(R.string.enter_valid_email_address)
                 } else {
-                    Color.Gray
+                    null
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -170,18 +165,14 @@ fun AuthFormContent(
 
             InputField(
                 modifier = Modifier.fillMaxWidth(),
-                isPassword = true,
                 label = stringResource(R.string.password),
                 value = state.passwordField,
                 onValueChange = onPasswordFieldChange,
-                icon = IconType.Password,
-                iconDescription = stringResource(R.string.description_password_text_field),
-                supportingText = state.passwordError
-                    ?: stringResource(R.string.min_eight_characters),
-                supportingTextColor = if (state.emailError != null) {
-                    KluvsTheme.colors.danger
+                error = state.passwordError,
+                helperText = if (state.passwordError == null) {
+                    stringResource(R.string.min_eight_characters)
                 } else {
-                    Color.Gray
+                    null
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -191,9 +182,6 @@ fun AuthFormContent(
                         ImeAction.Next
                     }
                 ),
-                keyboardActions = KeyboardActions(
-                    onGo = { onSubmit()}
-                ),
             )
 
             if (mode == AuthMode.SIGNUP) {
@@ -201,25 +189,18 @@ fun AuthFormContent(
 
                 InputField(
                     modifier = Modifier.fillMaxWidth(),
-                    isPassword = true,
                     label = stringResource(R.string.confirm_password),
                     value = state.confirmPasswordField,
                     onValueChange = onConfirmPasswordFieldChange,
-                    icon = IconType.Password,
-                    iconDescription = stringResource(R.string.description_confirm_password_text_field),
-                    supportingText = state.confirmPasswordError
-                        ?: stringResource(R.string.match_password_above),
-                    supportingTextColor = if (state.emailError != null) {
-                        KluvsTheme.colors.danger
+                    error = state.confirmPasswordError,
+                    helperText = if (state.confirmPasswordError == null) {
+                        stringResource(R.string.match_password_above)
                     } else {
-                        Color.Gray
+                        null
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Go
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onGo = { onSubmit() }
                     ),
                 )
             }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -31,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -44,7 +42,7 @@ import com.ivangarzab.kluvs.auth.presentation.ForgotPasswordUiState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.ui.components.InputField
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.ui.extensions.toLocalizedMessage
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -144,21 +142,15 @@ fun ForgotPasswordScreenContent(
                     label = stringResource(R.string.email),
                     value = state.emailField,
                     onValueChange = onEmailFieldChange,
-                    icon = IconType.Email,
-                    iconDescription = stringResource(R.string.description_email_text_field),
-                    supportingText = state.emailError
-                        ?: stringResource(R.string.enter_valid_email_address),
-                    supportingTextColor = if (state.emailError != null) {
-                        KluvsTheme.colors.danger
+                    error = state.emailError,
+                    helperText = if (state.emailError == null) {
+                        stringResource(R.string.enter_valid_email_address)
                     } else {
-                        Color.Gray
+                        null
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Go
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onGo = { onSubmit() }
                     ),
                 )
 
