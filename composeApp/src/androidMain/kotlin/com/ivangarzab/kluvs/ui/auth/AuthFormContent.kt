@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,6 +42,7 @@ import com.ivangarzab.kluvs.designsystem.theme.providerDiscordBg
 import com.ivangarzab.kluvs.designsystem.theme.providerGoogleBg
 import com.ivangarzab.kluvs.designsystem.theme.providerGoogleText
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
+import com.ivangarzab.kluvs.designsystem.components.fields.PasswordField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.SocialButton
@@ -160,7 +162,7 @@ fun AuthFormContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            InputField(
+            PasswordField(
                 modifier = Modifier.fillMaxWidth(),
                 label = stringResource(R.string.password),
                 value = state.passwordField,
@@ -179,12 +181,15 @@ fun AuthFormContent(
                         ImeAction.Next
                     }
                 ),
+                keyboardActions = KeyboardActions(
+                    onGo = { onSubmit() },
+                ),
             )
 
             if (mode == AuthMode.SIGNUP) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                InputField(
+                PasswordField(
                     modifier = Modifier.fillMaxWidth(),
                     label = stringResource(R.string.confirm_password),
                     value = state.confirmPasswordField,
@@ -198,6 +203,9 @@ fun AuthFormContent(
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Go
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onGo = { onSubmit() },
                     ),
                 )
             }
