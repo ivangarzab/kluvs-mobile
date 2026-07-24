@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E07199C72EE3A87800F5E515 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E07199C62EE3A87800F5E515 /* Localizable.xcstrings */; };
 		E081F2D02F284C0A00AFD427 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E081F2CF2F284C0A00AFD427 /* Sentry */; settings = {ATTRIBUTES = (Required, ); }; };
+		BE0653EFE97CD16788A5128F /* KluvsDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 2B456756F536AAFE6A53A475 /* KluvsDesignSystem */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E081F2D02F284C0A00AFD427 /* Sentry in Frameworks */,
+				BE0653EFE97CD16788A5128F /* KluvsDesignSystem in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,6 +124,7 @@
 			name = iosApp;
 			packageProductDependencies = (
 				E081F2CF2F284C0A00AFD427 /* Sentry */,
+				2B456756F536AAFE6A53A475 /* KluvsDesignSystem */,
 			);
 			productName = iosApp;
 			productReference = B9DA97B12DC1472C00A4DA20 /* Kluvs.app */;
@@ -180,6 +183,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				E081F2CE2F284C0900AFD427 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				99D39893AA7BB5CEA8250D9C /* XCLocalSwiftPackageReference "../KluvsDesignSystem" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B9DA97B22DC1472C00A4DA20 /* Products */;
@@ -555,6 +559,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		99D39893AA7BB5CEA8250D9C /* XCLocalSwiftPackageReference "../KluvsDesignSystem" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../KluvsDesignSystem;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		E081F2CE2F284C0900AFD427 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -571,6 +582,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E081F2CE2F284C0900AFD427 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
+		};
+		2B456756F536AAFE6A53A475 /* KluvsDesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 99D39893AA7BB5CEA8250D9C /* XCLocalSwiftPackageReference "../KluvsDesignSystem" */;
+			productName = KluvsDesignSystem;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

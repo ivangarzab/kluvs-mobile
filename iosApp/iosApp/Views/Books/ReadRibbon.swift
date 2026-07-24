@@ -1,8 +1,9 @@
+import SwiftUI
 //
 //  ReadRibbon.swift
 //  iosApp
 //
-import SwiftUI
+import KluvsDesignSystem
 
 /// Ribbon size, matching the book-cover sizes it's overlaid on (design-system/docs/book-cover.md).
 enum ReadRibbonSize {

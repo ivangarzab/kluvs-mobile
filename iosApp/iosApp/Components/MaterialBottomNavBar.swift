@@ -1,4 +1,5 @@
 import SwiftUI
+import KluvsDesignSystem
 
 struct MaterialBottomNavBar: View {
     @Binding var selectedTab: Int

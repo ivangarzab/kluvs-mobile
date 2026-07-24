@@ -1,4 +1,5 @@
 import SwiftUI
+import KluvsDesignSystem
 
 struct ErrorView: View {
     let message: String

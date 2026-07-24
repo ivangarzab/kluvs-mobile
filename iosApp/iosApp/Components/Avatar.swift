@@ -1,4 +1,5 @@
 import SwiftUI
+import KluvsDesignSystem
 
 /// Circular, generated member avatar: shows an uploaded image if present, otherwise
 /// initials on a deterministic hue background. Mirrors web's `Avatar` / Android's `Avatar`.

@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import KluvsDesignSystem
 
 /// Overview tab: active-session summary (book, participation, own progress) and an
 /// "up next" discussion teaser. Mirrors web's mobile Overview tab / Android's `OverviewTab`.

@@ -1,12 +1,13 @@
+import AuthenticationServices
+import SwiftUI
+import Shared
 //
 //  AuthFormView.swift
 //  iosApp
 //
 //  Main auth form UI (equivalent to Android's AuthFormContent)
 //
-import AuthenticationServices
-import SwiftUI
-import Shared
+import KluvsDesignSystem
 
 struct AuthFormView: View {
     let mode: AuthMode

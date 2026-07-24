@@ -1,4 +1,5 @@
 import SwiftUI
+import KluvsDesignSystem
 
 /// Minimal member shape `AvatarStack` needs — decoupled from any specific UI model.
 struct AvatarStackMember: Identifiable {

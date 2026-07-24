@@ -1,8 +1,9 @@
+import SwiftUI
 //
 //  BooksTopBar.swift
 //  iosApp
 //
-import SwiftUI
+import KluvsDesignSystem
 
 private let titleFadeDuration = 0.15
 private let searchUnfurlDuration = 0.2

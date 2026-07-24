@@ -1,10 +1,11 @@
+import SwiftUI
 //
 //  ForgotPasswordView.swift
 //  iosApp
 //
 //  Forgot password screen, backed by the shared AuthViewModel
 //
-import SwiftUI
+import KluvsDesignSystem
 
 struct ForgotPasswordView: View {
     @StateObject private var viewModel = AuthViewModelWrapper()

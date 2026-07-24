@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import KluvsDesignSystem
 
 /// Sheet for tracking/updating the signed-in member's reading progress on the active
 /// session. Mirrors the web app's `ReadingProgressModal` / Android's `ReadingProgressBottomSheet` —

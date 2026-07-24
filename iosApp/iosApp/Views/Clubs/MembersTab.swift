@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import KluvsDesignSystem
 
 struct MembersTab: View {
     let members: [Shared.MemberListItemInfo]
