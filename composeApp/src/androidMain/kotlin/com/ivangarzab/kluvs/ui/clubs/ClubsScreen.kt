@@ -495,7 +495,11 @@ fun ClubsScreenContent(
                             onUpdateClubName(newName)
                             showEditClubSheet = false
                         },
-                        onDismiss = { showEditClubSheet = false }
+                        onDismiss = { showEditClubSheet = false },
+                        onDeleteClub = {
+                            showEditClubSheet = false
+                            showDeleteClubDialog = true
+                        }
                     )
                 }
 
