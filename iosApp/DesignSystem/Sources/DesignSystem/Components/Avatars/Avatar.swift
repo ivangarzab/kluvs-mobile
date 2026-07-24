@@ -1,16 +1,27 @@
 import SwiftUI
-import DesignSystem
 
 /// Circular, generated member avatar: shows an uploaded image if present, otherwise
 /// initials on a deterministic hue background. Mirrors web's `Avatar` / Android's `Avatar`.
 ///
 /// Role is never shown here — no ring, no badge. Use `RoleEyebrow` for role display.
-struct Avatar: View {
+///
+/// Not yet ported: Android's `isLoading` param (semi-transparent overlay + spinner) — depends on
+/// `LoadingSpinner`, which doesn't exist on this platform yet. Real, flagged gap, not silently
+/// dropped.
+public struct Avatar: View {
     let name: String
     let avatarUrl: String?
     let size: CGFloat
-    var memberId: String = ""
-    var isOwn: Bool = false
+    var memberId: String
+    var isOwn: Bool
+
+    public init(name: String, avatarUrl: String?, size: CGFloat, memberId: String = "", isOwn: Bool = false) {
+        self.name = name
+        self.avatarUrl = avatarUrl
+        self.size = size
+        self.memberId = memberId
+        self.isOwn = isOwn
+    }
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -25,7 +36,7 @@ struct Avatar: View {
         return colorScheme == .dark ? .foregroundWarmPrimary : .foregroundLightLabelVariant
     }
 
-    var body: some View {
+    public var body: some View {
         ZStack {
             if let urlString = avatarUrl, !urlString.isEmpty, let url = URL(string: urlString) {
                 AsyncImage(url: url) { phase in

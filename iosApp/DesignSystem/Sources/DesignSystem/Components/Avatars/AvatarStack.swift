@@ -1,26 +1,38 @@
 import SwiftUI
-import DesignSystem
 
 /// Minimal member shape `AvatarStack` needs — decoupled from any specific UI model.
-struct AvatarStackMember: Identifiable {
-    let id: String
-    let name: String
-    let avatarUrl: String?
+public struct AvatarStackMember: Identifiable {
+    public let id: String
+    public let name: String
+    public let avatarUrl: String?
+
+    public init(id: String, name: String, avatarUrl: String?) {
+        self.id = id
+        self.name = name
+        self.avatarUrl = avatarUrl
+    }
 }
 
 /// Overlapping row of avatars with a "+N" overflow chip. Mirrors web's `AvatarStack` /
 /// Android's `AvatarStack`: first avatar on top, ~1/3-size overlap, up to `max` shown.
-struct AvatarStack: View {
+public struct AvatarStack: View {
     let members: [AvatarStackMember]
-    var size: CGFloat = 24
-    var max: Int = 3
-    var ringColor: Color = Color(uiColor: .systemBackground)
+    var size: CGFloat
+    var max: Int
+    var ringColor: Color
+
+    public init(members: [AvatarStackMember], size: CGFloat = 24, max: Int = 3, ringColor: Color = Color(uiColor: .systemBackground)) {
+        self.members = members
+        self.size = size
+        self.max = max
+        self.ringColor = ringColor
+    }
 
     private var shown: [AvatarStackMember] { Array(members.prefix(max)) }
     private var extra: Int { members.count - shown.count }
     private var overlap: CGFloat { size / 3 }
 
-    var body: some View {
+    public var body: some View {
         HStack(spacing: 0) {
             ForEach(Array(shown.enumerated()), id: \.element.id) { index, member in
                 Avatar(name: member.name, avatarUrl: member.avatarUrl, size: size, memberId: member.id)
