@@ -45,11 +45,18 @@ fun BookDetailActions(
             enabled = !isMutationInProgress
         )
 
+        val shelfLabels = mapOf(
+            ShelfStatus.CURRENTLY_READING to stringResource(R.string.shelf_currently_reading),
+            ShelfStatus.READ to stringResource(R.string.shelf_read),
+            ShelfStatus.WANT_TO_READ to stringResource(R.string.shelf_want_to_read),
+            ShelfStatus.NOT_FINISHED to stringResource(R.string.shelf_not_finished),
+        )
+
         Dropdown(
             options = ShelfStatus.entries,
             selected = shelfStatus,
             onSelect = onShelfChange,
-            label = { shelfActionLabel(it) },
+            label = { status -> shelfLabels.getValue(status) },
             placeholder = stringResource(R.string.shelf_add_to_shelf),
             clearLabel = stringResource(R.string.shelf_none),
             enabled = !isMutationInProgress
