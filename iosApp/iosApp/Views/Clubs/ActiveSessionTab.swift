@@ -153,12 +153,19 @@ struct DiscussionTimelineItem: View {
                         .foregroundColor(.secondary)
                         .opacity(discussion.isPast ? 0.5 : 1.0)
 
-                    AttendanceControl(
-                        roster: attendanceRoster,
-                        disabled: discussion.isPast,
-                        onSetAttendance: onSetAttendance
-                    )
-                    .padding(.top, 4)
+                    if let attendanceRoster {
+                        AttendanceControl(
+                            counts: [
+                                .yes: attendanceRoster.responses.filter { $0.status == .yes }.count,
+                                .maybe: attendanceRoster.responses.filter { $0.status == .maybe }.count,
+                                .no: attendanceRoster.responses.filter { $0.status == .no }.count,
+                            ],
+                            selected: attendanceRoster.myStatus?.toOption,
+                            disabled: discussion.isPast,
+                            onSelect: { onSetAttendance($0.toDomain) }
+                        )
+                        .padding(.top, 4)
+                    }
                 }
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -222,4 +229,27 @@ struct DiscussionTimelineItem: View {
 
 #Preview {
     ActiveSessionTab(sessionDetails: nil)
+}
+
+// MARK: - Domain <-> DesignSystem.AttendanceOption translation
+
+private extension Shared.AttendanceStatus {
+    var toOption: AttendanceOption? {
+        switch self {
+        case .yes: .yes
+        case .maybe: .maybe
+        case .no: .no
+        default: nil
+        }
+    }
+}
+
+private extension AttendanceOption {
+    var toDomain: Shared.AttendanceStatus {
+        switch self {
+        case .yes: .yes
+        case .maybe: .maybe
+        case .no: .no
+        }
+    }
 }
