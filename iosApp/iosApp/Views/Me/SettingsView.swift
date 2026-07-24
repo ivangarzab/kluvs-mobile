@@ -1,5 +1,6 @@
 import SwiftUI
 import SafariServices
+import DesignSystem
 
 struct SettingsView: View {
     let userId: String
@@ -40,7 +41,7 @@ struct SettingsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
-                    Image.custom(.back)
+                    IconType.back.image
                 }
             }
         }
