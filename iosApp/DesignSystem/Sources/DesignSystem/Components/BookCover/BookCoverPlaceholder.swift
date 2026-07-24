@@ -5,19 +5,18 @@
 import SwiftUI
 
 /// The design system's "no cover available" fallback: a tessellating hexagon
-/// hive grid on the warmDarkBar/lightBar surface. See design-system/docs/book-cover.md.
+/// hive grid on the `KluvsTheme.colors.bar` surface. See design-system/docs/book-cover.md.
 ///
 /// Pointy-top hexagon tiling where `hexWidth` is the vertex-to-vertex column spacing
 /// (matches the web token's 28px tile width at book-cover--md scale).
-struct BookCoverPlaceholder: View {
-    var hexWidth: CGFloat = 14
+public struct BookCoverPlaceholder: View {
+    var hexWidth: CGFloat
 
-    @Environment(\.colorScheme) private var colorScheme
+    public init(hexWidth: CGFloat = 14) {
+        self.hexWidth = hexWidth
+    }
 
-    private var backgroundColor: Color { colorScheme == .dark ? .warmDarkBar : .lightBar }
-    private var strokeColor: Color { colorScheme == .dark ? .warmDarkCard2 : .lightDivider }
-
-    var body: some View {
+    public var body: some View {
         Canvas { context, size in
             let radius = hexWidth / sqrt(3)
             let hexHeight = radius * 2
@@ -37,9 +36,9 @@ struct BookCoverPlaceholder: View {
                 row += 1
             }
 
-            context.stroke(path, with: .color(strokeColor), lineWidth: 1.5)
+            context.stroke(path, with: .color(KluvsTheme.colors.divider), lineWidth: 1.5)
         }
-        .background(backgroundColor)
+        .background(KluvsTheme.colors.bar)
     }
 
     /// Appends a pointy-top hexagon outline centered at `center` with circumradius `radius`.

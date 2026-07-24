@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// Sheet showing the signed-in member's reading log: sessions grouped into
 /// "Currently Reading" and "Read". Mirrors web's ReadingLogModal / Android's

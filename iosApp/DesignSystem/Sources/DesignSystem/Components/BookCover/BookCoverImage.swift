@@ -4,16 +4,23 @@ import SwiftUI
 /// Owns its own fixed frame + clip so callers don't have to juggle `.aspectRatio`/`.frame`
 /// ordering — a chained `.frame().aspectRatio(.fit)` on the container without an explicit
 /// height and `.clipped()` let the fill-mode image overflow/distort in earlier versions.
-struct BookCoverImage: View {
+public struct BookCoverImage: View {
     let imageUrl: String?
     let width: CGFloat
     /// width / height
-    var aspectRatio: CGFloat = 2.0 / 3.0
-    var cornerRadius: CGFloat = 4
+    var aspectRatio: CGFloat
+    var cornerRadius: CGFloat
+
+    public init(imageUrl: String?, width: CGFloat, aspectRatio: CGFloat = 2.0 / 3.0, cornerRadius: CGFloat = 4) {
+        self.imageUrl = imageUrl
+        self.width = width
+        self.aspectRatio = aspectRatio
+        self.cornerRadius = cornerRadius
+    }
 
     private var height: CGFloat { width / aspectRatio }
 
-    var body: some View {
+    public var body: some View {
         Group {
             if let imageUrl, let url = URL(string: imageUrl) {
                 AsyncImage(url: url) { phase in

@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// A single "On Your Shelf" row: the active-session book for one of the
 /// member's clubs, with cover, club name, next discussion date, and the
