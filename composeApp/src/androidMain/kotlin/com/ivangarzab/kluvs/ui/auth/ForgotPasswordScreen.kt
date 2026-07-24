@@ -104,8 +104,8 @@ fun ForgotPasswordScreenContent(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = KluvsTheme.colors.dangerContainer,
-                    contentColor = KluvsTheme.colors.onAccentContainer,
+                    containerColor = KluvsTheme.colors.card,
+                    contentColor = KluvsTheme.colors.danger,
                     actionColor = KluvsTheme.colors.danger
                 )
             }
