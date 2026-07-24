@@ -20,7 +20,7 @@ public struct DangerZoneBox: View {
             Text("DANGER ZONE")
                 .kluvsStyle(KluvsTheme.typography.eyebrow)
                 .foregroundColor(KluvsTheme.colors.contentMuted)
-            OutlinedButton(text: actionLabel, action: onActionTap)
+            SecondaryButton(text: actionLabel, action: onActionTap, buttonColor: KluvsTheme.colors.danger)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)

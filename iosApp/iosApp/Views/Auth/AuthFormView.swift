@@ -40,7 +40,6 @@ struct AuthFormView: View {
                 SocialButton(
                     text: String(localized: "button_continue_apple"),
                     icon: IconType.apple,
-                    iconSize: 20,
                     backgroundColor: .black,
                     textColor: .white,
                     action: {
@@ -64,7 +63,6 @@ struct AuthFormView: View {
                 SocialButton(
                     text: String(localized: "button_continue_discord"),
                     icon: IconType.discord,
-                    iconSize: 20,
                     backgroundColor: .discordBlue,
                     textColor: .white,
                     action: {
@@ -75,12 +73,12 @@ struct AuthFormView: View {
                 SocialButton(
                     text: String(localized: "button_continue_google"),
                     icon: IconType.google,
-                    iconSize: 24,
                     backgroundColor: .googleGray,
                     textColor: .googleTextGray,
                     action: {
                         viewModel.signInWithGoogle()
-                    }
+                    },
+                    iconSize: 24
                 )
 
                 TextDividerView(text: String(localized: "hint_or_continue_email"))

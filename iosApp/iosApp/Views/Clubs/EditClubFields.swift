@@ -19,7 +19,7 @@ struct EditClubFields: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             InputField(label: "Club Name", value: $name)
-            DangerZoneBox(actionLabel: "Delete club…", onActionTap: onDeleteClub)
+            DangerZoneBox(actionLabel: "Delete club", onActionTap: onDeleteClub)
         }
     }
 }

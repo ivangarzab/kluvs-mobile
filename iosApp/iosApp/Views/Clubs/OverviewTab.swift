@@ -77,7 +77,7 @@ struct OverviewTab: View {
 
             if ownReading {
                 OwnProgressRow(
-                    percent: ownProgress?.percent,
+                    percent: ownProgress?.percent.map { Int($0) },
                     statusLabel: ownProgress?.label,
                     onUpdateProgress: onUpdateProgress,
                     leftLabel: "\(session.discussions.filter { $0.isPast }.count) of \(session.discussions.count) discussions",
