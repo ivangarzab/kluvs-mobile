@@ -76,7 +76,13 @@ struct OverviewTab: View {
             participationRow(ownReading: ownReading, canToggle: canToggle)
 
             if ownReading {
-                ownProgressRow(session: session)
+                OwnProgressRow(
+                    percent: ownProgress?.percent,
+                    statusLabel: ownProgress?.label,
+                    onUpdateProgress: onUpdateProgress,
+                    leftLabel: "\(session.discussions.filter { $0.isPast }.count) of \(session.discussions.count) discussions",
+                    leftLabelEmphasized: true
+                )
             }
         }
     }
@@ -141,33 +147,6 @@ struct OverviewTab: View {
         } label: {
             Image(systemName: "ellipsis")
                 .foregroundColor(.secondary)
-        }
-    }
-
-    // MARK: - Own Progress
-
-    @ViewBuilder
-    private func ownProgressRow(session: Shared.ActiveSessionDetails) -> some View {
-        let completed = session.discussions.filter { $0.isPast }.count
-        let total = session.discussions.count
-
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 12) {
-                ProgressView(value: Double(ownProgress?.percent ?? 0), total: 100)
-                    .tint(.brandOrange)
-                OutlinedButton(text: ownProgress != nil ? "Update" : "Track Progress", action: onUpdateProgress)
-            }
-            HStack {
-                Text("\(completed) of \(total) discussions")
-                    .font(.ebGaramondItalic(size: 15))
-                    .foregroundColor(.secondary)
-                Spacer()
-                if let label = ownProgress?.label {
-                    Text(label)
-                        .font(.kluvsHelperSm)
-                        .foregroundColor(.brandOrange)
-                }
-            }
         }
     }
 
