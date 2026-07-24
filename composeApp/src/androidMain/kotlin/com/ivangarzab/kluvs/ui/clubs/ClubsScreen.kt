@@ -60,6 +60,7 @@ import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
+import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
@@ -515,6 +516,7 @@ fun ClubsScreenContent(
                         title = "Delete Club",
                         message = "Are you sure you want to delete \"${state.currentClubDetails?.clubName}\"? This action cannot be undone.",
                         confirmLabel = "Delete",
+                        isDestructive = true,
                         onConfirm = {
                             onDeleteClub()
                             showDeleteClubDialog = false
@@ -559,6 +561,7 @@ fun ClubsScreenContent(
                         message = "Are you sure you want to end the current reading session for " +
                             "\"${state.activeSession?.book?.title}\"?\n\n$creditMessage",
                         confirmLabel = "Confirm End",
+                        isDestructive = true,
                         onConfirm = {
                             onEndSession()
                             showEndSessionDialog = false
@@ -619,6 +622,7 @@ fun ClubsScreenContent(
                         title = "Delete Discussion",
                         message = "Are you sure you want to delete this discussion?",
                         confirmLabel = "Delete",
+                        isDestructive = true,
                         onConfirm = {
                             onDeleteDiscussion(discussionId)
                             deletingDiscussionId = null
@@ -661,6 +665,7 @@ fun ClubsScreenContent(
                         title = "Remove Member",
                         message = "Are you sure you want to remove ${member?.name ?: "this member"} from the club?",
                         confirmLabel = "Remove",
+                        isDestructive = true,
                         onConfirm = {
                             onRemoveMember(memberId)
                             removingMemberId = null

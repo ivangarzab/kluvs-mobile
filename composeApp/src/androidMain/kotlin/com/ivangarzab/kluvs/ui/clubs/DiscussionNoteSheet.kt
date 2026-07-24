@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionNoteInfo
+import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 private const val NOTE_MAX_LENGTH = 4000
@@ -152,6 +153,7 @@ fun DiscussionNoteSheet(
             title = "Delete Note",
             message = "Are you sure you want to delete this note?",
             confirmLabel = "Delete",
+            isDestructive = true,
             onConfirm = {
                 showDeleteConfirmation = false
                 onDelete()
