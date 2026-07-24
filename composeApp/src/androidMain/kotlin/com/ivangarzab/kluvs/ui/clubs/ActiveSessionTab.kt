@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +45,9 @@ import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmDisabled
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceControl
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceOption
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
@@ -97,15 +97,11 @@ fun ActiveSessionTab(
                     style = MaterialTheme.typography.bodyMedium,
                     color = KluvsTheme.colors.contentMuted
                 )
-                Button(onClick = onCreateSession) {
-                    Icon(
-                        type = IconType.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Create Session")
-                }
+                PrimaryButton(
+                    text = "Create Session",
+                    onClick = onCreateSession,
+                    icon = IconType.Add,
+                )
             }
         } else {
             NoTabData(
@@ -346,13 +342,12 @@ private fun DiscussionTimelineItem(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onOpenNote) {
-                    Icon(
-                        type = IconType.Edit,
-                        contentDescription = "Discussion note",
-                        tint = KluvsTheme.colors.contentMuted
-                    )
-                }
+                IconButton(
+                    type = IconType.Edit,
+                    contentDescription = "Discussion note",
+                    tint = KluvsTheme.colors.contentMuted,
+                    onClick = onOpenNote,
+                )
                 if (showAdminActions) {
                     ActionMenu(
                         items = listOf(

@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -21,7 +19,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -31,10 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.auth.presentation.AuthMode
 import com.ivangarzab.kluvs.auth.presentation.AuthUiState
@@ -47,7 +42,9 @@ import com.ivangarzab.kluvs.designsystem.theme.providerGoogleBg
 import com.ivangarzab.kluvs.designsystem.theme.providerGoogleText
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.SocialButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.ui.components.TextDivider
 
 @Composable
@@ -207,37 +204,24 @@ fun AuthFormContent(
 
             if (mode == AuthMode.LOGIN) {
                 TextButton(
-                    modifier = Modifier
-                        .align(Alignment.End),
+                    modifier = Modifier.align(Alignment.End),
+                    text = stringResource(R.string.forgot_password),
                     onClick = { onNavigate(LoginNavigation.ForgetPassword) },
-                    content = {
-                        Text(
-                            text = stringResource(R.string.forgot_password),
-                            textAlign = TextAlign.Right,
-                            color = KluvsTheme.colors.accent,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
+                    emphasized = true,
                 )
             } else {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Button(
+            PrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                onClick = { onSubmit() }
-            ) {
-                Text(
-                    text = if (mode == AuthMode.LOGIN) {
-                        stringResource(R.string.sign_in)
-                    } else {
-                        stringResource(R.string.sign_up)
-                    },
-                    fontSize = 16.sp,
-                    color = KluvsTheme.colors.background
-                )
-            }
+                text = if (mode == AuthMode.LOGIN) {
+                    stringResource(R.string.sign_in)
+                } else {
+                    stringResource(R.string.sign_up)
+                },
+                onClick = { onSubmit() },
+            )
 
             Spacer(modifier = Modifier.height(4.dp))
 

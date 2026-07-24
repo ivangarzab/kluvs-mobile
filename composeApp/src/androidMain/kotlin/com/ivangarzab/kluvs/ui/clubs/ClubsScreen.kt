@@ -19,7 +19,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -56,9 +55,9 @@ import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
@@ -317,13 +316,12 @@ fun ClubsScreenContent(
                             .padding(horizontal = 4.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                type = IconType.ArrowBack,
-                                contentDescription = stringResource(R.string.navigate_back),
-                                tint = KluvsTheme.colors.content
-                            )
-                        }
+                        IconButton(
+                            type = IconType.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_back),
+                            tint = KluvsTheme.colors.content,
+                            onClick = onNavigateBack,
+                        )
                         Text(
                             text = stringResource(R.string.club_eyebrow).uppercase(),
                             style = MaterialTheme.typography.labelSmall,

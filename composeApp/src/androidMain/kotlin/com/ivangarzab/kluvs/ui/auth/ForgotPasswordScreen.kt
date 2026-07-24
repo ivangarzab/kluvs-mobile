@@ -7,13 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -21,7 +18,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +36,9 @@ import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.auth.presentation.AuthViewModel
 import com.ivangarzab.kluvs.auth.presentation.ForgotPasswordUiState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.ui.extensions.toLocalizedMessage
@@ -93,12 +91,11 @@ fun ForgotPasswordScreenContent(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            type = IconType.Back,
-                            contentDescription = stringResource(R.string.navigate_back)
-                        )
-                    }
+                    IconButton(
+                        type = IconType.Back,
+                        contentDescription = stringResource(R.string.navigate_back),
+                        onClick = onNavigateBack,
+                    )
                 }
             )
         },
@@ -156,21 +153,16 @@ fun ForgotPasswordScreenContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
+                PrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
                     enabled = !state.isLoading,
-                    onClick = onSubmit
-                ) {
-                    Text(
-                        text = if (state.isLoading) {
-                            stringResource(R.string.sending)
-                        } else {
-                            stringResource(R.string.send_reset_link)
-                        },
-                        color = KluvsTheme.colors.background
-                    )
-                }
+                    onClick = onSubmit,
+                    text = if (state.isLoading) {
+                        stringResource(R.string.sending)
+                    } else {
+                        stringResource(R.string.send_reset_link)
+                    },
+                )
             } else {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -211,13 +203,11 @@ fun ForgotPasswordScreenContent(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    TextButton(onClick = onNavigateBack) {
-                        Text(
-                            text = stringResource(R.string.back_to_sign_in),
-                            color = KluvsTheme.colors.accent,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+                    TextButton(
+                        text = stringResource(R.string.back_to_sign_in),
+                        onClick = onNavigateBack,
+                        emphasized = true,
+                    )
                 }
             }
         }

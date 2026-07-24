@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +44,7 @@ import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlacehold
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
@@ -277,9 +277,10 @@ private fun NoActiveSessionState(
         )
         if (isAdminOrAbove) {
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onCreateSession) {
-                Text(stringResource(R.string.start_session))
-            }
+            PrimaryButton(
+                text = stringResource(R.string.start_session),
+                onClick = onCreateSession,
+            )
         }
     }
 }

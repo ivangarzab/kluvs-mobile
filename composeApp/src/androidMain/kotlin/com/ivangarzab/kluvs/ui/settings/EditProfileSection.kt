@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
@@ -67,16 +67,13 @@ fun EditProfileSection(
 
         Spacer(Modifier.height(16.dp))
 
-        Button(
+        PrimaryButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = onSaveProfile,
             enabled = hasChanges && !isSaving,
-        ) {
-            Text(
-                if (isSaving) stringResource(R.string.button_save) + "…"
-                else stringResource(R.string.button_save)
-            )
-        }
+            text = if (isSaving) stringResource(R.string.button_save) + "…"
+                else stringResource(R.string.button_save),
+        )
     }
 }
 

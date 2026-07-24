@@ -20,7 +20,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +42,7 @@ import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
+import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
@@ -101,9 +101,7 @@ fun ClubsListScreen(
                             color = KluvsTheme.colors.content
                         )
                     }
-                    TextButton(onClick = onJoinWithCode) {
-                        Text("Join with a code")
-                    }
+                    TextButton(text = "Join with a code", onClick = onJoinWithCode)
                 }
 
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -231,9 +229,7 @@ private fun ClubsListEmptyState(modifier: Modifier = Modifier, onJoinWithCode: (
                 style = MaterialTheme.typography.bodyMedium,
                 color = KluvsTheme.colors.contentMuted
             )
-            TextButton(onClick = onJoinWithCode) {
-                Text("Join with a code")
-            }
+            TextButton(text = "Join with a code", onClick = onJoinWithCode)
         }
     }
 }
