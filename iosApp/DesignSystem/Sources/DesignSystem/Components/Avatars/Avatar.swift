@@ -4,23 +4,21 @@ import SwiftUI
 /// initials on a deterministic hue background. Mirrors web's `Avatar` / Android's `Avatar`.
 ///
 /// Role is never shown here — no ring, no badge. Use `RoleEyebrow` for role display.
-///
-/// Not yet ported: Android's `isLoading` param (semi-transparent overlay + spinner) — depends on
-/// `LoadingSpinner`, which doesn't exist on this platform yet. Real, flagged gap, not silently
-/// dropped.
 public struct Avatar: View {
     let name: String
     let avatarUrl: String?
     let size: CGFloat
     var memberId: String
     var isOwn: Bool
+    var isLoading: Bool
 
-    public init(name: String, avatarUrl: String?, size: CGFloat, memberId: String = "", isOwn: Bool = false) {
+    public init(name: String, avatarUrl: String?, size: CGFloat, memberId: String = "", isOwn: Bool = false, isLoading: Bool = false) {
         self.name = name
         self.avatarUrl = avatarUrl
         self.size = size
         self.memberId = memberId
         self.isOwn = isOwn
+        self.isLoading = isLoading
     }
 
     @Environment(\.colorScheme) private var colorScheme
@@ -49,6 +47,12 @@ public struct Avatar: View {
                 }
             } else {
                 initialsView
+            }
+
+            if isLoading {
+                Circle()
+                    .fill(KluvsTheme.colors.card.opacity(0.7))
+                LoadingSpinner(size: size * 0.5)
             }
         }
         .frame(width: size, height: size)
