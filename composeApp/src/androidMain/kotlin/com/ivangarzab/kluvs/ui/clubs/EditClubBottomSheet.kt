@@ -52,7 +52,7 @@ fun EditClubBottomSheet(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
             InputField(label = "Club Name", value = name, onValueChange = { name = it })
-            DangerZoneBox(actionLabel = "Delete club…", onActionClick = onDeleteClub)
+            DangerZoneBox(actionLabel = "Delete club", onActionClick = onDeleteClub)
         }
     }
 }
