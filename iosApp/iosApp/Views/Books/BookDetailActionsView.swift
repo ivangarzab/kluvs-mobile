@@ -4,6 +4,7 @@
 //
 import SwiftUI
 import Shared
+import DesignSystem
 
 private let assignableShelfStatuses: [Shared.ShelfStatus] = [.currentlyReading, .read, .wantToRead, .notFinished]
 
@@ -21,31 +22,17 @@ struct BookDetailActionsView: View {
     var body: some View {
         if isRegistered {
             HStack(spacing: 10) {
-                LikeToggle(isLiked: isLiked, enabled: !isMutationInProgress, onTap: onToggleLike)
+                TogglePill(
+                    checked: isLiked,
+                    onToggle: onToggleLike,
+                    iconChecked: .favorite,
+                    iconUnchecked: .favoriteOutline,
+                    contentDescription: String(localized: isLiked ? "unlike_book" : "like_book"),
+                    enabled: !isMutationInProgress
+                )
                 ShelfPill(shelfStatus: shelfStatus, enabled: !isMutationInProgress, onShelfChange: onShelfChange)
             }
         }
-    }
-}
-
-private struct LikeToggle: View {
-    let isLiked: Bool
-    let enabled: Bool
-    let onTap: () -> Void
-
-    private var tint: Color { isLiked ? .brandOrange : .secondary }
-    private var borderColor: Color { isLiked ? .brandOrange : Color.secondary.opacity(0.4) }
-
-    var body: some View {
-        Button(action: onTap) {
-            Image(systemName: isLiked ? "heart.fill" : "heart")
-                .font(.system(size: 16))
-                .foregroundColor(tint)
-                .frame(width: 36, height: 36)
-                .overlay(Circle().stroke(borderColor, lineWidth: 1))
-        }
-        .disabled(!enabled)
-        .accessibilityLabel(String(localized: isLiked ? "unlike_book" : "like_book"))
     }
 }
 
