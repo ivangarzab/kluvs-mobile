@@ -8,6 +8,12 @@ struct MeView: View {
     @StateObject private var viewModel = MeViewModelWrapper()
     @State private var showSettings = false
     @State private var editingShelfItem: Shared.ShelfItem? = nil
+    @State private var progressType: Shared.ProgressType = .page
+    @State private var progressCurrentPageText = ""
+    @State private var progressPercentText = ""
+    @State private var progressMarkFinished = false
+    @State private var progressLastAutoTriggerValue: String? = nil
+    @State private var progressSheetHeader = "Track Progress"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -55,7 +61,14 @@ struct MeView: View {
                             ShelfSection(
                                 shelf: viewModel.shelf,
                                 onUpdateProgress: { sessionId in
-                                    editingShelfItem = viewModel.shelf.first { $0.sessionId == sessionId }
+                                    let item = viewModel.shelf.first { $0.sessionId == sessionId }
+                                    progressType = item?.ownProgress?.type ?? .page
+                                    progressCurrentPageText = item?.ownProgress?.currentPage?.int32Value.map { String($0) } ?? ""
+                                    progressPercentText = item?.ownProgress?.percentComplete?.floatValue.map { formatPercent($0) } ?? ""
+                                    progressMarkFinished = item?.ownProgress?.isCompleted ?? false
+                                    progressLastAutoTriggerValue = nil
+                                    progressSheetHeader = item?.ownProgress != nil ? "Update Progress" : "Track Progress"
+                                    editingShelfItem = item
                                 }
                             )
 
@@ -101,28 +114,43 @@ struct MeView: View {
                 SettingsView(userId: userId)
             }
         }
-        .sheet(item: $editingShelfItem) { item in
-            ReadingProgressSheet(
+        .kluvsBottomSheet(item: $editingShelfItem, header: progressSheetHeader) { item in
+            ReadingProgressFields(
                 bookTitle: item.bookTitle,
                 pageCount: item.bookPageCount?.int32Value,
-                initialType: item.ownProgress?.type ?? .page,
-                initialCurrentPage: item.ownProgress?.currentPage?.int32Value,
-                initialPercentComplete: item.ownProgress?.percentComplete?.floatValue,
-                initialMarkFinished: item.ownProgress?.isCompleted ?? false,
-                onSave: { type, currentPage, percentComplete, markFinished in
+                progressType: $progressType,
+                currentPageText: $progressCurrentPageText,
+                percentText: $progressPercentText,
+                markFinished: $progressMarkFinished,
+                lastAutoTriggerValue: $progressLastAutoTriggerValue
+            )
+        } footer: { item in
+            let canSave: Bool = {
+                switch progressType {
+                case .page: return Int32(progressCurrentPageText) != nil
+                case .percent: return Float(progressPercentText) != nil
+                default: return false
+                }
+            }()
+            BottomSheetFooter(
+                actionLabel: "Save Progress",
+                onAction: {
+                    let page = progressType == .page ? Int32(progressCurrentPageText) : nil
+                    let percent: Int32? = progressType == .percent
+                        ? Float(progressPercentText).map { Int32(Swift.min(100, Swift.max(0, $0.rounded()))) }
+                        : nil
                     viewModel.onSaveProgress(
                         sessionId: item.sessionId,
-                        type: type,
-                        currentPage: currentPage,
-                        percentComplete: percentComplete,
-                        markFinished: markFinished
+                        type: progressType,
+                        currentPage: page,
+                        percentComplete: percent,
+                        markFinished: progressMarkFinished
                     )
                     editingShelfItem = nil
                 },
-                onDismiss: { editingShelfItem = nil }
+                onCancel: { editingShelfItem = nil },
+                actionEnabled: canSave
             )
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
         }
         .kluvsBottomSheet(
             isPresented: $viewModel.showReadingLog,

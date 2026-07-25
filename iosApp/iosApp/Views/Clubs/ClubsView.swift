@@ -6,6 +6,11 @@ private struct IDWrapper: Identifiable {
     let id: String
 }
 
+/// Shared by both Clubs and Me's Reading Progress sheet call sites.
+func formatPercent(_ value: Float) -> String {
+    value == value.rounded() ? String(Int(value)) : String(value)
+}
+
 /// Entry point for the Clubs tab: owns list -> detail navigation (mirrors web's
 /// `/clubs` -> `/clubs/:id`) and the single `ClubDetailsViewModelWrapper` shared
 /// across both, matching Android's `ClubsScreen`.
@@ -110,6 +115,11 @@ private struct ClubDetailView: View {
     @State private var editSessionDueDate = Date()
     @State private var showEndSessionAlert = false
     @State private var showProgressSheet = false
+    @State private var progressType: Shared.ProgressType = .page
+    @State private var progressCurrentPageText = ""
+    @State private var progressPercentText = ""
+    @State private var progressMarkFinished = false
+    @State private var progressLastAutoTriggerValue: String? = nil
     @State private var showCreateDiscussionSheet = false
     @State private var editingDiscussionId: IDWrapper? = nil
     @State private var discussionTitle = ""
@@ -135,6 +145,16 @@ private struct ClubDetailView: View {
         createSessionHasDueDate = false
         createSessionDueDate = Date()
         showCreateSessionSheet = true
+    }
+
+    private func openProgressSheet() {
+        let ownProgress = viewModel.ownProgress
+        progressType = ownProgress?.type ?? .page
+        progressCurrentPageText = ownProgress?.currentPage?.int32Value.map { String($0) } ?? ""
+        progressPercentText = ownProgress?.percentComplete?.floatValue.map { formatPercent($0) } ?? ""
+        progressMarkFinished = ownProgress?.isCompleted ?? false
+        progressLastAutoTriggerValue = nil
+        showProgressSheet = true
     }
 
     private func openCreateDiscussion() {
@@ -253,7 +273,7 @@ private struct ClubDetailView: View {
                         currentUserId: userId,
                         onEditSession: { openEditSession() },
                         onEndSession: { showEndSessionAlert = true },
-                        onUpdateProgress: { showProgressSheet = true },
+                        onUpdateProgress: { openProgressSheet() },
                         onCreateSession: { openCreateSession() },
                         onToggleParticipation: { isReading in
                             if let memberId = currentMemberId {
@@ -425,24 +445,42 @@ private struct ClubDetailView: View {
             onConfirm: { viewModel.onEndSession() }
         )
         // Update reading progress
-        .sheet(isPresented: $showProgressSheet) {
+        .kluvsBottomSheet(
+            isPresented: $showProgressSheet,
+            header: viewModel.ownProgress != nil ? "Update Progress" : "Track Progress"
+        ) {
             if let session = viewModel.activeSession {
-                ReadingProgressSheet(
+                ReadingProgressFields(
                     bookTitle: session.book.title,
                     pageCount: session.book.pageCount?.int32Value,
-                    initialType: viewModel.ownProgress?.type ?? .page,
-                    initialCurrentPage: viewModel.ownProgress?.currentPage?.int32Value,
-                    initialPercentComplete: viewModel.ownProgress?.percentComplete?.floatValue,
-                    initialMarkFinished: viewModel.ownProgress?.isCompleted ?? false,
-                    onSave: { type, currentPage, percentComplete, markFinished in
-                        viewModel.onSaveProgress(type: type, currentPage: currentPage, percentComplete: percentComplete, markFinished: markFinished)
-                        showProgressSheet = false
-                    },
-                    onDismiss: { showProgressSheet = false }
+                    progressType: $progressType,
+                    currentPageText: $progressCurrentPageText,
+                    percentText: $progressPercentText,
+                    markFinished: $progressMarkFinished,
+                    lastAutoTriggerValue: $progressLastAutoTriggerValue
                 )
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
             }
+        } footer: {
+            let canSave: Bool = {
+                switch progressType {
+                case .page: return Int32(progressCurrentPageText) != nil
+                case .percent: return Float(progressPercentText) != nil
+                default: return false
+                }
+            }()
+            BottomSheetFooter(
+                actionLabel: "Save Progress",
+                onAction: {
+                    let page = progressType == .page ? Int32(progressCurrentPageText) : nil
+                    let percent: Int32? = progressType == .percent
+                        ? Float(progressPercentText).map { Int32(Swift.min(100, Swift.max(0, $0.rounded()))) }
+                        : nil
+                    viewModel.onSaveProgress(type: progressType, currentPage: page, percentComplete: percent, markFinished: progressMarkFinished)
+                    showProgressSheet = false
+                },
+                onCancel: { showProgressSheet = false },
+                actionEnabled: canSave
+            )
         }
         // Create discussion
         .kluvsBottomSheet(isPresented: $showCreateDiscussionSheet, header: "Add Discussion") {
