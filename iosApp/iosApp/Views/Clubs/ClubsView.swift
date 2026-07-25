@@ -100,6 +100,14 @@ private struct ClubDetailView: View {
     @State private var showDeleteClubAlert = false
     @State private var showCreateSessionSheet = false
     @State private var showEditSessionSheet = false
+    @State private var createSessionBookTitle = ""
+    @State private var createSessionBookAuthor = ""
+    @State private var createSessionHasDueDate = false
+    @State private var createSessionDueDate = Date()
+    @State private var editSessionBookTitle = ""
+    @State private var editSessionBookAuthor = ""
+    @State private var editSessionHasDueDate = false
+    @State private var editSessionDueDate = Date()
     @State private var showEndSessionAlert = false
     @State private var showProgressSheet = false
     @State private var showCreateDiscussionSheet = false
@@ -113,6 +121,26 @@ private struct ClubDetailView: View {
     /// Returns the current user's memberId from the members list (needed for role/remove calls).
     private var currentMemberId: String? {
         viewModel.members.first { $0.userId == userId }?.memberId
+    }
+
+    /// Resets Create Session's fields fresh each time it opens — since the sheet is now a
+    /// persistent overlay rather than a re-instantiated `.sheet()` presentation, its `@State`
+    /// wouldn't otherwise reset between opens the way it used to for free.
+    private func openCreateSession() {
+        createSessionBookTitle = ""
+        createSessionBookAuthor = ""
+        createSessionHasDueDate = false
+        createSessionDueDate = Date()
+        showCreateSessionSheet = true
+    }
+
+    private func openEditSession() {
+        let session = viewModel.activeSession
+        editSessionBookTitle = session?.book.title ?? ""
+        editSessionBookAuthor = session?.book.author ?? ""
+        editSessionHasDueDate = viewModel.sessionDueDateIso != nil
+        editSessionDueDate = viewModel.sessionDueDateIso?.toSwiftDate() ?? Date()
+        showEditSessionSheet = true
     }
 
     var body: some View {
@@ -205,10 +233,10 @@ private struct ClubDetailView: View {
                         userRole: viewModel.userRole,
                         members: viewModel.members,
                         currentUserId: userId,
-                        onEditSession: { showEditSessionSheet = true },
+                        onEditSession: { openEditSession() },
                         onEndSession: { showEndSessionAlert = true },
                         onUpdateProgress: { showProgressSheet = true },
-                        onCreateSession: { showCreateSessionSheet = true },
+                        onCreateSession: { openCreateSession() },
                         onToggleParticipation: { isReading in
                             if let memberId = currentMemberId {
                                 viewModel.onToggleParticipation(memberId: memberId, isReading: isReading)
@@ -220,7 +248,7 @@ private struct ClubDetailView: View {
                     ActiveSessionTab(
                         sessionDetails: viewModel.activeSession,
                         userRole: viewModel.userRole,
-                        onCreateSession: { showCreateSessionSheet = true },
+                        onCreateSession: { openCreateSession() },
                         onCreateDiscussion: { showCreateDiscussionSheet = true },
                         onEditDiscussion: { id in editingDiscussionId = IDWrapper(id: id) },
                         onDeleteDiscussion: { id in deletingDiscussionId = id },
@@ -304,25 +332,63 @@ private struct ClubDetailView: View {
             onConfirm: { viewModel.onDeleteClub() }
         )
         // Create session
-        .sheet(isPresented: $showCreateSessionSheet) {
-            CreateSessionSheet(
-                onSave: { book, dueDateIso in
-                    viewModel.onCreateSession(book: book, dueDateIso: dueDateIso)
+        .kluvsBottomSheet(isPresented: $showCreateSessionSheet, header: "Create Session") {
+            CreateSessionFields(
+                bookTitle: $createSessionBookTitle,
+                bookAuthor: $createSessionBookAuthor,
+                hasDueDate: $createSessionHasDueDate,
+                dueDate: $createSessionDueDate
+            )
+        } footer: {
+            let trimmedTitle = createSessionBookTitle.trimmingCharacters(in: .whitespaces)
+            let trimmedAuthor = createSessionBookAuthor.trimmingCharacters(in: .whitespaces)
+            BottomSheetFooter(
+                actionLabel: "Create",
+                onAction: {
+                    let book = Shared.Book(
+                        id: "", title: trimmedTitle, author: trimmedAuthor,
+                        edition: nil, year: nil, isbn: nil, pageCount: nil,
+                        imageUrl: nil, externalGoogleId: nil
+                    )
+                    let resolvedDueDateIso = createSessionHasDueDate ? createSessionDueDate.toIsoString() : nil
+                    viewModel.onCreateSession(book: book, dueDateIso: resolvedDueDateIso)
                     showCreateSessionSheet = false
                 },
-                onDismiss: { showCreateSessionSheet = false }
+                onCancel: { showCreateSessionSheet = false },
+                actionEnabled: !trimmedTitle.isEmpty && !trimmedAuthor.isEmpty
             )
         }
         // Edit session
-        .sheet(isPresented: $showEditSessionSheet) {
-            EditSessionSheet(
-                currentBook: viewModel.activeSession?.book,
-                initialDueDateIso: viewModel.sessionDueDateIso,
-                onSave: { book, dueDateIso in
-                    viewModel.onUpdateSession(book: book, dueDateIso: dueDateIso)
+        .kluvsBottomSheet(isPresented: $showEditSessionSheet, header: "Edit Session") {
+            EditSessionFields(
+                bookTitle: $editSessionBookTitle,
+                bookAuthor: $editSessionBookAuthor,
+                hasDueDate: $editSessionHasDueDate,
+                dueDate: $editSessionDueDate
+            )
+        } footer: {
+            let trimmedTitle = editSessionBookTitle.trimmingCharacters(in: .whitespaces)
+            let trimmedAuthor = editSessionBookAuthor.trimmingCharacters(in: .whitespaces)
+            let hasChanges = trimmedTitle != (viewModel.activeSession?.book.title ?? "") ||
+                trimmedAuthor != (viewModel.activeSession?.book.author ?? "") ||
+                editSessionHasDueDate != (viewModel.sessionDueDateIso != nil) ||
+                (editSessionHasDueDate && editSessionDueDate != (viewModel.sessionDueDateIso?.toSwiftDate() ?? Date()))
+            BottomSheetFooter(
+                actionLabel: "Save",
+                onAction: {
+                    let book: Shared.Book? = (!trimmedTitle.isEmpty && !trimmedAuthor.isEmpty)
+                        ? Shared.Book(
+                            id: "", title: trimmedTitle, author: trimmedAuthor,
+                            edition: nil, year: nil, isbn: nil, pageCount: nil,
+                            imageUrl: nil, externalGoogleId: nil
+                        )
+                        : nil
+                    let resolvedDueDateIso = editSessionHasDueDate ? editSessionDueDate.toIsoString() : nil
+                    viewModel.onUpdateSession(book: book, dueDateIso: resolvedDueDateIso)
                     showEditSessionSheet = false
                 },
-                onDismiss: { showEditSessionSheet = false }
+                onCancel: { showEditSessionSheet = false },
+                actionEnabled: hasChanges
             )
         }
         // End session confirmation
