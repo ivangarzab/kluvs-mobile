@@ -112,6 +112,9 @@ private struct ClubDetailView: View {
     @State private var showProgressSheet = false
     @State private var showCreateDiscussionSheet = false
     @State private var editingDiscussionId: IDWrapper? = nil
+    @State private var discussionTitle = ""
+    @State private var discussionLocation = ""
+    @State private var discussionDate = Date()
     @State private var deletingDiscussionId: String? = nil
     @State private var openNoteDiscussionId: IDWrapper? = nil
     @State private var changingRoleMemberId: IDWrapper? = nil
@@ -132,6 +135,21 @@ private struct ClubDetailView: View {
         createSessionHasDueDate = false
         createSessionDueDate = Date()
         showCreateSessionSheet = true
+    }
+
+    private func openCreateDiscussion() {
+        discussionTitle = ""
+        discussionLocation = ""
+        discussionDate = Date()
+        showCreateDiscussionSheet = true
+    }
+
+    private func openEditDiscussion(discussionId: String) {
+        let discussion = viewModel.activeSession?.discussions.first { $0.id == discussionId }
+        discussionTitle = discussion?.title ?? ""
+        discussionLocation = discussion?.location ?? ""
+        discussionDate = viewModel.discussionDateIso(for: discussionId)?.toSwiftDate() ?? Date()
+        editingDiscussionId = IDWrapper(id: discussionId)
     }
 
     private func openEditSession() {
@@ -249,8 +267,8 @@ private struct ClubDetailView: View {
                         sessionDetails: viewModel.activeSession,
                         userRole: viewModel.userRole,
                         onCreateSession: { openCreateSession() },
-                        onCreateDiscussion: { showCreateDiscussionSheet = true },
-                        onEditDiscussion: { id in editingDiscussionId = IDWrapper(id: id) },
+                        onCreateDiscussion: { openCreateDiscussion() },
+                        onEditDiscussion: { id in openEditDiscussion(discussionId: id) },
                         onDeleteDiscussion: { id in deletingDiscussionId = id },
                         onOpenNote: { id in openNoteDiscussionId = IDWrapper(id: id) },
                         discussionRosters: viewModel.discussionRosters,
@@ -427,28 +445,58 @@ private struct ClubDetailView: View {
             }
         }
         // Create discussion
-        .sheet(isPresented: $showCreateDiscussionSheet) {
-            DiscussionSheet(
-                onSave: { title, location, dateIso in
-                    viewModel.onCreateDiscussion(title: title, location: location, dateIso: dateIso)
+        .kluvsBottomSheet(isPresented: $showCreateDiscussionSheet, header: "Add Discussion") {
+            DiscussionFields(
+                title: $discussionTitle,
+                location: $discussionLocation,
+                selectedDate: $discussionDate,
+                bookTitle: viewModel.activeSession?.book.title
+            )
+        } footer: {
+            let trimmedTitle = discussionTitle.trimmingCharacters(in: .whitespaces)
+            BottomSheetFooter(
+                actionLabel: "Add Discussion",
+                onAction: {
+                    viewModel.onCreateDiscussion(
+                        title: trimmedTitle,
+                        location: discussionLocation.trimmingCharacters(in: .whitespaces),
+                        dateIso: discussionDate.toIsoString()
+                    )
                     showCreateDiscussionSheet = false
                 },
-                onDismiss: { showCreateDiscussionSheet = false }
+                onCancel: { showCreateDiscussionSheet = false },
+                actionEnabled: !trimmedTitle.isEmpty
             )
         }
         // Edit discussion
-        .sheet(item: $editingDiscussionId) { wrapper in
+        .kluvsBottomSheet(item: $editingDiscussionId, header: "Edit Discussion") { wrapper in
+            DiscussionFields(
+                title: $discussionTitle,
+                location: $discussionLocation,
+                selectedDate: $discussionDate,
+                bookTitle: viewModel.activeSession?.book.title
+            )
+        } footer: { wrapper in
             let discussionId = wrapper.id
             let discussion = viewModel.activeSession?.discussions.first { $0.id == discussionId }
-            DiscussionSheet(
-                initialTitle: discussion?.title ?? "",
-                initialLocation: discussion?.location ?? "",
-                initialDateIso: viewModel.discussionDateIso(for: discussionId),
-                onSave: { title, location, dateIso in
-                    viewModel.onUpdateDiscussion(discussionId: discussionId, title: title, location: location, dateIso: dateIso)
+            let trimmedTitle = discussionTitle.trimmingCharacters(in: .whitespaces)
+            let trimmedLocation = discussionLocation.trimmingCharacters(in: .whitespaces)
+            let hasChanges = trimmedTitle != (discussion?.title ?? "") ||
+                trimmedLocation != (discussion?.location ?? "") ||
+                discussionDate != (viewModel.discussionDateIso(for: discussionId)?.toSwiftDate() ?? Date())
+            BottomSheetFooter(
+                actionLabel: "Update Discussion",
+                onAction: {
+                    viewModel.onUpdateDiscussion(
+                        discussionId: discussionId,
+                        title: trimmedTitle,
+                        location: trimmedLocation,
+                        dateIso: discussionDate.toIsoString()
+                    )
                     editingDiscussionId = nil
                 },
-                onDismiss: { editingDiscussionId = nil }
+                onCancel: { editingDiscussionId = nil },
+                actionEnabled: !trimmedTitle.isEmpty && hasChanges
             )
         }
         // Delete discussion confirmation
