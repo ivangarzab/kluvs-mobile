@@ -63,8 +63,10 @@ struct MeView: View {
                                 onUpdateProgress: { sessionId in
                                     let item = viewModel.shelf.first { $0.sessionId == sessionId }
                                     progressType = item?.ownProgress?.type ?? .page
-                                    progressCurrentPageText = item?.ownProgress?.currentPage?.int32Value.map { String($0) } ?? ""
-                                    progressPercentText = item?.ownProgress?.percentComplete?.floatValue.map { formatPercent($0) } ?? ""
+                                    let currentPage: Int32? = item?.ownProgress?.currentPage?.int32Value
+                                    progressCurrentPageText = currentPage.map { String($0) } ?? ""
+                                    let percentComplete: Float? = item?.ownProgress?.percentComplete?.floatValue
+                                    progressPercentText = percentComplete.map { formatPercent($0) } ?? ""
                                     progressMarkFinished = item?.ownProgress?.isCompleted ?? false
                                     progressLastAutoTriggerValue = nil
                                     progressSheetHeader = item?.ownProgress != nil ? "Update Progress" : "Track Progress"

@@ -170,11 +170,30 @@ public extension View {
         header: String,
         isDestructiveHeader: Bool = false,
         @ViewBuilder content: @escaping (Item) -> Content,
-        @ViewBuilder footer: @escaping (Item) -> Footer = { _ in EmptyView() }
+        @ViewBuilder footer: @escaping (Item) -> Footer
     ) -> some View {
         overlay {
             ItemBottomSheetHost(item: item, header: header, isDestructiveHeader: isDestructiveHeader, content: content, footer: footer)
         }
+    }
+
+    /// No-footer convenience — a default value of `{ _ in EmptyView() }` on the overload above
+    /// doesn't compile: default-argument expressions can't reference the function's own generic
+    /// parameters (`Item`), so `_` has nothing to infer its type from. A real overload sidesteps
+    /// that since `Item` is bound normally in a function body, not a default-expression context.
+    func kluvsBottomSheet<Item: Identifiable, Content: View>(
+        item: Binding<Item?>,
+        header: String,
+        isDestructiveHeader: Bool = false,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) -> some View {
+        kluvsBottomSheet(
+            item: item,
+            header: header,
+            isDestructiveHeader: isDestructiveHeader,
+            content: content,
+            footer: { (_: Item) in EmptyView() }
+        )
     }
 }
 

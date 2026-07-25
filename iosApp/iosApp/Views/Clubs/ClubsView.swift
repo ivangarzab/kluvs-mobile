@@ -159,8 +159,10 @@ private struct ClubDetailView: View {
     private func openProgressSheet() {
         let ownProgress = viewModel.ownProgress
         progressType = ownProgress?.type ?? .page
-        progressCurrentPageText = ownProgress?.currentPage?.int32Value.map { String($0) } ?? ""
-        progressPercentText = ownProgress?.percentComplete?.floatValue.map { formatPercent($0) } ?? ""
+        let currentPage: Int32? = ownProgress?.currentPage?.int32Value
+        progressCurrentPageText = currentPage.map { String($0) } ?? ""
+        let percentComplete: Float? = ownProgress?.percentComplete?.floatValue
+        progressPercentText = percentComplete.map { formatPercent($0) } ?? ""
         progressMarkFinished = ownProgress?.isCompleted ?? false
         progressLastAutoTriggerValue = nil
         showProgressSheet = true
