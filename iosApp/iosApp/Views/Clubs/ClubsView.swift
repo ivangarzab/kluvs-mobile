@@ -21,6 +21,7 @@ struct ClubsView: View {
     @StateObject private var viewModel = ClubDetailsViewModelWrapper()
     @State private var path = NavigationPath()
     @State private var showCreateClubSheet = false
+    @State private var newClubName = ""
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -48,7 +49,10 @@ struct ClubsView: View {
                             viewModel.selectClub(clubId: clubId)
                             path.append(clubId)
                         },
-                        onAddClub: { showCreateClubSheet = true },
+                        onAddClub: {
+                            newClubName = ""
+                            showCreateClubSheet = true
+                        },
                         onJoinWithCode: onNavigateToJoin
                     )
                 }
@@ -72,13 +76,18 @@ struct ClubsView: View {
                 path.append(clubId)
             }
         }
-        .sheet(isPresented: $showCreateClubSheet) {
-            CreateClubSheet(
-                onCreate: { name in
-                    viewModel.onCreateClub(userId: userId, name: name)
+        .kluvsBottomSheet(isPresented: $showCreateClubSheet, header: "New Club") {
+            CreateClubFields(name: $newClubName)
+        } footer: {
+            let trimmedName = newClubName.trimmingCharacters(in: .whitespaces)
+            BottomSheetFooter(
+                actionLabel: "Create",
+                onAction: {
+                    viewModel.onCreateClub(userId: userId, name: trimmedName)
                     showCreateClubSheet = false
                 },
-                onDismiss: { showCreateClubSheet = false }
+                onCancel: { showCreateClubSheet = false },
+                actionEnabled: !trimmedName.isEmpty
             )
         }
     }
