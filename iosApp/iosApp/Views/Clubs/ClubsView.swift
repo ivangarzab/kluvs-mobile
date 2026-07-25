@@ -518,16 +518,15 @@ private struct ClubDetailView: View {
             }
         )
         // Discussion note
-        .sheet(item: $openNoteDiscussionId) { wrapper in
+        .kluvsBottomSheet(item: $openNoteDiscussionId, header: "Note") { wrapper in
             let discussionId = wrapper.id
-            DiscussionNoteSheet(
+            DiscussionNoteFields(
                 note: viewModel.discussionNotes[discussionId],
                 onSave: { content in viewModel.onSaveDiscussionNote(discussionId: discussionId, content: content) },
                 onDelete: {
                     viewModel.onDeleteDiscussionNote(discussionId: discussionId)
                     openNoteDiscussionId = nil
-                },
-                onDismiss: { openNoteDiscussionId = nil }
+                }
             )
             .onAppear { viewModel.onLoadDiscussionNote(discussionId: discussionId) }
         }

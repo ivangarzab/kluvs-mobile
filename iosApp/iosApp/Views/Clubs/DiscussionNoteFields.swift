@@ -4,17 +4,24 @@ import DesignSystem
 
 private let noteMaxLength = 4000
 
-/// Sheet for viewing, creating, editing, or deleting the signed-in member's
-/// note on a discussion.
+/// Discussion note sheet body — presented via `.kluvsBottomSheet` at the call site (`ClubsView`),
+/// not as its own `View` wrapping a `.sheet`.
 ///
 /// A nil `note` means it hasn't finished loading yet. A non-nil `note` with
 /// a nil `noteId` means no note exists yet, so the sheet opens straight into
 /// an editable/create state.
-struct DiscussionNoteSheet: View {
+///
+/// No web equivalent exists for this one (mobile-only feature) — nothing to check against.
+///
+/// Deliberately renders its own Edit/Delete or Cancel/Save button row as part of its content,
+/// rather than using `BottomSheetFooter`'s slot: this component has two distinct modes (viewing,
+/// editing) with different action pairs depending on internal state, not the fixed Cancel/Action
+/// shape `BottomSheetFooter` assumes — forcing it into that slot would mean lifting this
+/// component's editing state up to the call site for no real benefit.
+struct DiscussionNoteFields: View {
     let note: Shared.DiscussionNoteInfo?
     let onSave: (String) -> Void
     let onDelete: () -> Void
-    let onDismiss: () -> Void
 
     @State private var isEditing: Bool = false
     @State private var content: String = ""
@@ -22,28 +29,18 @@ struct DiscussionNoteSheet: View {
     @State private var lastLoadedNoteId: String??
 
     var body: some View {
-        NavigationView {
-            Group {
-                if let note {
-                    if isEditing {
-                        editingView(note: note)
-                    } else {
-                        viewingView(note: note)
-                    }
+        Group {
+            if let note {
+                if isEditing {
+                    editingView(note: note)
                 } else {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    viewingView(note: note)
                 }
-            }
-            .navigationTitle("Note")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", action: onDismiss)
-                }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 120)
             }
         }
-        .presentationDetents([.medium, .large])
         .onChange(of: note?.noteId) { _, newNoteId in
             // Sync local edit state whenever a distinct note identity loads —
             // avoids clobbering in-progress typing on unrelated state updates
@@ -66,17 +63,17 @@ struct DiscussionNoteSheet: View {
     @ViewBuilder
     private func viewingView(note: Shared.DiscussionNoteInfo) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            ScrollView {
-                Text(note.content)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            Text(note.content)
+                .kluvsStyle(KluvsTheme.typography.body.medium)
+                .foregroundColor(KluvsTheme.colors.content)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
             HStack {
-                Button("Edit") { isEditing = true }
+                TextButton(text: "Edit", action: { isEditing = true })
                 Spacer()
-                Button("Delete", role: .destructive) { showDeleteConfirmation = true }
+                TextButton(text: "Delete", action: { showDeleteConfirmation = true })
             }
         }
-        .padding()
     }
 
     @ViewBuilder
@@ -86,30 +83,31 @@ struct DiscussionNoteSheet: View {
                 get: { content },
                 set: { content = String($0.prefix(noteMaxLength)) }
             ))
+            .kluvsStyle(KluvsTheme.typography.body.medium)
             .frame(minHeight: 160)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(uiColor: .separator)))
+            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(KluvsTheme.colors.divider, lineWidth: 1))
 
             if let error = note.error {
                 Text(error)
-                    .font(.footnote)
-                    .foregroundColor(.red)
+                    .kluvsStyle(KluvsTheme.typography.caption)
+                    .foregroundColor(KluvsTheme.colors.danger)
             }
 
             HStack {
                 if note.noteId != nil {
-                    Button("Cancel") {
+                    TextButton(text: "Cancel", action: {
                         content = note.content
                         isEditing = false
-                    }
+                    })
                 }
                 Spacer()
-                Button(note.isSaving ? "Saving…" : "Save") {
-                    onSave(content.trimmingCharacters(in: .whitespacesAndNewlines))
-                }
-                .disabled(!canSave(note: note))
+                PrimaryButton(
+                    text: note.isSaving ? "Saving…" : "Save",
+                    action: { onSave(content.trimmingCharacters(in: .whitespacesAndNewlines)) },
+                    enabled: canSave(note: note)
+                )
             }
         }
-        .padding()
     }
 
     private func canSave(note: Shared.DiscussionNoteInfo) -> Bool {
@@ -119,7 +117,7 @@ struct DiscussionNoteSheet: View {
 }
 
 #Preview {
-    DiscussionNoteSheet(
+    DiscussionNoteFields(
         note: Shared.DiscussionNoteInfo(
             noteId: "n1",
             content: "Bring snacks next time and discuss chapter 5.",
@@ -127,7 +125,8 @@ struct DiscussionNoteSheet: View {
             error: nil
         ),
         onSave: { _ in },
-        onDelete: {},
-        onDismiss: {}
+        onDelete: {}
     )
+    .padding()
+    .background(KluvsTheme.colors.bar)
 }
