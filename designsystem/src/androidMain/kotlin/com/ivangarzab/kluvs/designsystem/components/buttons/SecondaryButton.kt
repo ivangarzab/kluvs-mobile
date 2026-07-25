@@ -9,6 +9,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
@@ -24,14 +25,17 @@ fun SecondaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    buttonColor: Color = KluvsTheme.colors.accent,
 ) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, KluvsTheme.colors.accent),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = KluvsTheme.colors.accent),
+        border = androidx.compose.foundation.BorderStroke(1.dp, buttonColor),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = buttonColor
+        ),
     ) {
         Text(text = text, style = KluvsTheme.typography.label)
     }

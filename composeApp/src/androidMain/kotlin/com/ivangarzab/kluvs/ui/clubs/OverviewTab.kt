@@ -2,7 +2,6 @@ package com.ivangarzab.kluvs.ui.clubs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,18 +14,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +44,9 @@ import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlacehold
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.designsystem.components.progress.OwnProgressRow
 import kotlinx.datetime.LocalDateTime
@@ -121,9 +113,9 @@ fun OverviewTab(
 
             val nextDiscussion = sessionDetails.discussions.firstOrNull { it.isNext }
             if (nextDiscussion != null) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = KluvsTheme.colors.cardAlt)
                 UpNextTeaser(discussion = nextDiscussion)
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = KluvsTheme.colors.cardAlt)
             }
         } else {
             NoActiveSessionState(
@@ -177,7 +169,7 @@ private fun SessionSummary(
                         Text(
                             text = stringResource(R.string.active_session_eyebrow).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = KluvsTheme.colors.accent
                         )
 
                         Spacer(Modifier.height(4.dp))
@@ -185,20 +177,23 @@ private fun SessionSummary(
                         Text(
                             text = sessionDetails.book.title,
                             style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = KluvsTheme.colors.content
                         )
                     }
                     if (isAdminOrAbove) {
-                        SessionOverflowMenu(
-                            onEditSession = onEditSession,
-                            onEndSession = onEndSession
+                        ActionMenu(
+                            items = listOf(
+                                ActionMenuItem(label = "Edit Session", onClick = onEditSession),
+                                ActionMenuItem(label = "End Session", onClick = onEndSession, isDestructive = true)
+                            ),
+                            contentDescription = "Session options"
                         )
                     }
                 }
                 Text(
                     text = sessionDetails.book.author,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
             }
         }
@@ -219,14 +214,14 @@ private fun SessionSummary(
                     Text(
                         text = stringResource(R.string.x_of_y_reading, readingCount, totalMemberCount),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = KluvsTheme.colors.contentMuted
                     )
                 }
             } else {
                 Text(
                     text = stringResource(R.string.no_participants_yet),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
             }
 
@@ -271,20 +266,21 @@ private fun NoActiveSessionState(
         Text(
             text = stringResource(R.string.no_session_yet_eyebrow).uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = KluvsTheme.colors.contentMuted
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.start_reading_together),
             style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
-            color = MaterialTheme.colorScheme.onSurface,
+            color = KluvsTheme.colors.content,
             textAlign = TextAlign.Center
         )
         if (isAdminOrAbove) {
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onCreateSession) {
-                Text(stringResource(R.string.start_session))
-            }
+            PrimaryButton(
+                text = stringResource(R.string.start_session),
+                onClick = onCreateSession,
+            )
         }
     }
 }
@@ -303,67 +299,25 @@ private fun UpNextTeaser(
             Text(
                 text = stringResource(R.string.up_next_eyebrow).uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+                color = KluvsTheme.colors.accent
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = discussion.title,
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = KluvsTheme.colors.content
             )
             Text(
                 text = discussion.location,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = KluvsTheme.colors.contentMuted
             )
         }
         Text(
             text = discussion.date,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = KluvsTheme.colors.accent
         )
-    }
-}
-
-@Composable
-private fun SessionOverflowMenu(
-    onEditSession: () -> Unit,
-    onEndSession: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                type = IconType.MoreVert,
-                contentDescription = "Session options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Edit Session") },
-                onClick = {
-                    expanded = false
-                    onEditSession()
-                }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = "End Session",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                },
-                onClick = {
-                    expanded = false
-                    onEndSession()
-                }
-            )
-        }
     }
 }
 
@@ -372,7 +326,7 @@ private fun SessionOverflowMenu(
 fun Preview_OverviewTab() = KluvsTheme {
     OverviewTab(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxSize(),
         clubDetails = ClubDetails(

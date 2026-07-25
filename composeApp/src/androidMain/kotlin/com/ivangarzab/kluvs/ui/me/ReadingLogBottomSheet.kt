@@ -12,10 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,16 +25,19 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import com.ivangarzab.kluvs.R
+import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
+import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.model.BookSummary
 import com.ivangarzab.kluvs.model.ClubPreview
 import com.ivangarzab.kluvs.model.ReadingLog
 import com.ivangarzab.kluvs.model.ReadingLogEntry
-import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 
 /**
  * Bottom sheet showing the signed-in member's reading log: sessions grouped
  * into "Currently Reading" and "Read". Mirrors web's ReadingLogModal.
+ *
+ * No footer — read-only, matching web (no Save/Cancel row).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,37 +46,24 @@ fun ReadingLogBottomSheet(
     isLoading: Boolean,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
+    BottomSheet(
+        header = stringResource(R.string.reading_log),
+        onDismiss = onDismiss,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.reading_log),
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            if (isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 ReadingLogSection(
                     title = stringResource(R.string.shelf_currently_reading),
                     entries = log?.active.orEmpty()
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = KluvsTheme.colors.divider)
                 ReadingLogSection(
                     title = stringResource(R.string.shelf_read),
                     entries = log?.finished.orEmpty()
@@ -94,14 +81,14 @@ private fun ReadingLogSection(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = title.uppercase(),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.labelSmall
+            color = KluvsTheme.colors.contentMuted,
+            style = KluvsTheme.typography.eyebrow
         )
         if (entries.isEmpty()) {
             Text(
                 text = stringResource(R.string.nothing_here_yet),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
+                color = KluvsTheme.colors.contentMuted,
+                style = KluvsTheme.typography.body.medium,
                 fontStyle = FontStyle.Italic
             )
         } else {
@@ -132,23 +119,23 @@ private fun ReadingLogEntryRow(entry: ReadingLogEntry) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = entry.book?.title.orEmpty(),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleSmall,
+                color = KluvsTheme.colors.content,
+                style = KluvsTheme.typography.title.small,
                 fontStyle = FontStyle.Italic,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = entry.book?.author.orEmpty(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
+                color = KluvsTheme.colors.contentMuted,
+                style = KluvsTheme.typography.body.medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = entry.club?.name.orEmpty().uppercase(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelSmall
+                color = KluvsTheme.colors.contentMuted,
+                style = KluvsTheme.typography.eyebrow
             )
         }
     }

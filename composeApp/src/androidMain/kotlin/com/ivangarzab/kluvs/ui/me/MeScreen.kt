@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +58,7 @@ import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
 import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
+import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.ui.utils.compressImage
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -176,20 +176,14 @@ fun LogoutConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.logout_confirmation_title)) },
-        text = { Text(stringResource(R.string.logout_confirmation_message)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.yes))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.no))
-            }
-        }
+    ConfirmationDialog(
+        title = stringResource(R.string.logout_confirmation_title),
+        message = stringResource(R.string.logout_confirmation_message),
+        confirmLabel = stringResource(R.string.yes),
+        dismissLabel = stringResource(R.string.no),
+        isDestructive = true,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss
     )
 }
 

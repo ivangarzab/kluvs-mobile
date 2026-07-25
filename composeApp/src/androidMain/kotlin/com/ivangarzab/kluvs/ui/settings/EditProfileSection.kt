@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,6 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 @Composable
@@ -34,51 +34,46 @@ fun EditProfileSection(
         Text(
             text = stringResource(R.string.edit_profile),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
 
         Spacer(modifier = Modifier.padding(vertical = 4.dp))
 
-        OutlinedTextField(
+        InputField(
             modifier = Modifier.fillMaxWidth(),
+            label = stringResource(R.string.label_name),
             value = editedName,
             onValueChange = onNameChanged,
-            label = { Text(stringResource(R.string.label_name)) },
-            singleLine = true,
         )
 
         Spacer(Modifier.height(8.dp))
 
-        OutlinedTextField(
+        InputField(
             modifier = Modifier.fillMaxWidth(),
+            label = stringResource(R.string.label_handle),
             value = editedHandle,
             onValueChange = onHandleChanged,
-            label = { Text(stringResource(R.string.label_handle)) },
-            prefix = { Text("@") },
-            singleLine = true,
+            prefix = "@",
         )
 
         if (saveError != null) {
             Spacer(Modifier.height(8.dp))
             Text(
                 text = saveError,
-                color = MaterialTheme.colorScheme.error,
+                color = KluvsTheme.colors.danger,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
 
         Spacer(Modifier.height(16.dp))
 
-        Button(
+        PrimaryButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = onSaveProfile,
             enabled = hasChanges && !isSaving,
-        ) {
-            Text(
-                if (isSaving) stringResource(R.string.button_save) + "…"
-                else stringResource(R.string.button_save)
-            )
-        }
+            text = if (isSaving) stringResource(R.string.button_save) + "…"
+                else stringResource(R.string.button_save),
+        )
     }
 }
 

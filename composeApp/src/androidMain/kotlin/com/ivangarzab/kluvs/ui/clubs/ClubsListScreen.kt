@@ -20,7 +20,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +42,7 @@ import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
+import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
@@ -92,18 +92,16 @@ fun ClubsListScreen(
                         Text(
                             text = stringResource(R.string.your_eyebrow).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = stringResource(R.string.clubs),
                             style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = KluvsTheme.colors.content
                         )
                     }
-                    TextButton(onClick = onJoinWithCode) {
-                        Text("Join with a code")
-                    }
+                    TextButton(text = "Join with a code", onClick = onJoinWithCode)
                 }
 
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -112,7 +110,7 @@ fun ClubsListScreen(
                             club = club,
                             onClick = { onClubSelected(club.id) }
                         )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        HorizontalDivider(color = KluvsTheme.colors.cardAlt)
                     }
                 }
             }
@@ -174,7 +172,7 @@ private fun ClubListRow(
                 Text(
                     text = club.name,
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = KluvsTheme.colors.content
                 )
                 club.role?.let { RoleEyebrow(role = it) }
             }
@@ -186,7 +184,7 @@ private fun ClubListRow(
                         fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
                         fontStyle = FontStyle.Italic
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
             }
 
@@ -200,7 +198,7 @@ private fun ClubListRow(
         Icon(
             type = IconType.ChevronRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = KluvsTheme.colors.contentMuted
         )
     }
 }
@@ -224,16 +222,14 @@ private fun ClubsListEmptyState(modifier: Modifier = Modifier, onJoinWithCode: (
             Text(
                 text = "No clubs yet",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = KluvsTheme.colors.content
             )
             Text(
                 text = "Join a club to get started",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = KluvsTheme.colors.contentMuted
             )
-            TextButton(onClick = onJoinWithCode) {
-                Text("Join with a code")
-            }
+            TextButton(text = "Join with a code", onClick = onJoinWithCode)
         }
     }
 }

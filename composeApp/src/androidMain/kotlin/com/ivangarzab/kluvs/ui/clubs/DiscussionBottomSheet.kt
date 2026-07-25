@@ -1,23 +1,20 @@
 package com.ivangarzab.kluvs.ui.clubs
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,23 +24,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
+import com.ivangarzab.kluvs.designsystem.components.fields.PickerField
+import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
+import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheetFooter
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import kotlinx.datetime.LocalDateTime
 
 /**
- * Bottom sheet for creating or editing a discussion.
+ * Bottom sheet for creating or editing a discussion. Used for both create (empty fields) and edit
+ * (pre-filled title/location) modes.
  *
- * Used for both create (empty fields) and edit (pre-filled title/location) modes.
- * The date and time are selected via pickers rather than free-form text entry.
+ * Checked kluvs-frontend's DiscussionModal.tsx as source of truth: Location is optional there
+ * (only Title/Date/Time are required) — this sheet previously required Location too via its
+ * canSave check, a real bug, now fixed to match web. Also adds the "READING SESSION" read-only
+ * info box web shows ([bookTitle], the active session's book title), which this sheet never had.
+ *
+ * DatePickerDialog/TimePicker AlertDialogs stay native — system UI, not design-system content.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscussionBottomSheet(
+    isEditing: Boolean = false,
     initialTitle: String = "",
     initialLocation: String = "",
     initialDate: LocalDateTime? = null,
+    bookTitle: String? = null,
     onSave: (title: String, location: String, date: LocalDateTime) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -56,105 +62,64 @@ fun DiscussionBottomSheet(
     var selectedHour by remember { mutableStateOf(initialDate?.hour ?: 19) }
     var selectedMinute by remember { mutableStateOf(initialDate?.minute ?: 0) }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     val dateDisplayText = selectedDateMillis?.let { formatDateMillis(it) } ?: ""
     val timeDisplayText = selectedDateMillis?.let {
         "${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}"
     } ?: ""
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Discussion",
-                style = MaterialTheme.typography.titleMedium
-            )
+    val canSave = title.isNotBlank() && selectedDateMillis != null
+    val hasChanges = title.trim() != initialTitle ||
+        location.trim() != initialLocation ||
+        selectedDateMillis != initialDateMillis ||
+        selectedHour != (initialDate?.hour ?: 19) ||
+        selectedMinute != (initialDate?.minute ?: 0)
 
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Title") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
-                label = { Text("Location") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                leadingIcon = {
-                    Icon(
-                        type = IconType.Location,
-                        contentDescription = null
-                    )
-                }
-            )
-
-            // Read-only field that opens the date picker on tap
-            Box {
-                OutlinedTextField(
-                    value = dateDisplayText,
-                    onValueChange = {},
-                    label = { Text("Date") },
-                    placeholder = { Text("Select date") },
-                    modifier = Modifier.fillMaxWidth(),
-                    readOnly = true,
-                    singleLine = true
-                )
-                TextButton(
-                    onClick = { showDatePicker = true },
-                    modifier = Modifier.matchParentSize()
-                ) { }
-            }
-
-            // Read-only field that opens the time picker, shown only after a date is picked
-            if (selectedDateMillis != null) {
-                Box {
-                    OutlinedTextField(
-                        value = timeDisplayText,
-                        onValueChange = {},
-                        label = { Text("Time") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    TextButton(
-                        onClick = { showTimePicker = true },
-                        modifier = Modifier.matchParentSize()
-                    ) { }
-                }
-            }
-
-            val canSave = title.isNotBlank() && location.isNotBlank() && selectedDateMillis != null
-            val hasChanges = title.trim() != initialTitle ||
-                location.trim() != initialLocation ||
-                selectedDateMillis != initialDateMillis ||
-                selectedHour != (initialDate?.hour ?: 19) ||
-                selectedMinute != (initialDate?.minute ?: 0)
-            Button(
-                onClick = {
-                    val millis = selectedDateMillis ?: return@Button
+    BottomSheet(
+        header = if (isEditing) "Edit Discussion" else "Add Discussion",
+        onDismiss = onDismiss,
+        footer = {
+            BottomSheetFooter(
+                actionLabel = if (isEditing) "Update Discussion" else "Add Discussion",
+                onAction = {
+                    val millis = selectedDateMillis ?: return@BottomSheetFooter
                     val dateTime = buildLocalDateTime(millis, selectedHour, selectedMinute)
                     onSave(title.trim(), location.trim(), dateTime)
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = canSave && hasChanges
-            ) {
-                Text(
-                    text = "Save",
-                    color = MaterialTheme.colorScheme.background
-                )
+                onCancel = onDismiss,
+                actionEnabled = canSave && hasChanges,
+            )
+        },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            InputField(label = "Title", value = title, onValueChange = { title = it })
+            // InputField has no leading-icon slot (unlike the raw OutlinedTextField this
+            // replaces), so the location pin icon this field used to show is dropped — a minor
+            // decorative loss, not a functional one.
+            InputField(label = "Location (optional)", value = location, onValueChange = { location = it })
+            PickerField(label = "Date", value = dateDisplayText, onClick = { showDatePicker = true })
+            if (selectedDateMillis != null) {
+                PickerField(label = "Time", value = timeDisplayText, onClick = { showTimePicker = true })
+            }
+
+            if (bookTitle != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KluvsTheme.colors.cardAlt, RoundedCornerShape(8.dp))
+                        .border(1.dp, KluvsTheme.colors.divider, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    Text(
+                        text = "READING SESSION",
+                        style = KluvsTheme.typography.eyebrow,
+                        color = KluvsTheme.colors.contentMuted,
+                    )
+                    Text(
+                        text = bookTitle,
+                        style = KluvsTheme.typography.body.medium,
+                        color = KluvsTheme.colors.content,
+                    )
+                }
             }
         }
     }

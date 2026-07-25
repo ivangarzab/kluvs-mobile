@@ -19,9 +19,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -58,9 +55,12 @@ import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
+import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
@@ -281,12 +281,12 @@ fun ClubsScreenContent(
                         Text(
                             text = "No clubs yet",
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = KluvsTheme.colors.content
                         )
                         Text(
                             text = "Join a club to get started",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                     }
                 }
@@ -304,7 +304,7 @@ fun ClubsScreenContent(
                 )
 
                 Column(
-                    modifier = modifier.background(color = MaterialTheme.colorScheme.background)
+                    modifier = modifier.background(color = KluvsTheme.colors.background)
                 ) {
                     // Operation in-progress indicator
                     if (state.isOperationInProgress) {
@@ -317,17 +317,16 @@ fun ClubsScreenContent(
                             .padding(horizontal = 4.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                type = IconType.ArrowBack,
-                                contentDescription = stringResource(R.string.navigate_back),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        IconButton(
+                            type = IconType.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_back),
+                            tint = KluvsTheme.colors.content,
+                            onClick = onNavigateBack,
+                        )
                         Text(
                             text = stringResource(R.string.club_eyebrow).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                     }
 
@@ -343,7 +342,7 @@ fun ClubsScreenContent(
                                 Text(
                                     text = clubDetails.clubName,
                                     style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = KluvsTheme.colors.content
                                 )
                                 Spacer(Modifier.height(12.dp))
                                 ClubMetaRow(
@@ -353,14 +352,30 @@ fun ClubsScreenContent(
                                 )
                             }
                             if (state.userRole == Role.OWNER || state.userRole == Role.ADMIN) {
-                                ClubOverflowMenu(
-                                    canManageClub = state.userRole == Role.OWNER,
-                                    onEdit = { showEditClubSheet = true },
-                                    onDelete = { showDeleteClubDialog = true },
-                                    onShare = {
-                                        onOpenShareSheet()
-                                        showShareClubSheet = true
-                                    }
+                                val canManageClub = state.userRole == Role.OWNER
+                                ActionMenu(
+                                    items = buildList {
+                                        add(
+                                            ActionMenuItem(
+                                                label = "Share",
+                                                onClick = {
+                                                    onOpenShareSheet()
+                                                    showShareClubSheet = true
+                                                }
+                                            )
+                                        )
+                                        if (canManageClub) {
+                                            add(ActionMenuItem(label = "Edit", onClick = { showEditClubSheet = true }))
+                                            add(
+                                                ActionMenuItem(
+                                                    label = "Delete",
+                                                    onClick = { showDeleteClubDialog = true },
+                                                    isDestructive = true
+                                                )
+                                            )
+                                        }
+                                    },
+                                    contentDescription = "Club options"
                                 )
                             }
                         }
@@ -370,13 +385,13 @@ fun ClubsScreenContent(
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
                         modifier = Modifier.fillMaxWidth(),
-                        containerColor = MaterialTheme.colorScheme.background,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        containerColor = KluvsTheme.colors.background,
+                        contentColor = KluvsTheme.colors.contentMuted,
                         indicator = { tabPositions ->
                             if (pagerState.currentPage < tabPositions.size) {
                                 TabRowDefaults.SecondaryIndicator(
                                     modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = KluvsTheme.colors.accent
                                 )
                             }
                         }
@@ -395,9 +410,9 @@ fun ClubsScreenContent(
                                         text = title,
                                         style = MaterialTheme.typography.labelLarge,
                                         color = if (selected) {
-                                            MaterialTheme.colorScheme.primary
+                                            KluvsTheme.colors.accent
                                         } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                            KluvsTheme.colors.contentMuted
                                         }
                                     )
                                 }
@@ -414,7 +429,7 @@ fun ClubsScreenContent(
                         }
                     } else {
                         val tabModifier = Modifier
-                            .background(color = MaterialTheme.colorScheme.background)
+                            .background(color = KluvsTheme.colors.background)
                             .fillMaxSize()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
 
@@ -480,7 +495,11 @@ fun ClubsScreenContent(
                             onUpdateClubName(newName)
                             showEditClubSheet = false
                         },
-                        onDismiss = { showEditClubSheet = false }
+                        onDismiss = { showEditClubSheet = false },
+                        onDeleteClub = {
+                            showEditClubSheet = false
+                            showDeleteClubDialog = true
+                        }
                     )
                 }
 
@@ -501,6 +520,7 @@ fun ClubsScreenContent(
                         title = "Delete Club",
                         message = "Are you sure you want to delete \"${state.currentClubDetails?.clubName}\"? This action cannot be undone.",
                         confirmLabel = "Delete",
+                        isDestructive = true,
                         onConfirm = {
                             onDeleteClub()
                             showDeleteClubDialog = false
@@ -545,6 +565,7 @@ fun ClubsScreenContent(
                         message = "Are you sure you want to end the current reading session for " +
                             "\"${state.activeSession?.book?.title}\"?\n\n$creditMessage",
                         confirmLabel = "Confirm End",
+                        isDestructive = true,
                         onConfirm = {
                             onEndSession()
                             showEndSessionDialog = false
@@ -578,6 +599,7 @@ fun ClubsScreenContent(
 
                 if (showCreateDiscussionSheet) {
                     DiscussionBottomSheet(
+                        bookTitle = state.activeSession?.book?.title,
                         onSave = { title, location, date ->
                             onCreateDiscussion(title, location, date)
                             showCreateDiscussionSheet = false
@@ -589,9 +611,11 @@ fun ClubsScreenContent(
                 editingDiscussionId?.let { discussionId ->
                     val discussion = state.activeSession?.discussions?.find { it.id == discussionId }
                     DiscussionBottomSheet(
+                        isEditing = true,
                         initialTitle = discussion?.title ?: "",
                         initialLocation = discussion?.location ?: "",
                         initialDate = discussion?.rawDate,
+                        bookTitle = state.activeSession?.book?.title,
                         onSave = { title, location, date ->
                             onUpdateDiscussion(discussionId, title, location, date)
                             editingDiscussionId = null
@@ -605,6 +629,7 @@ fun ClubsScreenContent(
                         title = "Delete Discussion",
                         message = "Are you sure you want to delete this discussion?",
                         confirmLabel = "Delete",
+                        isDestructive = true,
                         onConfirm = {
                             onDeleteDiscussion(discussionId)
                             deletingDiscussionId = null
@@ -647,6 +672,7 @@ fun ClubsScreenContent(
                         title = "Remove Member",
                         message = "Are you sure you want to remove ${member?.name ?: "this member"} from the club?",
                         confirmLabel = "Remove",
+                        isDestructive = true,
                         onConfirm = {
                             onRemoveMember(memberId)
                             removingMemberId = null
@@ -679,14 +705,14 @@ private fun ClubMetaRow(
             Text(
                 text = stringResource(R.string.founded_x, foundedYear).uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = KluvsTheme.colors.contentMuted
             )
             MetaDot()
         }
         Text(
             text = stringResource(R.string.x_members, memberCount).uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = KluvsTheme.colors.contentMuted
         )
     }
 }
@@ -696,68 +722,15 @@ private fun MetaDot() {
     Box(
         modifier = Modifier
             .size(3.dp)
-            .background(color = MaterialTheme.colorScheme.onSurfaceVariant, shape = CircleShape)
+            .background(color = KluvsTheme.colors.contentMuted, shape = CircleShape)
     )
-}
-
-@Composable
-private fun ClubOverflowMenu(
-    canManageClub: Boolean,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    onShare: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                type = IconType.MoreVert,
-                contentDescription = "Club options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Share") },
-                onClick = {
-                    expanded = false
-                    onShare()
-                }
-            )
-            if (canManageClub) {
-                DropdownMenuItem(
-                    text = { Text("Edit") },
-                    onClick = {
-                        expanded = false
-                        onEdit()
-                    }
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "Delete",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        onDelete()
-                    }
-                )
-            }
-        }
-    }
 }
 
 @PreviewLightDark
 @Composable
 fun Preview_ClubsScreen() = KluvsTheme {
     ClubsScreenContent(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         state = ClubDetailsState(
             isLoading = false
         ),

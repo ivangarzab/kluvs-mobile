@@ -5,11 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,8 +19,11 @@ import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.join.presentation.JoinState
 import com.ivangarzab.kluvs.join.presentation.JoinViewModel
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -83,37 +83,31 @@ private fun JoinScreenContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        IconButton(onClick = onNavigateBack) {
-            Icon(
-                type = IconType.ArrowBack,
-                contentDescription = stringResource(R.string.navigate_back)
-            )
-        }
+        IconButton(
+            type = IconType.ArrowBack,
+            contentDescription = stringResource(R.string.navigate_back),
+            onClick = onNavigateBack,
+        )
 
         Text(
             text = "Join a club",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
 
-        OutlinedTextField(
+        InputField(
             value = state.tokenInput,
             onValueChange = onTokenChanged,
-            label = { Text("Invite code") },
+            label = "Invite code",
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
         )
 
-        Button(
+        SecondaryButton(
+            text = "Preview",
             onClick = onPreviewInvite,
             modifier = Modifier.fillMaxWidth(),
             enabled = state.tokenInput.isNotBlank() && !state.isLoadingPreview
-        ) {
-            Text(
-                text = "Preview",
-                color = MaterialTheme.colorScheme.background
-            )
-        }
+        )
 
         if (state.isLoadingPreview) {
             CircularProgressIndicator()
@@ -123,7 +117,7 @@ private fun JoinScreenContent(
             Text(
                 text = error,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error
+                color = KluvsTheme.colors.danger
             )
         }
 
@@ -131,27 +125,23 @@ private fun JoinScreenContent(
             Text(
                 text = preview.name,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = KluvsTheme.colors.content
             )
 
             state.joinError?.let { error ->
                 Text(
                     text = error,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
+                    color = KluvsTheme.colors.danger
                 )
             }
 
-            Button(
+            PrimaryButton(
+                text = if (state.isJoining) "Joining..." else "Join",
                 onClick = onJoinClicked,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isJoining
-            ) {
-                Text(
-                    text = if (state.isJoining) "Joining..." else "Join",
-                    color = MaterialTheme.colorScheme.background
-                )
-            }
+            )
         }
     }
 }

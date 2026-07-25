@@ -7,14 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -22,7 +19,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -42,9 +37,11 @@ import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.auth.presentation.AuthViewModel
 import com.ivangarzab.kluvs.auth.presentation.ForgotPasswordUiState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.ui.components.InputField
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.ui.extensions.toLocalizedMessage
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -95,12 +92,11 @@ fun ForgotPasswordScreenContent(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            type = IconType.Back,
-                            contentDescription = stringResource(R.string.navigate_back)
-                        )
-                    }
+                    IconButton(
+                        type = IconType.Back,
+                        contentDescription = stringResource(R.string.navigate_back),
+                        onClick = onNavigateBack,
+                    )
                 }
             )
         },
@@ -108,9 +104,9 @@ fun ForgotPasswordScreenContent(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    actionColor = MaterialTheme.colorScheme.error
+                    containerColor = KluvsTheme.colors.card,
+                    contentColor = KluvsTheme.colors.danger,
+                    actionColor = KluvsTheme.colors.danger
                 )
             }
         },
@@ -123,7 +119,7 @@ fun ForgotPasswordScreenContent(
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = stringResource(R.string.forgot_it),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = KluvsTheme.colors.content,
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -133,7 +129,7 @@ fun ForgotPasswordScreenContent(
                 Text(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     text = stringResource(R.string.reset_password_subhead),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.bodyLarge,
                 )
 
@@ -144,46 +140,38 @@ fun ForgotPasswordScreenContent(
                     label = stringResource(R.string.email),
                     value = state.emailField,
                     onValueChange = onEmailFieldChange,
-                    icon = IconType.Email,
-                    iconDescription = stringResource(R.string.description_email_text_field),
-                    supportingText = state.emailError
-                        ?: stringResource(R.string.enter_valid_email_address),
-                    supportingTextColor = if (state.emailError != null) {
-                        MaterialTheme.colorScheme.error
+                    error = state.emailError,
+                    helperText = if (state.emailError == null) {
+                        stringResource(R.string.enter_valid_email_address)
                     } else {
-                        Color.Gray
+                        null
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Go
                     ),
                     keyboardActions = KeyboardActions(
-                        onGo = { onSubmit() }
+                        onGo = { onSubmit() },
                     ),
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
+                PrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
                     enabled = !state.isLoading,
-                    onClick = onSubmit
-                ) {
-                    Text(
-                        text = if (state.isLoading) {
-                            stringResource(R.string.sending)
-                        } else {
-                            stringResource(R.string.send_reset_link)
-                        },
-                        color = MaterialTheme.colorScheme.background
-                    )
-                }
+                    onClick = onSubmit,
+                    text = if (state.isLoading) {
+                        stringResource(R.string.sending)
+                    } else {
+                        stringResource(R.string.send_reset_link)
+                    },
+                )
             } else {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = KluvsTheme.colors.cardAlt
                     ),
                 ) {
                     Column(
@@ -194,20 +182,20 @@ fun ForgotPasswordScreenContent(
                     ) {
                         Text(
                             text = stringResource(R.string.reset_link_sent_to),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = KluvsTheme.colors.contentMuted,
                             style = MaterialTheme.typography.labelMedium,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = state.emailField,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = KluvsTheme.colors.content,
                             fontWeight = FontWeight.Medium,
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = stringResource(R.string.reset_link_sent_body),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = KluvsTheme.colors.contentMuted,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -219,13 +207,11 @@ fun ForgotPasswordScreenContent(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    TextButton(onClick = onNavigateBack) {
-                        Text(
-                            text = stringResource(R.string.back_to_sign_in),
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+                    TextButton(
+                        text = stringResource(R.string.back_to_sign_in),
+                        onClick = onNavigateBack,
+                        emphasized = true,
+                    )
                 }
             }
         }
@@ -237,7 +223,7 @@ fun ForgotPasswordScreenContent(
 fun Preview_ForgotPasswordScreen() = KluvsTheme {
     ForgotPasswordScreenContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         state = ForgotPasswordUiState(),
         onEmailFieldChange = {},
@@ -251,7 +237,7 @@ fun Preview_ForgotPasswordScreen() = KluvsTheme {
 fun Preview_ForgotPasswordScreen_EmailSent() = KluvsTheme {
     ForgotPasswordScreenContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         state = ForgotPasswordUiState(
             emailField = "test@example.com",

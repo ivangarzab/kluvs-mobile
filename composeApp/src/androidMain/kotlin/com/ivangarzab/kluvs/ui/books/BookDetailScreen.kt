@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -48,8 +47,8 @@ import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.BookVolumeInfo
 import com.ivangarzab.kluvs.model.ShelfSource
 import com.ivangarzab.kluvs.model.ShelfStatus
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.ebGaramond
 import org.koin.compose.viewmodel.koinViewModel
@@ -118,7 +117,7 @@ fun BookDetailScreenContent(
 
     Column(
         modifier = modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
@@ -127,13 +126,12 @@ fun BookDetailScreenContent(
                 .padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onNavigateBack) {
-                Icon(
-                    type = IconType.ArrowBack,
-                    contentDescription = stringResource(R.string.navigate_back),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            IconButton(
+                type = IconType.ArrowBack,
+                contentDescription = stringResource(R.string.navigate_back),
+                tint = KluvsTheme.colors.content,
+                onClick = onNavigateBack,
+            )
         }
 
         if (state.isMutationInProgress) {
@@ -163,20 +161,20 @@ fun BookDetailScreenContent(
                         fontFamily = ebGaramond,
                         fontStyle = FontStyle.Italic,
                         style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = KluvsTheme.colors.content
                     )
                     volumeInfo?.subtitle?.let { subtitle ->
                         Text(
                             text = subtitle,
                             fontFamily = ebGaramond,
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = KluvsTheme.colors.contentMuted
                         )
                     }
                     Text(
                         text = metaLine(book, volumeInfo),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = KluvsTheme.colors.contentMuted
                     )
                 }
             }
@@ -211,9 +209,9 @@ fun BookDetailScreenContent(
                     style = MaterialTheme.typography.bodyMedium,
                     fontStyle = if (description == null) FontStyle.Italic else FontStyle.Normal,
                     color = if (description == null) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        KluvsTheme.colors.contentMuted
                     } else {
-                        MaterialTheme.colorScheme.onSurface
+                        KluvsTheme.colors.content
                     }
                 )
             }
@@ -266,7 +264,7 @@ private fun SectionEyebrow(text: String) {
     Text(
         text = text.uppercase(),
         style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = KluvsTheme.colors.contentMuted
     )
 }
 
@@ -275,10 +273,10 @@ private fun CategoryChip(text: String) {
     Text(
         text = text,
         modifier = Modifier
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+            .border(1.dp, KluvsTheme.colors.divider, CircleShape)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = KluvsTheme.colors.contentMuted
     )
 }
 
@@ -294,12 +292,12 @@ private fun DetailRow(label: String, value: String) {
             text = label,
             modifier = Modifier.width(90.dp),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = KluvsTheme.colors.contentMuted
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
     }
 }
@@ -348,7 +346,7 @@ private fun displayLanguage(code: String): String {
 @Composable
 fun Preview_BookDetailScreen() = KluvsTheme {
     BookDetailScreenContent(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         state = BookDetailsState(
             book = Book(id = "1", title = "The Hobbit", author = "J.R.R. Tolkien", year = 1937, isbn = "978-0-395-07122-1"),
             isLoadingEnrichment = false,

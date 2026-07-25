@@ -25,7 +25,7 @@ fun AboutSection(modifier: Modifier = Modifier) {
         /*Text(
             text = stringResource(R.string.about_title),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
 
         Spacer(modifier = Modifier.padding(vertical = 8.dp))*/

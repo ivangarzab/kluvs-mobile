@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.statusDanger
 import com.ivangarzab.kluvs.designsystem.theme.statusDangerSubtle
 
 /**
@@ -41,7 +43,7 @@ fun DangerZoneBox(
             color = KluvsTheme.colors.contentMuted,
             modifier = Modifier.padding(bottom = 8.dp),
         )
-        OutlinedButton(text = actionLabel, onClick = onActionClick)
+        SecondaryButton(text = actionLabel, buttonColor = statusDanger, onClick = onActionClick)
     }
 }
 

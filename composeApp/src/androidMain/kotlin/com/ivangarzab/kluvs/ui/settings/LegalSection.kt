@@ -35,7 +35,7 @@ fun LegalSection(
         Text(
             text = stringResource(R.string.legal_title),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = KluvsTheme.colors.content
         )
 
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
@@ -71,7 +71,7 @@ private fun LegalRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
+            color = KluvsTheme.colors.accent,
         )
     }
 }

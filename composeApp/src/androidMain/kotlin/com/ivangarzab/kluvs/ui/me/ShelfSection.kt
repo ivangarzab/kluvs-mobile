@@ -40,13 +40,13 @@ fun ShelfSection(
         ) {
             Text(
                 text = stringResource(R.string.on_your_shelf).uppercase(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = KluvsTheme.colors.contentMuted,
                 style = MaterialTheme.typography.labelSmall
             )
             if (shelf.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.books_in_progress_x, shelf.size),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.bodyMedium,
                     fontStyle = FontStyle.Italic
                 )
@@ -70,7 +70,7 @@ fun ShelfSection(
 @Composable
 private fun Preview_ShelfSection() = KluvsTheme {
     ShelfSection(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         shelf = listOf(
             ShelfItem(
                 sessionId = "s0",

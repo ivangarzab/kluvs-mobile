@@ -18,18 +18,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -53,10 +45,14 @@ import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmDisabled
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceControl
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceOption
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import kotlinx.datetime.LocalDateTime
 
 /** Translation at the boundary into the hollow [AttendanceControl] — see its call site below. */
@@ -99,17 +95,13 @@ fun ActiveSessionTab(
                 Text(
                     text = stringResource(R.string.no_session_details),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
-                Button(onClick = onCreateSession) {
-                    Icon(
-                        type = IconType.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Create Session")
-                }
+                PrimaryButton(
+                    text = "Create Session",
+                    onClick = onCreateSession,
+                    icon = IconType.Add,
+                )
             }
         } else {
             NoTabData(
@@ -129,7 +121,7 @@ fun ActiveSessionTab(
             if (sessionDetails.discussions.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.x_discussions_scheduled, sessionDetails.discussions.size),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
@@ -151,7 +143,7 @@ fun ActiveSessionTab(
             if (discussions.isEmpty()) {
                 Text(
                     text = "No discussions scheduled yet.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
@@ -199,7 +191,7 @@ private fun DiscussionTimelineItem(
     // A dot/line is "lit" (copper) once its discussion is past or is the current next one —
     // this is what makes the rail read as a continuous copper thread through completed items.
     val isLit = discussion.isPast || discussion.isNext
-    val neutralLineColor = MaterialTheme.colorScheme.surfaceVariant
+    val neutralLineColor = KluvsTheme.colors.cardAlt
     val litLineColor = brandPrimary.copy(alpha = 0.4f)
 
     Row(
@@ -253,7 +245,7 @@ private fun DiscussionTimelineItem(
                         )
                         .then(
                             if (!discussion.isPast && !discussion.isNext) {
-                                Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                                Modifier.border(1.dp, KluvsTheme.colors.divider, CircleShape)
                             } else Modifier
                         ),
                     contentAlignment = Alignment.Center
@@ -262,7 +254,7 @@ private fun DiscussionTimelineItem(
                         Icon(
                             type = IconType.Checkmark,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.background,
+                            tint = KluvsTheme.colors.background,
                             modifier = Modifier.size(10.dp)
                         )
                     }
@@ -287,8 +279,8 @@ private fun DiscussionTimelineItem(
 
         Spacer(Modifier.width(12.dp))
 
-        val textColor = MaterialTheme.colorScheme.onSurface
-        val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        val textColor = KluvsTheme.colors.content
+        val secondaryTextColor = KluvsTheme.colors.contentMuted
 
         Row(
             modifier = Modifier
@@ -301,7 +293,7 @@ private fun DiscussionTimelineItem(
                 if (discussion.isNext) {
                     Text(
                         text = "UP NEXT",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = KluvsTheme.colors.accent,
                         style = MaterialTheme.typography.labelSmall
                     )
                     Spacer(Modifier.height(2.dp))
@@ -350,62 +342,22 @@ private fun DiscussionTimelineItem(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onOpenNote) {
-                    Icon(
-                        type = IconType.Edit,
-                        contentDescription = "Discussion note",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                IconButton(
+                    type = IconType.Edit,
+                    contentDescription = "Discussion note",
+                    tint = KluvsTheme.colors.contentMuted,
+                    onClick = onOpenNote,
+                )
                 if (showAdminActions) {
-                    DiscussionOverflowMenu(
-                        onEdit = onEdit,
-                        onDelete = onDelete
+                    ActionMenu(
+                        items = listOf(
+                            ActionMenuItem(label = "Edit", onClick = onEdit),
+                            ActionMenuItem(label = "Delete", onClick = onDelete, isDestructive = true)
+                        ),
+                        contentDescription = "Discussion options"
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun DiscussionOverflowMenu(
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                type = IconType.MoreVert,
-                contentDescription = "Discussion options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Edit") },
-                onClick = {
-                    expanded = false
-                    onEdit()
-                }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = "Delete",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                },
-                onClick = {
-                    expanded = false
-                    onDelete()
-                }
-            )
         }
     }
 }
@@ -415,7 +367,7 @@ private fun DiscussionOverflowMenu(
 fun Preview_ActiveSessionTab() = KluvsTheme {
     ActiveSessionTab(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         sessionDetails = ActiveSessionDetails(

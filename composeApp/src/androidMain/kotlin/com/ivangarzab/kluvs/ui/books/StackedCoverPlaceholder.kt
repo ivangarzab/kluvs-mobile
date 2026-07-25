@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -78,7 +77,7 @@ private fun DrawScope.drawDiagonalStripedRect(
 @PreviewLightDark
 @Composable
 fun Preview_StackedCoverPlaceholder() = KluvsTheme {
-    Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier.background(KluvsTheme.colors.background)) {
         StackedCoverPlaceholder()
     }
 }

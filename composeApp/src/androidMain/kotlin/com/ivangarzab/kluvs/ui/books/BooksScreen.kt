@@ -229,7 +229,7 @@ private fun ShelfContent(
                     Text(
                         text = stringResource(R.string.no_books_shelved),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = KluvsTheme.colors.contentMuted
                     )
                 }
             }
@@ -363,12 +363,12 @@ private fun SearchEmptyState(heading: String, body: String) {
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Medium,
                     fontSize = 28.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = KluvsTheme.colors.contentMuted
                 )
                 Text(
                     text = body,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KluvsTheme.colors.contentMuted,
                     textAlign = TextAlign.Center
                 )
             }
@@ -388,7 +388,7 @@ private fun sectionLabel(status: ShelfStatus): String = when (status) {
 @Composable
 fun Preview_BooksScreen_Empty() = KluvsTheme {
     BooksScreenContent(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         state = BooksState(isLoadingShelf = false)
     )
 }
@@ -397,7 +397,7 @@ fun Preview_BooksScreen_Empty() = KluvsTheme {
 @Composable
 fun Preview_BooksScreen_WithShelf() = KluvsTheme {
     BooksScreenContent(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+        modifier = Modifier.background(color = KluvsTheme.colors.background),
         state = BooksState(
             isLoadingShelf = false,
             shelfEntries = fakeShelfEntries()

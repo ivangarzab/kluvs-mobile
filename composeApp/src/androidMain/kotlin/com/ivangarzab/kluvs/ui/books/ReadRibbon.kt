@@ -4,7 +4,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -61,7 +60,7 @@ fun ReadRibbon(
 @PreviewLightDark
 @Composable
 fun Preview_ReadRibbon() = KluvsTheme {
-    Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier.background(KluvsTheme.colors.background)) {
         ReadRibbon(contentDescription = "Read with Kluvs")
     }
 }

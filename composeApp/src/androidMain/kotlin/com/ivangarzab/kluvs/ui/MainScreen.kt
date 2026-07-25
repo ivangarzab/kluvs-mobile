@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -74,14 +73,14 @@ fun MainScreenContent(
         modifier = modifier,
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = KluvsTheme.colors.card
             ) {
                 val itemColors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    selectedIconColor = KluvsTheme.colors.accent,
+                    unselectedIconColor = KluvsTheme.colors.contentMuted,
+                    selectedTextColor = KluvsTheme.colors.accent,
+                    unselectedTextColor = KluvsTheme.colors.contentMuted,
+                    indicatorColor = KluvsTheme.colors.accent.copy(alpha = 0.2f)
                 )
                 val meScale by animateFloatAsState(
                     targetValue = if (pagerState.currentPage == 0) 1f else 0.85f,
