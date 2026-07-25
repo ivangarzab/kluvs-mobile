@@ -1,17 +1,16 @@
 package com.ivangarzab.kluvs.designsystem.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,8 +24,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.designsystem.components.controls.ToggleControl
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
+import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
+import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheetFooter
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.theme.feature
 import kotlin.math.roundToInt
 
 /** Hollow tracking-mode option — decoupled from the app's `ProgressType` domain enum. */
@@ -36,8 +37,11 @@ enum class ProgressTrackingMode { PAGE, PERCENT }
  * Bottom sheet for tracking/updating the signed-in member's reading progress.
  *
  * Shared component: used by the Clubs screen (session progress) and the Me screen (shelf rows).
- * Mirrors the web app's ReadingProgressModal — Page/Percent toggle, value input, auto "mark as
- * finished" when the value reaches the end of the book, and a manual finished switch.
+ * Checked kluvs-frontend's ReadingProgressModal.tsx as source of truth — already matched closely
+ * functionally (Page/Percent toggle, auto "mark as finished" at the end of the book, manual
+ * finished switch). This pass adds the elevated "BOOK" info box web shows, which this sheet
+ * previously rendered as a plain italic Text line instead, and swaps raw OutlinedTextField for
+ * InputField.
  *
  * Hollow — takes [ProgressTrackingMode] instead of the app's `ProgressType`; [onSave] reports back
  * in the same hollow currency, so callers translate at the boundary.
@@ -66,8 +70,6 @@ fun ReadingProgressBottomSheet(
     // sticks until the value changes again (same semantics as the web modal)
     var lastAutoTriggerValue by remember { mutableStateOf<String?>(null) }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     fun autoToggleFinished(newValue: String) {
         if (newValue == lastAutoTriggerValue) return
         val atEnd = when {
@@ -93,70 +95,81 @@ fun ReadingProgressBottomSheet(
         ProgressTrackingMode.PERCENT -> percentText.toFloatOrNull() != null
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = if (initialCurrentPage != null || initialPercentComplete != null) {
-                    "Update Progress"
-                } else {
-                    "Track Progress"
+    BottomSheet(
+        header = if (initialCurrentPage != null || initialPercentComplete != null) "Update Progress" else "Track Progress",
+        onDismiss = onDismiss,
+        footer = {
+            BottomSheetFooter(
+                actionLabel = "Save Progress",
+                onAction = {
+                    val page = if (progressType == ProgressTrackingMode.PAGE) currentPageText.toIntOrNull() else null
+                    val percent = if (progressType == ProgressTrackingMode.PERCENT) {
+                        percentText.toFloatOrNull()?.coerceIn(0f, 100f)
+                    } else null
+                    onSave(progressType, page, percent, markFinished)
                 },
-                style = KluvsTheme.typography.title.medium
+                onCancel = onDismiss,
+                actionEnabled = canSave,
             )
-
-            Text(
-                text = bookTitle,
-                // Title + feature (italic) — this is a book title, design-system's confirmed pattern.
-                style = KluvsTheme.typography.title.medium.feature(),
-                color = KluvsTheme.colors.contentMuted
-            )
-
-            // Track By toggle
-            ToggleControl(
-                options = listOf(ProgressTrackingMode.PAGE, ProgressTrackingMode.PERCENT),
-                selected = progressType,
-                onSelect = { progressType = it },
-                label = { if (it == ProgressTrackingMode.PAGE) "Page" else "Percent" },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (progressType == ProgressTrackingMode.PAGE) {
-                OutlinedTextField(
-                    value = currentPageText,
-                    onValueChange = { value ->
-                        currentPageText = value.filter { it.isDigit() }
-                        autoToggleFinished(currentPageText)
-                    },
-                    label = { Text("Current Page" + (pageCount?.let { " (of $it)" } ?: "")) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    supportingText = previewPercent?.let {
-                        { Text("That's about $it% complete.") }
-                    }
+        },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(KluvsTheme.colors.cardAlt, RoundedCornerShape(8.dp))
+                    .border(1.dp, KluvsTheme.colors.divider, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            ) {
+                Text(
+                    text = "BOOK",
+                    style = KluvsTheme.typography.eyebrow,
+                    color = KluvsTheme.colors.contentMuted,
                 )
-            } else {
-                OutlinedTextField(
-                    value = percentText,
-                    onValueChange = { value ->
-                        percentText = value.filter { it.isDigit() || it == '.' }
-                        autoToggleFinished(percentText)
-                    },
-                    label = { Text("Percent Complete") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    suffix = { Text("%") }
+                Text(
+                    text = bookTitle,
+                    style = KluvsTheme.typography.body.medium,
+                    color = KluvsTheme.colors.content,
                 )
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "TRACK BY",
+                    style = KluvsTheme.typography.eyebrow,
+                    color = KluvsTheme.colors.contentMuted,
+                )
+                ToggleControl(
+                    options = listOf(ProgressTrackingMode.PAGE, ProgressTrackingMode.PERCENT),
+                    selected = progressType,
+                    onSelect = { progressType = it },
+                    label = { if (it == ProgressTrackingMode.PAGE) "Page" else "Percent" },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (progressType == ProgressTrackingMode.PAGE) {
+                    InputField(
+                        label = "Current Page" + (pageCount?.let { " (of $it)" } ?: ""),
+                        value = currentPageText,
+                        onValueChange = { value ->
+                            currentPageText = value.filter { it.isDigit() }
+                            autoToggleFinished(currentPageText)
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        helperText = previewPercent?.let { "That's about $it% complete." },
+                    )
+                } else {
+                    InputField(
+                        label = "Percent Complete",
+                        value = percentText,
+                        onValueChange = { value ->
+                            percentText = value.filter { it.isDigit() || it == '.' }
+                            autoToggleFinished(percentText)
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        suffix = "%",
+                    )
+                }
             }
 
             Row(
@@ -166,28 +179,12 @@ fun ReadingProgressBottomSheet(
             ) {
                 Text(
                     text = "Mark as finished",
-                    style = KluvsTheme.typography.body.medium
+                    style = KluvsTheme.typography.body.medium,
+                    color = KluvsTheme.colors.content,
                 )
                 Switch(
                     checked = markFinished,
                     onCheckedChange = { markFinished = it }
-                )
-            }
-
-            Button(
-                onClick = {
-                    val page = if (progressType == ProgressTrackingMode.PAGE) currentPageText.toIntOrNull() else null
-                    val percent = if (progressType == ProgressTrackingMode.PERCENT) {
-                        percentText.toFloatOrNull()?.coerceIn(0f, 100f)
-                    } else null
-                    onSave(progressType, page, percent, markFinished)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = canSave
-            ) {
-                Text(
-                    text = "Save Progress",
-                    color = KluvsTheme.colors.background
                 )
             }
         }
