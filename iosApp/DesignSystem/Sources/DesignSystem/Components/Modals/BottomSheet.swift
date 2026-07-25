@@ -96,6 +96,7 @@ private struct DraggableBottomSheet<Content: View, Footer: View>: View {
     @Binding var isPresented: Bool
     let header: String
     var isDestructiveHeader: Bool
+    var onDismiss: (() -> Void)?
     @ViewBuilder let content: () -> Content
     @ViewBuilder let footer: () -> Footer
 
@@ -132,6 +133,12 @@ private struct DraggableBottomSheet<Content: View, Footer: View>: View {
             }
         }
         .animation(.easeOut(duration: 0.25), value: isPresented)
+        .onChange(of: isPresented) { _, newValue in
+            // Fires on any dismissal path (scrim tap, drag, or a caller setting isPresented
+            // false directly, e.g. after a footer Save action) — matches native .sheet's own
+            // onDismiss semantics, which fire regardless of *how* the sheet closed.
+            if !newValue { onDismiss?() }
+        }
     }
 }
 
@@ -144,11 +151,12 @@ public extension View {
         isPresented: Binding<Bool>,
         header: String,
         isDestructiveHeader: Bool = false,
+        onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content,
         @ViewBuilder footer: @escaping () -> Footer = { EmptyView() }
     ) -> some View {
         overlay {
-            DraggableBottomSheet(isPresented: isPresented, header: header, isDestructiveHeader: isDestructiveHeader, content: content, footer: footer)
+            DraggableBottomSheet(isPresented: isPresented, header: header, isDestructiveHeader: isDestructiveHeader, onDismiss: onDismiss, content: content, footer: footer)
         }
     }
 

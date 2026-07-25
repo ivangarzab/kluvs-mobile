@@ -124,10 +124,12 @@ struct MeView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $viewModel.showReadingLog, onDismiss: { viewModel.onReadingLogDismissed() }) {
-            ReadingLogSheet(log: viewModel.readingLog, isLoading: viewModel.isReadingLogLoading)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+        .kluvsBottomSheet(
+            isPresented: $viewModel.showReadingLog,
+            header: "Reading Log",
+            onDismiss: { viewModel.onReadingLogDismissed() }
+        ) {
+            ReadingLogFields(log: viewModel.readingLog, isLoading: viewModel.isReadingLogLoading)
         }
     }
 }

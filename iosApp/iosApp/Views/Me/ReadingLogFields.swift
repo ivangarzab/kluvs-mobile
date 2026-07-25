@@ -2,33 +2,28 @@ import SwiftUI
 import Shared
 import DesignSystem
 
-/// Sheet showing the signed-in member's reading log: sessions grouped into
-/// "Currently Reading" and "Read". Mirrors web's ReadingLogModal / Android's
-/// ReadingLogBottomSheet.
-struct ReadingLogSheet: View {
+/// Reading Log sheet body — presented via `.kluvsBottomSheet` at the call site (`MeView`), not as
+/// its own `View` wrapping a `.sheet`. No footer — read-only, matching web's `ReadingLogModal`
+/// (no Save/Cancel row, closes via the header's × / here, the scrim tap or drag-to-dismiss).
+struct ReadingLogFields: View {
     let log: Shared.ReadingLog?
     let isLoading: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(String(localized: "reading_log"))
-                .font(.kluvsSectionHeading)
-
-            if isLoading {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
-                .padding(.vertical, 32)
-            } else {
+        if isLoading {
+            HStack {
+                Spacer()
+                ProgressView()
+                Spacer()
+            }
+            .padding(.vertical, 32)
+        } else {
+            VStack(alignment: .leading, spacing: 16) {
                 ReadingLogGroup(title: String(localized: "shelf_currently_reading"), entries: log?.active ?? [])
                 Divider()
                 ReadingLogGroup(title: String(localized: "shelf_read"), entries: log?.finished ?? [])
             }
         }
-        .padding(20)
-        .padding(.bottom, 20)
     }
 }
 
@@ -81,5 +76,6 @@ private struct ReadingLogRow: View {
 }
 
 #Preview {
-    ReadingLogSheet(log: nil, isLoading: false)
+    ReadingLogFields(log: nil, isLoading: false)
+        .padding()
 }
