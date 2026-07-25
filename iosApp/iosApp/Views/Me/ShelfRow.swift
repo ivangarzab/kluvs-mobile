@@ -32,7 +32,7 @@ struct ShelfRow: View {
                 }
 
                 OwnProgressRow(
-                    percent: item.ownProgress?.percent.map { Int($0) },
+                    percent: item.ownProgress.map { Int($0.percent) },
                     statusLabel: item.ownProgress?.label,
                     onUpdateProgress: { onUpdateProgress(item.sessionId) },
                     leftLabel: item.nextDiscussionDate.map { "Next · \($0)" } ?? "Your progress"

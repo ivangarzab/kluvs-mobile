@@ -67,6 +67,53 @@ struct ConfirmationDialog: View {
     }
 }
 
+/// Owns the fade in/out animation for `kluvsConfirmationDialog`. Has to be a real `View` (not
+/// inline in the modifier below) so `.animation(value:)` lives on a stable ancestor that exists
+/// whether or not the dialog is currently presented — attaching it directly inside the
+/// `if isPresented` conditional silently no-ops, since that view only exists on one side of the
+/// toggle and SwiftUI has no "before" state to animate from/to. Same fix as `BottomSheet`'s.
+private struct PresentedConfirmationDialog: View {
+    @Binding var isPresented: Bool
+    let title: String
+    let message: String
+    var confirmLabel: String
+    var dismissLabel: String?
+    var isDestructive: Bool
+    var onDismiss: (() -> Void)?
+    let onConfirm: () -> Void
+
+    var body: some View {
+        ZStack {
+            if isPresented {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        isPresented = false
+                        onDismiss?()
+                    }
+                ConfirmationDialog(
+                    title: title,
+                    message: message,
+                    onConfirm: {
+                        isPresented = false
+                        onConfirm()
+                    },
+                    onDismiss: {
+                        isPresented = false
+                        onDismiss?()
+                    },
+                    confirmLabel: confirmLabel,
+                    dismissLabel: dismissLabel,
+                    isDestructive: isDestructive
+                )
+                .padding(32)
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: isPresented)
+    }
+}
+
 public extension View {
     /// Presents a `ConfirmationDialog` as a custom scrim + card overlay when `isPresented` is
     /// true. `onConfirm` and dismissal (confirm, cancel, or tapping the scrim) all set
@@ -86,34 +133,16 @@ public extension View {
         onConfirm: @escaping () -> Void
     ) -> some View {
         overlay {
-            if isPresented.wrappedValue {
-                ZStack {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            isPresented.wrappedValue = false
-                            onDismiss?()
-                        }
-                    ConfirmationDialog(
-                        title: title,
-                        message: message,
-                        onConfirm: {
-                            isPresented.wrappedValue = false
-                            onConfirm()
-                        },
-                        onDismiss: {
-                            isPresented.wrappedValue = false
-                            onDismiss?()
-                        },
-                        confirmLabel: confirmLabel,
-                        dismissLabel: dismissLabel,
-                        isDestructive: isDestructive
-                    )
-                    .padding(32)
-                }
-                .transition(.opacity)
-                .animation(.easeOut(duration: 0.2), value: isPresented.wrappedValue)
-            }
+            PresentedConfirmationDialog(
+                isPresented: isPresented,
+                title: title,
+                message: message,
+                confirmLabel: confirmLabel,
+                dismissLabel: dismissLabel,
+                isDestructive: isDestructive,
+                onDismiss: onDismiss,
+                onConfirm: onConfirm
+            )
         }
     }
 }
