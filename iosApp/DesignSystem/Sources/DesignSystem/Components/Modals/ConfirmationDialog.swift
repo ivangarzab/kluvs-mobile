@@ -58,8 +58,8 @@ struct ConfirmationDialog: View {
                 Button(confirmLabel, action: onConfirm)
                     .foregroundColor(accentColor)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
         }
         .background(KluvsTheme.colors.bar)
         .clipShape(RoundedRectangle(cornerRadius: 16))
