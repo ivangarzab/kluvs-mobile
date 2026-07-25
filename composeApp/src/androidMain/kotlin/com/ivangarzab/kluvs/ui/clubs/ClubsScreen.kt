@@ -599,6 +599,7 @@ fun ClubsScreenContent(
 
                 if (showCreateDiscussionSheet) {
                     DiscussionBottomSheet(
+                        bookTitle = state.activeSession?.book?.title,
                         onSave = { title, location, date ->
                             onCreateDiscussion(title, location, date)
                             showCreateDiscussionSheet = false
@@ -610,9 +611,11 @@ fun ClubsScreenContent(
                 editingDiscussionId?.let { discussionId ->
                     val discussion = state.activeSession?.discussions?.find { it.id == discussionId }
                     DiscussionBottomSheet(
+                        isEditing = true,
                         initialTitle = discussion?.title ?: "",
                         initialLocation = discussion?.location ?: "",
                         initialDate = discussion?.rawDate,
+                        bookTitle = state.activeSession?.book?.title,
                         onSave = { title, location, date ->
                             onUpdateDiscussion(discussionId, title, location, date)
                             editingDiscussionId = null
