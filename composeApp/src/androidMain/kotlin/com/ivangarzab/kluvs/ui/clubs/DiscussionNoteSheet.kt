@@ -8,15 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionNoteInfo
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
+import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
@@ -39,6 +37,13 @@ private const val NOTE_MAX_LENGTH = 4000
  * A null [note] means it hasn't finished loading yet. A non-null [note] with
  * [DiscussionNoteInfo.noteId] null means no note exists yet, so the sheet
  * opens straight into an editable/create state.
+ *
+ * Mobile-only feature, no web equivalent to check. Renders its own Edit/Delete or Cancel/Save
+ * button row as content rather than using BottomSheetFooter's slot — same reasoning as iOS's
+ * conversion: this component has two modes with different action pairs depending on internal
+ * state, not the fixed Cancel/Action shape BottomSheetFooter assumes. Kept the raw multi-line
+ * OutlinedTextField for the note editor rather than forcing it into InputField — InputField
+ * requires a label, which would be redundant given the sheet header already says "Note".
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,24 +57,11 @@ fun DiscussionNoteSheet(
     var content by remember(note?.content) { mutableStateOf(note?.content ?: "") }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
+    BottomSheet(
+        header = "Note",
+        onDismiss = onDismiss,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Note",
-                style = MaterialTheme.typography.titleMedium
-            )
-
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             when {
                 note == null -> {
                     Box(
@@ -95,8 +87,8 @@ fun DiscussionNoteSheet(
                     if (errorMessage != null) {
                         Text(
                             text = errorMessage,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
+                            style = KluvsTheme.typography.caption,
+                            color = KluvsTheme.colors.danger,
                         )
                     }
 
@@ -105,43 +97,36 @@ fun DiscussionNoteSheet(
                         horizontalArrangement = Arrangement.End
                     ) {
                         if (note.noteId != null) {
-                            TextButton(onClick = {
+                            TextButton(text = "Cancel", onClick = {
                                 content = note.content
                                 isEditing = false
-                            }) { Text("Cancel") }
+                            })
                             Spacer(Modifier.width(8.dp))
                         }
                     }
 
                     val canSave = content.isNotBlank() && content.trim() != note.content.trim()
-                    Button(
+                    PrimaryButton(
+                        text = if (note.isSaving) "Saving…" else "Save",
                         onClick = { onSave(content.trim()) },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = canSave && !note.isSaving
-                    ) {
-                        Text(
-                            text = if (note.isSaving) "Saving…" else "Save",
-                            color = MaterialTheme.colorScheme.background
-                        )
-                    }
+                        enabled = canSave && !note.isSaving,
+                    )
                 }
 
                 else -> {
                     Text(
                         text = note.content,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = KluvsTheme.typography.body.medium,
+                        color = KluvsTheme.colors.content,
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        TextButton(onClick = { isEditing = true }) { Text("Edit") }
-                        TextButton(
-                            onClick = { showDeleteConfirmation = true }
-                        ) {
-                            Text("Delete", color = MaterialTheme.colorScheme.error)
-                        }
+                        TextButton(text = "Edit", onClick = { isEditing = true })
+                        TextButton(text = "Delete", onClick = { showDeleteConfirmation = true })
                     }
                 }
             }
