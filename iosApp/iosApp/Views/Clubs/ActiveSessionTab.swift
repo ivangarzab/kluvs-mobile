@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 struct ActiveSessionTab: View {
     let sessionDetails: Shared.ActiveSessionDetails?
@@ -28,7 +29,7 @@ struct ActiveSessionTab: View {
                         }
                         Spacer()
                         if isAdminOrAbove {
-                            GhostButton(text: "+ Add", onClick: onCreateDiscussion)
+                            OutlinedButton(text: "+ Add", action: onCreateDiscussion)
                         }
                     }
                     .padding(.bottom, 12)
@@ -139,7 +140,7 @@ struct DiscussionTimelineItem: View {
                         .opacity(discussion.isPast ? 0.5 : 1.0)
 
                     HStack(spacing: 2) {
-                        Image.custom(.location)
+                        IconType.location.image
                             .font(.caption)
                         Text(discussion.location)
                             .font(.subheadline)
@@ -152,12 +153,19 @@ struct DiscussionTimelineItem: View {
                         .foregroundColor(.secondary)
                         .opacity(discussion.isPast ? 0.5 : 1.0)
 
-                    AttendanceControl(
-                        roster: attendanceRoster,
-                        disabled: discussion.isPast,
-                        onSetAttendance: onSetAttendance
-                    )
-                    .padding(.top, 4)
+                    if let attendanceRoster {
+                        AttendanceControl(
+                            counts: [
+                                .yes: attendanceRoster.responses.filter { $0.status == .yes }.count,
+                                .maybe: attendanceRoster.responses.filter { $0.status == .maybe }.count,
+                                .no: attendanceRoster.responses.filter { $0.status == .no }.count,
+                            ],
+                            selected: attendanceRoster.myStatus?.toOption,
+                            disabled: discussion.isPast,
+                            onSelect: { onSetAttendance($0.toDomain) }
+                        )
+                        .padding(.top, 4)
+                    }
                 }
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -170,14 +178,10 @@ struct DiscussionTimelineItem: View {
                     }
 
                     if showAdminActions {
-                        Menu {
-                            Button("Edit") { onEdit() }
-                            Button("Delete", role: .destructive) { onDelete() }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .foregroundColor(.secondary)
-                                .padding(.vertical, 12)
-                        }
+                        ActionMenu(items: [
+                            ActionMenuItem(label: "Edit", action: onEdit),
+                            ActionMenuItem(label: "Delete", action: onDelete, isDestructive: true),
+                        ])
                     }
                 }
             }
@@ -204,7 +208,7 @@ struct DiscussionTimelineItem: View {
                         .frame(width: 16, height: 16)
                 }
                 if discussion.isPast {
-                    Image.custom(.checkmark)
+                    IconType.checkmark.image
                         .font(.system(size: 8, weight: .bold))
                         .foregroundColor(Color(UIColor.systemBackground))
                 }
@@ -221,4 +225,27 @@ struct DiscussionTimelineItem: View {
 
 #Preview {
     ActiveSessionTab(sessionDetails: nil)
+}
+
+// MARK: - Domain <-> DesignSystem.AttendanceOption translation
+
+private extension Shared.AttendanceStatus {
+    var toOption: AttendanceOption? {
+        switch self {
+        case .yes: .yes
+        case .maybe: .maybe
+        case .no: .no
+        default: nil
+        }
+    }
+}
+
+private extension AttendanceOption {
+    var toDomain: Shared.AttendanceStatus {
+        switch self {
+        case .yes: .yes
+        case .maybe: .maybe
+        case .no: .no
+        }
+    }
 }

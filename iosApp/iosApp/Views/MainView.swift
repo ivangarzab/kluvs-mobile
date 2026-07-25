@@ -1,4 +1,5 @@
 import SwiftUI
+import DesignSystem
 
 struct MainView: View {
     let userId: String

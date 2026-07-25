@@ -1,4 +1,5 @@
 import SwiftUI
+import DesignSystem
 
 struct MaterialBottomNavBar: View {
     @Binding var selectedTab: Int
@@ -38,7 +39,7 @@ struct MaterialBottomNavBar: View {
 }
 
 struct MaterialNavBarItem: View {
-    let icon: CustomIcon
+    let icon: IconType
     let label: String
     let isSelected: Bool
     let action: () -> Void
@@ -55,7 +56,7 @@ struct MaterialNavBarItem: View {
                     }
 
                     // Icon
-                    Image.custom(icon)
+                    icon.image
                         .font(.system(size: 24))
                         .foregroundColor(isSelected ? .brandOrange : .secondary)
                         .scaleEffect(isSelected ? 1.0 : 0.85)

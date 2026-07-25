@@ -1,4 +1,5 @@
 import SwiftUI
+import DesignSystem
 
 struct LoadingView: View {
     var body: some View {
@@ -6,9 +7,7 @@ struct LoadingView: View {
             Spacer()
             HStack {
                 Spacer()
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(1.5)
+                LoadingSpinner(size: 48)
                 Spacer()
             }
             Spacer()

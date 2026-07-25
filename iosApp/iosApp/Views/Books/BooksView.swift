@@ -4,6 +4,7 @@
 //
 import SwiftUI
 import Shared
+import DesignSystem
 
 private let shelfSections: [Shared.ShelfStatus] = [.currentlyReading, .read, .wantToRead, .notFinished]
 private let searchDebounceNanoseconds: UInt64 = 400_000_000
@@ -22,17 +23,20 @@ struct BooksView: View {
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 BooksTopBar(
-                    isSearchActive: isSearchActive,
+                    isSearchActive: Binding(
+                        get: { isSearchActive },
+                        set: { newValue in
+                            isSearchActive = newValue
+                            // Closing search also clears the query — matches the old
+                            // onBackClick behavior this binding replaces.
+                            if !newValue { viewModel.onQueryChange("") }
+                        }
+                    ),
                     isSearching: viewModel.isSearching,
                     query: Binding(
                         get: { viewModel.query },
                         set: { viewModel.onQueryChange($0) }
-                    ),
-                    onSearchClick: { isSearchActive = true },
-                    onBackClick: {
-                        isSearchActive = false
-                        viewModel.onQueryChange("")
-                    }
+                    )
                 )
 
                 if viewModel.isMutationInProgress {
@@ -78,16 +82,18 @@ struct BooksView: View {
                 viewModel.search(query)
             }
         }
-        .alert("Result", isPresented: Binding(
-            get: { viewModel.operationError != nil },
-            set: { if !$0 { viewModel.onConsumeOperationError() } }
-        )) {
-            Button("OK") { viewModel.onConsumeOperationError() }
-        } message: {
-            if let error = viewModel.operationError {
-                Text(error)
-            }
-        }
+        .kluvsConfirmationDialog(
+            isPresented: Binding(
+                get: { viewModel.operationError != nil },
+                set: { _ in }
+            ),
+            title: "Result",
+            message: viewModel.operationError ?? "",
+            confirmLabel: "OK",
+            dismissLabel: nil,
+            onDismiss: { viewModel.onConsumeOperationError() },
+            onConfirm: { viewModel.onConsumeOperationError() }
+        )
     }
 }
 

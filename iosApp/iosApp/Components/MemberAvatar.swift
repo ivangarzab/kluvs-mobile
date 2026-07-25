@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 /**
  * Displays a member's avatar image with fallback to placeholder.
@@ -24,11 +25,11 @@ struct MemberAvatar: View {
         }
     }
 
-    private var roleIcon: String? {
+    private var roleIcon: IconType? {
         guard let role = role else { return nil }
         switch role {
-        case .owner: return "ic_crown"
-        case .admin: return "ic_shield"
+        case .owner: return .crown
+        case .admin: return .shield
         default: return nil
         }
     }
@@ -51,8 +52,8 @@ struct MemberAvatar: View {
             avatarView
 
             // Role icon overlay (no background — bare tinted icon)
-            if let iconName = roleIcon, let color = rimColor {
-                Image(iconName)
+            if let roleIcon, let color = rimColor {
+                roleIcon.image
                     .resizable()
                     .scaledToFit()
                     .frame(width: iconSize, height: iconSize)

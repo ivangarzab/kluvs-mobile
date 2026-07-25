@@ -1,10 +1,11 @@
+import SwiftUI
 //
 //  ForgotPasswordView.swift
 //  iosApp
 //
 //  Forgot password screen, backed by the shared AuthViewModel
 //
-import SwiftUI
+import DesignSystem
 
 struct ForgotPasswordView: View {
     @StateObject private var viewModel = AuthViewModelWrapper()
@@ -29,15 +30,14 @@ struct ForgotPasswordView: View {
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
 
-                    InputFieldView(
+                    InputField(
                         label: String(localized: "label_email"),
-                        text: Binding(
+                        value: Binding(
                             get: { viewModel.forgotPasswordEmailField },
                             set: { viewModel.onForgotPasswordEmailChanged($0) }
                         ),
-                        icon: .email,
-                        supportingText: viewModel.forgotPasswordEmailError ?? String(localized: "hint_email"),
-                        supportingTextColor: viewModel.forgotPasswordEmailError != nil ? .red : .gray,
+                        error: viewModel.forgotPasswordEmailError,
+                        helperText: viewModel.forgotPasswordEmailError == nil ? String(localized: "hint_email") : nil,
                         keyboardType: .emailAddress,
                         submitLabel: .go,
                         onSubmit: { viewModel.sendPasswordResetEmail() }
@@ -100,11 +100,14 @@ struct ForgotPasswordView: View {
                 showErrorAlert = true
             }
         }
-        .alert("Authentication Error", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(viewModel.forgotPasswordErrorMessage ?? "An unexpected error occurred")
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $showErrorAlert,
+            title: "Authentication Error",
+            message: viewModel.forgotPasswordErrorMessage ?? "An unexpected error occurred",
+            confirmLabel: "OK",
+            dismissLabel: nil,
+            onConfirm: {}
+        )
     }
 }
 

@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// Overview tab: active-session summary (book, participation, own progress) and an
 /// "up next" discussion teaser. Mirrors web's mobile Overview tab / Android's `OverviewTab`.
@@ -75,7 +76,13 @@ struct OverviewTab: View {
             participationRow(ownReading: ownReading, canToggle: canToggle)
 
             if ownReading {
-                ownProgressRow(session: session)
+                OwnProgressRow(
+                    percent: ownProgress.map { Int($0.percent) },
+                    statusLabel: ownProgress?.label,
+                    onUpdateProgress: onUpdateProgress,
+                    leftLabel: "\(session.discussions.filter { $0.isPast }.count) of \(session.discussions.count) discussions",
+                    leftLabelEmphasized: true
+                )
             }
         }
     }
@@ -125,49 +132,19 @@ struct OverviewTab: View {
             Spacer()
 
             if canToggle {
-                GhostButton(
+                OutlinedButton(
                     text: ownReading ? "Opt out" : "Join this Read",
-                    onClick: { onToggleParticipation(!ownReading) }
+                    action: { onToggleParticipation(!ownReading) }
                 )
             }
         }
     }
 
     private var sessionOverflowMenu: some View {
-        Menu {
-            Button("Edit Session", action: onEditSession)
-            Button("End Session", role: .destructive, action: onEndSession)
-        } label: {
-            Image(systemName: "ellipsis")
-                .foregroundColor(.secondary)
-        }
-    }
-
-    // MARK: - Own Progress
-
-    @ViewBuilder
-    private func ownProgressRow(session: Shared.ActiveSessionDetails) -> some View {
-        let completed = session.discussions.filter { $0.isPast }.count
-        let total = session.discussions.count
-
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 12) {
-                ProgressView(value: Double(ownProgress?.percent ?? 0), total: 100)
-                    .tint(.brandOrange)
-                GhostButton(text: ownProgress != nil ? "Update" : "Track Progress", onClick: onUpdateProgress)
-            }
-            HStack {
-                Text("\(completed) of \(total) discussions")
-                    .font(.ebGaramondItalic(size: 15))
-                    .foregroundColor(.secondary)
-                Spacer()
-                if let label = ownProgress?.label {
-                    Text(label)
-                        .font(.kluvsHelperSm)
-                        .foregroundColor(.brandOrange)
-                }
-            }
-        }
+        ActionMenu(items: [
+            ActionMenuItem(label: "Edit Session", action: onEditSession),
+            ActionMenuItem(label: "End Session", action: onEndSession, isDestructive: true),
+        ])
     }
 
     // MARK: - No Active Session

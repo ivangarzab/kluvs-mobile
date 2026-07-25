@@ -1,12 +1,19 @@
 import SwiftUI
 import Shared
 import PhotosUI
+import DesignSystem
 
 struct MeView: View {
     let userId: String
     @StateObject private var viewModel = MeViewModelWrapper()
     @State private var showSettings = false
     @State private var editingShelfItem: Shared.ShelfItem? = nil
+    @State private var progressType: Shared.ProgressType = .page
+    @State private var progressCurrentPageText = ""
+    @State private var progressPercentText = ""
+    @State private var progressMarkFinished = false
+    @State private var progressLastAutoTriggerValue: String? = nil
+    @State private var progressSheetHeader = "Track Progress"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -54,7 +61,16 @@ struct MeView: View {
                             ShelfSection(
                                 shelf: viewModel.shelf,
                                 onUpdateProgress: { sessionId in
-                                    editingShelfItem = viewModel.shelf.first { $0.sessionId == sessionId }
+                                    let item = viewModel.shelf.first { $0.sessionId == sessionId }
+                                    progressType = item?.ownProgress?.type ?? .page
+                                    let currentPage: Int32? = item?.ownProgress?.currentPage?.int32Value
+                                    progressCurrentPageText = currentPage.map { String($0) } ?? ""
+                                    let percentComplete: Float? = item?.ownProgress?.percentComplete?.floatValue
+                                    progressPercentText = percentComplete.map { formatPercent($0) } ?? ""
+                                    progressMarkFinished = item?.ownProgress?.isCompleted ?? false
+                                    progressLastAutoTriggerValue = nil
+                                    progressSheetHeader = item?.ownProgress != nil ? "Update Progress" : "Track Progress"
+                                    editingShelfItem = item
                                 }
                             )
 
@@ -85,50 +101,65 @@ struct MeView: View {
         .onAppear {
             viewModel.loadUserData(userId: userId)
         }
-        .alert(isPresented: $viewModel.showLogoutConfirmation) {
-            Alert(
-                title: Text(NSLocalizedString("logout_confirmation_title", comment: "")),
-                message: Text(NSLocalizedString("logout_confirmation_message", comment: "")),
-                primaryButton: .destructive(Text(NSLocalizedString("yes", comment: ""))) {
-                    viewModel.onSignOutDialogConfirmed()
-                },
-                secondaryButton: .cancel(Text(NSLocalizedString("no", comment: ""))) {
-                    viewModel.onSignOutDialogDismissed()
-                }
-            )
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $viewModel.showLogoutConfirmation,
+            title: NSLocalizedString("logout_confirmation_title", comment: ""),
+            message: NSLocalizedString("logout_confirmation_message", comment: ""),
+            confirmLabel: NSLocalizedString("yes", comment: ""),
+            dismissLabel: NSLocalizedString("no", comment: ""),
+            isDestructive: true,
+            onDismiss: { viewModel.onSignOutDialogDismissed() },
+            onConfirm: { viewModel.onSignOutDialogConfirmed() }
+        )
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView(userId: userId)
             }
         }
-        .sheet(item: $editingShelfItem) { item in
-            ReadingProgressSheet(
+        .kluvsBottomSheet(item: $editingShelfItem, header: progressSheetHeader) { item in
+            ReadingProgressFields(
                 bookTitle: item.bookTitle,
                 pageCount: item.bookPageCount?.int32Value,
-                initialType: item.ownProgress?.type ?? .page,
-                initialCurrentPage: item.ownProgress?.currentPage?.int32Value,
-                initialPercentComplete: item.ownProgress?.percentComplete?.floatValue,
-                initialMarkFinished: item.ownProgress?.isCompleted ?? false,
-                onSave: { type, currentPage, percentComplete, markFinished in
+                progressType: $progressType,
+                currentPageText: $progressCurrentPageText,
+                percentText: $progressPercentText,
+                markFinished: $progressMarkFinished,
+                lastAutoTriggerValue: $progressLastAutoTriggerValue
+            )
+        } footer: { item in
+            let canSave: Bool = {
+                switch progressType {
+                case .page: return Int32(progressCurrentPageText) != nil
+                case .percent: return Float(progressPercentText) != nil
+                default: return false
+                }
+            }()
+            BottomSheetFooter(
+                actionLabel: "Save Progress",
+                onAction: {
+                    let page = progressType == .page ? Int32(progressCurrentPageText) : nil
+                    let percent: Int32? = progressType == .percent
+                        ? Float(progressPercentText).map { Int32(Swift.min(100, Swift.max(0, $0.rounded()))) }
+                        : nil
                     viewModel.onSaveProgress(
                         sessionId: item.sessionId,
-                        type: type,
-                        currentPage: currentPage,
-                        percentComplete: percentComplete,
-                        markFinished: markFinished
+                        type: progressType,
+                        currentPage: page,
+                        percentComplete: percent,
+                        markFinished: progressMarkFinished
                     )
                     editingShelfItem = nil
                 },
-                onDismiss: { editingShelfItem = nil }
+                onCancel: { editingShelfItem = nil },
+                actionEnabled: canSave
             )
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $viewModel.showReadingLog, onDismiss: { viewModel.onReadingLogDismissed() }) {
-            ReadingLogSheet(log: viewModel.readingLog, isLoading: viewModel.isReadingLogLoading)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+        .kluvsBottomSheet(
+            isPresented: $viewModel.showReadingLog,
+            header: "Reading Log",
+            onDismiss: { viewModel.onReadingLogDismissed() }
+        ) {
+            ReadingLogFields(log: viewModel.readingLog, isLoading: viewModel.isReadingLogLoading)
         }
     }
 }
@@ -163,7 +194,7 @@ struct ProfileSection: View {
                             .fill(Color.brandOrange.opacity(0.9))
                             .frame(width: 24, height: 24)
 
-                        Image.custom(CustomIcon.edit)
+                        IconType.edit.image
                             .resizable()
                             .scaledToFit()
                             .frame(width: 12, height: 12)
@@ -218,19 +249,19 @@ struct FooterSection: View {
             Divider()
                 .padding(.vertical, 12)
 
-            FooterItem(label: String(localized: "sign_out"), icon: .logout, labelColor: .red, iconColor: .red, action: onSignOut)
+            FooterItem(label: String(localized: "sign_out"), icon: .signOut, labelColor: .red, iconColor: .red, action: onSignOut)
         }
     }
 }
 
 struct FooterItem: View {
     let label: String
-    let icon: CustomIcon
+    let icon: IconType
     let action: (() -> Void)?
     var labelColor: Color = .primary
     var iconColor: Color = .primary
 
-    init(label: String, icon: CustomIcon, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
+    init(label: String, icon: IconType, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
         self.label = label
         self.icon = icon
         self.labelColor = labelColor
@@ -245,7 +276,7 @@ struct FooterItem: View {
             action?()
         }) {
             HStack(spacing: 12) {
-                Image.custom(icon)
+                icon.image
                     .resizable()
                     .scaledToFit()
                     .frame(width: iconSize, height: iconSize)

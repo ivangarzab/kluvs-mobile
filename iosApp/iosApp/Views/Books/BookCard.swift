@@ -1,9 +1,10 @@
+import SwiftUI
+import Shared
 //
 //  BookCard.swift
 //  iosApp
 //
-import SwiftUI
-import Shared
+import DesignSystem
 
 /// A single book tile: cover (with a read-ribbon badge for Kluvs-session books), title,
 /// author, and year. Purely a browsing tile — tapping navigates to the book detail screen,

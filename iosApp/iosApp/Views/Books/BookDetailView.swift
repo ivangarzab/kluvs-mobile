@@ -1,9 +1,10 @@
+import SwiftUI
+import Shared
 //
 //  BookDetailView.swift
 //  iosApp
 //
-import SwiftUI
-import Shared
+import DesignSystem
 
 private let languageDisplayNames: [String: String] = [
     "en": "English", "es": "Spanish", "fr": "French", "de": "German",
@@ -122,16 +123,18 @@ struct BookDetailView: View {
         .onAppear {
             viewModel.load(book: book, shelfStatus: initialShelfStatus, shelfSource: initialShelfSource)
         }
-        .alert("Result", isPresented: Binding(
-            get: { viewModel.operationError != nil },
-            set: { if !$0 { viewModel.onConsumeOperationError() } }
-        )) {
-            Button("OK") { viewModel.onConsumeOperationError() }
-        } message: {
-            if let error = viewModel.operationError {
-                Text(error)
-            }
-        }
+        .kluvsConfirmationDialog(
+            isPresented: Binding(
+                get: { viewModel.operationError != nil },
+                set: { _ in }
+            ),
+            title: "Result",
+            message: viewModel.operationError ?? "",
+            confirmLabel: "OK",
+            dismissLabel: nil,
+            onDismiss: { viewModel.onConsumeOperationError() },
+            onConfirm: { viewModel.onConsumeOperationError() }
+        )
     }
 
     @ViewBuilder

@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 struct MembersTab: View {
     let members: [Shared.MemberListItemInfo]
@@ -28,7 +29,7 @@ struct MembersTab: View {
                             .foregroundColor(.secondary)
                         Spacer()
                         if isAdminOrAbove {
-                            GhostButton(text: "+ Invite", onClick: onInviteMember)
+                            OutlinedButton(text: "+ Invite", action: onInviteMember)
                         }
                     }
                     .padding(.bottom, 12)
@@ -112,18 +113,16 @@ private struct MemberListItem: View {
                 HStack(spacing: 4) {
                     RoleEyebrow(role: member.role)
                     if showAdminActions || showRemove {
-                        Menu {
+                        ActionMenu(items: {
+                            var items: [ActionMenuItem] = []
                             if showAdminActions {
-                                Button("Change Role", action: onChangeRole)
+                                items.append(ActionMenuItem(label: "Change Role", action: onChangeRole))
                             }
                             if showRemove {
-                                Button("Remove", role: .destructive, action: onRemove)
+                                items.append(ActionMenuItem(label: "Remove", action: onRemove, isDestructive: true))
                             }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
-                        }
+                            return items
+                        }())
                     }
                 }
                 if let isReading {

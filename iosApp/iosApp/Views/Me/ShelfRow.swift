@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// A single "On Your Shelf" row: the active-session book for one of the
 /// member's clubs, with cover, club name, next discussion date, and the
@@ -31,7 +32,8 @@ struct ShelfRow: View {
                 }
 
                 OwnProgressRow(
-                    ownProgress: item.ownProgress,
+                    percent: item.ownProgress.map { Int($0.percent) },
+                    statusLabel: item.ownProgress?.label,
                     onUpdateProgress: { onUpdateProgress(item.sessionId) },
                     leftLabel: item.nextDiscussionDate.map { "Next · \($0)" } ?? "Your progress"
                 )
