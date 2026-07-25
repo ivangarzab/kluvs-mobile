@@ -260,15 +260,14 @@ private struct ClubDetailView: View {
             set: { if $0 == nil { viewModel.onConsumeOperationResult() } }
         ))
         // Share club invite link
-        .sheet(isPresented: $showShareClubSheet) {
-            ShareClubSheet(
+        .kluvsBottomSheet(isPresented: $showShareClubSheet, header: "Share Club") {
+            ShareClubFields(
                 joinPolicy: viewModel.clubDetails?.joinPolicy,
                 inviteToken: viewModel.clubDetails?.inviteToken,
                 canManage: viewModel.userRole == .owner,
                 isOperationInProgress: viewModel.isOperationInProgress,
                 onTogglePolicy: { viewModel.onUpdateJoinPolicy($0) },
-                onRotate: { viewModel.onRotateInviteLink() },
-                onDismiss: { showShareClubSheet = false }
+                onRotate: { viewModel.onRotateInviteLink() }
             )
         }
         // Edit club name
