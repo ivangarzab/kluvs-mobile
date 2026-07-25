@@ -107,6 +107,7 @@ private struct ClubDetailView: View {
     @State private var deletingDiscussionId: String? = nil
     @State private var openNoteDiscussionId: IDWrapper? = nil
     @State private var changingRoleMemberId: IDWrapper? = nil
+    @State private var selectedRole: Shared.Role = .member
     @State private var removingMemberId: String? = nil
 
     /// Returns the current user's memberId from the members list (needed for role/remove calls).
@@ -235,7 +236,12 @@ private struct ClubDetailView: View {
                         participants: viewModel.activeSession?.participants ?? [],
                         currentUserId: userId,
                         userRole: viewModel.userRole,
-                        onChangeRole: { memberId in changingRoleMemberId = IDWrapper(id: memberId) },
+                        onChangeRole: { memberId in
+                            let member = viewModel.members.first { $0.memberId == memberId }
+                            let assignable: [Shared.Role] = [.admin, .member]
+                            selectedRole = assignable.contains(member?.role ?? .member) ? (member?.role ?? .member) : .member
+                            changingRoleMemberId = IDWrapper(id: memberId)
+                        },
                         onRemoveMember: { memberId in removingMemberId = memberId }
                     )
                     .tag(2)
@@ -413,19 +419,22 @@ private struct ClubDetailView: View {
             .onAppear { viewModel.onLoadDiscussionNote(discussionId: discussionId) }
         }
         // Change role
-        .sheet(item: $changingRoleMemberId) { wrapper in
+        .kluvsBottomSheet(item: $changingRoleMemberId, header: "Change Role") { wrapper in
+            let member = viewModel.members.first { $0.memberId == wrapper.id }
+            ChangeRoleFields(memberName: member?.name ?? "", selectedRole: $selectedRole)
+        } footer: { wrapper in
             let memberId = wrapper.id
             let member = viewModel.members.first { $0.memberId == memberId }
-            ChangeRoleSheet(
-                memberName: member?.name ?? "",
-                currentRole: member?.role ?? .member,
-                onSave: { newRole in
+            BottomSheetFooter(
+                actionLabel: "Save",
+                onAction: {
                     if let mid = currentMemberId {
-                        viewModel.onUpdateMemberRole(memberId: memberId, currentMemberId: mid, newRole: newRole)
+                        viewModel.onUpdateMemberRole(memberId: memberId, currentMemberId: mid, newRole: selectedRole)
                     }
                     changingRoleMemberId = nil
                 },
-                onDismiss: { changingRoleMemberId = nil }
+                onCancel: { changingRoleMemberId = nil },
+                actionEnabled: selectedRole != (member?.role ?? .member)
             )
         }
         // Remove member confirmation

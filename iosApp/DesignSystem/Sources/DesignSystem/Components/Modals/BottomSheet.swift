@@ -151,6 +151,47 @@ public extension View {
             DraggableBottomSheet(isPresented: isPresented, header: header, isDestructiveHeader: isDestructiveHeader, content: content, footer: footer)
         }
     }
+
+    /// `item`-driven variant, for call sites presenting per-item state (e.g. "editing discussion
+    /// X") instead of a plain `Bool`. Retains the last non-nil item across the dismiss animation
+    /// (the same way SwiftUI's own `.sheet(item:)` behaves) so `content`/`footer` never see `nil`
+    /// mid-fade-out — `item` is typically cleared to `nil` right as the dismiss begins, and without
+    /// this the closures would have nothing to render for that last animated frame.
+    func kluvsBottomSheet<Item: Identifiable, Content: View, Footer: View>(
+        item: Binding<Item?>,
+        header: String,
+        isDestructiveHeader: Bool = false,
+        @ViewBuilder content: @escaping (Item) -> Content,
+        @ViewBuilder footer: @escaping (Item) -> Footer = { _ in EmptyView() }
+    ) -> some View {
+        overlay {
+            ItemBottomSheetHost(item: item, header: header, isDestructiveHeader: isDestructiveHeader, content: content, footer: footer)
+        }
+    }
+}
+
+private struct ItemBottomSheetHost<Item: Identifiable, Content: View, Footer: View>: View {
+    @Binding var item: Item?
+    let header: String
+    var isDestructiveHeader: Bool
+    let content: (Item) -> Content
+    let footer: (Item) -> Footer
+
+    @State private var cachedItem: Item?
+
+    var body: some View {
+        DraggableBottomSheet(
+            isPresented: Binding(get: { item != nil }, set: { if !$0 { item = nil } }),
+            header: header,
+            isDestructiveHeader: isDestructiveHeader,
+            content: { if let cachedItem { content(cachedItem) } },
+            footer: { if let cachedItem { footer(cachedItem) } }
+        )
+        .onChange(of: item?.id) { _, _ in
+            if let item { cachedItem = item }
+        }
+        .onAppear { cachedItem = item }
+    }
 }
 
 #Preview {
