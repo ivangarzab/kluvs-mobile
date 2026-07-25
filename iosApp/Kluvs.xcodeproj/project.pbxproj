@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BE0653EFE97CD16788A5128F /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 2B456756F536AAFE6A53A475 /* DesignSystem */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* DesignSystem */; };
 		E07199C72EE3A87800F5E515 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E07199C62EE3A87800F5E515 /* Localizable.xcstrings */; };
 		E081F2D02F284C0A00AFD427 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E081F2CF2F284C0A00AFD427 /* Sentry */; settings = {ATTRIBUTES = (Required, ); }; };
 /* End PBXBuildFile section */
@@ -74,6 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* DesignSystem in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,6 +150,7 @@
 			);
 			name = iosAppTests;
 			packageProductDependencies = (
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* DesignSystem */,
 			);
 			productName = iosAppTests;
 			productReference = E081F1F22F2025CB00AFD427 /* iosAppTests.xctest */;
@@ -579,6 +582,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		2B456756F536AAFE6A53A475 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 99D39893AA7BB5CEA8250D9C /* XCLocalSwiftPackageReference "DesignSystem" */;
+			productName = DesignSystem;
+		};
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 99D39893AA7BB5CEA8250D9C /* XCLocalSwiftPackageReference "DesignSystem" */;
 			productName = DesignSystem;
