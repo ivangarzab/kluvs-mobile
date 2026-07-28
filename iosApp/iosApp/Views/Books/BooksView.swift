@@ -9,15 +9,24 @@ import DesignSystem
 private let shelfSections: [Shared.ShelfStatus] = [.currentlyReading, .read, .wantToRead, .notFinished]
 private let searchDebounceNanoseconds: UInt64 = 400_000_000
 
+/// Carries the tapped `Book` value itself through the `NavigationPath`, rather than pushing
+/// just its id and having the destination closure read a separately-set `@State` — that split
+/// is a real race: the id push and the state mutation are two separate updates, and
+/// `NavigationStack` can resolve the destination from a snapshot that predates the second one,
+/// most visibly on the very first push in a session (shows a blank destination with no top bar
+/// until a second tap "catches up"). `Shared.Book` isn't `Hashable` on the Swift side, so this
+/// wraps it and forwards equality/hash to its `id`.
+private struct BookRoute: Hashable {
+    let book: Shared.Book
+    static func == (lhs: BookRoute, rhs: BookRoute) -> Bool { lhs.book.id == rhs.book.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(book.id) }
+}
+
 struct BooksView: View {
     @StateObject private var viewModel = BooksViewModelWrapper()
     @State private var isSearchActive = false
     @State private var searchTask: Task<Void, Never>?
     @State private var path = NavigationPath()
-    // Tapped books (from shelf, search, or a "more by this author" row) are threaded through
-    // this closure rather than nav args, since they may not be back-referenceable from
-    // BooksViewModelWrapper's state — mirrors Android's `selectedBook` pattern in BooksScreen.
-    @State private var selectedBook: Shared.Book?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -47,29 +56,25 @@ struct BooksView: View {
 
                 if isSearchActive {
                     SearchContent(viewModel: viewModel, onBookTap: { book in
-                        selectedBook = book
-                        path.append(book.id)
+                        path.append(BookRoute(book: book))
                     })
                 } else {
                     ShelfContent(viewModel: viewModel, onBookTap: { book in
-                        selectedBook = book
-                        path.append(book.id)
+                        path.append(BookRoute(book: book))
                     })
                 }
             }
-            .navigationDestination(for: String.self) { _ in
-                if let book = selectedBook {
-                    let shelfEntry = viewModel.shelfEntries.first { $0.book.id == book.id }
-                    BookDetailView(
-                        book: book,
-                        initialShelfStatus: shelfEntry?.shelf,
-                        initialShelfSource: shelfEntry?.source,
-                        onNavigateToBook: { nextBook in
-                            selectedBook = nextBook
-                            path.append(nextBook.id)
-                        }
-                    )
-                }
+            .navigationDestination(for: BookRoute.self) { route in
+                let book = route.book
+                let shelfEntry = viewModel.shelfEntries.first { $0.book.id == book.id }
+                BookDetailView(
+                    book: book,
+                    initialShelfStatus: shelfEntry?.shelf,
+                    initialShelfSource: shelfEntry?.source,
+                    onNavigateToBook: { nextBook in
+                        path.append(BookRoute(book: nextBook))
+                    }
+                )
             }
         }
         .onAppear { viewModel.loadShelf() }
