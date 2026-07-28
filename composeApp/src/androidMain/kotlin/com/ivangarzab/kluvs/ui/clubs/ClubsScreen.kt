@@ -192,7 +192,6 @@ fun ClubsScreen(
                     onDeleteClub = viewModel::onDeleteClub,
                     onUpdateJoinPolicy = viewModel::onUpdateJoinPolicy,
                     onRotateInviteLink = viewModel::onRotateInviteLink,
-                    onOpenShareSheet = { viewModel.refresh(forceRefresh = true) },
                     onCreateSession = viewModel::onCreateSession,
                     onUpdateSession = viewModel::onUpdateSession,
                     onEndSession = viewModel::onEndSession,
@@ -237,7 +236,6 @@ fun ClubsScreenContent(
     onDeleteClub: () -> Unit = {},
     onUpdateJoinPolicy: (JoinPolicy) -> Unit = {},
     onRotateInviteLink: () -> Unit = {},
-    onOpenShareSheet: () -> Unit = {},
     onCreateSession: (Book, LocalDateTime?) -> Unit = { _, _ -> },
     onUpdateSession: (Book?, LocalDateTime?) -> Unit = { _, _ -> },
     onEndSession: () -> Unit = {},
@@ -373,10 +371,7 @@ fun ClubsScreenContent(
                                         add(
                                             ActionMenuItem(
                                                 label = "Share",
-                                                onClick = {
-                                                    onOpenShareSheet()
-                                                    showShareClubSheet = true
-                                                }
+                                                onClick = { showShareClubSheet = true }
                                             )
                                         )
                                         if (canManageClub) {
