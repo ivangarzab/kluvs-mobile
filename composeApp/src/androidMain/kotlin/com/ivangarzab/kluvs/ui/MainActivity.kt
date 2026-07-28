@@ -165,9 +165,6 @@ fun MainNavHost(
                         onNavigateToSettings = {
                             navController.navigate("${NavDestinations.SETTINGS}/$userId")
                         },
-                        onNavigateToJoin = {
-                            navController.navigate(NavDestinations.JOIN)
-                        }
                     )
                 }
             }
@@ -178,6 +175,13 @@ fun MainNavHost(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
+            // "Join with a code" from inside the Clubs tab now opens JoinBottomSheet in-place
+            // instead of navigating here — this route has no current entry point. It's kept
+            // registered for the not-yet-built Android App Links deep-link case (tapping a raw
+            // invite URL while signed out, per JoinScreen's own doc comment): that flow needs a
+            // full screen it can land on before auth even resolves, plus the needsSignIn→Login
+            // handoff below, neither of which fits a bottom sheet nested inside the (already
+            // authenticated) Clubs tab.
             composable(NavDestinations.JOIN) {
                 JoinScreen(
                     onNavigateBack = { navController.popBackStack() },

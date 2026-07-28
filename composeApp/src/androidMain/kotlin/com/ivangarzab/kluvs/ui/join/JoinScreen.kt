@@ -28,8 +28,13 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Join-by-invite-token screen. Reachable today only via manual token entry — tapping a raw
- * invite URL does not yet open this screen (Android App Links deep linking is a follow-up).
+ * Join-by-invite-token screen. Not reachable from any UI action today — "Join with a code"
+ * inside the (already-authenticated) Clubs tab opens
+ * [com.ivangarzab.kluvs.ui.clubs.JoinBottomSheet] in-place instead. This full screen is kept
+ * registered at [com.ivangarzab.kluvs.ui.NavDestinations.JOIN] for the not-yet-built Android
+ * App Links deep-link case — tapping a raw invite URL while signed out, which needs to land
+ * somewhere before auth resolves and needs the [onNeedsSignIn] → Login handoff below, neither
+ * of which a nested bottom sheet can do.
  *
  * The preview shows only the club name — [com.ivangarzab.kluvs.model.ClubPreview] has no
  * avatar/member-count yet (also a follow-up, needs a backend spec change).

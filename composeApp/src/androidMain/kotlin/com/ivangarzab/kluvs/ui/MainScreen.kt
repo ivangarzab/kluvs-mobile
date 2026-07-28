@@ -42,14 +42,12 @@ fun MainScreen(
     userId: String,
     initialClubId: String? = null,
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToJoin: () -> Unit = {},
 ) {
     MainScreenContent(
         modifier = modifier,
         userId = userId,
         initialClubId = initialClubId,
         onNavigateToSettings = onNavigateToSettings,
-        onNavigateToJoin = onNavigateToJoin,
     )
 }
 
@@ -60,7 +58,6 @@ fun MainScreenContent(
     userId: String,
     initialClubId: String? = null,
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToJoin: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
 
@@ -187,7 +184,6 @@ fun MainScreenContent(
                     modifier = contentModifier,
                     userId = userId,
                     initialClubId = initialClubId,
-                    onNavigateToJoin = onNavigateToJoin,
                 )
                 2 -> BooksScreen(
                     modifier = contentModifier,

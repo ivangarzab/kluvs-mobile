@@ -90,7 +90,6 @@ fun ClubsScreen(
     modifier: Modifier = Modifier,
     userId: String,
     initialClubId: String? = null,
-    onNavigateToJoin: () -> Unit = {},
     viewModel: ClubDetailsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -143,6 +142,7 @@ fun ClubsScreen(
         ) {
             composable("list") {
                 var showCreateClubSheet by remember { mutableStateOf(false) }
+                var showJoinSheet by remember { mutableStateOf(false) }
 
                 ClubsListScreen(
                     modifier = Modifier.fillMaxSize(),
@@ -155,7 +155,7 @@ fun ClubsScreen(
                         navController.navigate("detail/$clubId")
                     },
                     onAddClub = { showCreateClubSheet = true },
-                    onJoinWithCode = onNavigateToJoin
+                    onJoinWithCode = { showJoinSheet = true }
                 )
 
                 if (showCreateClubSheet) {
@@ -165,6 +165,17 @@ fun ClubsScreen(
                             showCreateClubSheet = false
                         },
                         onDismiss = { showCreateClubSheet = false }
+                    )
+                }
+
+                if (showJoinSheet) {
+                    JoinBottomSheet(
+                        onDismiss = { showJoinSheet = false },
+                        onJoined = { clubId ->
+                            showJoinSheet = false
+                            viewModel.selectClub(clubId)
+                            navController.navigate("detail/$clubId")
+                        }
                     )
                 }
             }
