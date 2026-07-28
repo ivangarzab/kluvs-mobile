@@ -53,7 +53,7 @@ fun ShelfSection(
             }
         }
 
-        Spacer(Modifier.padding(8.dp))
+        Spacer(Modifier.padding(16.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(),

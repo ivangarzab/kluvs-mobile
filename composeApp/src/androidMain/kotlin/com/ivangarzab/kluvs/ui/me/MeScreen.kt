@@ -252,7 +252,9 @@ fun MeScreenContent(
                         Divider()
 
                         UpNextSection(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth(),
                             upNext = state.upNext
                         )
 
@@ -320,7 +322,7 @@ private fun ProfileSection(
             Text(
                 text = name,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.headlineSmall
             )
             Text(
                 text = handle,
