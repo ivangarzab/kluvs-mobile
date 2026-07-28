@@ -492,7 +492,8 @@ fun ClubsScreenContent(
                                         currentUserId = currentUserId,
                                         userRole = state.userRole,
                                         onChangeRole = { memberId -> changingRoleMemberId = memberId },
-                                        onRemoveMember = { memberId -> removingMemberId = memberId }
+                                        onRemoveMember = { memberId -> removingMemberId = memberId },
+                                        onInviteMember = { showShareClubSheet = true }
                                     )
                                 }
                             }
