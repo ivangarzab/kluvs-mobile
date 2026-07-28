@@ -61,6 +61,7 @@ import com.ivangarzab.kluvs.designsystem.theme.foregroundLightTertiary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmTertiary
 import com.ivangarzab.kluvs.designsystem.theme.ibmPlexSans
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
@@ -111,6 +112,7 @@ fun BooksScreen(
                     modifier = Modifier.fillMaxSize(),
                     state = state,
                     onRetryShelf = { viewModel.loadShelf() },
+                    onRefreshShelf = { viewModel.loadShelf(forceRefresh = true) },
                     onQueryChange = viewModel::onQueryChange,
                     onSearch = viewModel::search,
                     onBookClick = { book ->
@@ -148,6 +150,7 @@ fun BooksScreenContent(
     modifier: Modifier = Modifier,
     state: BooksState,
     onRetryShelf: () -> Unit = {},
+    onRefreshShelf: () -> Unit = onRetryShelf,
     onQueryChange: (String) -> Unit = {},
     onSearch: (String) -> Unit = {},
     onBookClick: (Book) -> Unit = {}
@@ -185,6 +188,7 @@ fun BooksScreenContent(
                     modifier = Modifier.weight(1f),
                     state = state,
                     onRetry = onRetryShelf,
+                    onRefresh = onRefreshShelf,
                     onBookClick = onBookClick
                 )
             }
@@ -205,6 +209,7 @@ private fun ShelfContent(
     modifier: Modifier = Modifier,
     state: BooksState,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onBookClick: (Book) -> Unit
 ) {
     val shelfError = state.shelfError
@@ -234,21 +239,27 @@ private fun ShelfContent(
                 }
             }
             is ScreenState.Content -> {
-                val entriesBySection = state.shelfEntries.groupBy { it.shelf }
-                LazyColumn(
+                PullToRefreshContainer(
+                    isLoading = state.isLoadingShelf,
+                    onRefresh = onRefresh,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    SHELF_SECTIONS.forEach { section ->
-                        val entries = entriesBySection[section].orEmpty()
-                        if (entries.isNotEmpty()) {
-                            item(key = section.name) {
-                                ShelfSection(
-                                    section = section,
-                                    entries = entries,
-                                    onBookClick = onBookClick
-                                )
+                    val entriesBySection = state.shelfEntries.groupBy { it.shelf }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        SHELF_SECTIONS.forEach { section ->
+                            val entries = entriesBySection[section].orEmpty()
+                            if (entries.isNotEmpty()) {
+                                item(key = section.name) {
+                                    ShelfSection(
+                                        section = section,
+                                        entries = entries,
+                                        onBookClick = onBookClick
+                                    )
+                                }
                             }
                         }
                     }

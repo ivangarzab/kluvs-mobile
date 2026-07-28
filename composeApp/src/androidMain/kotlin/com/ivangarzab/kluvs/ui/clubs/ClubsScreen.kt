@@ -58,6 +58,7 @@ import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
@@ -148,6 +149,7 @@ fun ClubsScreen(
                     state = state,
                     screenState = screenState,
                     onRetry = viewModel::refresh,
+                    onRefresh = { viewModel.loadUserClubs(userId, forceRefresh = true) },
                     onClubSelected = { clubId ->
                         viewModel.selectClub(clubId)
                         navController.navigate("detail/$clubId")
@@ -174,6 +176,7 @@ fun ClubsScreen(
                     userId = userId,
                     onNavigateBack = { navController.popBackStack() },
                     onRetry = viewModel::refresh,
+                    onRefresh = { viewModel.refresh(forceRefresh = true) },
                     onUpdateClubName = viewModel::onUpdateClubName,
                     onDeleteClub = viewModel::onDeleteClub,
                     onUpdateJoinPolicy = viewModel::onUpdateJoinPolicy,
@@ -217,6 +220,7 @@ fun ClubsScreenContent(
     screenState: ScreenState,
     userId: String = "",
     onRetry: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onNavigateBack: () -> Unit = {},
     onUpdateClubName: (String) -> Unit = {},
     onDeleteClub: () -> Unit = {},
@@ -420,7 +424,7 @@ fun ClubsScreenContent(
                         }
                     }
 
-                    if (state.isLoading) {
+                    if (state.isLoading && state.currentClubDetails == null) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -433,52 +437,58 @@ fun ClubsScreenContent(
                             .fillMaxSize()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
 
-                        // Swipeable tab content
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier.fillMaxSize()
-                        ) { page ->
-                            when (page) {
-                                0 -> OverviewTab(
-                                    modifier = tabModifier,
-                                    clubDetails = state.currentClubDetails,
-                                    sessionDetails = state.activeSession,
-                                    ownProgress = state.ownProgress,
-                                    userRole = state.userRole,
-                                    members = state.members,
-                                    currentUserId = currentUserId,
-                                    onEditSession = { showEditSessionSheet = true },
-                                    onEndSession = { showEndSessionDialog = true },
-                                    onUpdateProgress = { showProgressSheet = true },
-                                    onCreateSession = { showCreateSessionSheet = true },
-                                    onToggleParticipation = { isReading ->
-                                        val currentMemberId = state.members.find { it.userId == currentUserId }?.memberId
-                                            ?: return@OverviewTab
-                                        onToggleParticipation(currentMemberId, isReading)
-                                    }
-                                )
-                                1 -> ActiveSessionTab(
-                                    modifier = tabModifier,
-                                    sessionDetails = state.activeSession,
-                                    userRole = state.userRole,
-                                    onCreateSession = { showCreateSessionSheet = true },
-                                    onCreateDiscussion = { showCreateDiscussionSheet = true },
-                                    onEditDiscussion = { id -> editingDiscussionId = id },
-                                    onDeleteDiscussion = { id -> deletingDiscussionId = id },
-                                    onOpenNote = { id -> openNoteDiscussionId = id },
-                                    discussionRosters = state.discussionRosters,
-                                    onLoadAttendanceRoster = onLoadAttendanceRoster,
-                                    onSetAttendance = onSetAttendance
-                                )
-                                2 -> MembersTab(
-                                    modifier = tabModifier,
-                                    members = state.members,
-                                    participants = state.activeSession?.participants ?: emptyList(),
-                                    currentUserId = currentUserId,
-                                    userRole = state.userRole,
-                                    onChangeRole = { memberId -> changingRoleMemberId = memberId },
-                                    onRemoveMember = { memberId -> removingMemberId = memberId }
-                                )
+                        PullToRefreshContainer(
+                            isLoading = state.isLoading,
+                            onRefresh = onRefresh,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            // Swipeable tab content
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxSize()
+                            ) { page ->
+                                when (page) {
+                                    0 -> OverviewTab(
+                                        modifier = tabModifier,
+                                        clubDetails = state.currentClubDetails,
+                                        sessionDetails = state.activeSession,
+                                        ownProgress = state.ownProgress,
+                                        userRole = state.userRole,
+                                        members = state.members,
+                                        currentUserId = currentUserId,
+                                        onEditSession = { showEditSessionSheet = true },
+                                        onEndSession = { showEndSessionDialog = true },
+                                        onUpdateProgress = { showProgressSheet = true },
+                                        onCreateSession = { showCreateSessionSheet = true },
+                                        onToggleParticipation = { isReading ->
+                                            val currentMemberId = state.members.find { it.userId == currentUserId }?.memberId
+                                                ?: return@OverviewTab
+                                            onToggleParticipation(currentMemberId, isReading)
+                                        }
+                                    )
+                                    1 -> ActiveSessionTab(
+                                        modifier = tabModifier,
+                                        sessionDetails = state.activeSession,
+                                        userRole = state.userRole,
+                                        onCreateSession = { showCreateSessionSheet = true },
+                                        onCreateDiscussion = { showCreateDiscussionSheet = true },
+                                        onEditDiscussion = { id -> editingDiscussionId = id },
+                                        onDeleteDiscussion = { id -> deletingDiscussionId = id },
+                                        onOpenNote = { id -> openNoteDiscussionId = id },
+                                        discussionRosters = state.discussionRosters,
+                                        onLoadAttendanceRoster = onLoadAttendanceRoster,
+                                        onSetAttendance = onSetAttendance
+                                    )
+                                    2 -> MembersTab(
+                                        modifier = tabModifier,
+                                        members = state.members,
+                                        participants = state.activeSession?.participants ?: emptyList(),
+                                        currentUserId = currentUserId,
+                                        userRole = state.userRole,
+                                        onChangeRole = { memberId -> changingRoleMemberId = memberId },
+                                        onRemoveMember = { memberId -> removingMemberId = memberId }
+                                    )
+                                }
                             }
                         }
                     }

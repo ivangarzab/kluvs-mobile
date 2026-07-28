@@ -123,9 +123,12 @@ class GetMemberClubsUseCase(
      * Fetches all clubs for a member by their user ID.
      *
      * @param userId The auth user ID to look up
+     * @param forceRefresh If true, bypasses cache for each club's row enrichment
+     *        (e.g. pull-to-refresh) — the member fetch itself is always force-refreshed
+     *        regardless (see below)
      * @return Result containing list of [com.ivangarzab.kluvs.clubs.presentation.ClubListItem], or error if failed
      */
-    suspend operator fun invoke(userId: String): Result<List<ClubListItem>> {
+    suspend operator fun invoke(userId: String, forceRefresh: Boolean = false): Result<List<ClubListItem>> {
         Bark.d("Fetching member clubs (User ID: $userId)")
         // Force-refresh: a cached Member's embedded clubs[].role can go stale after a role
         // change, silently hiding admin/owner actions (e.g. kebab menus) until the cache
@@ -133,7 +136,7 @@ class GetMemberClubsUseCase(
         return memberRepository.getMemberByUserId(userId, forceRefresh = true).map { member ->
             val clubs = member.clubs ?: emptyList()
             val clubItems = coroutineScope {
-                clubs.map { club -> async { enrichClubListItem(club) } }.map { it.await() }
+                clubs.map { club -> async { enrichClubListItem(club, forceRefresh) } }.map { it.await() }
             }
             Bark.i("Loaded member clubs (Count: ${clubItems.size})")
             clubItems
@@ -142,8 +145,8 @@ class GetMemberClubsUseCase(
         }
     }
 
-    private suspend fun enrichClubListItem(club: Club): ClubListItem {
-        val fullClub = clubRepository.getClub(club.id).getOrElse {
+    private suspend fun enrichClubListItem(club: Club, forceRefresh: Boolean): ClubListItem {
+        val fullClub = clubRepository.getClub(club.id, forceRefresh = forceRefresh).getOrElse {
             Bark.d("Failed to enrich club row (Club ID: ${club.id}); falling back to name + role only")
             null
         }

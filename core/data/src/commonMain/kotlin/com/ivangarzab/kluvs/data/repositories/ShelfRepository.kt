@@ -21,10 +21,11 @@ interface ShelfRepository {
     /**
      * Retrieves the member's full shelf.
      *
+     * @param forceRefresh If true, bypasses cache and fetches fresh data from remote
      * @return Result containing every [ShelfEntry] (with book populated) if successful,
      *         or an error if the operation failed
      */
-    suspend fun getShelf(): Result<List<ShelfEntry>>
+    suspend fun getShelf(forceRefresh: Boolean = false): Result<List<ShelfEntry>>
 
     /**
      * Retrieves the member's shelf status for a single book.
@@ -66,16 +67,18 @@ internal class ShelfRepositoryImpl(
     private val cachePolicy: CachePolicy
 ) : ShelfRepository {
 
-    override suspend fun getShelf(): Result<List<ShelfEntry>> {
-        val cachedShelf = shelfLocalDataSource.getShelf()
-        if (cachedShelf.isNotEmpty()) {
-            val lastFetchedAt = shelfLocalDataSource.getLastFetchedAt(cachedShelf.first().book.id)
-            if (!cachePolicy.isStale(lastFetchedAt, CacheTTL.SHELF)) {
-                Bark.d("Cache hit for shelf")
-                return Result.success(cachedShelf)
+    override suspend fun getShelf(forceRefresh: Boolean): Result<List<ShelfEntry>> {
+        if (!forceRefresh) {
+            val cachedShelf = shelfLocalDataSource.getShelf()
+            if (cachedShelf.isNotEmpty()) {
+                val lastFetchedAt = shelfLocalDataSource.getLastFetchedAt(cachedShelf.first().book.id)
+                if (!cachePolicy.isStale(lastFetchedAt, CacheTTL.SHELF)) {
+                    Bark.d("Cache hit for shelf")
+                    return Result.success(cachedShelf)
+                }
             }
+            Bark.d("Cache miss for shelf")
         }
-        Bark.d("Cache miss for shelf")
 
         val result = shelfRemoteDataSource.getShelf()
 

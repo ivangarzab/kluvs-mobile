@@ -12,8 +12,8 @@ import com.ivangarzab.kluvs.model.ShelfEntry
 class GetShelfUseCase(
     private val shelfRepository: ShelfRepository
 ) {
-    suspend operator fun invoke(): Result<List<ShelfEntry>> {
+    suspend operator fun invoke(forceRefresh: Boolean = false): Result<List<ShelfEntry>> {
         Bark.d("Fetching shelf via use case")
-        return shelfRepository.getShelf()
+        return shelfRepository.getShelf(forceRefresh)
     }
 }

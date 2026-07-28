@@ -53,6 +53,7 @@ import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
@@ -124,6 +125,7 @@ fun MeScreen(
                 modifier = Modifier,
                 state = state,
                 onRetry = viewModel::refresh,
+                onRefresh = { viewModel.refresh(forceRefresh = true) },
                 onSettingsClick = onNavigateToSettings,
                 onHelpClick = { /* TODO() */ },
                 onSignOutClick = viewModel::onSignOutClicked,
@@ -192,6 +194,7 @@ fun MeScreenContent(
     modifier: Modifier = Modifier,
     state: MeState,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onSettingsClick: () -> Unit,
     onHelpClick: () -> Unit,
     onSignOutClick: () -> Unit,
@@ -199,9 +202,10 @@ fun MeScreenContent(
     onUpdateProgress: (sessionId: String) -> Unit = {},
 ) {
     val screenState = when {
+        state.profile != null -> ScreenState.Content
         state.isLoading -> ScreenState.Loading
         state.error != null -> ScreenState.Error(state.error!!)
-        else -> ScreenState.Content
+        else -> ScreenState.Empty
     }
 
     AnimatedContent(
@@ -219,55 +223,61 @@ fun MeScreenContent(
             )
             is ScreenState.Empty,
             is ScreenState.Content -> {
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .background(color = MaterialTheme.colorScheme.background)
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                PullToRefreshContainer(
+                    isLoading = state.isLoading,
+                    onRefresh = onRefresh,
+                    modifier = modifier.fillMaxSize(),
                 ) {
-                    ProfileSection(
-                        avatarUrl = state.profile?.avatarUrl,
-                        name = state.profile?.name ?: "",
-                        handle = state.profile?.handle ?: "",
-                        isUploadingAvatar = state.isUploadingAvatar,
-                        onAvatarClick = onAvatarClick
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = MaterialTheme.colorScheme.background)
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        ProfileSection(
+                            avatarUrl = state.profile?.avatarUrl,
+                            name = state.profile?.name ?: "",
+                            handle = state.profile?.handle ?: "",
+                            isUploadingAvatar = state.isUploadingAvatar,
+                            onAvatarClick = onAvatarClick
+                        )
 
-                    Divider()
-
-                    StatisticsSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        data = state.statistics,
-                        joinDate = state.profile?.joinDate
-                    )
-
-                    Divider()
-
-                    UpNextSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        upNext = state.upNext
-                    )
-
-                    if (state.upNext != null) {
                         Divider()
+
+                        StatisticsSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            data = state.statistics,
+                            joinDate = state.profile?.joinDate
+                        )
+
+                        Divider()
+
+                        UpNextSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            upNext = state.upNext
+                        )
+
+                        if (state.upNext != null) {
+                            Divider()
+                        }
+
+                        ShelfSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            shelf = state.shelf,
+                            onUpdateProgress = onUpdateProgress
+                        )
+
+                        Divider()
+
+                        FooterSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            onSettingsClick = onSettingsClick,
+                            onHelpClick = onHelpClick,
+                            onSignOutClick = onSignOutClick,
+                        )
                     }
-
-                    ShelfSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        shelf = state.shelf,
-                        onUpdateProgress = onUpdateProgress
-                    )
-
-                    Divider()
-
-                    FooterSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        onSettingsClick = onSettingsClick,
-                        onHelpClick = onHelpClick,
-                        onSignOutClick = onSignOutClick,
-                    )
                 }
             }
         }

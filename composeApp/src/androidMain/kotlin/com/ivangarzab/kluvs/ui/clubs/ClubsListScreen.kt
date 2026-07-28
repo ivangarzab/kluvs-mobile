@@ -46,6 +46,7 @@ import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
 /**
@@ -59,6 +60,7 @@ fun ClubsListScreen(
     state: ClubDetailsState,
     screenState: ScreenState,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onClubSelected: (String) -> Unit,
     onAddClub: () -> Unit = {},
     onJoinWithCode: () -> Unit = {},
@@ -82,35 +84,41 @@ fun ClubsListScreen(
                 onJoinWithCode = onJoinWithCode
             )
 
-            is ScreenState.Content -> Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.your_eyebrow).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = KluvsTheme.colors.contentMuted
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(R.string.clubs),
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = KluvsTheme.colors.content
-                        )
+            is ScreenState.Content -> PullToRefreshContainer(
+                isLoading = state.isLoading,
+                onRefresh = onRefresh,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column {
+                            Text(
+                                text = stringResource(R.string.your_eyebrow).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = KluvsTheme.colors.contentMuted
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.clubs),
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = KluvsTheme.colors.content
+                            )
+                        }
+                        TextButton(text = "Join with a code", onClick = onJoinWithCode)
                     }
-                    TextButton(text = "Join with a code", onClick = onJoinWithCode)
-                }
 
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(state.availableClubs) { club ->
-                        ClubListRow(
-                            club = club,
-                            onClick = { onClubSelected(club.id) }
-                        )
-                        HorizontalDivider(color = KluvsTheme.colors.cardAlt)
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        items(state.availableClubs) { club ->
+                            ClubListRow(
+                                club = club,
+                                onClick = { onClubSelected(club.id) }
+                            )
+                            HorizontalDivider(color = KluvsTheme.colors.cardAlt)
+                        }
                     }
                 }
             }

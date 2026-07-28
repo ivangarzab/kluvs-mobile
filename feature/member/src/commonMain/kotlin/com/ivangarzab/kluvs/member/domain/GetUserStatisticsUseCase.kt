@@ -22,11 +22,12 @@ class GetUserStatisticsUseCase(
      * Calculates statistics for the specified user.
      *
      * @param userId The Discord user ID of the current user
+     * @param forceRefresh If true, bypasses cache and fetches fresh data from remote
      * @return Result containing [com.ivangarzab.kluvs.presentation.models.UserStatistics] if successful, or error if failed
      */
-    suspend operator fun invoke(userId: String): Result<UserStatistics> {
+    suspend operator fun invoke(userId: String, forceRefresh: Boolean = false): Result<UserStatistics> {
         Bark.d("Fetching user statistics (User ID: $userId)")
-        return memberRepository.getMemberByUserId(userId).map { member: Member ->
+        return memberRepository.getMemberByUserId(userId, forceRefresh).map { member: Member ->
             val stats = UserStatistics(
                 clubsCount = member.clubs?.size ?: 0,
                 booksRead = member.booksRead
