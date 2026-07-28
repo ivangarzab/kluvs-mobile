@@ -329,7 +329,8 @@ private struct ClubDetailView: View {
                             selectedRole = assignable.contains(member?.role ?? .member) ? (member?.role ?? .member) : .member
                             changingRoleMemberId = IDWrapper(id: memberId)
                         },
-                        onRemoveMember: { memberId in removingMemberId = memberId }
+                        onRemoveMember: { memberId in removingMemberId = memberId },
+                        onInviteMember: { showShareClubSheet = true }
                     )
                     .tag(2)
                 }
