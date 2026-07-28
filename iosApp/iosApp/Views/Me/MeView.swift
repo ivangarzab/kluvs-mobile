@@ -197,7 +197,7 @@ struct ProfileSection: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 12, height: 12)
-                            .foregroundColor(.white)
+                            .foregroundColor(KluvsTheme.colors.onAccent)
                     }
                 }
                 .onChange(of: selectedItem) { newItem in
@@ -212,12 +212,12 @@ struct ProfileSection: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(profile.name)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .kluvsStyle(KluvsTheme.typography.headline.small)
+                    .foregroundColor(KluvsTheme.colors.content)
 
-                Text(profile.handle ?? "")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                Text("@\(profile.handle ?? "")")
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
 
             Spacer()
@@ -246,7 +246,7 @@ struct SnackbarView: View {
             }
         }
         .padding()
-        .background(Color.red.opacity(0.9))
+        .background(KluvsTheme.colors.danger.opacity(0.9))
         .cornerRadius(8)
         .shadow(radius: 4)
         .onAppear {

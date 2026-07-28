@@ -220,7 +220,7 @@ private struct SaveSuccessToast: View {
             }
         }
         .padding()
-        .background(Color.green.opacity(0.9))
+        .background(KluvsTheme.colors.success.opacity(0.9))
         .cornerRadius(8)
         .shadow(radius: 4)
         .onAppear {

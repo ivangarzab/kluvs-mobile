@@ -662,7 +662,7 @@ private struct ClubMetaRow: View {
 
     private var metaDot: some View {
         Circle()
-            .fill(Color.secondary)
+            .fill(KluvsTheme.colors.contentMuted)
             .frame(width: 3, height: 3)
     }
 }

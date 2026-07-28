@@ -92,8 +92,8 @@ struct DiscussionTimelineItem: View {
     // next one — this is what makes the rail read as a continuous copper thread
     // through completed items.
     private var isLit: Bool { discussion.isPast || discussion.isNext }
-    private var litLineColor: Color { Color.brandOrange.opacity(0.4) }
-    private var neutralLineColor: Color { Color.gray.opacity(0.3) }
+    private var litLineColor: Color { KluvsTheme.colors.accent.opacity(0.4) }
+    private var neutralLineColor: Color { KluvsTheme.colors.cardAlt }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -167,7 +167,7 @@ struct DiscussionTimelineItem: View {
                 HStack(spacing: 0) {
                     Button(action: onOpenNote) {
                         Image(systemName: "pencil")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                             .padding(.vertical, 12)
                     }
 
@@ -198,13 +198,13 @@ struct DiscussionTimelineItem: View {
                     .frame(width: discussion.isNext ? 24 : 16, height: discussion.isNext ? 24 : 16)
                 if !discussion.isPast && !discussion.isNext {
                     Circle()
-                        .strokeBorder(Color(uiColor: .separator), lineWidth: 1)
+                        .strokeBorder(KluvsTheme.colors.divider, lineWidth: 1)
                         .frame(width: 16, height: 16)
                 }
                 if discussion.isPast {
                     IconType.checkmark.image
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(Color(UIColor.systemBackground))
+                        .foregroundColor(KluvsTheme.colors.background)
                 }
             }
         }

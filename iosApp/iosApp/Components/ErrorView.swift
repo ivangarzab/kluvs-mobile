@@ -10,20 +10,12 @@ struct ErrorView: View {
             Spacer()
 
             Text(message)
-                .foregroundColor(.red)
-                .font(.body)
+                .kluvsStyle(KluvsTheme.typography.body.large)
+                .foregroundColor(KluvsTheme.colors.danger)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
-            Button(action: onRetry) {
-                Text("button_retry")
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.brandOrange)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
+            PrimaryButton(text: String(localized: "button_retry"), action: onRetry)
 
             Spacer()
         }
