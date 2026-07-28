@@ -22,9 +22,7 @@ struct PullToRefreshHost: UIViewRepresentable {
         let anchor = UIView(frame: .zero)
         anchor.backgroundColor = .clear
         anchor.isUserInteractionEnabled = false
-        DispatchQueue.main.async {
-            context.coordinator.attach(via: anchor)
-        }
+        context.coordinator.scheduleAttach(via: anchor)
         return anchor
     }
 
@@ -46,6 +44,24 @@ struct PullToRefreshHost: UIViewRepresentable {
 
         init(onProgressChange: @escaping (CGFloat) -> Void) {
             self.onProgressChange = onProgressChange
+        }
+
+        /// The anchor may not be attached to its final hierarchy/window yet on the first
+        /// runloop tick after `makeUIView`, so retry a few times with a short delay rather
+        /// than giving up after a single attempt.
+        func scheduleAttach(via anchor: UIView, attemptsRemaining: Int = 5) {
+            DispatchQueue.main.async { [weak self, weak anchor] in
+                guard let self, let anchor else { return }
+                if self.scrollView != nil { return }
+                if anchor.findEnclosingScrollView() != nil {
+                    self.attach(via: anchor)
+                } else if attemptsRemaining > 0 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self, weak anchor] in
+                        guard let self, let anchor else { return }
+                        self.scheduleAttach(via: anchor, attemptsRemaining: attemptsRemaining - 1)
+                    }
+                }
+            }
         }
 
         func attach(via anchor: UIView) {
@@ -85,13 +101,27 @@ struct PullToRefreshHost: UIViewRepresentable {
 }
 
 private extension UIView {
-    /// Walks superviews (not the responder chain — a `UIViewRepresentable`-hosted view's
-    /// superview chain is what actually leads to the SwiftUI-owned `UIScrollView`).
+    /// Finds the nearest `UIScrollView` sharing this view's hierarchy. Deliberately doesn't just
+    /// walk superviews: attaching this anchor via `.background()`/`.overlay()` places it as a
+    /// *sibling* of the SwiftUI `ScrollView`'s backing `UIScrollView` inside a shared container,
+    /// not as its descendant — a pure upward walk never finds it. Instead, walk upward a few
+    /// levels (past that shared container) and, at each level, search back down through every
+    /// subview for a `UIScrollView`, which works regardless of which exact ancestor turns out to
+    /// be the common one.
     func findEnclosingScrollView() -> UIScrollView? {
-        var view: UIView? = self
-        while let current = view {
-            if let scrollView = current as? UIScrollView { return scrollView }
-            view = current.superview
+        var ancestor: UIView? = self
+        for _ in 0..<8 {
+            guard let current = ancestor else { break }
+            if let found = current.firstScrollViewInSubtree() { return found }
+            ancestor = current.superview
+        }
+        return nil
+    }
+
+    private func firstScrollViewInSubtree() -> UIScrollView? {
+        if let scrollView = self as? UIScrollView { return scrollView }
+        for subview in subviews {
+            if let found = subview.firstScrollViewInSubtree() { return found }
         }
         return nil
     }
@@ -110,7 +140,7 @@ private struct PullToRefreshModifier: ViewModifier {
                     onRefresh: onRefresh,
                     onProgressChange: { progress = $0 }
                 )
-                .frame(width: 0, height: 0)
+                .frame(width: 1, height: 1)
             )
             .overlay(alignment: .top) {
                 if progress > 0 {
