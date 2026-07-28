@@ -5,20 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
@@ -39,13 +34,16 @@ import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.brandOnPrimary
 import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
+import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
-import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
 /**
@@ -59,77 +57,68 @@ fun ClubsListScreen(
     state: ClubDetailsState,
     screenState: ScreenState,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onClubSelected: (String) -> Unit,
     onAddClub: () -> Unit = {},
     onJoinWithCode: () -> Unit = {},
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
-        when (screenState) {
-            is ScreenState.Loading -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-
-            is ScreenState.Error -> ErrorScreen(
-                message = screenState.message,
-                onRetry = onRetry
-            )
-
-            is ScreenState.Empty -> ClubsListEmptyState(
-                modifier = Modifier.fillMaxSize(),
-                onJoinWithCode = onJoinWithCode
-            )
-
-            is ScreenState.Content -> Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.your_eyebrow).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = KluvsTheme.colors.contentMuted
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(R.string.clubs),
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = KluvsTheme.colors.content
-                        )
-                    }
-                    TextButton(text = "Join with a code", onClick = onJoinWithCode)
+    Column(modifier = modifier.fillMaxSize()) {
+        TopAppBar(
+            header = stringResource(R.string.your_eyebrow),
+            title = stringResource(R.string.clubs),
+            action = {
+                if (screenState !is ScreenState.Empty) {
+                    OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)
                 }
+            },
+        )
 
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(state.availableClubs) { club ->
-                        ClubListRow(
-                            club = club,
-                            onClick = { onClubSelected(club.id) }
-                        )
-                        HorizontalDivider(color = KluvsTheme.colors.cardAlt)
-                    }
-                }
-            }
-        }
+        Box(modifier = Modifier.weight(1f)) {
+            when (screenState) {
+                is ScreenState.Loading -> ClubsListSkeleton(modifier = Modifier.fillMaxSize())
 
-        if (screenState is ScreenState.Content || screenState is ScreenState.Empty) {
-            FloatingActionButton(
-                onClick = onAddClub,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                containerColor = brandPrimary,
-                contentColor = brandOnPrimary
-            ) {
-                Icon(
-                    type = IconType.Add,
-                    contentDescription = "New club"
+                is ScreenState.Error -> ErrorScreen(
+                    message = screenState.message,
+                    onRetry = onRetry
                 )
+
+                is ScreenState.Empty -> ClubsListEmptyState(
+                    modifier = Modifier.fillMaxSize(),
+                    onJoinWithCode = onJoinWithCode
+                )
+
+                is ScreenState.Content -> PullToRefreshContainer(
+                    isLoading = state.isLoading,
+                    onRefresh = onRefresh,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        items(state.availableClubs) { club ->
+                            ClubListRow(
+                                club = club,
+                                onClick = { onClubSelected(club.id) }
+                            )
+                            HorizontalDivider(color = KluvsTheme.colors.cardAlt)
+                        }
+                    }
+                }
+            }
+
+            if (screenState is ScreenState.Content || screenState is ScreenState.Empty) {
+                FloatingActionButton(
+                    onClick = onAddClub,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    containerColor = brandPrimary,
+                    contentColor = brandOnPrimary
+                ) {
+                    Icon(
+                        type = IconType.Add,
+                        contentDescription = "New club"
+                    )
+                }
             }
         }
     }
@@ -171,7 +160,7 @@ private fun ClubListRow(
             ) {
                 Text(
                     text = club.name,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = KluvsTheme.typography.title.medium,
                     color = KluvsTheme.colors.content
                 )
                 club.role?.let { RoleEyebrow(role = it) }
@@ -180,10 +169,7 @@ private fun ClubListRow(
             club.bookTitle?.let { title ->
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
-                        fontStyle = FontStyle.Italic
-                    ),
+                    style = KluvsTheme.typography.title.small.feature(),
                     color = KluvsTheme.colors.contentMuted
                 )
             }
@@ -221,15 +207,15 @@ private fun ClubsListEmptyState(modifier: Modifier = Modifier, onJoinWithCode: (
         ) {
             Text(
                 text = "No clubs yet",
-                style = MaterialTheme.typography.titleLarge,
+                style = KluvsTheme.typography.headline.small,
                 color = KluvsTheme.colors.content
             )
             Text(
                 text = "Join a club to get started",
-                style = MaterialTheme.typography.bodyMedium,
+                style = KluvsTheme.typography.body.medium,
                 color = KluvsTheme.colors.contentMuted
             )
-            TextButton(text = "Join with a code", onClick = onJoinWithCode)
+            OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)
         }
     }
 }

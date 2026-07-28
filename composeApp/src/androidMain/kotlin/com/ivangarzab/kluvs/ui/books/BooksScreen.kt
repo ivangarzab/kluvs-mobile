@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -21,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -49,6 +52,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.books.presentation.BooksState
 import com.ivangarzab.kluvs.books.presentation.BooksViewModel
+import com.ivangarzab.kluvs.designsystem.components.appbars.SearchTopAppBar
 import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.ShelfEntry
 import com.ivangarzab.kluvs.model.ShelfSource
@@ -61,6 +65,7 @@ import com.ivangarzab.kluvs.designsystem.theme.foregroundLightTertiary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmTertiary
 import com.ivangarzab.kluvs.designsystem.theme.ibmPlexSans
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
@@ -111,6 +116,7 @@ fun BooksScreen(
                     modifier = Modifier.fillMaxSize(),
                     state = state,
                     onRetryShelf = { viewModel.loadShelf() },
+                    onRefreshShelf = { viewModel.loadShelf(forceRefresh = true) },
                     onQueryChange = viewModel::onQueryChange,
                     onSearch = viewModel::search,
                     onBookClick = { book ->
@@ -148,6 +154,7 @@ fun BooksScreenContent(
     modifier: Modifier = Modifier,
     state: BooksState,
     onRetryShelf: () -> Unit = {},
+    onRefreshShelf: () -> Unit = onRetryShelf,
     onQueryChange: (String) -> Unit = {},
     onSearch: (String) -> Unit = {},
     onBookClick: (Book) -> Unit = {}
@@ -163,16 +170,18 @@ fun BooksScreenContent(
     }
 
     Column(modifier = modifier) {
-        BooksTopBar(
+        SearchTopAppBar(
+            header = stringResource(R.string.books),
+            title = stringResource(R.string.your_shelf_title),
             isSearchActive = view == BooksView.Search,
-            isSearching = state.isSearching,
-            query = state.query,
-            onQueryChange = onQueryChange,
-            onSearchClick = { view = BooksView.Search },
-            onBackClick = {
-                view = BooksView.Shelf
-                onQueryChange("")
-            }
+            onSearchActiveChange = { active ->
+                view = if (active) BooksView.Search else BooksView.Shelf
+                if (!active) onQueryChange("")
+            },
+            searchQuery = state.query,
+            onSearchQueryChange = onQueryChange,
+            isSearchLoading = state.isSearching,
+            searchPlaceholder = stringResource(R.string.search_books_hint),
         )
 
         if (state.isMutationInProgress) {
@@ -185,6 +194,7 @@ fun BooksScreenContent(
                     modifier = Modifier.weight(1f),
                     state = state,
                     onRetry = onRetryShelf,
+                    onRefresh = onRefreshShelf,
                     onBookClick = onBookClick
                 )
             }
@@ -205,6 +215,7 @@ private fun ShelfContent(
     modifier: Modifier = Modifier,
     state: BooksState,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onBookClick: (Book) -> Unit
 ) {
     val shelfError = state.shelfError
@@ -222,33 +233,39 @@ private fun ShelfContent(
         modifier = modifier
     ) { targetState ->
         when (targetState) {
-            is ScreenState.Loading -> LoadingScreen()
+            is ScreenState.Loading -> BooksShelfSkeleton(modifier = Modifier.fillMaxSize())
             is ScreenState.Error -> ErrorScreen(message = targetState.message, onRetry = onRetry)
             is ScreenState.Empty -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = stringResource(R.string.no_books_shelved),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = KluvsTheme.typography.body.large,
                         color = KluvsTheme.colors.contentMuted
                     )
                 }
             }
             is ScreenState.Content -> {
-                val entriesBySection = state.shelfEntries.groupBy { it.shelf }
-                LazyColumn(
+                PullToRefreshContainer(
+                    isLoading = state.isLoadingShelf,
+                    onRefresh = onRefresh,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    SHELF_SECTIONS.forEach { section ->
-                        val entries = entriesBySection[section].orEmpty()
-                        if (entries.isNotEmpty()) {
-                            item(key = section.name) {
-                                ShelfSection(
-                                    section = section,
-                                    entries = entries,
-                                    onBookClick = onBookClick
-                                )
+                    val entriesBySection = state.shelfEntries.groupBy { it.shelf }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        SHELF_SECTIONS.forEach { section ->
+                            val entries = entriesBySection[section].orEmpty()
+                            if (entries.isNotEmpty()) {
+                                item(key = section.name) {
+                                    ShelfSection(
+                                        section = section,
+                                        entries = entries,
+                                        onBookClick = onBookClick
+                                    )
+                                }
                             }
                         }
                     }
@@ -268,14 +285,13 @@ private fun ShelfSection(
     Column(modifier = modifier) {
         val isDark = isSystemInDarkTheme()
         Row(
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
-            // Eyebrow — design-system component.eyebrow, mapped to Typography.labelSmall
             Text(
                 text = sectionLabel(section).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = KluvsTheme.typography.eyebrow,
                 color = if (isDark) Color(0xFFB0B0B0) else foregroundLightSecondary
             )
             Text(
@@ -367,7 +383,7 @@ private fun SearchEmptyState(heading: String, body: String) {
                 )
                 Text(
                     text = body,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = KluvsTheme.typography.body.medium,
                     color = KluvsTheme.colors.contentMuted,
                     textAlign = TextAlign.Center
                 )

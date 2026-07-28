@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -16,12 +15,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 /**
  * Centered confirm/cancel dialog — design-system "Modal", centered-dialog form (see
- * design-system/docs/modal.md). Reserved for hard, confirm-only confirmations (Delete Club,
- * Sign Out, Remove Member) — anything with fields to fill in belongs in [BottomSheet] instead.
+ * design-system/docs/modal.md): eyebrow header, divider, body, divider, footer — the same
+ * three-zone shell [BottomSheet] uses. Built on a raw [Dialog], not M3's `AlertDialog` —
+ * AlertDialog's fixed title/text/button slots can't produce this structure (no divider, no
+ * full-bleed header) no matter what's passed to it. A previous version of this component used
+ * `AlertDialog` and rendered as a plain default dialog in the running app, while a hand-copied
+ * `@Preview` reconstruction (kept only because Dialog/Popup content doesn't render in Compose's
+ * static preview renderer) showed the intended layout and silently drifted from what actually
+ * shipped. [ConfirmationDialogContent] below is now the single shared source for both, so that
+ * kind of drift can't happen again.
+ *
+ * Reserved for hard, confirm-only confirmations (Delete Club, Sign Out, Remove Member) —
+ * anything with fields to fill in belongs in [BottomSheet] instead.
  *
  * @param isDestructive true for irreversible actions (delete/remove) — tints the title and
  * confirm label danger-red instead of copper. Sign-out-style confirmations (reversible, just
@@ -37,66 +47,42 @@ fun ConfirmationDialog(
     dismissLabel: String = "Cancel",
     isDestructive: Boolean = false,
 ) {
-    val accentColor = if (isDestructive) KluvsTheme.colors.danger else KluvsTheme.colors.accent
-    val containerColor = KluvsTheme.colors.bar
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(16.dp),
-        containerColor = containerColor,
-        title = {
-            Text(
-                text = title.uppercase(),
-                style = KluvsTheme.typography.eyebrow,
-                color = accentColor,
-            )
-        },
-        text = {
-            Text(
-                text = message,
-                style = KluvsTheme.typography.body.medium,
-                color = KluvsTheme.colors.contentMuted,
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onConfirm,
-                colors = ButtonDefaults.textButtonColors(contentColor = accentColor),
-            ) {
-                Text(confirmLabel)
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = KluvsTheme.colors.contentMuted),
-            ) {
-                Text(dismissLabel)
-            }
-        },
-    )
+    Dialog(onDismissRequest = onDismiss) {
+        ConfirmationDialogContent(
+            title = title,
+            message = message,
+            confirmLabel = confirmLabel,
+            dismissLabel = dismissLabel,
+            isDestructive = isDestructive,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss,
+        )
+    }
 }
 
 /**
- * Static previews can't render [AlertDialog]'s actual window content (a long-standing Compose
- * Preview limitation shared by any Dialog/ModalBottomSheet-based composable) — this reconstructs
- * the same visual shape as a plain [Column] instead. Use Android Studio's Interactive Mode, or a
- * real device/emulator, to preview [ConfirmationDialog] itself.
+ * The dialog's actual visual content — shared by [ConfirmationDialog] (wrapped in a real
+ * [Dialog] window at runtime) and the `@Preview` functions below (called directly, since
+ * [Dialog]'s content doesn't render in Compose's static preview renderer — a long-standing
+ * limitation shared by any Popup/Dialog-based composable. Use Android Studio's Interactive
+ * Mode, or a real device/emulator, to preview [ConfirmationDialog] itself).
  */
 @Composable
-private fun ConfirmationDialogPreviewShape(
+private fun ConfirmationDialogContent(
     title: String,
     message: String,
     confirmLabel: String,
     dismissLabel: String,
     isDestructive: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
 ) {
     val accentColor = if (isDestructive) KluvsTheme.colors.danger else KluvsTheme.colors.accent
     val containerColor = KluvsTheme.colors.bar
     val dividerColor = KluvsTheme.colors.divider
 
     Column(
-        modifier = Modifier
-            .background(containerColor, RoundedCornerShape(16.dp)),
+        modifier = Modifier.background(containerColor, RoundedCornerShape(16.dp)),
     ) {
         // Header — eyebrow label, border-bottom.
         Text(
@@ -120,9 +106,7 @@ private fun ConfirmationDialogPreviewShape(
                 .padding(24.dp),
         )
 
-        // Footer — Cancel leading (ghost text), action trailing, border-top. Matches the real
-        // component's use of plain tinted TextButtons (Android AlertDialog convention), not a
-        // filled button — see ConfirmationDialog's own confirmButton/dismissButton above.
+        // Footer — Cancel leading (ghost text), action trailing, border-top.
         HorizontalDivider(color = dividerColor)
         Row(
             modifier = Modifier
@@ -130,10 +114,16 @@ private fun ConfirmationDialogPreviewShape(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            TextButton(onClick = {}, colors = ButtonDefaults.textButtonColors(contentColor = KluvsTheme.colors.contentMuted)) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = KluvsTheme.colors.contentMuted),
+            ) {
                 Text(dismissLabel)
             }
-            TextButton(onClick = {}, colors = ButtonDefaults.textButtonColors(contentColor = accentColor)) {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(contentColor = accentColor),
+            ) {
                 Text(confirmLabel)
             }
         }
@@ -143,23 +133,27 @@ private fun ConfirmationDialogPreviewShape(
 @PreviewLightDark
 @Composable
 private fun Preview_ConfirmationDialog_Destructive() = KluvsTheme {
-    ConfirmationDialogPreviewShape(
+    ConfirmationDialogContent(
         title = "Delete Club",
         message = "Are you sure you want to delete this club? This action cannot be undone.",
         confirmLabel = "Delete",
         dismissLabel = "Cancel",
         isDestructive = true,
+        onConfirm = {},
+        onDismiss = {},
     )
 }
 
 @PreviewLightDark
 @Composable
 private fun Preview_ConfirmationDialog_Default() = KluvsTheme {
-    ConfirmationDialogPreviewShape(
+    ConfirmationDialogContent(
         title = "Sign Out",
         message = "Are you sure you want to sign out?",
         confirmLabel = "Sign Out",
         dismissLabel = "Cancel",
         isDestructive = false,
+        onConfirm = {},
+        onDismiss = {},
     )
 }

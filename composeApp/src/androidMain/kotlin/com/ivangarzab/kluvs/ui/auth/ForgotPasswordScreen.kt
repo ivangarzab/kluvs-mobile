@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -120,7 +119,7 @@ fun ForgotPasswordScreenContent(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = stringResource(R.string.forgot_it),
                 color = KluvsTheme.colors.content,
-                style = MaterialTheme.typography.titleLarge
+                style = KluvsTheme.typography.headline.small
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -130,7 +129,7 @@ fun ForgotPasswordScreenContent(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     text = stringResource(R.string.reset_password_subhead),
                     color = KluvsTheme.colors.contentMuted,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = KluvsTheme.typography.body.large,
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -183,20 +182,20 @@ fun ForgotPasswordScreenContent(
                         Text(
                             text = stringResource(R.string.reset_link_sent_to),
                             color = KluvsTheme.colors.contentMuted,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = KluvsTheme.typography.label,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = state.emailField,
                             color = KluvsTheme.colors.content,
                             fontWeight = FontWeight.Medium,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = KluvsTheme.typography.body.large,
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = stringResource(R.string.reset_link_sent_body),
                             color = KluvsTheme.colors.contentMuted,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = KluvsTheme.typography.body.medium,
                         )
                     }
                 }

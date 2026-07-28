@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -73,14 +72,14 @@ fun BookCard(
             Column {
                 Text(
                     text = book.title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = KluvsTheme.typography.title.small,
                     color = KluvsTheme.colors.content,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = book.author,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = KluvsTheme.typography.caption,
                     color = KluvsTheme.colors.contentMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -88,7 +87,7 @@ fun BookCard(
                 if (book.year != null) {
                     Text(
                         text = book.year.toString(),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = KluvsTheme.typography.caption,
                         color = KluvsTheme.colors.contentMuted
                     )
                 }

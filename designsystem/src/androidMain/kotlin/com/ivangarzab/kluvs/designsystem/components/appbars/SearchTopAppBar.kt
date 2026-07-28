@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,11 +20,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedIconButton
 import com.ivangarzab.kluvs.designsystem.components.fields.SearchField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
@@ -57,6 +61,17 @@ fun SearchTopAppBar(
     isSearchLoading: Boolean = false,
     searchPlaceholder: String = "Search",
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            focusRequester.requestFocus()
+        } else {
+            keyboardController?.hide()
+        }
+    }
+
     val contentAlpha by animateFloatAsState(
         targetValue = if (isSearchActive) 0f else 1f,
         animationSpec = tween(CONTENT_FADE_MS),
@@ -82,7 +97,7 @@ fun SearchTopAppBar(
                 onNavigateBack = onNavigateBack,
                 action = {
                     action()
-                    IconButton(
+                    OutlinedIconButton(
                         type = IconType.Search,
                         contentDescription = "Search",
                         onClick = { onSearchActiveChange(true) },
@@ -115,6 +130,7 @@ fun SearchTopAppBar(
                 onValueChange = onSearchQueryChange,
                 placeholder = searchPlaceholder,
                 isLoading = isSearchLoading,
+                focusRequester = focusRequester,
                 modifier = Modifier.weight(1f),
             )
         }

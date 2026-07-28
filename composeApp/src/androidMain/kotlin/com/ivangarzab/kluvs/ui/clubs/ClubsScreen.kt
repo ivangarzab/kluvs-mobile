@@ -18,9 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -55,9 +53,9 @@ import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
@@ -89,7 +87,6 @@ fun ClubsScreen(
     modifier: Modifier = Modifier,
     userId: String,
     initialClubId: String? = null,
-    onNavigateToJoin: () -> Unit = {},
     viewModel: ClubDetailsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -142,18 +139,20 @@ fun ClubsScreen(
         ) {
             composable("list") {
                 var showCreateClubSheet by remember { mutableStateOf(false) }
+                var showJoinSheet by remember { mutableStateOf(false) }
 
                 ClubsListScreen(
                     modifier = Modifier.fillMaxSize(),
                     state = state,
                     screenState = screenState,
                     onRetry = viewModel::refresh,
+                    onRefresh = { viewModel.loadUserClubs(userId, forceRefresh = true) },
                     onClubSelected = { clubId ->
                         viewModel.selectClub(clubId)
                         navController.navigate("detail/$clubId")
                     },
                     onAddClub = { showCreateClubSheet = true },
-                    onJoinWithCode = onNavigateToJoin
+                    onJoinWithCode = { showJoinSheet = true }
                 )
 
                 if (showCreateClubSheet) {
@@ -165,6 +164,17 @@ fun ClubsScreen(
                         onDismiss = { showCreateClubSheet = false }
                     )
                 }
+
+                if (showJoinSheet) {
+                    JoinBottomSheet(
+                        onDismiss = { showJoinSheet = false },
+                        onJoined = { clubId ->
+                            showJoinSheet = false
+                            viewModel.selectClub(clubId)
+                            navController.navigate("detail/$clubId")
+                        }
+                    )
+                }
             }
             composable("detail/{clubId}") {
                 ClubsScreenContent(
@@ -174,11 +184,11 @@ fun ClubsScreen(
                     userId = userId,
                     onNavigateBack = { navController.popBackStack() },
                     onRetry = viewModel::refresh,
+                    onRefresh = { viewModel.refresh(forceRefresh = true) },
                     onUpdateClubName = viewModel::onUpdateClubName,
                     onDeleteClub = viewModel::onDeleteClub,
                     onUpdateJoinPolicy = viewModel::onUpdateJoinPolicy,
                     onRotateInviteLink = viewModel::onRotateInviteLink,
-                    onOpenShareSheet = { viewModel.refresh(forceRefresh = true) },
                     onCreateSession = viewModel::onCreateSession,
                     onUpdateSession = viewModel::onUpdateSession,
                     onEndSession = viewModel::onEndSession,
@@ -217,12 +227,12 @@ fun ClubsScreenContent(
     screenState: ScreenState,
     userId: String = "",
     onRetry: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onNavigateBack: () -> Unit = {},
     onUpdateClubName: (String) -> Unit = {},
     onDeleteClub: () -> Unit = {},
     onUpdateJoinPolicy: (JoinPolicy) -> Unit = {},
     onRotateInviteLink: () -> Unit = {},
-    onOpenShareSheet: () -> Unit = {},
     onCreateSession: (Book, LocalDateTime?) -> Unit = { _, _ -> },
     onUpdateSession: (Book?, LocalDateTime?) -> Unit = { _, _ -> },
     onEndSession: () -> Unit = {},
@@ -280,12 +290,12 @@ fun ClubsScreenContent(
                     ) {
                         Text(
                             text = "No clubs yet",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = KluvsTheme.typography.headline.small,
                             color = KluvsTheme.colors.content
                         )
                         Text(
                             text = "Join a club to get started",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = KluvsTheme.typography.body.medium,
                             color = KluvsTheme.colors.contentMuted
                         )
                     }
@@ -311,46 +321,11 @@ fun ClubsScreenContent(
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            type = IconType.ArrowBack,
-                            contentDescription = stringResource(R.string.navigate_back),
-                            tint = KluvsTheme.colors.content,
-                            onClick = onNavigateBack,
-                        )
-                        Text(
-                            text = stringResource(R.string.club_eyebrow).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = KluvsTheme.colors.contentMuted
-                        )
-                    }
-
-                    state.currentClubDetails?.let { clubDetails ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = clubDetails.clubName,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = KluvsTheme.colors.content
-                                )
-                                Spacer(Modifier.height(12.dp))
-                                ClubMetaRow(
-                                    userRole = state.userRole,
-                                    foundedYear = clubDetails.foundedYear,
-                                    memberCount = clubDetails.memberCount
-                                )
-                            }
+                    TopAppBar(
+                        header = stringResource(R.string.club_eyebrow),
+                        title = state.currentClubDetails?.clubName,
+                        onNavigateBack = onNavigateBack,
+                        action = {
                             if (state.userRole == Role.OWNER || state.userRole == Role.ADMIN) {
                                 val canManageClub = state.userRole == Role.OWNER
                                 ActionMenu(
@@ -358,10 +333,7 @@ fun ClubsScreenContent(
                                         add(
                                             ActionMenuItem(
                                                 label = "Share",
-                                                onClick = {
-                                                    onOpenShareSheet()
-                                                    showShareClubSheet = true
-                                                }
+                                                onClick = { showShareClubSheet = true }
                                             )
                                         )
                                         if (canManageClub) {
@@ -378,107 +350,118 @@ fun ClubsScreenContent(
                                     contentDescription = "Club options"
                                 )
                             }
-                        }
-                        Spacer(Modifier.height(16.dp))
-                    }
+                        },
+                    )
 
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage,
-                        modifier = Modifier.fillMaxWidth(),
-                        containerColor = KluvsTheme.colors.background,
-                        contentColor = KluvsTheme.colors.contentMuted,
-                        indicator = { tabPositions ->
-                            if (pagerState.currentPage < tabPositions.size) {
-                                TabRowDefaults.SecondaryIndicator(
-                                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                                    color = KluvsTheme.colors.accent
+                    if (state.isLoading && state.currentClubDetails == null) {
+                        ClubDetailsSkeleton(modifier = Modifier.fillMaxSize())
+                    } else {
+                        state.currentClubDetails?.let { clubDetails ->
+                            ClubMetaRow(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                userRole = state.userRole,
+                                foundedYear = clubDetails.foundedYear,
+                                memberCount = clubDetails.memberCount
+                            )
+                            Spacer(Modifier.height(16.dp))
+                        }
+
+                        TabRow(
+                            selectedTabIndex = pagerState.currentPage,
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = KluvsTheme.colors.background,
+                            contentColor = KluvsTheme.colors.contentMuted,
+                            indicator = { tabPositions ->
+                                if (pagerState.currentPage < tabPositions.size) {
+                                    TabRowDefaults.SecondaryIndicator(
+                                        modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                        color = KluvsTheme.colors.accent
+                                    )
+                                }
+                            }
+                        ) {
+                            tabs.forEachIndexed { index, title ->
+                                val selected = pagerState.currentPage == index
+                                Tab(
+                                    selected = selected,
+                                    onClick = {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(index)
+                                        }
+                                    },
+                                    text = {
+                                        Text(
+                                            text = title,
+                                            style = KluvsTheme.typography.label,
+                                            color = if (selected) {
+                                                KluvsTheme.colors.accent
+                                            } else {
+                                                KluvsTheme.colors.contentMuted
+                                            }
+                                        )
+                                    }
                                 )
                             }
                         }
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            val selected = pagerState.currentPage == index
-                            Tab(
-                                selected = selected,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                },
-                                text = {
-                                    Text(
-                                        text = title,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = if (selected) {
-                                            KluvsTheme.colors.accent
-                                        } else {
-                                            KluvsTheme.colors.contentMuted
-                                        }
-                                    )
-                                }
-                            )
-                        }
-                    }
 
-                    if (state.isLoading) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    } else {
                         val tabModifier = Modifier
                             .background(color = KluvsTheme.colors.background)
                             .fillMaxSize()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
 
-                        // Swipeable tab content
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier.fillMaxSize()
-                        ) { page ->
-                            when (page) {
-                                0 -> OverviewTab(
-                                    modifier = tabModifier,
-                                    clubDetails = state.currentClubDetails,
-                                    sessionDetails = state.activeSession,
-                                    ownProgress = state.ownProgress,
-                                    userRole = state.userRole,
-                                    members = state.members,
-                                    currentUserId = currentUserId,
-                                    onEditSession = { showEditSessionSheet = true },
-                                    onEndSession = { showEndSessionDialog = true },
-                                    onUpdateProgress = { showProgressSheet = true },
-                                    onCreateSession = { showCreateSessionSheet = true },
-                                    onToggleParticipation = { isReading ->
-                                        val currentMemberId = state.members.find { it.userId == currentUserId }?.memberId
-                                            ?: return@OverviewTab
-                                        onToggleParticipation(currentMemberId, isReading)
-                                    }
-                                )
-                                1 -> ActiveSessionTab(
-                                    modifier = tabModifier,
-                                    sessionDetails = state.activeSession,
-                                    userRole = state.userRole,
-                                    onCreateSession = { showCreateSessionSheet = true },
-                                    onCreateDiscussion = { showCreateDiscussionSheet = true },
-                                    onEditDiscussion = { id -> editingDiscussionId = id },
-                                    onDeleteDiscussion = { id -> deletingDiscussionId = id },
-                                    onOpenNote = { id -> openNoteDiscussionId = id },
-                                    discussionRosters = state.discussionRosters,
-                                    onLoadAttendanceRoster = onLoadAttendanceRoster,
-                                    onSetAttendance = onSetAttendance
-                                )
-                                2 -> MembersTab(
-                                    modifier = tabModifier,
-                                    members = state.members,
-                                    participants = state.activeSession?.participants ?: emptyList(),
-                                    currentUserId = currentUserId,
-                                    userRole = state.userRole,
-                                    onChangeRole = { memberId -> changingRoleMemberId = memberId },
-                                    onRemoveMember = { memberId -> removingMemberId = memberId }
-                                )
+                        PullToRefreshContainer(
+                            isLoading = state.isLoading,
+                            onRefresh = onRefresh,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            // Swipeable tab content
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxSize()
+                            ) { page ->
+                                when (page) {
+                                    0 -> OverviewTab(
+                                        modifier = tabModifier,
+                                        clubDetails = state.currentClubDetails,
+                                        sessionDetails = state.activeSession,
+                                        ownProgress = state.ownProgress,
+                                        userRole = state.userRole,
+                                        members = state.members,
+                                        currentUserId = currentUserId,
+                                        onEditSession = { showEditSessionSheet = true },
+                                        onEndSession = { showEndSessionDialog = true },
+                                        onUpdateProgress = { showProgressSheet = true },
+                                        onCreateSession = { showCreateSessionSheet = true },
+                                        onToggleParticipation = { isReading ->
+                                            val currentMemberId = state.members.find { it.userId == currentUserId }?.memberId
+                                                ?: return@OverviewTab
+                                            onToggleParticipation(currentMemberId, isReading)
+                                        }
+                                    )
+                                    1 -> ActiveSessionTab(
+                                        modifier = tabModifier,
+                                        sessionDetails = state.activeSession,
+                                        userRole = state.userRole,
+                                        onCreateSession = { showCreateSessionSheet = true },
+                                        onCreateDiscussion = { showCreateDiscussionSheet = true },
+                                        onEditDiscussion = { id -> editingDiscussionId = id },
+                                        onDeleteDiscussion = { id -> deletingDiscussionId = id },
+                                        onOpenNote = { id -> openNoteDiscussionId = id },
+                                        discussionRosters = state.discussionRosters,
+                                        onLoadAttendanceRoster = onLoadAttendanceRoster,
+                                        onSetAttendance = onSetAttendance
+                                    )
+                                    2 -> MembersTab(
+                                        modifier = tabModifier,
+                                        members = state.members,
+                                        participants = state.activeSession?.participants ?: emptyList(),
+                                        currentUserId = currentUserId,
+                                        userRole = state.userRole,
+                                        onChangeRole = { memberId -> changingRoleMemberId = memberId },
+                                        onRemoveMember = { memberId -> removingMemberId = memberId },
+                                        onInviteMember = { showShareClubSheet = true }
+                                    )
+                                }
                             }
                         }
                     }
@@ -641,6 +624,8 @@ fun ClubsScreenContent(
                 openNoteDiscussionId?.let { discussionId ->
                     LaunchedEffect(discussionId) { onLoadDiscussionNote(discussionId) }
                     DiscussionNoteSheet(
+                        discussionTitle = state.activeSession?.discussions
+                            ?.firstOrNull { it.id == discussionId }?.title,
                         note = state.discussionNotes[discussionId],
                         onSave = { content -> onSaveDiscussionNote(discussionId, content) },
                         onDelete = {
@@ -704,14 +689,14 @@ private fun ClubMetaRow(
         if (foundedYear != null) {
             Text(
                 text = stringResource(R.string.founded_x, foundedYear).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = KluvsTheme.typography.eyebrow,
                 color = KluvsTheme.colors.contentMuted
             )
             MetaDot()
         }
         Text(
             text = stringResource(R.string.x_members, memberCount).uppercase(),
-            style = MaterialTheme.typography.labelSmall,
+            style = KluvsTheme.typography.eyebrow,
             color = KluvsTheme.colors.contentMuted
         )
     }

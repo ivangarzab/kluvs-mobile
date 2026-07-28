@@ -6,8 +6,10 @@
     <string name="clubs">Kluvs</string>
     <string name="me">Me</string>
     <string name="books">Books</string>
+    <string name="your_shelf_title">Your Shelf</string>
     <string name="general">Overview</string>
     <string name="club_eyebrow">Club</string>
+    <string name="book_eyebrow">Book</string>
     <string name="your_eyebrow">Your</string>
     <string name="active_session_eyebrow">Active Session</string>
     <string name="up_next_eyebrow">Up Next</string>
@@ -90,8 +92,6 @@
     <!-- Logout Confirmation -->
     <string name="logout_confirmation_title">Sign Out</string>
     <string name="logout_confirmation_message">Are you sure you want to sign out?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>

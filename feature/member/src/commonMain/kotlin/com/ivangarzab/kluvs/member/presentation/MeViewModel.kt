@@ -36,16 +36,16 @@ class MeViewModel(
 
     private var currentUserId: String? = null
 
-    fun loadUserData(userId: String) {
+    fun loadUserData(userId: String, forceRefresh: Boolean = false) {
         currentUserId = userId
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
             // Launch all 3 UseCase calls in parallel
-            val deferredProfile = async { getCurrentUserProfile(userId) }
-            val deferredStats = async { getUserStatistics(userId) }
-            val deferredShelf = async { getOnYourShelf(userId) }
+            val deferredProfile = async { getCurrentUserProfile(userId, forceRefresh) }
+            val deferredStats = async { getUserStatistics(userId, forceRefresh) }
+            val deferredShelf = async { getOnYourShelf(userId, forceRefresh) }
 
             // Await all results
             val profileResult = deferredProfile.await()
@@ -82,9 +82,9 @@ class MeViewModel(
         }
     }
 
-    fun refresh() {
-        Bark.d("Refreshing member data")
-        currentUserId?.let { loadUserData(it) }
+    fun refresh(forceRefresh: Boolean = false) {
+        Bark.d("Refreshing member data (forceRefresh=$forceRefresh)")
+        currentUserId?.let { loadUserData(it, forceRefresh) }
     }
 
     /**

@@ -41,11 +41,12 @@ class GetOnYourShelfUseCase(
      * member's clubs with active sessions.
      *
      * @param userId The Discord user ID of the current user
+     * @param forceRefresh If true, bypasses cache and fetches fresh data from remote
      * @return Result containing [OnYourShelfResult] if successful, or error if failed
      */
-    suspend operator fun invoke(userId: String): Result<OnYourShelfResult> {
+    suspend operator fun invoke(userId: String, forceRefresh: Boolean = false): Result<OnYourShelfResult> {
         Bark.d("Fetching on-your-shelf items (User ID: $userId)")
-        return memberRepository.getMemberByUserId(userId).mapCatching { member: Member ->
+        return memberRepository.getMemberByUserId(userId, forceRefresh).mapCatching { member: Member ->
             val clubs = member.clubs ?: emptyList()
             Bark.d("Found ${clubs.size} clubs for user (User ID: $userId)")
             val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -54,7 +55,7 @@ class GetOnYourShelfUseCase(
             var nearestDiscussionClubName: String? = null
 
             val items = clubs.mapNotNull { club ->
-                val fullClub = clubRepository.getClub(club.id).getOrNull()
+                val fullClub = clubRepository.getClub(club.id, forceRefresh = forceRefresh).getOrNull()
                 fullClub?.activeSession?.let { session ->
                     val ownProgress = getSessionProgress(session.id, session.book.pageCount).getOrNull()
                     val upcomingDiscussions = session.discussions.filter { it.date > now }

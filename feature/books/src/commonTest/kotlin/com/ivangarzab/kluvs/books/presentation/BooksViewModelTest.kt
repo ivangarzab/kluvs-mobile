@@ -132,8 +132,9 @@ class BooksViewModelTest {
 
     @Test
     fun `onAssignShelf updates matching shelf entry on success`() = runTest {
-        // Refresh after a successful mutation refetches the shelf, so the mock reflects the new state
-        everySuspend { shelfRepository.getShelf() } returns Result.success(
+        // Refresh after a successful mutation refetches the shelf (with forceRefresh=true), so the
+        // mock must match any argument, not just the getShelf() default.
+        everySuspend { shelfRepository.getShelf(any()) } returns Result.success(
             listOf(testEntry.copy(shelf = ShelfStatus.READ))
         )
         everySuspend { shelfRepository.assignShelf(any(), any()) } returns Result.success(ShelfStatus.READ)

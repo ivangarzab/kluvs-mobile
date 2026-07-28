@@ -30,9 +30,14 @@ fun LoadingSpinner(
                 avd?.start()
             }
         },
-        modifier = modifier.size(size),
+        // spinner_kluvs.xml pads its viewport so the "inhale" scale peak never clips;
+        // scale the View up to match so the drawn mark still renders at `size`.
+        modifier = modifier.size(size * VIEWPORT_PADDING_FACTOR),
     )
 }
+
+// 500 / 394.41 — the padded viewport's side length over the original mark's width.
+private const val VIEWPORT_PADDING_FACTOR = 1.268f
 
 @PreviewLightDark
 @Composable

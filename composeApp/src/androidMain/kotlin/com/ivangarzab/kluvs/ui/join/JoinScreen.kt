@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,12 +22,18 @@ import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Join-by-invite-token screen. Reachable today only via manual token entry — tapping a raw
- * invite URL does not yet open this screen (Android App Links deep linking is a follow-up).
+ * Join-by-invite-token screen. Not reachable from any UI action today — "Join with a code"
+ * inside the (already-authenticated) Clubs tab opens
+ * [com.ivangarzab.kluvs.ui.clubs.JoinBottomSheet] in-place instead. This full screen is kept
+ * registered at [com.ivangarzab.kluvs.ui.NavDestinations.JOIN] for the not-yet-built Android
+ * App Links deep-link case — tapping a raw invite URL while signed out, which needs to land
+ * somewhere before auth resolves and needs the [onNeedsSignIn] → Login handoff below, neither
+ * of which a nested bottom sheet can do.
  *
  * The preview shows only the club name — [com.ivangarzab.kluvs.model.ClubPreview] has no
  * avatar/member-count yet (also a follow-up, needs a backend spec change).
@@ -91,7 +95,7 @@ private fun JoinScreenContent(
 
         Text(
             text = "Join a club",
-            style = MaterialTheme.typography.headlineMedium,
+            style = KluvsTheme.typography.headline.small,
             color = KluvsTheme.colors.content
         )
 
@@ -110,13 +114,13 @@ private fun JoinScreenContent(
         )
 
         if (state.isLoadingPreview) {
-            CircularProgressIndicator()
+            LoadingSpinner()
         }
 
         state.previewError?.let { error ->
             Text(
                 text = error,
-                style = MaterialTheme.typography.bodyMedium,
+                style = KluvsTheme.typography.body.medium,
                 color = KluvsTheme.colors.danger
             )
         }
@@ -124,14 +128,14 @@ private fun JoinScreenContent(
         state.preview?.let { preview ->
             Text(
                 text = preview.name,
-                style = MaterialTheme.typography.titleLarge,
+                style = KluvsTheme.typography.headline.small,
                 color = KluvsTheme.colors.content
             )
 
             state.joinError?.let { error ->
                 Text(
                     text = error,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = KluvsTheme.typography.body.medium,
                     color = KluvsTheme.colors.danger
                 )
             }

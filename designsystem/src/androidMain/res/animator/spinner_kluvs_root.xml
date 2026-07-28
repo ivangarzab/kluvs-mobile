@@ -8,14 +8,14 @@
     android:duration="4000"
     android:repeatCount="-1">
     <propertyValuesHolder android:propertyName="alpha">
-        <keyframe android:fraction="0.00" android:value="0.94"
-            android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+        <keyframe android:fraction="0.00" android:value="0.94"/>
         <keyframe android:fraction="0.35" android:value="1.0"
-            android:interpolator="@android:interpolator/linear"/>
-        <keyframe android:fraction="0.50" android:value="1.0"
             android:interpolator="@interpolator/kluvs_breathe_tidal"/>
-        <keyframe android:fraction="0.85" android:value="0.94"
+        <keyframe android:fraction="0.50" android:value="1.0"
             android:interpolator="@android:interpolator/linear"/>
-        <keyframe android:fraction="1.00" android:value="0.94"/>
+        <keyframe android:fraction="0.85" android:value="0.94"
+            android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+        <keyframe android:fraction="1.00" android:value="0.94"
+            android:interpolator="@android:interpolator/linear"/>
     </propertyValuesHolder>
 </objectAnimator>

@@ -16,7 +16,11 @@ interface SessionDao {
     @Query("SELECT * FROM sessions WHERE id = :sessionId")
     suspend fun getSession(sessionId: String): SessionEntity?
 
-    @Query("SELECT * FROM sessions WHERE clubId = :clubId")
+    // Ordered by lastFetchedAt DESC: a club can have more than one cached session row
+    // (e.g. a finished session whose row was never cleaned up), and without ordering,
+    // callers taking the first result (e.g. ClubLocalDataSource's "active session" lookup)
+    // would get a non-deterministic pick. Most-recently-fetched is the best proxy for "current."
+    @Query("SELECT * FROM sessions WHERE clubId = :clubId ORDER BY lastFetchedAt DESC")
     suspend fun getSessionsForClub(clubId: String): List<SessionEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

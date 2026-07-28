@@ -1,5 +1,7 @@
 package com.ivangarzab.kluvs.ui.clubs
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionNoteInfo
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
@@ -48,6 +51,7 @@ private const val NOTE_MAX_LENGTH = 4000
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscussionNoteSheet(
+    discussionTitle: String? = null,
     note: DiscussionNoteInfo?,
     onSave: (content: String) -> Unit,
     onDelete: () -> Unit,
@@ -62,6 +66,27 @@ fun DiscussionNoteSheet(
         onDismiss = onDismiss,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (discussionTitle != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KluvsTheme.colors.cardAlt, RoundedCornerShape(8.dp))
+                        .border(1.dp, KluvsTheme.colors.divider, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    Text(
+                        text = "DISCUSSION",
+                        style = KluvsTheme.typography.eyebrow,
+                        color = KluvsTheme.colors.contentMuted,
+                    )
+                    Text(
+                        text = discussionTitle,
+                        style = KluvsTheme.typography.body.medium,
+                        color = KluvsTheme.colors.content,
+                    )
+                }
+            }
+
             when {
                 note == null -> {
                     Box(
@@ -70,7 +95,7 @@ fun DiscussionNoteSheet(
                             .padding(vertical = 24.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        LoadingSpinner()
                     }
                 }
 
@@ -152,6 +177,7 @@ fun DiscussionNoteSheet(
 @Composable
 fun Preview_DiscussionNoteSheet() = KluvsTheme {
     DiscussionNoteSheet(
+        discussionTitle = "Chapters 5-8",
         note = DiscussionNoteInfo(noteId = "n1", content = "Bring snacks next time and discuss chapter 5."),
         onSave = {},
         onDelete = {},

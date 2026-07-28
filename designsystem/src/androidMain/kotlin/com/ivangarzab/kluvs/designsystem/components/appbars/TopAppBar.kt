@@ -44,6 +44,8 @@ fun TopAppBar(
     onNavigateBack: (() -> Unit)? = null,
     action: @Composable () -> Unit = {},
 ) {
+    val isLarge = title != null
+
     Column(modifier = modifier.fillMaxWidth()) {
         CompositionLocalProvider(LocalContentColor provides KluvsTheme.colors.content) {
             Row(
@@ -55,26 +57,31 @@ fun TopAppBar(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (onNavigateBack != null) {
-                    IconButton(type = IconType.ArrowBack, contentDescription = "Back", onClick = onNavigateBack)
-                    Spacer(modifier = Modifier.width(4.dp))
+                    IconButton(
+                        type = IconType.ArrowBack,
+                        contentDescription = "Back",
+                        onClick = onNavigateBack
+                    )
                 }
                 Text(
                     text = header.uppercase(),
                     style = KluvsTheme.typography.eyebrow,
                     color = KluvsTheme.colors.contentMuted,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .padding(if (isLarge.not() && onNavigateBack != null) 0.dp else 8.dp)
+                        .weight(1f),
                 )
                 action()
             }
         }
-        if (title != null) {
+        if (isLarge) {
             Text(
                 text = title,
                 style = KluvsTheme.typography.headline.small,
                 color = KluvsTheme.colors.content,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 8.dp)
                     .padding(bottom = 16.dp),
             )
         }

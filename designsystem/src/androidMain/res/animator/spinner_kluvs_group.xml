@@ -9,7 +9,11 @@
     50% → 85%  (2000–3400ms): eased exhale   cubic-bezier(0.4, 0, 0.4, 1)
     85% → 100% (3400–4000ms): held at rest   linear
 
-  Each <keyframe> interpolator controls the curve OUT OF that keyframe.
+  Android's Keyframe.interpolator controls the curve INTO that keyframe (i.e. the
+  segment from the previous keyframe to this one), not out of it — the opposite of
+  what an earlier version of this file assumed, which silently made the eased
+  inhale/exhale segments run linear instead. The first keyframe's interpolator is
+  never read (there's no preceding segment), so it's omitted below.
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:ordering="together">
@@ -19,15 +23,15 @@
         android:duration="4000"
         android:repeatCount="-1">
         <propertyValuesHolder android:propertyName="rotation">
-            <keyframe android:fraction="0.00" android:value="0"
-                android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+            <keyframe android:fraction="0.00" android:value="0"/>
             <keyframe android:fraction="0.35" android:value="120"
-                android:interpolator="@android:interpolator/linear"/>
-            <keyframe android:fraction="0.50" android:value="120"
                 android:interpolator="@interpolator/kluvs_breathe_tidal"/>
-            <keyframe android:fraction="0.85" android:value="240"
+            <keyframe android:fraction="0.50" android:value="120"
                 android:interpolator="@android:interpolator/linear"/>
-            <keyframe android:fraction="1.00" android:value="240"/>
+            <keyframe android:fraction="0.85" android:value="240"
+                android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+            <keyframe android:fraction="1.00" android:value="240"
+                android:interpolator="@android:interpolator/linear"/>
         </propertyValuesHolder>
     </objectAnimator>
 
@@ -36,15 +40,15 @@
         android:duration="4000"
         android:repeatCount="-1">
         <propertyValuesHolder android:propertyName="scaleX">
-            <keyframe android:fraction="0.00" android:value="0.96"
-                android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+            <keyframe android:fraction="0.00" android:value="0.96"/>
             <keyframe android:fraction="0.35" android:value="1.08"
-                android:interpolator="@android:interpolator/linear"/>
-            <keyframe android:fraction="0.50" android:value="1.08"
                 android:interpolator="@interpolator/kluvs_breathe_tidal"/>
-            <keyframe android:fraction="0.85" android:value="0.96"
+            <keyframe android:fraction="0.50" android:value="1.08"
                 android:interpolator="@android:interpolator/linear"/>
-            <keyframe android:fraction="1.00" android:value="0.96"/>
+            <keyframe android:fraction="0.85" android:value="0.96"
+                android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+            <keyframe android:fraction="1.00" android:value="0.96"
+                android:interpolator="@android:interpolator/linear"/>
         </propertyValuesHolder>
     </objectAnimator>
 
@@ -53,15 +57,15 @@
         android:duration="4000"
         android:repeatCount="-1">
         <propertyValuesHolder android:propertyName="scaleY">
-            <keyframe android:fraction="0.00" android:value="0.96"
-                android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+            <keyframe android:fraction="0.00" android:value="0.96"/>
             <keyframe android:fraction="0.35" android:value="1.08"
-                android:interpolator="@android:interpolator/linear"/>
-            <keyframe android:fraction="0.50" android:value="1.08"
                 android:interpolator="@interpolator/kluvs_breathe_tidal"/>
-            <keyframe android:fraction="0.85" android:value="0.96"
+            <keyframe android:fraction="0.50" android:value="1.08"
                 android:interpolator="@android:interpolator/linear"/>
-            <keyframe android:fraction="1.00" android:value="0.96"/>
+            <keyframe android:fraction="0.85" android:value="0.96"
+                android:interpolator="@interpolator/kluvs_breathe_tidal"/>
+            <keyframe android:fraction="1.00" android:value="0.96"
+                android:interpolator="@android:interpolator/linear"/>
         </propertyValuesHolder>
     </objectAnimator>
 

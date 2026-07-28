@@ -13,23 +13,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.clubs.presentation.MemberListItemInfo
 import com.ivangarzab.kluvs.clubs.presentation.SessionParticipantInfo
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
@@ -71,11 +68,7 @@ fun MembersTab(
             Text(
                 text = stringResource(R.string.x_members, members.size),
                 color = KluvsTheme.colors.contentMuted,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontStyle = FontStyle.Italic
-                )
+                style = KluvsTheme.typography.title.small.feature()
             )
             if (isAdminOrAbove) {
                 OutlinedButton(
@@ -118,7 +111,7 @@ fun MembersTab(
             ) {
                 Text(
                     text = stringResource(R.string.invite_others_cta),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
+                    style = KluvsTheme.typography.headline.small.feature(),
                     color = KluvsTheme.colors.contentMuted,
                     textAlign = TextAlign.Center
                 )
@@ -171,20 +164,20 @@ private fun MemberListItem(
                 Text(
                     text = name,
                     color = KluvsTheme.colors.content,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = KluvsTheme.typography.body.large
                 )
                 if (isSelf) {
                     Text(
                         text = stringResource(R.string.you).uppercase(),
                         color = KluvsTheme.colors.accent,
-                        style = MaterialTheme.typography.labelSmall
+                        style = KluvsTheme.typography.eyebrow
                     )
                 }
             }
             Text(
                 text = handle,
                 color = KluvsTheme.colors.contentMuted,
-                style = MaterialTheme.typography.bodyMedium
+                style = KluvsTheme.typography.body.medium
             )
         }
 
@@ -217,7 +210,7 @@ private fun MemberListItem(
                     } else {
                         KluvsTheme.colors.contentMuted
                     },
-                    style = MaterialTheme.typography.labelSmall
+                    style = KluvsTheme.typography.label
                 )
             }
         }

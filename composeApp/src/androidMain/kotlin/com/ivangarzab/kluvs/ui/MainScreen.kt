@@ -18,7 +18,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,14 +41,12 @@ fun MainScreen(
     userId: String,
     initialClubId: String? = null,
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToJoin: () -> Unit = {},
 ) {
     MainScreenContent(
         modifier = modifier,
         userId = userId,
         initialClubId = initialClubId,
         onNavigateToSettings = onNavigateToSettings,
-        onNavigateToJoin = onNavigateToJoin,
     )
 }
 
@@ -60,7 +57,6 @@ fun MainScreenContent(
     userId: String,
     initialClubId: String? = null,
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToJoin: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
 
@@ -187,7 +183,6 @@ fun MainScreenContent(
                     modifier = contentModifier,
                     userId = userId,
                     initialClubId = initialClubId,
-                    onNavigateToJoin = onNavigateToJoin,
                 )
                 2 -> BooksScreen(
                     modifier = contentModifier,

@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -40,6 +38,7 @@ import com.ivangarzab.kluvs.clubs.presentation.SessionParticipantInfo
 import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
@@ -168,7 +167,7 @@ private fun SessionSummary(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.active_session_eyebrow).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
+                            style = KluvsTheme.typography.eyebrow,
                             color = KluvsTheme.colors.accent
                         )
 
@@ -176,7 +175,7 @@ private fun SessionSummary(
 
                         Text(
                             text = sessionDetails.book.title,
-                            style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
+                            style = KluvsTheme.typography.title.large.feature(),
                             color = KluvsTheme.colors.content
                         )
                     }
@@ -192,7 +191,7 @@ private fun SessionSummary(
                 }
                 Text(
                     text = sessionDetails.book.author,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = KluvsTheme.typography.body.medium,
                     color = KluvsTheme.colors.contentMuted
                 )
             }
@@ -213,14 +212,14 @@ private fun SessionSummary(
                     AvatarStack(members = readingMembers, size = 24.dp)
                     Text(
                         text = stringResource(R.string.x_of_y_reading, readingCount, totalMemberCount),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = KluvsTheme.typography.caption,
                         color = KluvsTheme.colors.contentMuted
                     )
                 }
             } else {
                 Text(
                     text = stringResource(R.string.no_participants_yet),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = KluvsTheme.typography.body.medium,
                     color = KluvsTheme.colors.contentMuted
                 )
             }
@@ -265,13 +264,13 @@ private fun NoActiveSessionState(
     ) {
         Text(
             text = stringResource(R.string.no_session_yet_eyebrow).uppercase(),
-            style = MaterialTheme.typography.labelSmall,
+            style = KluvsTheme.typography.eyebrow,
             color = KluvsTheme.colors.contentMuted
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.start_reading_together),
-            style = MaterialTheme.typography.headlineSmall.copy(fontStyle = FontStyle.Italic),
+            style = KluvsTheme.typography.headline.small.feature(),
             color = KluvsTheme.colors.content,
             textAlign = TextAlign.Center
         )
@@ -298,24 +297,24 @@ private fun UpNextTeaser(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.up_next_eyebrow).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = KluvsTheme.typography.eyebrow,
                 color = KluvsTheme.colors.accent
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = discussion.title,
-                style = MaterialTheme.typography.titleSmall,
+                style = KluvsTheme.typography.title.medium,
                 color = KluvsTheme.colors.content
             )
             Text(
                 text = discussion.location,
-                style = MaterialTheme.typography.bodyMedium,
+                style = KluvsTheme.typography.body.medium,
                 color = KluvsTheme.colors.contentMuted
             )
         }
         Text(
             text = discussion.date,
-            style = MaterialTheme.typography.labelSmall,
+            style = KluvsTheme.typography.caption,
             color = KluvsTheme.colors.accent
         )
     }

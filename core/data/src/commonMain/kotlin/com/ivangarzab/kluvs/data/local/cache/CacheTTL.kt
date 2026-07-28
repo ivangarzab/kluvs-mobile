@@ -2,7 +2,7 @@ package com.ivangarzab.kluvs.data.local.cache
 
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Time-to-live (TTL) constants for cached data.
@@ -16,22 +16,23 @@ object CacheTTL {
     val SERVER: Duration = 7.days
 
     /**
-     * Club data TTL: 24 hours
-     * Clubs change infrequently (name, channel, founded date)
+     * Club data TTL: 15 minutes
+     * Clubs embed dynamic nested data (activeSession, members) that changes often,
+     * so this can't be as long-lived as the club's own static fields would allow.
      */
-    val CLUB: Duration = 24.hours
+    val CLUB: Duration = 15.minutes
 
     /**
-     * Member data TTL: 24 hours
-     * Member profiles update occasionally (avatar, points, books read)
+     * Member data TTL: 15 minutes
+     * Member profiles update occasionally (avatar, points, books read).
      */
-    val MEMBER: Duration = 24.hours
+    val MEMBER: Duration = 15.minutes
 
     /**
-     * Session data TTL: 6 hours
-     * Sessions are more dynamic (active status, dates change)
+     * Session data TTL: 15 minutes
+     * Sessions are dynamic (active status, dates change).
      */
-    val SESSION: Duration = 6.hours
+    val SESSION: Duration = 15.minutes
 
     /**
      * Book data TTL: 7 days
@@ -40,33 +41,33 @@ object CacheTTL {
     val BOOK: Duration = 7.days
 
     /**
-     * Shelf data TTL: 1 hour
+     * Shelf data TTL: 15 minutes
      * Shelf assignments are user-authored and change often; mutations
      * already reset freshness, so a short TTL keeps stale reads rare.
      */
-    val SHELF: Duration = 1.hours
+    val SHELF: Duration = 15.minutes
 
     /**
-     * Like data TTL: 1 hour
+     * Like data TTL: 15 minutes
      * Like state is user-authored and toggled frequently.
      */
-    val LIKE: Duration = 1.hours
+    val LIKE: Duration = 15.minutes
 
     /**
-     * Progress data TTL: 1 hour
+     * Progress data TTL: 15 minutes
      * Reading progress updates frequently as the member reads.
      */
-    val PROGRESS: Duration = 1.hours
+    val PROGRESS: Duration = 15.minutes
 
     /**
-     * Discussion note data TTL: 1 hour
+     * Discussion note data TTL: 15 minutes
      * Notes are user-authored and edited often.
      */
-    val DISCUSSION_NOTE: Duration = 1.hours
+    val DISCUSSION_NOTE: Duration = 15.minutes
 
     /**
-     * Discussion attendance data TTL: 1 hour
+     * Discussion attendance data TTL: 15 minutes
      * RSVPs can change up until the discussion happens.
      */
-    val DISCUSSION_ATTENDANCE: Duration = 1.hours
+    val DISCUSSION_ATTENDANCE: Duration = 15.minutes
 }

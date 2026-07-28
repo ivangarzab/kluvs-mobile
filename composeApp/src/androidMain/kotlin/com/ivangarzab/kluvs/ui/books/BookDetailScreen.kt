@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -47,10 +48,9 @@ import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.BookVolumeInfo
 import com.ivangarzab.kluvs.model.ShelfSource
 import com.ivangarzab.kluvs.model.ShelfStatus
-import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.theme.ebGaramond
+import com.ivangarzab.kluvs.designsystem.theme.feature
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -120,22 +120,20 @@ fun BookDetailScreenContent(
             .background(color = KluvsTheme.colors.background)
             .verticalScroll(rememberScrollState())
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                type = IconType.ArrowBack,
-                contentDescription = stringResource(R.string.navigate_back),
-                tint = KluvsTheme.colors.content,
-                onClick = onNavigateBack,
-            )
-        }
+        TopAppBar(
+            header = stringResource(R.string.book_eyebrow),
+            onNavigateBack = onNavigateBack,
+        )
 
         if (state.isMutationInProgress) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        if (state.isLoadingEnrichment) {
+            BookDetailSkeleton(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).padding(bottom = 32.dp)
+            )
+            return
         }
 
         Column(
@@ -158,22 +156,19 @@ fun BookDetailScreenContent(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = book.title,
-                        fontFamily = ebGaramond,
-                        fontStyle = FontStyle.Italic,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = KluvsTheme.typography.headline.small.feature(),
                         color = KluvsTheme.colors.content
                     )
                     volumeInfo?.subtitle?.let { subtitle ->
                         Text(
                             text = subtitle,
-                            fontFamily = ebGaramond,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = KluvsTheme.typography.title.small,
                             color = KluvsTheme.colors.contentMuted
                         )
                     }
                     Text(
                         text = metaLine(book, volumeInfo),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = KluvsTheme.typography.caption,
                         color = KluvsTheme.colors.contentMuted
                     )
                 }
@@ -206,7 +201,7 @@ fun BookDetailScreenContent(
                 val description = volumeInfo?.description
                 Text(
                     text = description ?: stringResource(R.string.book_no_description),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = KluvsTheme.typography.body.medium,
                     fontStyle = if (description == null) FontStyle.Italic else FontStyle.Normal,
                     color = if (description == null) {
                         KluvsTheme.colors.contentMuted
@@ -228,13 +223,12 @@ fun BookDetailScreenContent(
                 }
             }
 
-            if (state.isLoadingEnrichment || state.enrichment?.author != null) {
+            if (state.enrichment?.author != null) {
                 HorizontalDivider()
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SectionEyebrow(stringResource(R.string.book_about_the_author))
                     AuthorSection(
                         modifier = Modifier.fillMaxWidth(),
-                        isLoading = state.isLoadingEnrichment,
                         author = state.enrichment?.author
                     )
                 }
@@ -263,7 +257,7 @@ fun BookDetailScreenContent(
 private fun SectionEyebrow(text: String) {
     Text(
         text = text.uppercase(),
-        style = MaterialTheme.typography.labelSmall,
+        style = KluvsTheme.typography.eyebrow,
         color = KluvsTheme.colors.contentMuted
     )
 }
@@ -275,7 +269,7 @@ private fun CategoryChip(text: String) {
         modifier = Modifier
             .border(1.dp, KluvsTheme.colors.divider, CircleShape)
             .padding(horizontal = 12.dp, vertical = 6.dp),
-        style = MaterialTheme.typography.labelSmall,
+        style = KluvsTheme.typography.label,
         color = KluvsTheme.colors.contentMuted
     )
 }
@@ -291,12 +285,12 @@ private fun DetailRow(label: String, value: String) {
         Text(
             text = label,
             modifier = Modifier.width(90.dp),
-            style = MaterialTheme.typography.bodySmall,
+            style = KluvsTheme.typography.caption,
             color = KluvsTheme.colors.contentMuted
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodySmall,
+            style = KluvsTheme.typography.caption,
             color = KluvsTheme.colors.content
         )
     }

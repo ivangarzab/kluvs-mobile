@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -52,9 +50,12 @@ import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
-import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
 import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
@@ -116,17 +117,27 @@ fun MeScreen(
         )
     }
 
-    Column(modifier = modifier.background(color = MaterialTheme.colorScheme.background)) {
-        MeTopBar(onReadingLogClick = viewModel::onReadingLogClicked)
+    Column(modifier = modifier.background(color = KluvsTheme.colors.background)) {
+        TopAppBar(
+            header = stringResource(R.string.me),
+            action = {
+                ActionMenu(
+                    items = listOf(
+                        ActionMenuItem(label = stringResource(R.string.reading_log), onClick = viewModel::onReadingLogClicked),
+                        ActionMenuItem(label = stringResource(R.string.settings), onClick = onNavigateToSettings),
+                        ActionMenuItem(label = stringResource(R.string.sign_out), onClick = viewModel::onSignOutClicked, isDestructive = true),
+                    ),
+                    contentDescription = stringResource(R.string.profile_menu)
+                )
+            },
+        )
 
         Box(modifier = Modifier.weight(1f)) {
             MeScreenContent(
                 modifier = Modifier,
                 state = state,
                 onRetry = viewModel::refresh,
-                onSettingsClick = onNavigateToSettings,
-                onHelpClick = { /* TODO() */ },
-                onSignOutClick = viewModel::onSignOutClicked,
+                onRefresh = { viewModel.refresh(forceRefresh = true) },
                 onAvatarClick = {
                     imagePickerLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -179,8 +190,7 @@ fun LogoutConfirmationDialog(
     ConfirmationDialog(
         title = stringResource(R.string.logout_confirmation_title),
         message = stringResource(R.string.logout_confirmation_message),
-        confirmLabel = stringResource(R.string.yes),
-        dismissLabel = stringResource(R.string.no),
+        confirmLabel = stringResource(R.string.sign_out),
         isDestructive = true,
         onConfirm = onConfirm,
         onDismiss = onDismiss
@@ -192,16 +202,15 @@ fun MeScreenContent(
     modifier: Modifier = Modifier,
     state: MeState,
     onRetry: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onHelpClick: () -> Unit,
-    onSignOutClick: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onAvatarClick: () -> Unit = {},
     onUpdateProgress: (sessionId: String) -> Unit = {},
 ) {
     val screenState = when {
+        state.profile != null -> ScreenState.Content
         state.isLoading -> ScreenState.Loading
         state.error != null -> ScreenState.Error(state.error!!)
-        else -> ScreenState.Content
+        else -> ScreenState.Empty
     }
 
     AnimatedContent(
@@ -212,62 +221,61 @@ fun MeScreenContent(
         label = "MeScreenTransition"
     ) { targetState ->
         when (targetState) {
-            is ScreenState.Loading -> LoadingScreen()
+            is ScreenState.Loading -> MeScreenSkeleton(modifier = modifier.fillMaxSize())
             is ScreenState.Error -> ErrorScreen(
                 message = targetState.message,
                 onRetry = onRetry
             )
             is ScreenState.Empty,
             is ScreenState.Content -> {
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .background(color = MaterialTheme.colorScheme.background)
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                PullToRefreshContainer(
+                    isLoading = state.isLoading,
+                    onRefresh = onRefresh,
+                    modifier = modifier.fillMaxSize(),
                 ) {
-                    ProfileSection(
-                        avatarUrl = state.profile?.avatarUrl,
-                        name = state.profile?.name ?: "",
-                        handle = state.profile?.handle ?: "",
-                        isUploadingAvatar = state.isUploadingAvatar,
-                        onAvatarClick = onAvatarClick
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = KluvsTheme.colors.background)
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        ProfileSection(
+                            avatarUrl = state.profile?.avatarUrl,
+                            name = state.profile?.name ?: "",
+                            handle = state.profile?.handle ?: "",
+                            isUploadingAvatar = state.isUploadingAvatar,
+                            onAvatarClick = onAvatarClick
+                        )
 
-                    Divider()
-
-                    StatisticsSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        data = state.statistics,
-                        joinDate = state.profile?.joinDate
-                    )
-
-                    Divider()
-
-                    UpNextSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        upNext = state.upNext
-                    )
-
-                    if (state.upNext != null) {
                         Divider()
+
+                        StatisticsSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            data = state.statistics,
+                            joinDate = state.profile?.joinDate
+                        )
+
+                        Divider()
+
+                        UpNextSection(
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth(),
+                            upNext = state.upNext
+                        )
+
+                        if (state.upNext != null) {
+                            Divider()
+                        }
+
+                        ShelfSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            shelf = state.shelf,
+                            onUpdateProgress = onUpdateProgress
+                        )
                     }
-
-                    ShelfSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        shelf = state.shelf,
-                        onUpdateProgress = onUpdateProgress
-                    )
-
-                    Divider()
-
-                    FooterSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        onSettingsClick = onSettingsClick,
-                        onHelpClick = onHelpClick,
-                        onSignOutClick = onSignOutClick,
-                    )
                 }
             }
         }
@@ -305,8 +313,8 @@ private fun ProfileSection(
                 modifier = Modifier
                     .size(24.dp)
                     .align(Alignment.BottomEnd),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = KluvsTheme.colors.accent,
+                contentColor = KluvsTheme.colors.onAccent,
             ) {
                 Icon(
                     type = IconType.Edit,
@@ -321,90 +329,22 @@ private fun ProfileSection(
         Column {
             Text(
                 text = name,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge
+                color = KluvsTheme.colors.content,
+                style = KluvsTheme.typography.headline.small
             )
             Text(
-                text = handle,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium
+                text = "@$handle",
+                color = KluvsTheme.colors.contentMuted,
+                style = KluvsTheme.typography.body.medium
             )
         }
     }
 }
 
 @Composable
-private fun FooterSection(
-    modifier: Modifier = Modifier,
-    onSettingsClick: () -> Unit,
-    onHelpClick: () -> Unit,
-    onSignOutClick: () -> Unit,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        FooterItem(
-            label = stringResource(R.string.settings),
-            icon = IconType.Settings,
-            onClick = onSettingsClick
-        )
-
-        Divider()
-
-//        FooterItem(
-//            label = stringResource(R.string.help_and_support),
-//            icon = IconType.Help,
-//            onClick = onHelpClick
-//        )
-//
-//        Divider()
-
-        FooterItem(
-            label = stringResource(R.string.sign_out),
-            labelColor = MaterialTheme.colorScheme.error,
-            icon = IconType.SignOut,
-            iconColor = MaterialTheme.colorScheme.error,
-            onClick = onSignOutClick
-        )
-
-    }
-}
-
-@Composable
-private fun FooterItem(
-    modifier: Modifier = Modifier,
-    label: String,
-    labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    icon: IconType,
-    iconColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            modifier = Modifier.size(20.dp),
-            type = icon,
-            contentDescription = null,
-            tint = iconColor
-        )
-        Spacer(Modifier.padding(horizontal = 4.dp))
-        Text(
-            text = label,
-            color = labelColor,
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
-@Composable
 private fun Divider(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surfaceVariant
+    color: Color = KluvsTheme.colors.divider
 ) {
     HorizontalDivider(modifier = modifier, color = color)
 }
@@ -412,8 +352,8 @@ private fun Divider(
 @PreviewLightDark
 @Composable
 fun Preview_MeScreen() = KluvsTheme {
-    Column(modifier = Modifier.background(color = MaterialTheme.colorScheme.background)) {
-        MeTopBar()
+    Column(modifier = Modifier.background(color = KluvsTheme.colors.background)) {
+        TopAppBar(header = stringResource(R.string.me))
 
         MeScreenContent(
             state = MeState(
@@ -421,7 +361,7 @@ fun Preview_MeScreen() = KluvsTheme {
                 profile = UserProfile(
                     memberId = "0",
                     name = "Quill",
-                    handle = "@quill-bot",
+                    handle = "quill-bot",
                     joinDate = "2025",
                     avatarUrl = null
                 ),
@@ -448,9 +388,6 @@ fun Preview_MeScreen() = KluvsTheme {
                 )
             ),
             onRetry = { },
-            onSettingsClick = { },
-            onHelpClick = { },
-            onSignOutClick = { },
         )
     }
 }

@@ -29,7 +29,7 @@ import com.ivangarzab.kluvs.designsystem.theme.feature
  * @param statusLabel e.g. "42 of 169 pages" — null renders "Not started".
  * @param leftLabel e.g. "Your progress", "Next · Thu, Dec 31", or a formatted "3 of 5 discussions"
  * string — callers own the exact copy.
- * @param leftLabelEmphasized italicizes [leftLabel] via the `feature` modifier (Caption+feature) —
+ * @param leftLabelEmphasized italicizes [leftLabel] via the `feature` modifier (Title.small+feature) —
  * the Overview tab's discussion-count line used this; plain shelf-row labels don't.
  */
 @Composable
@@ -63,7 +63,7 @@ fun OwnProgressRow(
             Text(
                 text = leftLabel,
                 color = KluvsTheme.colors.contentMuted,
-                style = if (leftLabelEmphasized) KluvsTheme.typography.caption.feature() else KluvsTheme.typography.caption
+                style = if (leftLabelEmphasized) KluvsTheme.typography.title.small.feature() else KluvsTheme.typography.caption
             )
             Text(
                 text = statusLabel ?: "Not started",

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -67,12 +66,12 @@ private fun StatColumn(
         Text(
             text = value,
             color = KluvsTheme.colors.content,
-            style = MaterialTheme.typography.headlineMedium
+            style = KluvsTheme.typography.headline.small
         )
         Text(
             text = label.uppercase(),
             color = KluvsTheme.colors.contentMuted,
-            style = MaterialTheme.typography.labelSmall
+            style = KluvsTheme.typography.eyebrow
         )
     }
 }

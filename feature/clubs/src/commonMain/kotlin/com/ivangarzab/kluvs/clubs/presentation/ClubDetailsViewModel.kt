@@ -87,11 +87,11 @@ class ClubDetailsViewModel(
      * Loads the user's clubs and displays the first club.
      * If the user has no clubs, sets state to show empty state.
      */
-    fun loadUserClubs(userId: String) {
+    fun loadUserClubs(userId: String, forceRefresh: Boolean = false) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            getMemberClubsUseCase(userId)
+            getMemberClubsUseCase(userId, forceRefresh)
                 .onSuccess { clubListItems ->
                     _state.update { it.copy(availableClubs = clubListItems) }
 

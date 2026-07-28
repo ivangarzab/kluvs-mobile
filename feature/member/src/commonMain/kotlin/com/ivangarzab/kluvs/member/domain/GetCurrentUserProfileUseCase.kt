@@ -29,11 +29,12 @@ class GetCurrentUserProfileUseCase(
      * Fetches the profile for the specified user.
      *
      * @param userId The Discord user ID of the current user
+     * @param forceRefresh If true, bypasses cache and fetches fresh data from remote
      * @return Result containing [com.ivangarzab.kluvs.presentation.models.UserProfile] if successful, or error if failed
      */
-    suspend operator fun invoke(userId: String): Result<UserProfile> {
+    suspend operator fun invoke(userId: String, forceRefresh: Boolean = false): Result<UserProfile> {
         Bark.d("Fetching current user profile (User ID: $userId)")
-        return memberRepository.getMemberByUserId(userId).map { member: Member ->
+        return memberRepository.getMemberByUserId(userId, forceRefresh).map { member: Member ->
             val handle = member.handle ?: generateHandleFromName(member.name)
             val profile = UserProfile(
                 memberId = member.id,

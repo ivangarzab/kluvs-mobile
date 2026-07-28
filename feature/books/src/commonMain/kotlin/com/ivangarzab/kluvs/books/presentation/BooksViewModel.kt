@@ -34,7 +34,7 @@ class BooksViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoadingShelf = true, shelfError = null) }
 
-            getShelf()
+            getShelf(forceRefresh)
                 .onSuccess { entries ->
                     Bark.i("Loaded shelf (${entries.size} entries)")
                     _state.update { it.copy(isLoadingShelf = false, shelfEntries = entries) }
