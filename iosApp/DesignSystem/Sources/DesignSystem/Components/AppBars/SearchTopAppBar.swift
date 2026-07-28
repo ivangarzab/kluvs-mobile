@@ -52,7 +52,7 @@ public struct SearchTopAppBar<Action: View>: View {
             TopAppBar(header: header, title: title, onNavigateBack: onNavigateBack) {
                 Group {
                     action()
-                    IconButton(type: .search, contentDescription: "Search", action: { isSearchActive = true }, enabled: !isSearchActive)
+                    OutlinedIconButton(type: .search, contentDescription: "Search", action: { isSearchActive = true }, enabled: !isSearchActive)
                 }
             }
             .opacity(isSearchActive ? 0 : 1)

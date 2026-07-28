@@ -95,6 +95,17 @@
         }
       }
     },
+    "book_eyebrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Book"
+          }
+        }
+      }
+    },
     "book_field_edition" : {
       "extractionState" : "manual",
       "localizations" : {

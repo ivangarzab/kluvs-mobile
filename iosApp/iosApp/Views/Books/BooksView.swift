@@ -148,7 +148,7 @@ private struct ShelfSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .lastTextBaseline, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 // Eyebrow — design-system component.eyebrow: IBM Plex Sans 11px/500, uppercase, 0.14em tracking
                 Text(sectionLabel(section).uppercased())
                     .font(.kluvsModalLabel)

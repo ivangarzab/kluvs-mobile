@@ -93,16 +93,7 @@ struct BookDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.primary)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
+                TopAppBar(header: String(localized: "book_eyebrow"), onNavigateBack: { dismiss() })
 
                 if viewModel.isMutationInProgress {
                     ProgressView()
