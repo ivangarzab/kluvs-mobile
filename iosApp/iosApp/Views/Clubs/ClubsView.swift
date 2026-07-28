@@ -233,10 +233,7 @@ private struct ClubDetailView: View {
                         if viewModel.userRole == .owner || viewModel.userRole == .admin {
                             ActionMenu(items: {
                                 var items = [
-                                    ActionMenuItem(label: "Share", action: {
-                                        viewModel.refresh()
-                                        showShareClubSheet = true
-                                    })
+                                    ActionMenuItem(label: "Share", action: { showShareClubSheet = true })
                                 ]
                                 if viewModel.userRole == .owner {
                                     items.append(ActionMenuItem(label: "Edit", action: {
