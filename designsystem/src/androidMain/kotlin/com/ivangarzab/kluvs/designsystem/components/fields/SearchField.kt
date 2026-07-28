@@ -24,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -55,6 +57,7 @@ fun SearchField(
     placeholder: String = "Search",
     enabled: Boolean = true,
     isLoading: Boolean = false,
+    focusRequester: FocusRequester? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -75,12 +78,6 @@ fun SearchField(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (isLoading) {
-            LoadingSpinner(size = 16.dp)
-        } else {
-            Icon(type = IconType.Search, contentDescription = null, tint = accentColor, modifier = Modifier.size(18.dp))
-        }
-
         Box(modifier = Modifier.weight(1f)) {
             if (value.isEmpty()) {
                 Text(
@@ -92,7 +89,9 @@ fun SearchField(
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .let { if (focusRequester != null) it.focusRequester(focusRequester) else it },
                 enabled = enabled,
                 singleLine = true,
                 textStyle = KluvsTheme.typography.body.medium.copy(color = KluvsTheme.colors.content),
@@ -111,6 +110,12 @@ fun SearchField(
                     .size(18.dp)
                     .clickable(enabled = enabled) { onValueChange("") },
             )
+        }
+
+        if (isLoading) {
+            LoadingSpinner(size = 16.dp)
+        } else {
+            Icon(type = IconType.Search, contentDescription = null, tint = accentColor, modifier = Modifier.size(18.dp))
         }
     }
 }
