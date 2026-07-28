@@ -56,7 +56,6 @@ import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
-import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
@@ -355,62 +354,57 @@ fun ClubsScreenContent(
                         },
                     )
 
-                    state.currentClubDetails?.let { clubDetails ->
-                        ClubMetaRow(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            userRole = state.userRole,
-                            foundedYear = clubDetails.foundedYear,
-                            memberCount = clubDetails.memberCount
-                        )
-                        Spacer(Modifier.height(16.dp))
-                    }
+                    if (state.isLoading && state.currentClubDetails == null) {
+                        ClubDetailsSkeleton(modifier = Modifier.fillMaxSize())
+                    } else {
+                        state.currentClubDetails?.let { clubDetails ->
+                            ClubMetaRow(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                userRole = state.userRole,
+                                foundedYear = clubDetails.foundedYear,
+                                memberCount = clubDetails.memberCount
+                            )
+                            Spacer(Modifier.height(16.dp))
+                        }
 
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage,
-                        modifier = Modifier.fillMaxWidth(),
-                        containerColor = KluvsTheme.colors.background,
-                        contentColor = KluvsTheme.colors.contentMuted,
-                        indicator = { tabPositions ->
-                            if (pagerState.currentPage < tabPositions.size) {
-                                TabRowDefaults.SecondaryIndicator(
-                                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                                    color = KluvsTheme.colors.accent
+                        TabRow(
+                            selectedTabIndex = pagerState.currentPage,
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = KluvsTheme.colors.background,
+                            contentColor = KluvsTheme.colors.contentMuted,
+                            indicator = { tabPositions ->
+                                if (pagerState.currentPage < tabPositions.size) {
+                                    TabRowDefaults.SecondaryIndicator(
+                                        modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                        color = KluvsTheme.colors.accent
+                                    )
+                                }
+                            }
+                        ) {
+                            tabs.forEachIndexed { index, title ->
+                                val selected = pagerState.currentPage == index
+                                Tab(
+                                    selected = selected,
+                                    onClick = {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(index)
+                                        }
+                                    },
+                                    text = {
+                                        Text(
+                                            text = title,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = if (selected) {
+                                                KluvsTheme.colors.accent
+                                            } else {
+                                                KluvsTheme.colors.contentMuted
+                                            }
+                                        )
+                                    }
                                 )
                             }
                         }
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            val selected = pagerState.currentPage == index
-                            Tab(
-                                selected = selected,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                },
-                                text = {
-                                    Text(
-                                        text = title,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = if (selected) {
-                                            KluvsTheme.colors.accent
-                                        } else {
-                                            KluvsTheme.colors.contentMuted
-                                        }
-                                    )
-                                }
-                            )
-                        }
-                    }
 
-                    if (state.isLoading && state.currentClubDetails == null) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LoadingSpinner()
-                        }
-                    } else {
                         val tabModifier = Modifier
                             .background(color = KluvsTheme.colors.background)
                             .fillMaxSize()

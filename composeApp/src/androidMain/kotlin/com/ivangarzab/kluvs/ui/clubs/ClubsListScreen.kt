@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,7 +44,6 @@ import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
-import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
@@ -65,37 +63,36 @@ fun ClubsListScreen(
     onAddClub: () -> Unit = {},
     onJoinWithCode: () -> Unit = {},
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
-        when (screenState) {
-            is ScreenState.Loading -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingSpinner()
-            }
+    Column(modifier = modifier.fillMaxSize()) {
+        TopAppBar(
+            header = stringResource(R.string.your_eyebrow),
+            title = stringResource(R.string.clubs),
+            action = {
+                if (screenState !is ScreenState.Empty) {
+                    OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)
+                }
+            },
+        )
 
-            is ScreenState.Error -> ErrorScreen(
-                message = screenState.message,
-                onRetry = onRetry
-            )
+        Box(modifier = Modifier.weight(1f)) {
+            when (screenState) {
+                is ScreenState.Loading -> ClubsListSkeleton(modifier = Modifier.fillMaxSize())
 
-            is ScreenState.Empty -> ClubsListEmptyState(
-                modifier = Modifier.fillMaxSize(),
-                onJoinWithCode = onJoinWithCode
-            )
+                is ScreenState.Error -> ErrorScreen(
+                    message = screenState.message,
+                    onRetry = onRetry
+                )
 
-            is ScreenState.Content -> PullToRefreshContainer(
-                isLoading = state.isLoading,
-                onRefresh = onRefresh,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    TopAppBar(
-                        header = stringResource(R.string.your_eyebrow),
-                        title = stringResource(R.string.clubs),
-                        action = { OutlinedButton(text = "Join with a code", onClick = onJoinWithCode) },
-                    )
+                is ScreenState.Empty -> ClubsListEmptyState(
+                    modifier = Modifier.fillMaxSize(),
+                    onJoinWithCode = onJoinWithCode
+                )
 
+                is ScreenState.Content -> PullToRefreshContainer(
+                    isLoading = state.isLoading,
+                    onRefresh = onRefresh,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         items(state.availableClubs) { club ->
                             ClubListRow(
@@ -107,22 +104,22 @@ fun ClubsListScreen(
                     }
                 }
             }
-        }
 
-        if (screenState is ScreenState.Content || screenState is ScreenState.Empty) {
-            FloatingActionButton(
-                onClick = onAddClub,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                containerColor = brandPrimary,
-                contentColor = brandOnPrimary
-            ) {
-                Icon(
-                    type = IconType.Add,
-                    contentDescription = "New club"
-                )
+            if (screenState is ScreenState.Content || screenState is ScreenState.Empty) {
+                FloatingActionButton(
+                    onClick = onAddClub,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = brandPrimary,
+                    contentColor = brandOnPrimary
+                ) {
+                    Icon(
+                        type = IconType.Add,
+                        contentDescription = "New club"
+                    )
+                }
             }
         }
     }

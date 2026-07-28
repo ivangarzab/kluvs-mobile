@@ -57,7 +57,6 @@ import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContain
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
-import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
 import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
@@ -223,7 +222,7 @@ fun MeScreenContent(
         label = "MeScreenTransition"
     ) { targetState ->
         when (targetState) {
-            is ScreenState.Loading -> LoadingScreen()
+            is ScreenState.Loading -> MeScreenSkeleton(modifier = modifier.fillMaxSize())
             is ScreenState.Error -> ErrorScreen(
                 message = targetState.message,
                 onRetry = onRetry

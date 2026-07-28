@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -128,6 +130,13 @@ fun BookDetailScreenContent(
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
 
+        if (state.isLoadingEnrichment) {
+            BookDetailSkeleton(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).padding(bottom = 32.dp)
+            )
+            return
+        }
+
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -218,13 +227,12 @@ fun BookDetailScreenContent(
                 }
             }
 
-            if (state.isLoadingEnrichment || state.enrichment?.author != null) {
+            if (state.enrichment?.author != null) {
                 HorizontalDivider()
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SectionEyebrow(stringResource(R.string.book_about_the_author))
                     AuthorSection(
                         modifier = Modifier.fillMaxWidth(),
-                        isLoading = state.isLoadingEnrichment,
                         author = state.enrichment?.author
                     )
                 }
