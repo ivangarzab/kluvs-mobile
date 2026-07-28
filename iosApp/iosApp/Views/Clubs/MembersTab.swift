@@ -25,8 +25,8 @@ struct MembersTab: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         Text("\(members.count) members")
-                            .font(.ebGaramondItalic(size: 16))
-                            .foregroundColor(.secondary)
+                            .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                         Spacer()
                         if isAdminOrAbove {
                             OutlinedButton(text: "+ Invite", action: onInviteMember)
@@ -54,18 +54,10 @@ struct MembersTab: View {
                     if members.count <= 1 && isAdminOrAbove {
                         VStack(spacing: 16) {
                             Text("Invite others to get the conversation going.")
-                                .font(.ebGaramondMediumItalic(size: 20))
-                                .foregroundColor(.secondary)
+                                .kluvsStyle(KluvsTheme.typography.headline.small, feature: true)
+                                .foregroundColor(KluvsTheme.colors.contentMuted)
                                 .multilineTextAlignment(.center)
-                            Button(action: onInviteMember) {
-                                Text("Invite Members")
-                                    .font(.kluvsButtonPrimary)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
-                                    .background(Color.brandOrange)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(12)
-                            }
+                            PrimaryButton(text: "Invite Members", action: onInviteMember)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.top, 20)
@@ -95,16 +87,17 @@ private struct MemberListItem: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
                     Text(member.name)
-                        .font(.kluvsBodyLg)
+                        .kluvsStyle(KluvsTheme.typography.body.large)
+                        .foregroundColor(KluvsTheme.colors.content)
                     if isSelf {
                         Text("YOU")
-                            .font(.plexSansMedium(size: 11))
-                            .foregroundColor(.brandOrange)
+                            .kluvsStyle(KluvsTheme.typography.eyebrow)
+                            .foregroundColor(KluvsTheme.colors.accent)
                     }
                 }
                 Text(member.handle)
-                    .font(.kluvsBody)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
 
             Spacer()
@@ -127,8 +120,8 @@ private struct MemberListItem: View {
                 }
                 if let isReading {
                     Text(isReading ? "Reading" : "Skipping")
-                        .font(.plexSansMedium(size: 11))
-                        .foregroundColor(isReading ? .brandOrange : .secondary)
+                        .kluvsStyle(KluvsTheme.typography.label)
+                        .foregroundColor(isReading ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted)
                 }
             }
         }
