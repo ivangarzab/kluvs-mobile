@@ -78,8 +78,6 @@ struct MeView: View {
                                 }
                             )
 
-                            FooterSection()
-                                .padding(.bottom, 24)
                         }
                         .padding(.horizontal, 16)
                     }
@@ -225,60 +223,6 @@ struct ProfileSection: View {
             Spacer()
         }
         .padding()
-    }
-}
-
-// MARK: - Footer Section
-struct FooterSection: View {
-    var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "button_help_support"), icon: .help, action: {
-                // TODO: Navigate to help & support
-            })
-        }
-    }
-}
-
-struct FooterItem: View {
-    let label: String
-    let icon: IconType
-    let action: (() -> Void)?
-    var labelColor: Color = .primary
-    var iconColor: Color = .primary
-
-    init(label: String, icon: IconType, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
-        self.label = label
-        self.icon = icon
-        self.labelColor = labelColor
-        self.iconColor = iconColor
-        self.action = action
-    }
-
-    var iconSize = 18.0
-
-    var body: some View {
-        Button(action: {
-            action?()
-        }) {
-            HStack(spacing: 12) {
-                icon.image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: iconSize, height: iconSize)
-                    .foregroundColor(iconColor)
-
-                Text(label)
-                    .font(.body)
-                    .foregroundColor(labelColor)
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-        }
-        .disabled(action == nil)
     }
 }
 
