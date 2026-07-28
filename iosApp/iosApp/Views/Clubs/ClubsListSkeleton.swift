@@ -32,6 +32,7 @@ struct ClubsListSkeleton: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

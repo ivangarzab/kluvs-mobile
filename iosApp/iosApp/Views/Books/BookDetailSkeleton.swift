@@ -63,6 +63,7 @@ struct BookDetailSkeleton: View {
                 Bone().frame(width: 220, height: 12)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

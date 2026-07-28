@@ -28,6 +28,7 @@ struct BooksShelfSkeleton: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.vertical, 16)
     }
 }

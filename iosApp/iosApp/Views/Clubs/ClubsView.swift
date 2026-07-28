@@ -256,8 +256,12 @@ private struct ClubDetailView: View {
             }
 
             // Meta row + tab row + tab content are gated together, so the tab row doesn't
-            // sit there statically while the rest of the screen is still loading.
-            if viewModel.isLoading && viewModel.clubDetails == nil {
+            // sit there statically while the rest of the screen is still loading. Gated on
+            // clubDetails alone (not isLoading) - loadClubData's isLoading=true reset runs
+            // inside a coroutine dispatched from selectClub, so there's a brief window right
+            // after navigating in where isLoading can still read false with stale/nil data;
+            // "do we have this club's data yet" is the more robust question to ask.
+            if viewModel.clubDetails == nil {
                 ClubDetailsSkeleton()
                     .padding(.top, 16)
             } else {

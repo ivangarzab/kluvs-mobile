@@ -51,6 +51,7 @@ struct MeScreenSkeleton: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(16)
         .background(KluvsTheme.colors.background)
     }
