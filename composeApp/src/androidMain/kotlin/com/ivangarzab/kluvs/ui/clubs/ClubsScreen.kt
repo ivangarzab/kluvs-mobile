@@ -54,9 +54,8 @@ import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
@@ -324,46 +323,11 @@ fun ClubsScreenContent(
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            type = IconType.ArrowBack,
-                            contentDescription = stringResource(R.string.navigate_back),
-                            tint = KluvsTheme.colors.content,
-                            onClick = onNavigateBack,
-                        )
-                        Text(
-                            text = stringResource(R.string.club_eyebrow).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = KluvsTheme.colors.contentMuted
-                        )
-                    }
-
-                    state.currentClubDetails?.let { clubDetails ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = clubDetails.clubName,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = KluvsTheme.colors.content
-                                )
-                                Spacer(Modifier.height(12.dp))
-                                ClubMetaRow(
-                                    userRole = state.userRole,
-                                    foundedYear = clubDetails.foundedYear,
-                                    memberCount = clubDetails.memberCount
-                                )
-                            }
+                    TopAppBar(
+                        header = stringResource(R.string.club_eyebrow),
+                        title = state.currentClubDetails?.clubName,
+                        onNavigateBack = onNavigateBack,
+                        action = {
                             if (state.userRole == Role.OWNER || state.userRole == Role.ADMIN) {
                                 val canManageClub = state.userRole == Role.OWNER
                                 ActionMenu(
@@ -388,7 +352,16 @@ fun ClubsScreenContent(
                                     contentDescription = "Club options"
                                 )
                             }
-                        }
+                        },
+                    )
+
+                    state.currentClubDetails?.let { clubDetails ->
+                        ClubMetaRow(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            userRole = state.userRole,
+                            foundedYear = clubDetails.foundedYear,
+                            memberCount = clubDetails.memberCount
+                        )
                         Spacer(Modifier.height(16.dp))
                     }
 

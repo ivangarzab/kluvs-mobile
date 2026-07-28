@@ -1,8 +1,11 @@
 package com.ivangarzab.kluvs.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,7 +14,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,8 +28,7 @@ import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.settings.presentation.EditableProfile
 import com.ivangarzab.kluvs.settings.presentation.SettingsState
 import com.ivangarzab.kluvs.settings.presentation.SettingsViewModel
-import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -77,14 +78,9 @@ fun SettingsScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) },
-                navigationIcon = {
-                    IconButton(
-                        type = IconType.Back,
-                        contentDescription = stringResource(R.string.navigate_back),
-                        onClick = onNavigateBack,
-                    )
-                }
+                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+                header = stringResource(R.string.settings_title),
+                onNavigateBack = onNavigateBack,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

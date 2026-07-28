@@ -6,8 +6,10 @@
     <string name="clubs">Kluvs</string>
     <string name="me">Me</string>
     <string name="books">Books</string>
+    <string name="your_shelf_title">Your Shelf</string>
     <string name="general">Overview</string>
     <string name="club_eyebrow">Club</string>
+    <string name="book_eyebrow">Book</string>
     <string name="your_eyebrow">Your</string>
     <string name="active_session_eyebrow">Active Session</string>
     <string name="up_next_eyebrow">Up Next</string>

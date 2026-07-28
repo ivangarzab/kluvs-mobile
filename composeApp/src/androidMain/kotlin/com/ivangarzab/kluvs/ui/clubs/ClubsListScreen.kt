@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +40,7 @@ import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
@@ -90,26 +90,11 @@ fun ClubsListScreen(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Column {
-                            Text(
-                                text = stringResource(R.string.your_eyebrow).uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = KluvsTheme.colors.contentMuted
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.clubs),
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = KluvsTheme.colors.content
-                            )
-                        }
-                        OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)
-                    }
+                    TopAppBar(
+                        header = stringResource(R.string.your_eyebrow),
+                        title = stringResource(R.string.clubs),
+                        action = { OutlinedButton(text = "Join with a code", onClick = onJoinWithCode) },
+                    )
 
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         items(state.availableClubs) { club ->

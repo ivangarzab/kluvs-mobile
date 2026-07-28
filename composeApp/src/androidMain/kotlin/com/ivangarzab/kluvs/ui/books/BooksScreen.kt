@@ -49,6 +49,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.books.presentation.BooksState
 import com.ivangarzab.kluvs.books.presentation.BooksViewModel
+import com.ivangarzab.kluvs.designsystem.components.appbars.SearchTopAppBar
 import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.ShelfEntry
 import com.ivangarzab.kluvs.model.ShelfSource
@@ -166,16 +167,18 @@ fun BooksScreenContent(
     }
 
     Column(modifier = modifier) {
-        BooksTopBar(
+        SearchTopAppBar(
+            header = stringResource(R.string.books),
+            title = stringResource(R.string.your_shelf_title),
             isSearchActive = view == BooksView.Search,
-            isSearching = state.isSearching,
-            query = state.query,
-            onQueryChange = onQueryChange,
-            onSearchClick = { view = BooksView.Search },
-            onBackClick = {
-                view = BooksView.Shelf
-                onQueryChange("")
-            }
+            onSearchActiveChange = { active ->
+                view = if (active) BooksView.Search else BooksView.Shelf
+                if (!active) onQueryChange("")
+            },
+            searchQuery = state.query,
+            onSearchQueryChange = onQueryChange,
+            isSearchLoading = state.isSearching,
+            searchPlaceholder = stringResource(R.string.search_books_hint),
         )
 
         if (state.isMutationInProgress) {

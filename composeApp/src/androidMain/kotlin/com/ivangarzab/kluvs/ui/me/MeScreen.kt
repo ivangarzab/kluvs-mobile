@@ -51,8 +51,11 @@ import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
@@ -117,10 +120,18 @@ fun MeScreen(
     }
 
     Column(modifier = modifier.background(color = MaterialTheme.colorScheme.background)) {
-        MeTopBar(
-            onReadingLogClick = viewModel::onReadingLogClicked,
-            onSettingsClick = onNavigateToSettings,
-            onSignOutClick = viewModel::onSignOutClicked,
+        TopAppBar(
+            header = stringResource(R.string.me),
+            action = {
+                ActionMenu(
+                    items = listOf(
+                        ActionMenuItem(label = stringResource(R.string.reading_log), onClick = viewModel::onReadingLogClicked),
+                        ActionMenuItem(label = stringResource(R.string.settings), onClick = onNavigateToSettings),
+                        ActionMenuItem(label = stringResource(R.string.sign_out), onClick = viewModel::onSignOutClicked, isDestructive = true),
+                    ),
+                    contentDescription = stringResource(R.string.profile_menu)
+                )
+            },
         )
 
         Box(modifier = Modifier.weight(1f)) {
@@ -344,7 +355,7 @@ private fun Divider(
 @Composable
 fun Preview_MeScreen() = KluvsTheme {
     Column(modifier = Modifier.background(color = MaterialTheme.colorScheme.background)) {
-        MeTopBar()
+        TopAppBar(header = stringResource(R.string.me))
 
         MeScreenContent(
             state = MeState(

@@ -47,8 +47,7 @@ import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.BookVolumeInfo
 import com.ivangarzab.kluvs.model.ShelfSource
 import com.ivangarzab.kluvs.model.ShelfStatus
-import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.ebGaramond
 import org.koin.compose.viewmodel.koinViewModel
@@ -120,19 +119,10 @@ fun BookDetailScreenContent(
             .background(color = KluvsTheme.colors.background)
             .verticalScroll(rememberScrollState())
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                type = IconType.ArrowBack,
-                contentDescription = stringResource(R.string.navigate_back),
-                tint = KluvsTheme.colors.content,
-                onClick = onNavigateBack,
-            )
-        }
+        TopAppBar(
+            header = stringResource(R.string.book_eyebrow),
+            onNavigateBack = onNavigateBack,
+        )
 
         if (state.isMutationInProgress) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
