@@ -90,8 +90,6 @@
     <!-- Logout Confirmation -->
     <string name="logout_confirmation_title">Sign Out</string>
     <string name="logout_confirmation_message">Are you sure you want to sign out?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>

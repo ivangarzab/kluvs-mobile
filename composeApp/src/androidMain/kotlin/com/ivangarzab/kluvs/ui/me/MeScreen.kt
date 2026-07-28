@@ -181,8 +181,7 @@ fun LogoutConfirmationDialog(
     ConfirmationDialog(
         title = stringResource(R.string.logout_confirmation_title),
         message = stringResource(R.string.logout_confirmation_message),
-        confirmLabel = stringResource(R.string.yes),
-        dismissLabel = stringResource(R.string.no),
+        confirmLabel = stringResource(R.string.sign_out),
         isDestructive = true,
         onConfirm = onConfirm,
         onDismiss = onDismiss
