@@ -25,7 +25,7 @@ struct MeView: View {
 
             ZStack {
                 if viewModel.isLoading {
-                    LoadingView()
+                    MeScreenSkeleton()
                         .transition(.opacity)
                 } else if let error = viewModel.error {
                     ErrorView(message: error, onRetry: {

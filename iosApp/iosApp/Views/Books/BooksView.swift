@@ -106,7 +106,7 @@ private struct ShelfContent: View {
     var body: some View {
         switch viewModel.shelfScreenState {
         case .loading:
-            LoadingView()
+            BooksShelfSkeleton()
         case .error(let message):
             ErrorView(message: message, onRetry: { viewModel.loadShelf() })
         case .empty:

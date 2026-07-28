@@ -35,7 +35,7 @@ struct ClubsView: View {
             Group {
                 switch viewModel.screenState {
                 case .loading:
-                    LoadingView()
+                    ClubsListSkeleton()
                 case .error(let message):
                     ErrorView(message: message, onRetry: {
                         viewModel.loadUserClubs(userId: userId)
@@ -255,37 +255,33 @@ private struct ClubDetailView: View {
                 }
             }
 
-            // Role/founded/member-count meta row, below the masthead
-            if let clubDetails = viewModel.clubDetails {
-                ClubMetaRow(
-                    userRole: viewModel.userRole,
-                    foundedYear: clubDetails.foundedYear,
-                    memberCount: Int(clubDetails.memberCount)
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-            }
-
-            // Tab selector
-            TabRow(
-                selectedIndex: $selectedTab,
-                titles: [
-                    String(localized: "tab_general"),
-                    String(localized: "tab_discussions"),
-                    String(localized: "tab_members")
-                ]
-            )
-            .padding(.horizontal, 8)
-
-            // Tab content
-            if viewModel.isLoading {
-                Spacer()
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(1.5)
-                Spacer()
+            // Meta row + tab row + tab content are gated together, so the tab row doesn't
+            // sit there statically while the rest of the screen is still loading.
+            if viewModel.isLoading && viewModel.clubDetails == nil {
+                ClubDetailsSkeleton()
+                    .padding(.top, 16)
             } else {
+                if let clubDetails = viewModel.clubDetails {
+                    ClubMetaRow(
+                        userRole: viewModel.userRole,
+                        foundedYear: clubDetails.foundedYear,
+                        memberCount: Int(clubDetails.memberCount)
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+                }
+
+                TabRow(
+                    selectedIndex: $selectedTab,
+                    titles: [
+                        String(localized: "tab_general"),
+                        String(localized: "tab_discussions"),
+                        String(localized: "tab_members")
+                    ]
+                )
+                .padding(.horizontal, 8)
+
                 TabView(selection: $selectedTab) {
                     OverviewTab(
                         clubDetails: viewModel.clubDetails,
