@@ -91,16 +91,6 @@ fun DiscussionBottomSheet(
         },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            InputField(label = "Title", value = title, onValueChange = { title = it })
-            // InputField has no leading-icon slot (unlike the raw OutlinedTextField this
-            // replaces), so the location pin icon this field used to show is dropped — a minor
-            // decorative loss, not a functional one.
-            InputField(label = "Location (optional)", value = location, onValueChange = { location = it })
-            PickerField(label = "Date", value = dateDisplayText, onClick = { showDatePicker = true })
-            if (selectedDateMillis != null) {
-                PickerField(label = "Time", value = timeDisplayText, onClick = { showTimePicker = true })
-            }
-
             if (bookTitle != null) {
                 Column(
                     modifier = Modifier
@@ -120,6 +110,16 @@ fun DiscussionBottomSheet(
                         color = KluvsTheme.colors.content,
                     )
                 }
+            }
+
+            InputField(label = "Title", value = title, onValueChange = { title = it })
+            // InputField has no leading-icon slot (unlike the raw OutlinedTextField this
+            // replaces), so the location pin icon this field used to show is dropped — a minor
+            // decorative loss, not a functional one.
+            InputField(label = "Location (optional)", value = location, onValueChange = { location = it })
+            PickerField(label = "Date", value = dateDisplayText, onClick = { showDatePicker = true })
+            if (selectedDateMillis != null) {
+                PickerField(label = "Time", value = timeDisplayText, onClick = { showTimePicker = true })
             }
         }
     }
