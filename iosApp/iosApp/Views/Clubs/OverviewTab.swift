@@ -120,13 +120,13 @@ struct OverviewTab: View {
                 HStack(spacing: 8) {
                     AvatarStack(members: readingMembers, size: 24)
                     Text("\(readingParticipants.count) of \(totalMemberCount) reading")
-                        .font(.kluvsHelperSm)
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.caption)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                 }
             } else {
                 Text("No participants yet")
-                    .font(.kluvsHelperSm)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
 
             Spacer()
