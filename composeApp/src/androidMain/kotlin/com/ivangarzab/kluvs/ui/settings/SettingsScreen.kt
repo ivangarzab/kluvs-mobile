@@ -103,11 +103,12 @@ fun SettingsScreenContent(
                 onSaveProfile = onSaveProfile,
             )
 
-            HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 12.dp),
+                color = KluvsTheme.colors.divider
+            )
 
             LegalSection(context = context)
-
-//            HorizontalDivider()
 
             AboutSection()
         }

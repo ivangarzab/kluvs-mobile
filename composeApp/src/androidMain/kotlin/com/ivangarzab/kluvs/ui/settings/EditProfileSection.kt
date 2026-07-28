@@ -31,12 +31,12 @@ fun EditProfileSection(
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Text(
-            text = stringResource(R.string.edit_profile),
-            style = KluvsTheme.typography.title.medium,
-            color = KluvsTheme.colors.content
+            text = stringResource(R.string.edit_profile).uppercase(),
+            style = KluvsTheme.typography.eyebrow,
+            color = KluvsTheme.colors.contentMuted
         )
 
-        Spacer(modifier = Modifier.padding(vertical = 4.dp))
+        Spacer(Modifier.height(12.dp))
 
         InputField(
             modifier = Modifier.fillMaxWidth(),

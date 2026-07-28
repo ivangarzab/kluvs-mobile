@@ -32,9 +32,9 @@ fun LegalSection(
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Text(
-            text = stringResource(R.string.legal_title),
-            style = KluvsTheme.typography.title.medium,
-            color = KluvsTheme.colors.content
+            text = stringResource(R.string.legal_title).uppercase(),
+            style = KluvsTheme.typography.eyebrow,
+            color = KluvsTheme.colors.contentMuted
         )
 
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
@@ -44,14 +44,14 @@ fun LegalSection(
             onClick = { openCustomTab(context, PRIVACY_POLICY_URL) }
         )
 
-        HorizontalDivider(modifier = Modifier)
+        HorizontalDivider(color = KluvsTheme.colors.divider)
 
         LegalRow(
             label = stringResource(R.string.terms_of_use),
             onClick = { openCustomTab(context, TERMS_OF_USE_URL) }
         )
 
-        HorizontalDivider(modifier = Modifier)
+        HorizontalDivider(color = KluvsTheme.colors.divider)
     }
 }
 
