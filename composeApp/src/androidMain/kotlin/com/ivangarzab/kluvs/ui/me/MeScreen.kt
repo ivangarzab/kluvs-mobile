@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -118,7 +117,11 @@ fun MeScreen(
     }
 
     Column(modifier = modifier.background(color = MaterialTheme.colorScheme.background)) {
-        MeTopBar(onReadingLogClick = viewModel::onReadingLogClicked)
+        MeTopBar(
+            onReadingLogClick = viewModel::onReadingLogClicked,
+            onSettingsClick = onNavigateToSettings,
+            onSignOutClick = viewModel::onSignOutClicked,
+        )
 
         Box(modifier = Modifier.weight(1f)) {
             MeScreenContent(
@@ -126,9 +129,6 @@ fun MeScreen(
                 state = state,
                 onRetry = viewModel::refresh,
                 onRefresh = { viewModel.refresh(forceRefresh = true) },
-                onSettingsClick = onNavigateToSettings,
-                onHelpClick = { /* TODO() */ },
-                onSignOutClick = viewModel::onSignOutClicked,
                 onAvatarClick = {
                     imagePickerLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -195,9 +195,6 @@ fun MeScreenContent(
     state: MeState,
     onRetry: () -> Unit,
     onRefresh: () -> Unit = onRetry,
-    onSettingsClick: () -> Unit,
-    onHelpClick: () -> Unit,
-    onSignOutClick: () -> Unit,
     onAvatarClick: () -> Unit = {},
     onUpdateProgress: (sessionId: String) -> Unit = {},
 ) {
@@ -268,15 +265,6 @@ fun MeScreenContent(
                             shelf = state.shelf,
                             onUpdateProgress = onUpdateProgress
                         )
-
-                        Divider()
-
-                        FooterSection(
-                            modifier = Modifier.fillMaxWidth(),
-                            onSettingsClick = onSettingsClick,
-                            onHelpClick = onHelpClick,
-                            onSignOutClick = onSignOutClick,
-                        )
                     }
                 }
             }
@@ -344,74 +332,6 @@ private fun ProfileSection(
 }
 
 @Composable
-private fun FooterSection(
-    modifier: Modifier = Modifier,
-    onSettingsClick: () -> Unit,
-    onHelpClick: () -> Unit,
-    onSignOutClick: () -> Unit,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        FooterItem(
-            label = stringResource(R.string.settings),
-            icon = IconType.Settings,
-            onClick = onSettingsClick
-        )
-
-        Divider()
-
-//        FooterItem(
-//            label = stringResource(R.string.help_and_support),
-//            icon = IconType.Help,
-//            onClick = onHelpClick
-//        )
-//
-//        Divider()
-
-        FooterItem(
-            label = stringResource(R.string.sign_out),
-            labelColor = MaterialTheme.colorScheme.error,
-            icon = IconType.SignOut,
-            iconColor = MaterialTheme.colorScheme.error,
-            onClick = onSignOutClick
-        )
-
-    }
-}
-
-@Composable
-private fun FooterItem(
-    modifier: Modifier = Modifier,
-    label: String,
-    labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    icon: IconType,
-    iconColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            modifier = Modifier.size(20.dp),
-            type = icon,
-            contentDescription = null,
-            tint = iconColor
-        )
-        Spacer(Modifier.padding(horizontal = 4.dp))
-        Text(
-            text = label,
-            color = labelColor,
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
-@Composable
 private fun Divider(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.surfaceVariant
@@ -458,9 +378,6 @@ fun Preview_MeScreen() = KluvsTheme {
                 )
             ),
             onRetry = { },
-            onSettingsClick = { },
-            onHelpClick = { },
-            onSignOutClick = { },
         )
     }
 }

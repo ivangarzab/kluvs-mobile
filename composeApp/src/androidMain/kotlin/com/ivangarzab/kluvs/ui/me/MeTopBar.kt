@@ -20,13 +20,15 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 /**
  * Root-mode top bar for the Me tab — mirrors [com.ivangarzab.kluvs.ui.books.BooksTopBar]'s
- * layout (64dp, title left, one trailing utility icon right). Reading Log is
- * the screen's single utility action, exposed via the trailing kebab menu.
+ * layout (64dp, title left, one trailing utility icon right). Reading Log, Settings, and
+ * Sign Out are the screen's utility actions, exposed via the trailing kebab menu.
  */
 @Composable
 fun MeTopBar(
     modifier: Modifier = Modifier,
     onReadingLogClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
+    onSignOutClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -43,7 +45,9 @@ fun MeTopBar(
         )
         ActionMenu(
             items = listOf(
-                ActionMenuItem(label = stringResource(R.string.reading_log), onClick = onReadingLogClick)
+                ActionMenuItem(label = stringResource(R.string.reading_log), onClick = onReadingLogClick),
+                ActionMenuItem(label = stringResource(R.string.settings), onClick = onSettingsClick),
+                ActionMenuItem(label = stringResource(R.string.sign_out), onClick = onSignOutClick, isDestructive = true),
             ),
             contentDescription = stringResource(R.string.profile_menu)
         )
