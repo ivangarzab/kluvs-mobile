@@ -29,6 +29,13 @@ public struct TopAppBar<Action: View>: View {
         self.action = action
     }
 
+    // Matches Android's TopAppBar exactly: the header label gets no extra inline padding only
+    // in the single-row, has-a-back-button case (it sits flush after the button); every other
+    // case — with a title, or with no back button — adds 8pt so it doesn't hug the row edge.
+    private var headerInlinePadding: CGFloat {
+        (title == nil && onNavigateBack != nil) ? 0 : 8
+    }
+
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
@@ -38,6 +45,7 @@ public struct TopAppBar<Action: View>: View {
                 Text(header.uppercased())
                     .kluvsStyle(KluvsTheme.typography.eyebrow)
                     .foregroundColor(KluvsTheme.colors.contentMuted)
+                    .padding(.horizontal, headerInlinePadding)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 action()
             }
@@ -50,7 +58,7 @@ public struct TopAppBar<Action: View>: View {
                     .kluvsStyle(KluvsTheme.typography.headline.small)
                     .foregroundColor(KluvsTheme.colors.content)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 8)
                     .padding(.bottom, 16)
             }
         }
