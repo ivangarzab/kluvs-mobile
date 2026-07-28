@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// "Up Next" section: the nearest upcoming discussion across all of the
 /// member's clubs. Flat section matching the rest of the Me screen — no card
@@ -13,20 +14,21 @@ struct UpNextSection: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(String(localized: "up_next_eyebrow").uppercased())
-                        .font(.kluvsEyebrow)
-                        .foregroundColor(.brandOrange)
+                        .kluvsStyle(KluvsTheme.typography.eyebrow)
+                        .foregroundColor(KluvsTheme.colors.accent)
                     Spacer()
                     Text(upNext.date)
-                        .font(.kluvsEyebrow)
-                        .foregroundColor(.brandOrange)
+                        .kluvsStyle(KluvsTheme.typography.caption)
+                        .foregroundColor(KluvsTheme.colors.accent)
                 }
 
                 Text(upNext.title)
-                    .font(.ebGaramondItalic(size: 20))
+                    .kluvsStyle(KluvsTheme.typography.title.large, feature: true)
+                    .foregroundColor(KluvsTheme.colors.content)
 
                 Text([upNext.clubName, upNext.location].compactMap { $0 }.joined(separator: " — "))
-                    .font(.kluvsBody)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
             .padding()
         }

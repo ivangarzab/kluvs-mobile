@@ -18,17 +18,18 @@ struct ShelfRow: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.bookTitle)
-                            .font(.ebGaramondItalic(size: 17))
+                            .kluvsStyle(KluvsTheme.typography.title.medium, feature: true)
+                            .foregroundColor(KluvsTheme.colors.content)
                             .lineLimit(1)
                         Text(item.bookAuthor)
-                            .font(.kluvsBody)
-                            .foregroundColor(.secondary)
+                            .kluvsStyle(KluvsTheme.typography.body.medium)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                             .lineLimit(1)
                     }
                     Spacer()
                     Text(item.clubName.uppercased())
-                        .font(.kluvsEyebrow)
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.eyebrow)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                 }
 
                 OwnProgressRow(
