@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +30,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 /**
@@ -76,7 +76,7 @@ fun SearchField(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = accentColor)
+            LoadingSpinner(size = 16.dp)
         } else {
             Icon(type = IconType.Search, contentDescription = null, tint = accentColor, modifier = Modifier.size(18.dp))
         }

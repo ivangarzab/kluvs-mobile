@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundLightPlaceholder
@@ -205,12 +205,9 @@ private fun SearchInputBox(
         }
 
         if (isSearching) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(16.dp),
-                strokeWidth = 2.dp,
-                color = accentColor
+            LoadingSpinner(
+                modifier = Modifier.padding(start = 8.dp),
+                size = 16.dp,
             )
         } else {
             Icon(

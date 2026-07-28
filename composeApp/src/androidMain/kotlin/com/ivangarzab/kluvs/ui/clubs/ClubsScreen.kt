@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -58,6 +57,7 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
@@ -425,7 +425,7 @@ fun ClubsScreenContent(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator()
+                            LoadingSpinner()
                         }
                     } else {
                         val tabModifier = Modifier

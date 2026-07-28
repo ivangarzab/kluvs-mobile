@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -110,7 +110,7 @@ private fun JoinScreenContent(
         )
 
         if (state.isLoadingPreview) {
-            CircularProgressIndicator()
+            LoadingSpinner()
         }
 
         state.previewError?.let { error ->

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionNoteInfo
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
@@ -70,7 +70,7 @@ fun DiscussionNoteSheet(
                             .padding(vertical = 24.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        LoadingSpinner()
                     }
                 }
 

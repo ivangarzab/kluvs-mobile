@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +45,7 @@ import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
 /**
@@ -69,7 +69,7 @@ fun ClubsListScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                LoadingSpinner()
             }
 
             is ScreenState.Error -> ErrorScreen(

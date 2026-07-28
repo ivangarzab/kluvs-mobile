@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.model.BookSummary
@@ -55,7 +55,7 @@ fun ReadingLogBottomSheet(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                LoadingSpinner()
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
