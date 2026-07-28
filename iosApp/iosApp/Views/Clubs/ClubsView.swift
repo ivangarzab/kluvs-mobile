@@ -203,54 +203,37 @@ private struct ClubDetailView: View {
                     .tint(.brandOrange)
             }
 
-            // Back row: chevron + "CLUB" eyebrow, mirrors Android's masthead back row
-            HStack(spacing: 4) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.primary)
-                }
-                Text("CLUB")
-                    .font(.kluvsEyebrow)
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-
-            // Masthead: club name + role/founded/member-count meta row, + owner overflow
-            if let clubDetails = viewModel.clubDetails {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(clubDetails.clubName)
-                        .font(.kluvsPageHeading)
-                        .foregroundColor(.primary)
-
-                    HStack(alignment: .top) {
-                        ClubMetaRow(
-                            userRole: viewModel.userRole,
-                            foundedYear: clubDetails.foundedYear,
-                            memberCount: Int(clubDetails.memberCount)
-                        )
-                        Spacer()
-                        if viewModel.userRole == .owner || viewModel.userRole == .admin {
-                            ActionMenu(items: {
-                                var items = [
-                                    ActionMenuItem(label: "Share", action: { showShareClubSheet = true })
-                                ]
-                                if viewModel.userRole == .owner {
-                                    items.append(ActionMenuItem(label: "Edit", action: {
-                                        editClubName = viewModel.clubDetails?.clubName ?? ""
-                                        showEditClubSheet = true
-                                    }))
-                                    items.append(ActionMenuItem(label: "Delete", action: { showDeleteClubAlert = true }, isDestructive: true))
-                                }
-                                return items
-                            }())
+            // Masthead: eyebrow + back + club name + owner overflow, mirrors Android's TopAppBar
+            TopAppBar(
+                header: "Club",
+                title: viewModel.clubDetails?.clubName,
+                onNavigateBack: { dismiss() }
+            ) {
+                if viewModel.userRole == .owner || viewModel.userRole == .admin {
+                    ActionMenu(items: {
+                        var items = [
+                            ActionMenuItem(label: "Share", action: { showShareClubSheet = true })
+                        ]
+                        if viewModel.userRole == .owner {
+                            items.append(ActionMenuItem(label: "Edit", action: {
+                                editClubName = viewModel.clubDetails?.clubName ?? ""
+                                showEditClubSheet = true
+                            }))
+                            items.append(ActionMenuItem(label: "Delete", action: { showDeleteClubAlert = true }, isDestructive: true))
                         }
-                    }
+                        return items
+                    }())
                 }
+            }
+
+            // Role/founded/member-count meta row, below the masthead
+            if let clubDetails = viewModel.clubDetails {
+                ClubMetaRow(
+                    userRole: viewModel.userRole,
+                    foundedYear: clubDetails.foundedYear,
+                    memberCount: Int(clubDetails.memberCount)
+                )
                 .padding(.horizontal, 16)
-                .padding(.top, 16)
                 .padding(.bottom, 8)
             }
 

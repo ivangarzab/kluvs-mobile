@@ -50,20 +50,9 @@ struct ClubsListView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("YOUR")
-                    .font(.kluvsEyebrow)
-                    .foregroundColor(.secondary)
-                Text("Clubs")
-                    .font(.kluvsDisplay2)
-                    .foregroundColor(.primary)
-            }
-            Spacer()
+        TopAppBar(header: "Your", title: "Clubs") {
             OutlinedButton(text: "Join with a code", action: onJoinWithCode)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 20)
     }
 
     private var emptyState: some View {
