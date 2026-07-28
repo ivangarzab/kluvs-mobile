@@ -57,7 +57,7 @@ struct ClubsListView: View {
                     .foregroundColor(.primary)
             }
             Spacer()
-            Button("Join with a code", action: onJoinWithCode)
+            OutlinedButton(text: "Join with a code", action: onJoinWithCode)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 20)
@@ -70,7 +70,7 @@ struct ClubsListView: View {
             Text("Join a club to get started")
                 .font(.kluvsBody)
                 .foregroundColor(.secondary)
-            Button("Join with a code", action: onJoinWithCode)
+            OutlinedButton(text: "Join with a code", action: onJoinWithCode)
         }
     }
 }

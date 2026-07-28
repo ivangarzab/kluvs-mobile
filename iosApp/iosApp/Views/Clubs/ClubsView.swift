@@ -40,7 +40,7 @@ struct ClubsView: View {
                         Text(String(localized: "empty_no_clubs_hint"))
                             .font(.kluvsBody)
                             .foregroundColor(.secondary)
-                        Button("Join with a code", action: onNavigateToJoin)
+                        OutlinedButton(text: "Join with a code", action: onNavigateToJoin)
                     }
                 case .content:
                     ClubsListView(
