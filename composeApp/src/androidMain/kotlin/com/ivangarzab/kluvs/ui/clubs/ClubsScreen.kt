@@ -657,6 +657,8 @@ fun ClubsScreenContent(
                 openNoteDiscussionId?.let { discussionId ->
                     LaunchedEffect(discussionId) { onLoadDiscussionNote(discussionId) }
                     DiscussionNoteSheet(
+                        discussionTitle = state.activeSession?.discussions
+                            ?.firstOrNull { it.id == discussionId }?.title,
                         note = state.discussionNotes[discussionId],
                         onSave = { content -> onSaveDiscussionNote(discussionId, content) },
                         onDelete = {
