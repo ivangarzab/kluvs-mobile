@@ -4,6 +4,7 @@
 //
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// "About the Author" body: photo + name row, then bio below full-width (mirrors web's
 /// vertical stack). Shows a shimmer while loading, and is silently omitted entirely if
@@ -33,14 +34,14 @@ struct AuthorSectionView: View {
                     }
                     if let name = author.name {
                         Text(name)
-                            .font(.ebGaramond(size: 18))
-                            .foregroundColor(.primary)
+                            .kluvsStyle(KluvsTheme.typography.title.medium)
+                            .foregroundColor(KluvsTheme.colors.content)
                     }
                 }
                 if let bio = author.bio {
                     Text(bio)
-                        .font(.kluvsBody)
-                        .foregroundColor(.primary)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.content)
                 }
             }
         }

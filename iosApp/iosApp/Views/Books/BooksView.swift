@@ -113,8 +113,8 @@ private struct ShelfContent: View {
             VStack {
                 Spacer()
                 Text(String(localized: "no_books_shelved"))
-                    .font(.kluvsBodyLg)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.large)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
                 Spacer()
             }
         case .content:
@@ -151,11 +151,10 @@ private struct ShelfSectionView: View {
             HStack(alignment: .center, spacing: 8) {
                 // Eyebrow — design-system component.eyebrow: IBM Plex Sans 11px/500, uppercase, 0.14em tracking
                 Text(sectionLabel(section).uppercased())
-                    .font(.kluvsModalLabel)
-                    .kerning(1.5) // ~0.14em at 11pt
+                    .kluvsStyle(KluvsTheme.typography.eyebrow)
                     .foregroundColor(eyebrowColor)
                 Text("\(entries.count)")
-                    .font(.system(size: 10))
+                    .font(.plexSans(size: 10))
                     .foregroundColor(countColor)
             }
             .padding(.horizontal, 16)
@@ -241,10 +240,10 @@ private struct SearchEmptyState: View {
                 VStack(spacing: 4) {
                     Text(heading)
                         .font(.ebGaramondMediumItalic(size: 28))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                     Text(bodyText)
-                        .font(.kluvsBody)
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }
