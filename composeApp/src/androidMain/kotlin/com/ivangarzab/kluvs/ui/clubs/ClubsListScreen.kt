@@ -41,8 +41,8 @@ import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
-import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
@@ -108,7 +108,7 @@ fun ClubsListScreen(
                                 color = KluvsTheme.colors.content
                             )
                         }
-                        TextButton(text = "Join with a code", onClick = onJoinWithCode)
+                        OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)
                     }
 
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -237,7 +237,7 @@ private fun ClubsListEmptyState(modifier: Modifier = Modifier, onJoinWithCode: (
                 style = MaterialTheme.typography.bodyMedium,
                 color = KluvsTheme.colors.contentMuted
             )
-            TextButton(text = "Join with a code", onClick = onJoinWithCode)
+            OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)
         }
     }
 }
