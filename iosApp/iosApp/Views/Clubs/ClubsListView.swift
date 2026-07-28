@@ -58,10 +58,11 @@ struct ClubsListView: View {
     private var emptyState: some View {
         VStack(spacing: 8) {
             Text("No clubs yet")
-                .font(.kluvsSectionHeading)
+                .kluvsStyle(KluvsTheme.typography.headline.small)
+                .foregroundColor(KluvsTheme.colors.content)
             Text("Join a club to get started")
-                .font(.kluvsBody)
-                .foregroundColor(.secondary)
+                .kluvsStyle(KluvsTheme.typography.body.medium)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
             OutlinedButton(text: "Join with a code", action: onJoinWithCode)
         }
     }
@@ -77,8 +78,8 @@ private struct ClubListRow: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
                     Text(club.name)
-                        .font(.kluvsCardHeading)
-                        .foregroundColor(.primary)
+                        .kluvsStyle(KluvsTheme.typography.title.medium)
+                        .foregroundColor(KluvsTheme.colors.content)
                     if let role = club.role {
                         RoleEyebrow(role: role)
                     }
@@ -86,8 +87,8 @@ private struct ClubListRow: View {
 
                 if let bookTitle = club.bookTitle {
                     Text(bookTitle)
-                        .font(.ebGaramondItalic(size: 14))
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                 }
 
                 if !club.memberAvatarUrls.isEmpty {
@@ -103,7 +104,7 @@ private struct ClubListRow: View {
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundColor(.secondary)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)

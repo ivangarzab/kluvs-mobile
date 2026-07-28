@@ -43,10 +43,11 @@ struct ClubsView: View {
                 case .empty:
                     VStack(spacing: 8) {
                         Text(String(localized: "empty_no_clubs"))
-                            .font(.kluvsSectionHeading)
+                            .kluvsStyle(KluvsTheme.typography.headline.small)
+                            .foregroundColor(KluvsTheme.colors.content)
                         Text(String(localized: "empty_no_clubs_hint"))
-                            .font(.kluvsBody)
-                            .foregroundColor(.secondary)
+                            .kluvsStyle(KluvsTheme.typography.body.medium)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                         OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
                     }
                 case .content:
@@ -649,13 +650,13 @@ private struct ClubMetaRow: View {
             }
             if let foundedYear {
                 Text("FOUNDED \(foundedYear)".uppercased())
-                    .font(.plexSansMedium(size: 11))
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.eyebrow)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
                 metaDot
             }
             Text("\(memberCount) MEMBERS".uppercased())
-                .font(.plexSansMedium(size: 11))
-                .foregroundColor(.secondary)
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
         }
     }
 
