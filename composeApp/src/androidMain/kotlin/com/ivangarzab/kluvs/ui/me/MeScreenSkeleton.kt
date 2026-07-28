@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +37,7 @@ fun MeScreenSkeleton(modifier: Modifier = Modifier) {
 
     Column(
         modifier = modifier
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = KluvsTheme.colors.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -51,7 +50,7 @@ fun MeScreenSkeleton(modifier: Modifier = Modifier) {
             }
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(color = KluvsTheme.colors.divider)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -68,7 +67,7 @@ fun MeScreenSkeleton(modifier: Modifier = Modifier) {
             }
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(color = KluvsTheme.colors.divider)
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -78,7 +77,7 @@ fun MeScreenSkeleton(modifier: Modifier = Modifier) {
             Column(modifier = Modifier.fillMaxWidth(0.7f).height(24.dp).bone()) {}
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(color = KluvsTheme.colors.divider)
 
         Column(
             modifier = Modifier.fillMaxWidth(),

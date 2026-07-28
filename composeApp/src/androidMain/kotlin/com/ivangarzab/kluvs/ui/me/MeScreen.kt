@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -118,7 +117,7 @@ fun MeScreen(
         )
     }
 
-    Column(modifier = modifier.background(color = MaterialTheme.colorScheme.background)) {
+    Column(modifier = modifier.background(color = KluvsTheme.colors.background)) {
         TopAppBar(
             header = stringResource(R.string.me),
             action = {
@@ -237,7 +236,7 @@ fun MeScreenContent(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(color = MaterialTheme.colorScheme.background)
+                            .background(color = KluvsTheme.colors.background)
                             .verticalScroll(rememberScrollState())
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -314,8 +313,8 @@ private fun ProfileSection(
                 modifier = Modifier
                     .size(24.dp)
                     .align(Alignment.BottomEnd),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = KluvsTheme.colors.accent,
+                contentColor = KluvsTheme.colors.onAccent,
             ) {
                 Icon(
                     type = IconType.Edit,
@@ -330,12 +329,12 @@ private fun ProfileSection(
         Column {
             Text(
                 text = name,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = KluvsTheme.colors.content,
                 style = KluvsTheme.typography.headline.small
             )
             Text(
                 text = handle,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = KluvsTheme.colors.contentMuted,
                 style = KluvsTheme.typography.body.medium
             )
         }
@@ -345,7 +344,7 @@ private fun ProfileSection(
 @Composable
 private fun Divider(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surfaceVariant
+    color: Color = KluvsTheme.colors.divider
 ) {
     HorizontalDivider(modifier = modifier, color = color)
 }
@@ -353,7 +352,7 @@ private fun Divider(
 @PreviewLightDark
 @Composable
 fun Preview_MeScreen() = KluvsTheme {
-    Column(modifier = Modifier.background(color = MaterialTheme.colorScheme.background)) {
+    Column(modifier = Modifier.background(color = KluvsTheme.colors.background)) {
         TopAppBar(header = stringResource(R.string.me))
 
         MeScreenContent(
