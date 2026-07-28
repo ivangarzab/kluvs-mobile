@@ -17,11 +17,18 @@ func formatPercent(_ value: Float) -> String {
 struct ClubsView: View {
     let userId: String
     var initialClubId: String? = nil
+    /// Unused today — "Join with a code" now opens a local `JoinFields` bottom sheet instead
+    /// (matches Android's move away from a full-screen nav destination). Kept wired from
+    /// `ContentView` for the not-yet-built deep-link case (tapping a raw invite URL while
+    /// signed out needs a full screen to land on before auth resolves), same reasoning as
+    /// Android's still-registered-but-unused `JoinScreen` route.
     var onNavigateToJoin: () -> Void = {}
     @StateObject private var viewModel = ClubDetailsViewModelWrapper()
+    @StateObject private var joinViewModel = JoinViewModelWrapper()
     @State private var path = NavigationPath()
     @State private var showCreateClubSheet = false
     @State private var newClubName = ""
+    @State private var showJoinSheet = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -40,7 +47,7 @@ struct ClubsView: View {
                         Text(String(localized: "empty_no_clubs_hint"))
                             .font(.kluvsBody)
                             .foregroundColor(.secondary)
-                        OutlinedButton(text: "Join with a code", action: onNavigateToJoin)
+                        OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
                     }
                 case .content:
                     ClubsListView(
@@ -53,7 +60,7 @@ struct ClubsView: View {
                             newClubName = ""
                             showCreateClubSheet = true
                         },
-                        onJoinWithCode: onNavigateToJoin,
+                        onJoinWithCode: { showJoinSheet = true },
                         isRefreshing: viewModel.isLoading,
                         onRefresh: { viewModel.loadUserClubs(userId: userId, forceRefresh: true) }
                     )
@@ -77,6 +84,27 @@ struct ClubsView: View {
                 viewModel.selectClub(clubId: clubId)
                 path.append(clubId)
             }
+        }
+        .onChange(of: joinViewModel.joinedClubId) { _, newValue in
+            if let clubId = newValue {
+                joinViewModel.onConsumeJoinedClubId()
+                showJoinSheet = false
+                viewModel.selectClub(clubId: clubId)
+                path.append(clubId)
+            }
+        }
+        .kluvsBottomSheet(isPresented: $showJoinSheet, header: "Join with a Code") {
+            JoinFields(viewModel: joinViewModel)
+        } footer: {
+            let hasPreview = joinViewModel.preview != nil
+            BottomSheetFooter(
+                actionLabel: hasPreview ? (joinViewModel.isJoining ? "Joining…" : "Join") : "Preview",
+                onAction: hasPreview ? { joinViewModel.onJoinClicked() } : { joinViewModel.previewInvite() },
+                onCancel: { showJoinSheet = false },
+                actionEnabled: hasPreview
+                    ? !joinViewModel.isJoining
+                    : !joinViewModel.tokenInput.trimmingCharacters(in: .whitespaces).isEmpty && !joinViewModel.isLoadingPreview
+            )
         }
         .kluvsBottomSheet(isPresented: $showCreateClubSheet, header: "New Club") {
             CreateClubFields(name: $newClubName)
