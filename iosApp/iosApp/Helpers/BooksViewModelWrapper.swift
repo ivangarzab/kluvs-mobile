@@ -15,6 +15,7 @@ enum ShelfScreenState {
 @MainActor
 class BooksViewModelWrapper: ObservableObject {
     @Published var shelfScreenState: ShelfScreenState = .loading
+    @Published var isRefreshingShelf: Bool = false
     @Published var shelfEntries: [Shared.ShelfEntry] = []
     @Published var likedBookIds: Set<String> = []
     @Published var query: String = ""
@@ -37,11 +38,12 @@ class BooksViewModelWrapper: ObservableObject {
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.shelfScreenState = {
-                    if state.isLoadingShelf { return .loading }
                     if !state.shelfEntries.isEmpty { return .content }
+                    if state.isLoadingShelf { return .loading }
                     if let error = state.shelfError { return .error(error) }
                     return .empty
                 }()
+                self.isRefreshingShelf = state.isLoadingShelf
                 self.shelfEntries = state.shelfEntries
                 self.likedBookIds = Set(state.likedBookIds)
                 self.query = state.query

@@ -129,6 +129,9 @@ private struct ShelfContent: View {
                 }
                 .padding(.bottom, 16)
             }
+            .kluvsPullToRefresh(isRefreshing: viewModel.isRefreshingShelf) {
+                viewModel.loadShelf(forceRefresh: true)
+            }
         }
     }
 }

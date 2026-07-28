@@ -53,7 +53,9 @@ struct ClubsView: View {
                             newClubName = ""
                             showCreateClubSheet = true
                         },
-                        onJoinWithCode: onNavigateToJoin
+                        onJoinWithCode: onNavigateToJoin,
+                        isRefreshing: viewModel.isLoading,
+                        onRefresh: { viewModel.loadUserClubs(userId: userId, forceRefresh: true) }
                     )
                 }
             }

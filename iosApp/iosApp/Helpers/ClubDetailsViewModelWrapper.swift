@@ -70,10 +70,10 @@ class ClubDetailsViewModelWrapper: ObservableObject {
         cancellables.append(stateCancellable)
     }
 
-    func loadUserClubs(userId: String) { helper.loadUserClubs(userId: userId) }
+    func loadUserClubs(userId: String, forceRefresh: Bool = false) { helper.loadUserClubs(userId: userId, forceRefresh: forceRefresh) }
     func loadClubData(clubId: String) { helper.loadClubData(clubId: clubId) }
     func selectClub(clubId: String) { helper.selectClub(clubId: clubId) }
-    func refresh() { helper.refresh() }
+    func refresh(forceRefresh: Bool = false) { helper.refresh(forceRefresh: forceRefresh) }
 
     func onCreateClub(userId: String, name: String) { helper.onCreateClub(userId: userId, name: name) }
     func onConsumeCreatedClubId() { helper.onConsumeCreatedClubId() }

@@ -10,6 +10,8 @@ struct ClubsListView: View {
     let onClubSelected: (String) -> Void
     let onAddClub: () -> Void
     var onJoinWithCode: () -> Void = {}
+    var isRefreshing: Bool = false
+    var onRefresh: () -> Void = {}
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -31,6 +33,7 @@ struct ClubsListView: View {
                     }
                 }
                 .background(Color.kluvsBackground)
+                .kluvsPullToRefresh(isRefreshing: isRefreshing, onRefresh: onRefresh)
             }
 
             Button(action: onAddClub) {
