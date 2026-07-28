@@ -267,15 +267,15 @@ private struct ClubDetailView: View {
             }
 
             // Tab selector
-            Picker("", selection: $selectedTab) {
-                Text("tab_general").tag(0)
-                Text("tab_discussions").tag(1)
-                Text("tab_members").tag(2)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .tint(.brandOrange)
-            .padding(.horizontal)
-            .padding(.top, 8)
+            TabRow(
+                selectedIndex: $selectedTab,
+                titles: [
+                    String(localized: "tab_general"),
+                    String(localized: "tab_discussions"),
+                    String(localized: "tab_members")
+                ]
+            )
+            .padding(.horizontal, 8)
 
             // Tab content
             if viewModel.isLoading {
