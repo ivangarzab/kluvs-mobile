@@ -17,7 +17,11 @@ struct MeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            MeTopBar(onReadingLogClick: { viewModel.onReadingLogClicked() })
+            MeTopBar(
+                onReadingLogClick: { viewModel.onReadingLogClicked() },
+                onSettingsClick: { showSettings = true },
+                onSignOutClick: { viewModel.onSignOutClicked() }
+            )
 
             ZStack {
                 if viewModel.isLoading {
@@ -74,11 +78,8 @@ struct MeView: View {
                                 }
                             )
 
-                            FooterSection(
-                                onSignOut: { viewModel.onSignOutClicked() },
-                                onNavigateToSettings: { showSettings = true }
-                            )
-                            .padding(.bottom, 24)
+                            FooterSection()
+                                .padding(.bottom, 24)
                         }
                         .padding(.horizontal, 16)
                     }
@@ -229,27 +230,14 @@ struct ProfileSection: View {
 
 // MARK: - Footer Section
 struct FooterSection: View {
-    let onSignOut: () -> Void
-    let onNavigateToSettings: () -> Void
-
     var body: some View {
         VStack(spacing: 0) {
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "button_settings"), icon: .settings, action: onNavigateToSettings)
-
             Divider()
                 .padding(.vertical, 12)
 
             FooterItem(label: String(localized: "button_help_support"), icon: .help, action: {
                 // TODO: Navigate to help & support
             })
-
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "sign_out"), icon: .signOut, labelColor: .red, iconColor: .red, action: onSignOut)
         }
     }
 }
