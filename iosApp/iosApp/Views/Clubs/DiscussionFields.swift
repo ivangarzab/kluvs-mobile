@@ -18,6 +18,23 @@ struct DiscussionFields: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            if let bookTitle {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("READING SESSION")
+                        .kluvsStyle(KluvsTheme.typography.eyebrow)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
+                    Text(bookTitle)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.content)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(KluvsTheme.colors.cardAlt)
+                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(KluvsTheme.colors.divider, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+
             VStack(alignment: .leading, spacing: 12) {
                 InputField(label: "Title", value: $title)
                 InputField(label: "Location (optional)", value: $location)
@@ -34,23 +51,6 @@ struct DiscussionFields: View {
                 )
                 .datePickerStyle(.compact)
                 .labelsHidden()
-            }
-
-            if let bookTitle {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("READING SESSION")
-                        .kluvsStyle(KluvsTheme.typography.eyebrow)
-                        .foregroundColor(KluvsTheme.colors.contentMuted)
-                    Text(bookTitle)
-                        .kluvsStyle(KluvsTheme.typography.body.medium)
-                        .foregroundColor(KluvsTheme.colors.content)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(KluvsTheme.colors.cardAlt)
-                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(KluvsTheme.colors.divider, lineWidth: 1))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
     }
