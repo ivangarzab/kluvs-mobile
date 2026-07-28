@@ -261,6 +261,7 @@ private struct ClubDetailView: View {
                     foundedYear: clubDetails.foundedYear,
                     memberCount: Int(clubDetails.memberCount)
                 )
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 8)
             }
