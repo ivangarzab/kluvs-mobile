@@ -23,6 +23,8 @@ public struct SearchTopAppBar<Action: View>: View {
     var isSearchLoading: Bool
     var searchPlaceholder: String
 
+    @FocusState private var isSearchFieldFocused: Bool
+
     public init(
         header: String,
         isSearchActive: Binding<Bool>,
@@ -60,17 +62,23 @@ public struct SearchTopAppBar<Action: View>: View {
 
             HStack {
                 IconButton(type: .arrowBack, contentDescription: "Close search", action: { isSearchActive = false }, tint: KluvsTheme.colors.content)
-                SearchField(value: $searchQuery, placeholder: searchPlaceholder, isLoading: isSearchLoading)
+                SearchField(value: $searchQuery, placeholder: searchPlaceholder, isLoading: isSearchLoading, focus: $isSearchFieldFocused)
             }
             .padding(.horizontal, 8)
             .frame(height: topAppBarRowHeight)
             .scaleEffect(x: isSearchActive ? 1 : 0, y: 1, anchor: .trailing)
             .opacity(isSearchActive ? 1 : 0)
-            .animation(.easeOut(duration: searchUnfurlDuration), value: isSearchActive)
+            .animation(.easeInOut(duration: searchUnfurlDuration), value: isSearchActive)
         }
         .frame(height: barHeight)
         .animation(.easeOut(duration: searchUnfurlDuration), value: barHeight)
         .clipped()
+        // Mirrors Android's LaunchedEffect(isSearchActive): opening search focuses the field
+        // (and shows the keyboard); closing it explicitly resigns focus, since SwiftUI won't
+        // dismiss the keyboard on its own just because the field scaled/faded out.
+        .onChange(of: isSearchActive) { _, active in
+            isSearchFieldFocused = active
+        }
     }
 }
 
