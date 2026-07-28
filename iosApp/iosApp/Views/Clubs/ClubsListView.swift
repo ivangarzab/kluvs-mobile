@@ -9,7 +9,6 @@ struct ClubsListView: View {
     let clubs: [Shared.ClubListItem]
     let onClubSelected: (String) -> Void
     let onAddClub: () -> Void
-    var onJoinWithCode: () -> Void = {}
     var isRefreshing: Bool = false
     var onRefresh: () -> Void = {}
 
@@ -17,24 +16,19 @@ struct ClubsListView: View {
         ZStack(alignment: .bottomTrailing) {
             Color.kluvsBackground.ignoresSafeArea()
 
-            if clubs.isEmpty {
-                emptyState
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        header
-                        ForEach(clubs, id: \.id) { club in
-                            Button(action: { onClubSelected(club.id) }) {
-                                ClubListRow(club: club)
-                            }
-                            .buttonStyle(.plain)
-                            Divider()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(clubs, id: \.id) { club in
+                        Button(action: { onClubSelected(club.id) }) {
+                            ClubListRow(club: club)
                         }
+                        .buttonStyle(.plain)
+                        Divider()
                     }
                 }
-                .background(Color.kluvsBackground)
-                .kluvsPullToRefresh(isRefreshing: isRefreshing, onRefresh: onRefresh)
             }
+            .background(Color.kluvsBackground)
+            .kluvsPullToRefresh(isRefreshing: isRefreshing, onRefresh: onRefresh)
 
             Button(action: onAddClub) {
                 Image(systemName: "plus")
@@ -46,24 +40,6 @@ struct ClubsListView: View {
                     .shadow(radius: 4)
             }
             .padding(16)
-        }
-    }
-
-    private var header: some View {
-        TopAppBar(header: "Your", title: "Clubs") {
-            OutlinedButton(text: "Join with a code", action: onJoinWithCode)
-        }
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 8) {
-            Text("No clubs yet")
-                .kluvsStyle(KluvsTheme.typography.headline.small)
-                .foregroundColor(KluvsTheme.colors.content)
-            Text("Join a club to get started")
-                .kluvsStyle(KluvsTheme.typography.body.medium)
-                .foregroundColor(KluvsTheme.colors.contentMuted)
-            OutlinedButton(text: "Join with a code", action: onJoinWithCode)
         }
     }
 }

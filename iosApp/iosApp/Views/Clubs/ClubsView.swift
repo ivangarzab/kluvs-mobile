@@ -30,41 +30,56 @@ struct ClubsView: View {
     @State private var newClubName = ""
     @State private var showJoinSheet = false
 
+    private var isEmptyScreenState: Bool {
+        if case .empty = viewModel.screenState { return true }
+        return false
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
-            Group {
-                switch viewModel.screenState {
-                case .loading:
-                    ClubsListSkeleton()
-                case .error(let message):
-                    ErrorView(message: message, onRetry: {
-                        viewModel.loadUserClubs(userId: userId)
-                    })
-                case .empty:
-                    VStack(spacing: 8) {
-                        Text(String(localized: "empty_no_clubs"))
-                            .kluvsStyle(KluvsTheme.typography.headline.small)
-                            .foregroundColor(KluvsTheme.colors.content)
-                        Text(String(localized: "empty_no_clubs_hint"))
-                            .kluvsStyle(KluvsTheme.typography.body.medium)
-                            .foregroundColor(KluvsTheme.colors.contentMuted)
+            VStack(spacing: 0) {
+                // Always rendered, matching Android's ClubsListScreen - the header must not
+                // disappear during loading/error/empty, only the content below it changes.
+                TopAppBar(header: "Your", title: "Clubs") {
+                    // Empty state already shows its own "Join with a code" button.
+                    if !isEmptyScreenState {
                         OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
                     }
-                case .content:
-                    ClubsListView(
-                        clubs: viewModel.availableClubs,
-                        onClubSelected: { clubId in
-                            viewModel.selectClub(clubId: clubId)
-                            path.append(clubId)
-                        },
-                        onAddClub: {
-                            newClubName = ""
-                            showCreateClubSheet = true
-                        },
-                        onJoinWithCode: { showJoinSheet = true },
-                        isRefreshing: viewModel.isLoading,
-                        onRefresh: { viewModel.loadUserClubs(userId: userId, forceRefresh: true) }
-                    )
+                }
+
+                Group {
+                    switch viewModel.screenState {
+                    case .loading:
+                        ClubsListSkeleton()
+                    case .error(let message):
+                        ErrorView(message: message, onRetry: {
+                            viewModel.loadUserClubs(userId: userId)
+                        })
+                    case .empty:
+                        VStack(spacing: 8) {
+                            Text(String(localized: "empty_no_clubs"))
+                                .kluvsStyle(KluvsTheme.typography.headline.small)
+                                .foregroundColor(KluvsTheme.colors.content)
+                            Text(String(localized: "empty_no_clubs_hint"))
+                                .kluvsStyle(KluvsTheme.typography.body.medium)
+                                .foregroundColor(KluvsTheme.colors.contentMuted)
+                            OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
+                        }
+                    case .content:
+                        ClubsListView(
+                            clubs: viewModel.availableClubs,
+                            onClubSelected: { clubId in
+                                viewModel.selectClub(clubId: clubId)
+                                path.append(clubId)
+                            },
+                            onAddClub: {
+                                newClubName = ""
+                                showCreateClubSheet = true
+                            },
+                            isRefreshing: viewModel.isLoading,
+                            onRefresh: { viewModel.loadUserClubs(userId: userId, forceRefresh: true) }
+                        )
+                    }
                 }
             }
             .navigationDestination(for: String.self) { _ in
