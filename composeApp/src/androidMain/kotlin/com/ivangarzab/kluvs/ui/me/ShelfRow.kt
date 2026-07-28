@@ -9,14 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -25,6 +23,7 @@ import com.ivangarzab.kluvs.member.presentation.ShelfItem
 import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.presentation.progress.OwnProgressInfo
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.progress.OwnProgressRow
 
@@ -67,15 +66,14 @@ fun ShelfRow(
                     Text(
                         text = item.bookTitle,
                         color = KluvsTheme.colors.content,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontStyle = FontStyle.Italic,
+                        style = KluvsTheme.typography.title.medium.feature(),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = item.bookAuthor,
                         color = KluvsTheme.colors.contentMuted,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = KluvsTheme.typography.body.medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -83,7 +81,7 @@ fun ShelfRow(
                 Text(
                     text = item.clubName.uppercase(),
                     color = KluvsTheme.colors.contentMuted,
-                    style = MaterialTheme.typography.labelSmall
+                    style = KluvsTheme.typography.eyebrow
                 )
             }
 

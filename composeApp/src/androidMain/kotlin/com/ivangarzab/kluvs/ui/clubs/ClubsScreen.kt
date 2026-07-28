@@ -19,7 +19,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -291,12 +290,12 @@ fun ClubsScreenContent(
                     ) {
                         Text(
                             text = "No clubs yet",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = KluvsTheme.typography.headline.small,
                             color = KluvsTheme.colors.content
                         )
                         Text(
                             text = "Join a club to get started",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = KluvsTheme.typography.body.medium,
                             color = KluvsTheme.colors.contentMuted
                         )
                     }
@@ -393,7 +392,7 @@ fun ClubsScreenContent(
                                     text = {
                                         Text(
                                             text = title,
-                                            style = MaterialTheme.typography.labelLarge,
+                                            style = KluvsTheme.typography.label,
                                             color = if (selected) {
                                                 KluvsTheme.colors.accent
                                             } else {
@@ -690,14 +689,14 @@ private fun ClubMetaRow(
         if (foundedYear != null) {
             Text(
                 text = stringResource(R.string.founded_x, foundedYear).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = KluvsTheme.typography.eyebrow,
                 color = KluvsTheme.colors.contentMuted
             )
             MetaDot()
         }
         Text(
             text = stringResource(R.string.x_members, memberCount).uppercase(),
-            style = MaterialTheme.typography.labelSmall,
+            style = KluvsTheme.typography.eyebrow,
             color = KluvsTheme.colors.contentMuted
         )
     }

@@ -5,16 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.member.presentation.UpNextItem
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.feature
 
 /**
  * "Up Next" section: the nearest upcoming discussion across all of the
@@ -37,26 +36,25 @@ fun UpNextSection(
             Text(
                 text = stringResource(R.string.up_next_eyebrow).uppercase(),
                 color = KluvsTheme.colors.accent,
-                style = MaterialTheme.typography.labelSmall
+                style = KluvsTheme.typography.eyebrow
             )
             Text(
                 text = upNext.date,
                 color = KluvsTheme.colors.accent,
-                style = MaterialTheme.typography.labelSmall
+                style = KluvsTheme.typography.caption
             )
         }
 
         Text(
             text = upNext.title,
             color = KluvsTheme.colors.content,
-            style = MaterialTheme.typography.titleLarge,
-            fontStyle = FontStyle.Italic
+            style = KluvsTheme.typography.title.large.feature()
         )
 
         Text(
             text = listOfNotNull(upNext.clubName, upNext.location).joinToString(" — "),
             color = KluvsTheme.colors.contentMuted,
-            style = MaterialTheme.typography.bodyMedium
+            style = KluvsTheme.typography.body.medium
         )
     }
 }

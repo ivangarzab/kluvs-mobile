@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -240,7 +239,7 @@ private fun ShelfContent(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = stringResource(R.string.no_books_shelved),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = KluvsTheme.typography.body.large,
                         color = KluvsTheme.colors.contentMuted
                     )
                 }
@@ -290,10 +289,9 @@ private fun ShelfSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
-            // Eyebrow — design-system component.eyebrow, mapped to Typography.labelSmall
             Text(
                 text = sectionLabel(section).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = KluvsTheme.typography.eyebrow,
                 color = if (isDark) Color(0xFFB0B0B0) else foregroundLightSecondary
             )
             Text(
@@ -385,7 +383,7 @@ private fun SearchEmptyState(heading: String, body: String) {
                 )
                 Text(
                     text = body,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = KluvsTheme.typography.body.medium,
                     color = KluvsTheme.colors.contentMuted,
                     textAlign = TextAlign.Center
                 )

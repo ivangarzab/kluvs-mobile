@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
@@ -36,6 +34,7 @@ import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.brandOnPrimary
 import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
+import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlaceholder
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
@@ -111,7 +110,7 @@ fun ClubsListScreen(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(18.dp),
                     containerColor = brandPrimary,
                     contentColor = brandOnPrimary
                 ) {
@@ -161,7 +160,7 @@ private fun ClubListRow(
             ) {
                 Text(
                     text = club.name,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = KluvsTheme.typography.title.medium,
                     color = KluvsTheme.colors.content
                 )
                 club.role?.let { RoleEyebrow(role = it) }
@@ -170,10 +169,7 @@ private fun ClubListRow(
             club.bookTitle?.let { title ->
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
-                        fontStyle = FontStyle.Italic
-                    ),
+                    style = KluvsTheme.typography.title.small.feature(),
                     color = KluvsTheme.colors.contentMuted
                 )
             }
@@ -211,12 +207,12 @@ private fun ClubsListEmptyState(modifier: Modifier = Modifier, onJoinWithCode: (
         ) {
             Text(
                 text = "No clubs yet",
-                style = MaterialTheme.typography.titleLarge,
+                style = KluvsTheme.typography.headline.small,
                 color = KluvsTheme.colors.content
             )
             Text(
                 text = "Join a club to get started",
-                style = MaterialTheme.typography.bodyMedium,
+                style = KluvsTheme.typography.body.medium,
                 color = KluvsTheme.colors.contentMuted
             )
             OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)

@@ -331,12 +331,12 @@ private fun ProfileSection(
             Text(
                 text = name,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.headlineSmall
+                style = KluvsTheme.typography.headline.small
             )
             Text(
                 text = handle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium
+                style = KluvsTheme.typography.body.medium
             )
         }
     }

@@ -37,7 +37,7 @@ fun AboutSection(modifier: Modifier = Modifier) {
             Text(
                 text = stringResource(R.string.version_x, BuildConfig.VERSION_NAME),
                 color = MaterialTheme.colorScheme.inverseOnSurface,
-                style = MaterialTheme.typography.bodySmall,
+                style = KluvsTheme.typography.finePrint,
                 fontStyle = FontStyle.Italic,
             )
         }

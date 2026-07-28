@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,7 +33,7 @@ fun LegalSection(
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Text(
             text = stringResource(R.string.legal_title),
-            style = MaterialTheme.typography.titleMedium,
+            style = KluvsTheme.typography.title.medium,
             color = KluvsTheme.colors.content
         )
 
@@ -70,7 +69,7 @@ private fun LegalRow(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
+            style = KluvsTheme.typography.label,
             color = KluvsTheme.colors.accent,
         )
     }

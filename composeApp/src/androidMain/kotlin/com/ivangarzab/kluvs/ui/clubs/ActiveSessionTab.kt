@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,11 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.clubs.presentation.ActiveSessionDetails
 import com.ivangarzab.kluvs.clubs.presentation.BookInfo
@@ -42,6 +38,7 @@ import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.clubs.presentation.SessionParticipantInfo
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
+import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmDisabled
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceControl
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceOption
@@ -94,7 +91,7 @@ fun ActiveSessionTab(
             ) {
                 Text(
                     text = stringResource(R.string.no_session_details),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = KluvsTheme.typography.body.medium,
                     color = KluvsTheme.colors.contentMuted
                 )
                 PrimaryButton(
@@ -122,11 +119,7 @@ fun ActiveSessionTab(
                 Text(
                     text = stringResource(R.string.x_discussions_scheduled, sessionDetails.discussions.size),
                     color = KluvsTheme.colors.contentMuted,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal,
-                        fontStyle = FontStyle.Italic
-                    )
+                    style = KluvsTheme.typography.title.small.feature()
                 )
             }
             if (isAdminOrAbove) {
@@ -144,7 +137,7 @@ fun ActiveSessionTab(
                 Text(
                     text = "No discussions scheduled yet.",
                     color = KluvsTheme.colors.contentMuted,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = KluvsTheme.typography.body.medium,
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
             } else {
@@ -294,14 +287,14 @@ private fun DiscussionTimelineItem(
                     Text(
                         text = "UP NEXT",
                         color = KluvsTheme.colors.accent,
-                        style = MaterialTheme.typography.labelSmall
+                        style = KluvsTheme.typography.eyebrow
                     )
                     Spacer(Modifier.height(2.dp))
                 }
                 Text(
                     text = discussion.title,
                     color = textColor,
-                    style = if (discussion.isNext) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleSmall
+                    style = if (discussion.isNext) KluvsTheme.typography.title.medium else KluvsTheme.typography.title.small
                 )
                 Spacer(Modifier.height(4.dp))
                 Row(
@@ -317,14 +310,14 @@ private fun DiscussionTimelineItem(
                     Text(
                         text = discussion.location,
                         color = secondaryTextColor,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = KluvsTheme.typography.body.medium
                     )
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = discussion.date,
                     color = secondaryTextColor,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = KluvsTheme.typography.body.medium
                 )
                 Spacer(Modifier.height(8.dp))
                 // AttendanceControl is hollow (design-system primitives migration) — it doesn't

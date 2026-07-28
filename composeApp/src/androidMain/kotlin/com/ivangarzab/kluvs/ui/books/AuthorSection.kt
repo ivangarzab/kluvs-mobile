@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
@@ -16,7 +15,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import com.ivangarzab.kluvs.model.Author
-import com.ivangarzab.kluvs.designsystem.theme.ebGaramond
 
 /**
  * "About the Author" body: photo + name row, then bio below full-width (mirrors web's
@@ -55,8 +53,7 @@ fun AuthorSection(
             if (name != null) {
                 Text(
                     text = name,
-                    fontFamily = ebGaramond,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = KluvsTheme.typography.title.medium,
                     color = KluvsTheme.colors.content
                 )
             }
@@ -65,7 +62,7 @@ fun AuthorSection(
         if (bio != null) {
             Text(
                 text = bio,
-                style = MaterialTheme.typography.bodySmall,
+                style = KluvsTheme.typography.body.medium,
                 color = KluvsTheme.colors.content
             )
         }

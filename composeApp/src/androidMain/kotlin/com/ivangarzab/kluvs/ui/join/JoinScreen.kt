@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -96,7 +95,7 @@ private fun JoinScreenContent(
 
         Text(
             text = "Join a club",
-            style = MaterialTheme.typography.headlineMedium,
+            style = KluvsTheme.typography.headline.small,
             color = KluvsTheme.colors.content
         )
 
@@ -121,7 +120,7 @@ private fun JoinScreenContent(
         state.previewError?.let { error ->
             Text(
                 text = error,
-                style = MaterialTheme.typography.bodyMedium,
+                style = KluvsTheme.typography.body.medium,
                 color = KluvsTheme.colors.danger
             )
         }
@@ -129,14 +128,14 @@ private fun JoinScreenContent(
         state.preview?.let { preview ->
             Text(
                 text = preview.name,
-                style = MaterialTheme.typography.titleLarge,
+                style = KluvsTheme.typography.headline.small,
                 color = KluvsTheme.colors.content
             )
 
             state.joinError?.let { error ->
                 Text(
                     text = error,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = KluvsTheme.typography.body.medium,
                     color = KluvsTheme.colors.danger
                 )
             }

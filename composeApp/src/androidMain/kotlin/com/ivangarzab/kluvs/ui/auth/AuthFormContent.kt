@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -26,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -97,7 +95,7 @@ fun AuthFormContent(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = "Welcome to your Kluvs",
                 color = KluvsTheme.colors.content,
-                style = MaterialTheme.typography.titleLarge
+                style = KluvsTheme.typography.headline.small
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -112,7 +110,7 @@ fun AuthFormContent(
                     }
                 ),
                 color = KluvsTheme.colors.contentMuted,
-                style = MaterialTheme.typography.bodyLarge,
+                style = KluvsTheme.typography.body.large,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -245,7 +243,7 @@ fun AuthFormContent(
                         stringResource(R.string.already_have_an_account)
                     },
                     color = KluvsTheme.colors.contentMuted,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = KluvsTheme.typography.body.medium,
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
@@ -267,8 +265,7 @@ fun AuthFormContent(
                         stringResource(R.string.sign_in)
                     },
                     color = KluvsTheme.colors.accent,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    style = KluvsTheme.typography.label,
                 )
             }
         }

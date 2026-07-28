@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,7 +32,7 @@ fun EditProfileSection(
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Text(
             text = stringResource(R.string.edit_profile),
-            style = MaterialTheme.typography.titleMedium,
+            style = KluvsTheme.typography.title.medium,
             color = KluvsTheme.colors.content
         )
 
@@ -61,7 +60,7 @@ fun EditProfileSection(
             Text(
                 text = saveError,
                 color = KluvsTheme.colors.danger,
-                style = MaterialTheme.typography.bodySmall,
+                style = KluvsTheme.typography.body.medium,
             )
         }
 
