@@ -279,7 +279,7 @@ private fun ShelfSection(
     Column(modifier = modifier) {
         val isDark = isSystemInDarkTheme()
         Row(
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         ) {

@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
+import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedIconButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
@@ -114,12 +115,12 @@ fun BooksTopBar(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            IconButton(onClick = onSearchClick, enabled = !isSearchActive) {
-                Icon(
-                    type = IconType.Search,
-                    contentDescription = stringResource(R.string.search_books)
-                )
-            }
+            OutlinedIconButton(
+                type = IconType.Search,
+                contentDescription = stringResource(R.string.search_books),
+                onClick = onSearchClick,
+                enabled = !isSearchActive,
+            )
         }
 
         // Search row — unfurls from the right edge (scale-x from the search button's position),
