@@ -333,7 +333,7 @@ private fun ProfileSection(
                 style = KluvsTheme.typography.headline.small
             )
             Text(
-                text = handle,
+                text = "@$handle",
                 color = KluvsTheme.colors.contentMuted,
                 style = KluvsTheme.typography.body.medium
             )
@@ -361,7 +361,7 @@ fun Preview_MeScreen() = KluvsTheme {
                 profile = UserProfile(
                     memberId = "0",
                     name = "Quill",
-                    handle = "@quill-bot",
+                    handle = "quill-bot",
                     joinDate = "2025",
                     avatarUrl = null
                 ),
