@@ -17,11 +17,15 @@ struct MeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            MeTopBar(onReadingLogClick: { viewModel.onReadingLogClicked() })
+            MeTopBar(
+                onReadingLogClick: { viewModel.onReadingLogClicked() },
+                onSettingsClick: { showSettings = true },
+                onSignOutClick: { viewModel.onSignOutClicked() }
+            )
 
             ZStack {
                 if viewModel.isLoading {
-                    LoadingView()
+                    MeScreenSkeleton()
                         .transition(.opacity)
                 } else if let error = viewModel.error {
                     ErrorView(message: error, onRetry: {
@@ -74,11 +78,6 @@ struct MeView: View {
                                 }
                             )
 
-                            FooterSection(
-                                onSignOut: { viewModel.onSignOutClicked() },
-                                onNavigateToSettings: { showSettings = true }
-                            )
-                            .padding(.bottom, 24)
                         }
                         .padding(.horizontal, 16)
                     }
@@ -198,7 +197,7 @@ struct ProfileSection: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 12, height: 12)
-                            .foregroundColor(.white)
+                            .foregroundColor(KluvsTheme.colors.onAccent)
                     }
                 }
                 .onChange(of: selectedItem) { newItem in
@@ -213,84 +212,17 @@ struct ProfileSection: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(profile.name)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .kluvsStyle(KluvsTheme.typography.headline.small)
+                    .foregroundColor(KluvsTheme.colors.content)
 
-                Text(profile.handle ?? "")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                Text("@\(profile.handle ?? "")")
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
 
             Spacer()
         }
         .padding()
-    }
-}
-
-// MARK: - Footer Section
-struct FooterSection: View {
-    let onSignOut: () -> Void
-    let onNavigateToSettings: () -> Void
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "button_settings"), icon: .settings, action: onNavigateToSettings)
-
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "button_help_support"), icon: .help, action: {
-                // TODO: Navigate to help & support
-            })
-
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "sign_out"), icon: .signOut, labelColor: .red, iconColor: .red, action: onSignOut)
-        }
-    }
-}
-
-struct FooterItem: View {
-    let label: String
-    let icon: IconType
-    let action: (() -> Void)?
-    var labelColor: Color = .primary
-    var iconColor: Color = .primary
-
-    init(label: String, icon: IconType, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
-        self.label = label
-        self.icon = icon
-        self.labelColor = labelColor
-        self.iconColor = iconColor
-        self.action = action
-    }
-
-    var iconSize = 18.0
-
-    var body: some View {
-        Button(action: {
-            action?()
-        }) {
-            HStack(spacing: 12) {
-                icon.image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: iconSize, height: iconSize)
-                    .foregroundColor(iconColor)
-
-                Text(label)
-                    .font(.body)
-                    .foregroundColor(labelColor)
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-        }
-        .disabled(action == nil)
     }
 }
 
@@ -314,7 +246,7 @@ struct SnackbarView: View {
             }
         }
         .padding()
-        .background(Color.red.opacity(0.9))
+        .background(KluvsTheme.colors.danger.opacity(0.9))
         .cornerRadius(8)
         .shadow(radius: 4)
         .onAppear {

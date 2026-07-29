@@ -95,11 +95,12 @@ struct OverviewTab: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("ACTIVE SESSION")
-                            .font(.kluvsEyebrow)
-                            .foregroundColor(.brandOrange)
+                            .kluvsStyle(KluvsTheme.typography.eyebrow)
+                            .foregroundColor(KluvsTheme.colors.accent)
 
                         Text(session.book.title)
-                            .font(.ebGaramondMediumItalic(size: 22))
+                            .kluvsStyle(KluvsTheme.typography.title.large, feature: true)
+                            .foregroundColor(KluvsTheme.colors.content)
                     }
                     Spacer()
                     if isAdminOrAbove {
@@ -107,8 +108,8 @@ struct OverviewTab: View {
                     }
                 }
                 Text(session.book.author)
-                    .font(.kluvsBody)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
         }
     }
@@ -120,13 +121,13 @@ struct OverviewTab: View {
                 HStack(spacing: 8) {
                     AvatarStack(members: readingMembers, size: 24)
                     Text("\(readingParticipants.count) of \(totalMemberCount) reading")
-                        .font(.kluvsHelperSm)
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.caption)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                 }
             } else {
                 Text("No participants yet")
-                    .font(.kluvsHelperSm)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
 
             Spacer()
@@ -152,22 +153,15 @@ struct OverviewTab: View {
     private var noActiveSessionState: some View {
         VStack(spacing: 8) {
             Text("NO SESSION YET")
-                .font(.kluvsEyebrow)
-                .foregroundColor(.secondary)
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
             Text("Start reading together.")
-                .font(.ebGaramondMediumItalic(size: 22))
+                .kluvsStyle(KluvsTheme.typography.headline.small, feature: true)
+                .foregroundColor(KluvsTheme.colors.content)
                 .multilineTextAlignment(.center)
             if isAdminOrAbove {
-                Button(action: onCreateSession) {
-                    Text("Start Session")
-                        .font(.kluvsButtonPrimary)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.brandOrange)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                }
-                .padding(.top, 8)
+                PrimaryButton(text: "Start Session", action: onCreateSession)
+                    .padding(.top, 8)
             }
         }
         .frame(maxWidth: .infinity)
@@ -179,18 +173,19 @@ struct OverviewTab: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("UP NEXT")
-                    .font(.kluvsEyebrow)
-                    .foregroundColor(.brandOrange)
+                    .kluvsStyle(KluvsTheme.typography.eyebrow)
+                    .foregroundColor(KluvsTheme.colors.accent)
                 Text(discussion.title)
-                    .font(.kluvsCardHeading)
+                    .kluvsStyle(KluvsTheme.typography.title.medium)
+                    .foregroundColor(KluvsTheme.colors.content)
                 Text(discussion.location)
-                    .font(.kluvsBody)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
             Spacer()
             Text(discussion.date)
-                .font(.kluvsEyebrow)
-                .foregroundColor(.brandOrange)
+                .kluvsStyle(KluvsTheme.typography.caption)
+                .foregroundColor(KluvsTheme.colors.accent)
         }
     }
 }

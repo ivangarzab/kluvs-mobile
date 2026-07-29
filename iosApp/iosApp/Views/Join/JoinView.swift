@@ -1,8 +1,13 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
-/// Join-by-invite-token screen. Reachable today only via manual token entry — tapping a raw
-/// invite URL does not yet open this screen (iOS Universal Links deep linking is a follow-up).
+/// Join-by-invite-token screen. Not reachable from any UI action today — "Join with a code"
+/// inside the (already-authenticated) Clubs tab opens `JoinFields` in a local bottom sheet
+/// instead. This full screen is kept registered (`MainRoute.join`) for the not-yet-built iOS
+/// Universal Links deep-link case — tapping a raw invite URL while signed out, which needs to
+/// land somewhere before auth resolves and needs the `onNeedsSignIn` handoff below, neither of
+/// which a nested bottom sheet can do. Mirrors Android's `JoinScreen`.
 ///
 /// The preview shows only the club name — `Shared.ClubPreview` has no avatar/member-count yet
 /// (also a follow-up, needs a backend spec change).
@@ -15,51 +20,60 @@ struct JoinView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            IconButton(type: .back, contentDescription: "Back", action: { dismiss() })
+
             Text("Join a club")
-                .font(.kluvsPageHeading)
-                .foregroundColor(.primary)
+                .kluvsStyle(KluvsTheme.typography.headline.small)
+                .foregroundColor(KluvsTheme.colors.content)
 
-            TextField("Invite code", text: Binding(
-                get: { viewModel.tokenInput },
-                set: { viewModel.onTokenChanged($0) }
-            ))
-            .textFieldStyle(.roundedBorder)
-            .autocapitalization(.none)
-            .disableAutocorrection(true)
+            InputField(
+                label: "Invite code",
+                value: Binding(
+                    get: { viewModel.tokenInput },
+                    set: { viewModel.onTokenChanged($0) }
+                )
+            )
 
-            Button("Preview") {
-                viewModel.previewInvite()
-            }
-            .disabled(viewModel.tokenInput.isEmpty || viewModel.isLoadingPreview)
+            SecondaryButton(
+                text: "Preview",
+                action: { viewModel.previewInvite() },
+                enabled: !viewModel.tokenInput.trimmingCharacters(in: .whitespaces).isEmpty && !viewModel.isLoadingPreview
+            )
+            .frame(maxWidth: .infinity)
 
             if viewModel.isLoadingPreview {
-                ProgressView()
+                LoadingSpinner()
             }
 
             if let previewError = viewModel.previewError {
                 Text(previewError)
-                    .foregroundColor(.red)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.danger)
             }
 
             if let preview = viewModel.preview {
                 Text(preview.name)
-                    .font(.kluvsSectionHeading)
-                    .foregroundColor(.primary)
+                    .kluvsStyle(KluvsTheme.typography.headline.small)
+                    .foregroundColor(KluvsTheme.colors.content)
 
                 if let joinError = viewModel.joinError {
                     Text(joinError)
-                        .foregroundColor(.red)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.danger)
                 }
 
-                Button(viewModel.isJoining ? "Joining..." : "Join") {
-                    viewModel.onJoinClicked()
-                }
-                .disabled(viewModel.isJoining)
+                PrimaryButton(
+                    text: viewModel.isJoining ? "Joining…" : "Join",
+                    action: { viewModel.onJoinClicked() },
+                    enabled: !viewModel.isJoining
+                )
+                .frame(maxWidth: .infinity)
             }
 
             Spacer()
         }
         .padding(16)
+        .background(KluvsTheme.colors.background)
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: viewModel.joinedClubId) { _, newValue in
             if let clubId = newValue {

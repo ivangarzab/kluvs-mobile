@@ -30,12 +30,12 @@ struct AuthFormView: View {
 
                 // Header
                 Text("Welcome to your Kluvs")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .kluvsStyle(KluvsTheme.typography.headline.small)
+                    .foregroundColor(KluvsTheme.colors.content)
 
                 Text(mode == .login ? "Sign in to your account" : "Create a new account")
-                    .font(.body)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.large)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
 
                 SocialButton(
                     text: String(localized: "button_continue_apple"),
@@ -138,44 +138,32 @@ struct AuthFormView: View {
                 if mode == .login {
                     HStack {
                         Spacer()
-                        Button("Forgot password?") {
-                            onNavigate(.forgetPassword)
-                        }
-                        .font(.body)
-                        .foregroundColor(.brandOrange)
+                        TextButton(text: "Forgot password?", action: { onNavigate(.forgetPassword) }, emphasized: true)
                     }
                     .frame(height: 20) // Fixed height to match signup spacing
                 }
 
                 // Submit button
-                Button(action: {
+                PrimaryButton(text: mode == .login ? "Sign In" : "Sign Up", action: {
                     if mode == .login {
                         viewModel.signIn()
                     } else {
                         viewModel.signUp()
                     }
-                }) {
-                    Text(mode == .login ? "Sign In" : "Sign Up")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(Color(uiColor: .systemBackground))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(Color.brandOrange)
-                        .cornerRadius(8)
-                }
+                })
+                .frame(maxWidth: .infinity)
 
                 // Navigation link
                 HStack(spacing: 4) {
                     Text(mode == .login ? "Don't have an account?" : "Already have an account?")
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
 
                     Button(mode == .login ? "Sign Up" : "Sign In") {
                         onNavigate(mode == .login ? .signUp : .signIn)
                     }
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(.brandOrange)
+                    .kluvsStyle(KluvsTheme.typography.label)
+                    .foregroundColor(KluvsTheme.colors.accent)
                 }
 
                 Spacer()

@@ -11,8 +11,8 @@ import SwiftUI
 ///   - statusLabel: e.g. "42 of 169 pages" — `nil` renders "Not started".
 ///   - leftLabel: e.g. "Your progress", "Next · Thu, Dec 31", or a formatted "3 of 5 discussions"
 ///     string — callers own the exact copy.
-///   - leftLabelEmphasized: italicizes `leftLabel` via `kluvsStyle`'s `feature` flag
-///     (Caption+feature) — the Overview tab's discussion-count line uses this; plain shelf-row
+///   - leftLabelEmphasized: switches `leftLabel` to Title.small+feature (serif italic) instead of
+///     plain Caption — the Overview tab's discussion-count line uses this; plain shelf-row
 ///     labels don't.
 public struct OwnProgressRow: View {
     let percent: Int?
@@ -42,9 +42,14 @@ public struct OwnProgressRow: View {
                 OutlinedButton(text: percent != nil ? "Update" : "Track Progress", action: onUpdateProgress)
             }
             HStack {
-                Text(leftLabel)
-                    .kluvsStyle(KluvsTheme.typography.caption, feature: leftLabelEmphasized)
-                    .foregroundColor(KluvsTheme.colors.contentMuted)
+                Group {
+                    if leftLabelEmphasized {
+                        Text(leftLabel).kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                    } else {
+                        Text(leftLabel).kluvsStyle(KluvsTheme.typography.caption)
+                    }
+                }
+                .foregroundColor(KluvsTheme.colors.contentMuted)
                 Spacer()
                 Text(statusLabel ?? "Not started")
                     .kluvsStyle(KluvsTheme.typography.caption)

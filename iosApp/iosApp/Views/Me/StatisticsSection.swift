@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// "Your Statistics" section: a 3-column stat strip (Clubs / Books / Since),
 /// separated by hairline dividers. Mirrors web's ProfilePage stats row.
@@ -34,7 +35,7 @@ struct StatisticsSection: View {
 
     private var statDivider: some View {
         Rectangle()
-            .fill(Color.secondary.opacity(0.3))
+            .fill(KluvsTheme.colors.cardAlt)
             .frame(width: 1, height: 40)
     }
 }
@@ -46,10 +47,11 @@ private struct StatColumn: View {
     var body: some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.kluvsCardHeading)
+                .kluvsStyle(KluvsTheme.typography.headline.small)
+                .foregroundColor(KluvsTheme.colors.content)
             Text(label.uppercased())
-                .font(.kluvsEyebrow)
-                .foregroundColor(.secondary)
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
         }
         .frame(maxWidth: .infinity)
     }

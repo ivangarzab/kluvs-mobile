@@ -17,44 +17,69 @@ func formatPercent(_ value: Float) -> String {
 struct ClubsView: View {
     let userId: String
     var initialClubId: String? = nil
+    /// Unused today — "Join with a code" now opens a local `JoinFields` bottom sheet instead
+    /// (matches Android's move away from a full-screen nav destination). Kept wired from
+    /// `ContentView` for the not-yet-built deep-link case (tapping a raw invite URL while
+    /// signed out needs a full screen to land on before auth resolves), same reasoning as
+    /// Android's still-registered-but-unused `JoinScreen` route.
     var onNavigateToJoin: () -> Void = {}
     @StateObject private var viewModel = ClubDetailsViewModelWrapper()
+    @StateObject private var joinViewModel = JoinViewModelWrapper()
     @State private var path = NavigationPath()
     @State private var showCreateClubSheet = false
     @State private var newClubName = ""
+    @State private var showJoinSheet = false
+
+    private var isEmptyScreenState: Bool {
+        if case .empty = viewModel.screenState { return true }
+        return false
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
-            Group {
-                switch viewModel.screenState {
-                case .loading:
-                    LoadingView()
-                case .error(let message):
-                    ErrorView(message: message, onRetry: {
-                        viewModel.loadUserClubs(userId: userId)
-                    })
-                case .empty:
-                    VStack(spacing: 8) {
-                        Text(String(localized: "empty_no_clubs"))
-                            .font(.kluvsSectionHeading)
-                        Text(String(localized: "empty_no_clubs_hint"))
-                            .font(.kluvsBody)
-                            .foregroundColor(.secondary)
-                        Button("Join with a code", action: onNavigateToJoin)
+            VStack(spacing: 0) {
+                // Always rendered, matching Android's ClubsListScreen - the header must not
+                // disappear during loading/error/empty, only the content below it changes.
+                TopAppBar(header: "Your", title: "Clubs") {
+                    // Empty state already shows its own "Join with a code" button.
+                    if !isEmptyScreenState {
+                        OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
                     }
-                case .content:
-                    ClubsListView(
-                        clubs: viewModel.availableClubs,
-                        onClubSelected: { clubId in
-                            viewModel.selectClub(clubId: clubId)
-                            path.append(clubId)
-                        },
-                        onAddClub: {
-                            newClubName = ""
-                            showCreateClubSheet = true
-                        },
-                        onJoinWithCode: onNavigateToJoin
-                    )
+                }
+
+                Group {
+                    switch viewModel.screenState {
+                    case .loading:
+                        ClubsListSkeleton()
+                    case .error(let message):
+                        ErrorView(message: message, onRetry: {
+                            viewModel.loadUserClubs(userId: userId)
+                        })
+                    case .empty:
+                        VStack(spacing: 8) {
+                            Text(String(localized: "empty_no_clubs"))
+                                .kluvsStyle(KluvsTheme.typography.headline.small)
+                                .foregroundColor(KluvsTheme.colors.content)
+                            Text(String(localized: "empty_no_clubs_hint"))
+                                .kluvsStyle(KluvsTheme.typography.body.medium)
+                                .foregroundColor(KluvsTheme.colors.contentMuted)
+                            OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
+                        }
+                    case .content:
+                        ClubsListView(
+                            clubs: viewModel.availableClubs,
+                            onClubSelected: { clubId in
+                                viewModel.selectClub(clubId: clubId)
+                                path.append(clubId)
+                            },
+                            onAddClub: {
+                                newClubName = ""
+                                showCreateClubSheet = true
+                            },
+                            isRefreshing: viewModel.isLoading,
+                            onRefresh: { viewModel.loadUserClubs(userId: userId, forceRefresh: true) }
+                        )
+                    }
                 }
             }
             .navigationDestination(for: String.self) { _ in
@@ -75,6 +100,27 @@ struct ClubsView: View {
                 viewModel.selectClub(clubId: clubId)
                 path.append(clubId)
             }
+        }
+        .onChange(of: joinViewModel.joinedClubId) { _, newValue in
+            if let clubId = newValue {
+                joinViewModel.onConsumeJoinedClubId()
+                showJoinSheet = false
+                viewModel.selectClub(clubId: clubId)
+                path.append(clubId)
+            }
+        }
+        .kluvsBottomSheet(isPresented: $showJoinSheet, header: "Join with a Code") {
+            JoinFields(viewModel: joinViewModel)
+        } footer: {
+            let hasPreview = joinViewModel.preview != nil
+            BottomSheetFooter(
+                actionLabel: hasPreview ? (joinViewModel.isJoining ? "Joining…" : "Join") : "Preview",
+                onAction: hasPreview ? { joinViewModel.onJoinClicked() } : { joinViewModel.previewInvite() },
+                onCancel: { showJoinSheet = false },
+                actionEnabled: hasPreview
+                    ? !joinViewModel.isJoining
+                    : !joinViewModel.tokenInput.trimmingCharacters(in: .whitespaces).isEmpty && !joinViewModel.isLoadingPreview
+            )
         }
         .kluvsBottomSheet(isPresented: $showCreateClubSheet, header: "New Club") {
             CreateClubFields(name: $newClubName)
@@ -201,79 +247,60 @@ private struct ClubDetailView: View {
                     .tint(.brandOrange)
             }
 
-            // Back row: chevron + "CLUB" eyebrow, mirrors Android's masthead back row
-            HStack(spacing: 4) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.primary)
-                }
-                Text("CLUB")
-                    .font(.kluvsEyebrow)
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-
-            // Masthead: club name + role/founded/member-count meta row, + owner overflow
-            if let clubDetails = viewModel.clubDetails {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(clubDetails.clubName)
-                        .font(.kluvsPageHeading)
-                        .foregroundColor(.primary)
-
-                    HStack(alignment: .top) {
-                        ClubMetaRow(
-                            userRole: viewModel.userRole,
-                            foundedYear: clubDetails.foundedYear,
-                            memberCount: Int(clubDetails.memberCount)
-                        )
-                        Spacer()
-                        if viewModel.userRole == .owner || viewModel.userRole == .admin {
-                            ActionMenu(items: {
-                                var items = [
-                                    ActionMenuItem(label: "Share", action: {
-                                        viewModel.refresh()
-                                        showShareClubSheet = true
-                                    })
-                                ]
-                                if viewModel.userRole == .owner {
-                                    items.append(ActionMenuItem(label: "Edit", action: {
-                                        editClubName = viewModel.clubDetails?.clubName ?? ""
-                                        showEditClubSheet = true
-                                    }))
-                                    items.append(ActionMenuItem(label: "Delete", action: { showDeleteClubAlert = true }, isDestructive: true))
-                                }
-                                return items
-                            }())
+            // Masthead: eyebrow + back + club name + owner overflow, mirrors Android's TopAppBar
+            TopAppBar(
+                header: "Club",
+                title: viewModel.clubDetails?.clubName,
+                onNavigateBack: { dismiss() }
+            ) {
+                if viewModel.userRole == .owner || viewModel.userRole == .admin {
+                    ActionMenu(items: {
+                        var items = [
+                            ActionMenuItem(label: "Share", action: { showShareClubSheet = true })
+                        ]
+                        if viewModel.userRole == .owner {
+                            items.append(ActionMenuItem(label: "Edit", action: {
+                                editClubName = viewModel.clubDetails?.clubName ?? ""
+                                showEditClubSheet = true
+                            }))
+                            items.append(ActionMenuItem(label: "Delete", action: { showDeleteClubAlert = true }, isDestructive: true))
                         }
-                    }
+                        return items
+                    }())
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
             }
 
-            // Tab selector
-            Picker("", selection: $selectedTab) {
-                Text("tab_general").tag(0)
-                Text("tab_discussions").tag(1)
-                Text("tab_members").tag(2)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .tint(.brandOrange)
-            .padding(.horizontal)
-            .padding(.top, 8)
-
-            // Tab content
-            if viewModel.isLoading {
-                Spacer()
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(1.5)
-                Spacer()
+            // Meta row + tab row + tab content are gated together, so the tab row doesn't
+            // sit there statically while the rest of the screen is still loading. Gated on
+            // clubDetails alone (not isLoading) - loadClubData's isLoading=true reset runs
+            // inside a coroutine dispatched from selectClub, so there's a brief window right
+            // after navigating in where isLoading can still read false with stale/nil data;
+            // "do we have this club's data yet" is the more robust question to ask.
+            if viewModel.clubDetails == nil {
+                ClubDetailsSkeleton()
+                    .padding(.top, 16)
             } else {
+                if let clubDetails = viewModel.clubDetails {
+                    ClubMetaRow(
+                        userRole: viewModel.userRole,
+                        foundedYear: clubDetails.foundedYear,
+                        memberCount: Int(clubDetails.memberCount)
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+                }
+
+                TabRow(
+                    selectedIndex: $selectedTab,
+                    titles: [
+                        String(localized: "tab_general"),
+                        String(localized: "tab_discussions"),
+                        String(localized: "tab_members")
+                    ]
+                )
+                .padding(.horizontal, 8)
+
                 TabView(selection: $selectedTab) {
                     OverviewTab(
                         clubDetails: viewModel.clubDetails,
@@ -319,7 +346,8 @@ private struct ClubDetailView: View {
                             selectedRole = assignable.contains(member?.role ?? .member) ? (member?.role ?? .member) : .member
                             changingRoleMemberId = IDWrapper(id: memberId)
                         },
-                        onRemoveMember: { memberId in removingMemberId = memberId }
+                        onRemoveMember: { memberId in removingMemberId = memberId },
+                        onInviteMember: { showShareClubSheet = true }
                     )
                     .tag(2)
                 }
@@ -570,6 +598,7 @@ private struct ClubDetailView: View {
         .kluvsBottomSheet(item: $openNoteDiscussionId, header: "Note") { wrapper in
             let discussionId = wrapper.id
             DiscussionNoteFields(
+                discussionTitle: viewModel.activeSession?.discussions.first { $0.id == discussionId }?.title,
                 note: viewModel.discussionNotes[discussionId],
                 onSave: { content in viewModel.onSaveDiscussionNote(discussionId: discussionId, content: content) },
                 onDelete: {
@@ -636,19 +665,19 @@ private struct ClubMetaRow: View {
             }
             if let foundedYear {
                 Text("FOUNDED \(foundedYear)".uppercased())
-                    .font(.plexSansMedium(size: 11))
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.eyebrow)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
                 metaDot
             }
             Text("\(memberCount) MEMBERS".uppercased())
-                .font(.plexSansMedium(size: 11))
-                .foregroundColor(.secondary)
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
         }
     }
 
     private var metaDot: some View {
         Circle()
-            .fill(Color.secondary)
+            .fill(KluvsTheme.colors.contentMuted)
             .frame(width: 3, height: 3)
     }
 }

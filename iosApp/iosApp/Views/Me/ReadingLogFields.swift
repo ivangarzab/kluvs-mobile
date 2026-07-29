@@ -13,7 +13,7 @@ struct ReadingLogFields: View {
         if isLoading {
             HStack {
                 Spacer()
-                ProgressView()
+                LoadingSpinner()
                 Spacer()
             }
             .padding(.vertical, 32)
@@ -34,13 +34,14 @@ private struct ReadingLogGroup: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title.uppercased())
-                .font(.kluvsEyebrow)
-                .foregroundColor(.secondary)
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
 
             if entries.isEmpty {
                 Text(String(localized: "nothing_here_yet"))
-                    .font(.ebGaramondItalic(size: 15))
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .italic()
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             } else {
                 VStack(alignment: .leading, spacing: 12) {
                     ForEach(entries, id: \.sessionId) { entry in
@@ -61,15 +62,16 @@ private struct ReadingLogRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.book?.title ?? "")
-                    .font(.ebGaramondItalic(size: 16))
+                    .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                    .foregroundColor(KluvsTheme.colors.content)
                     .lineLimit(1)
                 Text(entry.book?.author ?? "")
-                    .font(.kluvsBody)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
                     .lineLimit(1)
                 Text((entry.club?.name ?? "").uppercased())
-                    .font(.plexSansMedium(size: 11))
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.eyebrow)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
         }
     }

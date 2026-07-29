@@ -93,28 +93,26 @@ struct BookDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.primary)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
+                TopAppBar(header: String(localized: "book_eyebrow"), onNavigateBack: { dismiss() })
 
-                if viewModel.isMutationInProgress {
-                    ProgressView()
-                        .progressViewStyle(LinearProgressViewStyle())
-                        .tint(.brandOrange)
-                }
-
-                if let currentBook = viewModel.book {
-                    content(for: currentBook)
+                if viewModel.isLoadingEnrichment {
+                    BookDetailSkeleton()
                         .padding(.horizontal, 16)
                         .padding(.top, 12)
                         .padding(.bottom, 32)
+                } else {
+                    if viewModel.isMutationInProgress {
+                        ProgressView()
+                            .progressViewStyle(LinearProgressViewStyle())
+                            .tint(.brandOrange)
+                    }
+
+                    if let currentBook = viewModel.book {
+                        content(for: currentBook)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 12)
+                            .padding(.bottom, 32)
+                    }
                 }
             }
         }
@@ -151,16 +149,16 @@ struct BookDetailView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(currentBook.title)
-                        .font(.ebGaramondMediumItalic(size: 24))
-                        .foregroundColor(.primary)
+                        .kluvsStyle(KluvsTheme.typography.headline.small, feature: true)
+                        .foregroundColor(KluvsTheme.colors.content)
                     if let subtitle = volumeInfo?.subtitle {
                         Text(subtitle)
-                            .font(.ebGaramond(size: 16))
-                            .foregroundColor(.secondary)
+                            .kluvsStyle(KluvsTheme.typography.title.small)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                     }
                     Text(metaLine(book: currentBook, volumeInfo: volumeInfo))
-                        .font(.kluvsBody)
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.caption)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                 }
             }
 
@@ -196,13 +194,13 @@ struct BookDetailView: View {
                 // Native exports the real field as `description_` to avoid the clash.
                 if let description = volumeInfo?.description_ {
                     Text(description)
-                        .font(.kluvsBodyLg)
-                        .foregroundColor(.primary)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.content)
                 } else {
                     Text(String(localized: "book_no_description"))
-                        .font(.kluvsBodyLg)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
                         .italic()
-                        .foregroundColor(.secondary)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                 }
             }
 
@@ -266,9 +264,8 @@ private struct SectionEyebrow: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(.kluvsModalLabel)
-            .kerning(1.5)
-            .foregroundColor(.secondary)
+            .kluvsStyle(KluvsTheme.typography.eyebrow)
+            .foregroundColor(KluvsTheme.colors.contentMuted)
     }
 }
 
@@ -277,11 +274,11 @@ private struct CategoryChip: View {
 
     var body: some View {
         Text(text)
-            .font(.kluvsModalLabel)
-            .foregroundColor(.secondary)
+            .kluvsStyle(KluvsTheme.typography.label)
+            .foregroundColor(KluvsTheme.colors.contentMuted)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .overlay(Capsule().stroke(Color.secondary.opacity(0.4), lineWidth: 1))
+            .overlay(Capsule().stroke(KluvsTheme.colors.divider, lineWidth: 1))
     }
 }
 
@@ -292,12 +289,12 @@ private struct DetailRowView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 24) {
             Text(label)
-                .font(.kluvsBody)
-                .foregroundColor(.secondary)
+                .kluvsStyle(KluvsTheme.typography.caption)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
                 .frame(width: 90, alignment: .leading)
             Text(value)
-                .font(.kluvsBody)
-                .foregroundColor(.primary)
+                .kluvsStyle(KluvsTheme.typography.caption)
+                .foregroundColor(KluvsTheme.colors.content)
         }
         .padding(.vertical, 12)
     }

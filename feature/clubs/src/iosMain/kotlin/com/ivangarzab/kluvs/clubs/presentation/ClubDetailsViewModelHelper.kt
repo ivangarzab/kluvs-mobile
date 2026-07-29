@@ -40,10 +40,10 @@ class ClubDetailsViewModelHelper : KoinComponent {
         return Closeable { job.cancel() }
     }
 
-    fun loadUserClubs(userId: String) = viewModel.loadUserClubs(userId)
+    fun loadUserClubs(userId: String, forceRefresh: Boolean = false) = viewModel.loadUserClubs(userId, forceRefresh)
     fun loadClubData(clubId: String) = viewModel.loadClubData(clubId)
     fun selectClub(clubId: String) = viewModel.selectClub(clubId)
-    fun refresh() = viewModel.refresh()
+    fun refresh(forceRefresh: Boolean = false) = viewModel.refresh(forceRefresh)
 
     // Club creation
     fun onCreateClub(userId: String, name: String) = viewModel.onCreateClub(userId, name)

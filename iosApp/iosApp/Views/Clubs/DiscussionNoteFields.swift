@@ -19,6 +19,7 @@ private let noteMaxLength = 4000
 /// shape `BottomSheetFooter` assumes — forcing it into that slot would mean lifting this
 /// component's editing state up to the call site for no real benefit.
 struct DiscussionNoteFields: View {
+    var discussionTitle: String? = nil
     let note: Shared.DiscussionNoteInfo?
     let onSave: (String) -> Void
     let onDelete: () -> Void
@@ -29,16 +30,35 @@ struct DiscussionNoteFields: View {
     @State private var lastLoadedNoteId: String??
 
     var body: some View {
-        Group {
-            if let note {
-                if isEditing {
-                    editingView(note: note)
-                } else {
-                    viewingView(note: note)
+        VStack(alignment: .leading, spacing: 16) {
+            if let discussionTitle {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("DISCUSSION")
+                        .kluvsStyle(KluvsTheme.typography.eyebrow)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
+                    Text(discussionTitle)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.content)
                 }
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 120)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(KluvsTheme.colors.cardAlt)
+                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(KluvsTheme.colors.divider, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+
+            Group {
+                if let note {
+                    if isEditing {
+                        editingView(note: note)
+                    } else {
+                        viewingView(note: note)
+                    }
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, minHeight: 120)
+                }
             }
         }
         .onChange(of: note?.noteId) { _, newNoteId in
@@ -118,6 +138,7 @@ struct DiscussionNoteFields: View {
 
 #Preview {
     DiscussionNoteFields(
+        discussionTitle: "Chapters 5-8",
         note: Shared.DiscussionNoteInfo(
             noteId: "n1",
             content: "Bring snacks next time and discuss chapter 5.",

@@ -5,7 +5,16 @@ struct MainView: View {
     let userId: String
     var initialClubId: String? = nil
     var onNavigateToJoin: () -> Void = {}
-    @State private var selectedTab = 0
+    // Tab order is Me(0) - Clubs(1) - Books(2), but landing on an auto-joined club (deep link /
+    // post-signup join) still needs to open straight into the Clubs tab, not the default Me tab.
+    @State private var selectedTab: Int
+
+    init(userId: String, initialClubId: String? = nil, onNavigateToJoin: @escaping () -> Void = {}) {
+        self.userId = userId
+        self.initialClubId = initialClubId
+        self.onNavigateToJoin = onNavigateToJoin
+        self._selectedTab = State(initialValue: initialClubId != nil ? 1 : 0)
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -17,9 +26,9 @@ struct MainView: View {
                 // Content area
                 Group {
                     if selectedTab == 0 {
-                        ClubsView(userId: userId, initialClubId: initialClubId, onNavigateToJoin: onNavigateToJoin)
-                    } else if selectedTab == 1 {
                         MeView(userId: userId)
+                    } else if selectedTab == 1 {
+                        ClubsView(userId: userId, initialClubId: initialClubId, onNavigateToJoin: onNavigateToJoin)
                     } else {
                         BooksView()
                     }
@@ -31,6 +40,9 @@ struct MainView: View {
             }
             .background(Color.kluvsBackground)
             .ignoresSafeArea(edges: .bottom)
+            .onChange(of: initialClubId) { _, newValue in
+                if newValue != nil { selectedTab = 1 }
+            }
         }
     }
 }

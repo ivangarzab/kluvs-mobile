@@ -4,6 +4,7 @@
 //
 import SwiftUI
 import Shared
+import DesignSystem
 
 /// "About the Author" body: photo + name row, then bio below full-width (mirrors web's
 /// vertical stack). Shows a shimmer while loading, and is silently omitted entirely if
@@ -25,7 +26,7 @@ struct AuthorSectionView: View {
                             case .success(let image):
                                 image.resizable().aspectRatio(contentMode: .fill)
                             default:
-                                Circle().fill(Color.secondary.opacity(0.2))
+                                Circle().fill(KluvsTheme.colors.cardAlt)
                             }
                         }
                         .frame(width: 48, height: 48)
@@ -33,14 +34,14 @@ struct AuthorSectionView: View {
                     }
                     if let name = author.name {
                         Text(name)
-                            .font(.ebGaramond(size: 18))
-                            .foregroundColor(.primary)
+                            .kluvsStyle(KluvsTheme.typography.title.medium)
+                            .foregroundColor(KluvsTheme.colors.content)
                     }
                 }
                 if let bio = author.bio {
                     Text(bio)
-                        .font(.kluvsBody)
-                        .foregroundColor(.primary)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.content)
                 }
             }
         }
@@ -50,7 +51,7 @@ struct AuthorSectionView: View {
 private struct AuthorSectionShimmer: View {
     @State private var animate = false
 
-    private var shimmerColor: Color { Color.secondary.opacity(animate ? 0.3 : 0.15) }
+    private var shimmerColor: Color { KluvsTheme.colors.contentMuted.opacity(animate ? 0.7 : 0.3) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

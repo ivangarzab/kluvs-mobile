@@ -24,8 +24,8 @@ struct ActiveSessionTab: View {
                     HStack {
                         if !session.discussions.isEmpty {
                             Text("\(session.discussions.count) scheduled")
-                                .font(.ebGaramondItalic(size: 16))
-                                .foregroundColor(.secondary)
+                                .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                                .foregroundColor(KluvsTheme.colors.contentMuted)
                         }
                         Spacer()
                         if isAdminOrAbove {
@@ -36,8 +36,8 @@ struct ActiveSessionTab: View {
 
                     if session.discussions.isEmpty {
                         Text("No discussions scheduled yet.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .kluvsStyle(KluvsTheme.typography.body.medium)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                             .padding(.vertical, 12)
                     } else {
                         ForEach(Array(session.discussions.enumerated()), id: \.offset) { index, discussion in
@@ -61,13 +61,10 @@ struct ActiveSessionTab: View {
                 if isOwner {
                     VStack(spacing: 12) {
                         Text(String(localized: "empty_no_session_details"))
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .kluvsStyle(KluvsTheme.typography.body.medium)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
 
-                        Button(action: onCreateSession) {
-                            Label("Create Session", systemImage: "plus")
-                        }
-                        .buttonStyle(.bordered)
+                        PrimaryButton(text: "Create Session", action: onCreateSession, icon: .add)
                     }
                     .padding()
                 } else {
@@ -95,8 +92,8 @@ struct DiscussionTimelineItem: View {
     // next one — this is what makes the rail read as a continuous copper thread
     // through completed items.
     private var isLit: Bool { discussion.isPast || discussion.isNext }
-    private var litLineColor: Color { Color.brandOrange.opacity(0.4) }
-    private var neutralLineColor: Color { Color.gray.opacity(0.3) }
+    private var litLineColor: Color { KluvsTheme.colors.accent.opacity(0.4) }
+    private var neutralLineColor: Color { KluvsTheme.colors.cardAlt }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -131,27 +128,24 @@ struct DiscussionTimelineItem: View {
                 VStack(alignment: .leading, spacing: 4) {
                     if discussion.isNext {
                         Text("UP NEXT")
-                            .font(.plexSansMedium(size: 11))
-                            .foregroundColor(.brandOrange)
+                            .kluvsStyle(KluvsTheme.typography.eyebrow)
+                            .foregroundColor(KluvsTheme.colors.accent)
                     }
                     Text(discussion.title)
-                        .font(discussion.isNext ? .ebGaramondMediumItalic(size: 22) : .body)
-                        .fontWeight(discussion.isNext ? .regular : .medium)
-                        .opacity(discussion.isPast ? 0.5 : 1.0)
+                        .kluvsStyle(discussion.isNext ? KluvsTheme.typography.title.medium : KluvsTheme.typography.title.small)
+                        .foregroundColor(KluvsTheme.colors.content)
 
                     HStack(spacing: 2) {
                         IconType.location.image
                             .font(.caption)
                         Text(discussion.location)
-                            .font(.subheadline)
+                            .kluvsStyle(KluvsTheme.typography.body.medium)
                     }
-                    .foregroundColor(.secondary)
-                    .opacity(discussion.isPast ? 0.5 : 1.0)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
 
                     Text(discussion.date)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .opacity(discussion.isPast ? 0.5 : 1.0)
+                        .kluvsStyle(KluvsTheme.typography.body.medium)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
 
                     if let attendanceRoster {
                         AttendanceControl(
@@ -173,7 +167,7 @@ struct DiscussionTimelineItem: View {
                 HStack(spacing: 0) {
                     Button(action: onOpenNote) {
                         Image(systemName: "pencil")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                             .padding(.vertical, 12)
                     }
 
@@ -204,13 +198,13 @@ struct DiscussionTimelineItem: View {
                     .frame(width: discussion.isNext ? 24 : 16, height: discussion.isNext ? 24 : 16)
                 if !discussion.isPast && !discussion.isNext {
                     Circle()
-                        .strokeBorder(Color(uiColor: .separator), lineWidth: 1)
+                        .strokeBorder(KluvsTheme.colors.divider, lineWidth: 1)
                         .frame(width: 16, height: 16)
                 }
                 if discussion.isPast {
                     IconType.checkmark.image
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(Color(UIColor.systemBackground))
+                        .foregroundColor(KluvsTheme.colors.background)
                 }
             }
         }

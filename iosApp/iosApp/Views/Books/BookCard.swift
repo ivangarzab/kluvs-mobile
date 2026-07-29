@@ -31,13 +31,13 @@ struct BookCard: View {
                 // metrics, not a guessed pixel height), so 1-line and 2-line titles don't
                 // produce differently sized cards in the same row.
                 Text(book.title)
-                    .font(.kluvsCardHeading)
-                    .foregroundColor(.primary)
+                    .kluvsStyle(KluvsTheme.typography.title.small)
+                    .foregroundColor(KluvsTheme.colors.content)
                     .lineLimit(2, reservesSpace: true)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                 Text(book.author)
-                    .font(.kluvsBody)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.caption)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
                     .lineLimit(1)
                 // Always reserve the year line's height, even when there's no year to show —
                 // `book.year` is nullable, and omitting the row entirely made those cards shorter.
@@ -45,8 +45,8 @@ struct BookCard: View {
                 // it directly invokes NSNumber's locale-aware `description` (e.g. "2,025") —
                 // pull out `.intValue` first for a plain digit string.
                 Text(book.year.map { "\($0.intValue)" } ?? " ")
-                    .font(.kluvsBody)
-                    .foregroundColor(book.year != nil ? .secondary : .clear)
+                    .kluvsStyle(KluvsTheme.typography.caption)
+                    .foregroundColor(book.year != nil ? KluvsTheme.colors.contentMuted : .clear)
             }
         }
         .frame(width: 120)

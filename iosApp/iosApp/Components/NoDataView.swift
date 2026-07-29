@@ -1,4 +1,5 @@
 import SwiftUI
+import DesignSystem
 
 struct NoTabData: View {
     let text: String
@@ -7,9 +8,8 @@ struct NoTabData: View {
         VStack {
             Spacer()
             Text(text)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .italic()
+                .kluvsStyle(KluvsTheme.typography.title.medium, feature: true)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
                 .multilineTextAlignment(.center)
                 .padding()
             Spacer()
@@ -23,9 +23,8 @@ struct NoSectionData: View {
 
     var body: some View {
         Text(text)
-            .font(.body)
-            .foregroundColor(.secondary)
-            .italic()
+            .kluvsStyle(KluvsTheme.typography.caption, feature: true)
+            .foregroundColor(KluvsTheme.colors.contentMuted)
             .padding(.vertical, 8)
     }
 }

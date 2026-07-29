@@ -9,29 +9,26 @@ struct ClubsListView: View {
     let clubs: [Shared.ClubListItem]
     let onClubSelected: (String) -> Void
     let onAddClub: () -> Void
-    var onJoinWithCode: () -> Void = {}
+    var isRefreshing: Bool = false
+    var onRefresh: () -> Void = {}
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Color.kluvsBackground.ignoresSafeArea()
 
-            if clubs.isEmpty {
-                emptyState
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        header
-                        ForEach(clubs, id: \.id) { club in
-                            Button(action: { onClubSelected(club.id) }) {
-                                ClubListRow(club: club)
-                            }
-                            .buttonStyle(.plain)
-                            Divider()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(clubs, id: \.id) { club in
+                        Button(action: { onClubSelected(club.id) }) {
+                            ClubListRow(club: club)
                         }
+                        .buttonStyle(.plain)
+                        Divider()
                     }
                 }
-                .background(Color.kluvsBackground)
             }
+            .background(Color.kluvsBackground)
+            .kluvsPullToRefresh(isRefreshing: isRefreshing, onRefresh: onRefresh)
 
             Button(action: onAddClub) {
                 Image(systemName: "plus")
@@ -43,34 +40,6 @@ struct ClubsListView: View {
                     .shadow(radius: 4)
             }
             .padding(16)
-        }
-    }
-
-    private var header: some View {
-        HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("YOUR")
-                    .font(.kluvsEyebrow)
-                    .foregroundColor(.secondary)
-                Text("Clubs")
-                    .font(.kluvsDisplay2)
-                    .foregroundColor(.primary)
-            }
-            Spacer()
-            Button("Join with a code", action: onJoinWithCode)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 20)
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 8) {
-            Text("No clubs yet")
-                .font(.kluvsSectionHeading)
-            Text("Join a club to get started")
-                .font(.kluvsBody)
-                .foregroundColor(.secondary)
-            Button("Join with a code", action: onJoinWithCode)
         }
     }
 }
@@ -85,8 +54,8 @@ private struct ClubListRow: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
                     Text(club.name)
-                        .font(.kluvsCardHeading)
-                        .foregroundColor(.primary)
+                        .kluvsStyle(KluvsTheme.typography.title.medium)
+                        .foregroundColor(KluvsTheme.colors.content)
                     if let role = club.role {
                         RoleEyebrow(role: role)
                     }
@@ -94,8 +63,8 @@ private struct ClubListRow: View {
 
                 if let bookTitle = club.bookTitle {
                     Text(bookTitle)
-                        .font(.ebGaramondItalic(size: 14))
-                        .foregroundColor(.secondary)
+                        .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
                 }
 
                 if !club.memberAvatarUrls.isEmpty {
@@ -111,7 +80,7 @@ private struct ClubListRow: View {
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundColor(.secondary)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
