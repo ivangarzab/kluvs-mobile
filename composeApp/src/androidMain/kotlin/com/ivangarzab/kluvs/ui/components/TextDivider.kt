@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,8 @@ fun TextDivider(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = Color.Gray,
+    textColor: Color = color,
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
     thickness: Dp = 1.dp
 ) {
     Row(
@@ -34,8 +37,8 @@ fun TextDivider(
 
         Text(
             text = text,
-            color = color,
-            fontSize = 14.sp,
+            color = textColor,
+            style = textStyle,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 

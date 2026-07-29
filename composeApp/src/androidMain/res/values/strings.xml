@@ -56,7 +56,7 @@
     <string name="create_a_new_account">Create a new account</string>
     <string name="continue_with_discord">Continue with Discord</string>
     <string name="continue_with_google">Continue with Google</string>
-    <string name="or_continue_with_email">or continue with email</string>
+    <string name="or_continue_with_email">or with email</string>
     <string name="enter_valid_email_address">enter valid email address</string>
     <string name="min_eight_characters">Minimum 8 characters</string>
     <string name="confirm_password">Confirm Password</string>
@@ -65,14 +65,23 @@
     <string name="dont_have_an_account">Don\'t have an account?</string>
     <string name="already_have_an_account">Already have an account?</string>
 
-    <!-- Forgot Password Screen -->
+    <!-- Auth Masthead -->
+    <string name="welcome_back">Welcome back</string>
+    <string name="welcome_in">Welcome in</string>
+    <string name="sign_in_subhead">Sign in to keep reading together.</string>
+    <string name="sign_up_subhead">Bring your books. Bring your people. Read together.</string>
+
+    <!-- Auth Footer -->
+    <string name="reading_done_best_together">Reading is done best together.</string>
+
+    <!-- Forgot Password Sheet -->
     <string name="forgot_it">Forgot it?</string>
+    <string name="check_your_inbox">Check your inbox</string>
     <string name="reset_password_subhead">Drop your email — we\'ll send a link to set a new password.</string>
     <string name="send_reset_link">Send reset link</string>
     <string name="sending">Sending…</string>
     <string name="reset_link_sent_to">Reset link sent to</string>
     <string name="reset_link_sent_body">Open the link from your email to choose a new password.</string>
-    <string name="back_to_sign_in">Back to sign in</string>
 
     <!-- Auth Error Messages -->
     <string name="error_invalid_credentials">Invalid email or password</string>

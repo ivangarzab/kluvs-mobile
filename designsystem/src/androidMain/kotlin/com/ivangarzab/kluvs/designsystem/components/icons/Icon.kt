@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -59,6 +60,7 @@ private fun IconType.toImageVectorOrNull(): ImageVector? = when (this) {
     IconType.Close -> Icons.Filled.Close
     IconType.Favorite -> Icons.Filled.Favorite
     IconType.FavoriteOutline -> Icons.Outlined.FavoriteBorder
+    IconType.Error -> Icons.Filled.Warning
     else -> null
 }
 
