@@ -460,4 +460,21 @@ class SessionRepositoryTest {
             localDataSource.deleteSession(any())
         }
     }
+
+    // ========================================
+    // UPDATE PARTICIPATION
+    // ========================================
+
+    @Test
+    fun `updateParticipation with non-numeric memberId returns Result failure without calling remote`() = runTest {
+        val result = repository.updateParticipation(
+            sessionId = "session-123",
+            memberId = "not-a-number",
+            isReading = true
+        )
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { remoteDataSource.updateSession(any()) }
+    }
 }

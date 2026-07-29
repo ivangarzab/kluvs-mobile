@@ -152,15 +152,17 @@ internal class ClubRepositoryImpl(
         creatorBooksRead: Int,
         serverId: String?,
         discordChannel: String?
-    ): Result<Club> =
-        clubRemoteDataSource.createClub(
+    ): Result<Club> {
+        val creatorMemberIdInt = creatorMemberId.toIntOrNull()
+            ?: return Result.failure(IllegalArgumentException("Invalid creator member ID: $creatorMemberId"))
+        return clubRemoteDataSource.createClub(
             ClubCreateRequestDto(
                 name = name,
                 serverId = serverId,
                 discordChannel = discordChannel,
                 members = listOf(
                     MemberDto(
-                        id = creatorMemberId.toIntOrNull() ?: 0,
+                        id = creatorMemberIdInt,
                         name = creatorMemberName,
                         platformMetadata = JsonObject(emptyMap()),
                         booksRead = creatorBooksRead
@@ -168,6 +170,7 @@ internal class ClubRepositoryImpl(
                 )
             )
         )
+    }
 
     override suspend fun updateClub(
         clubId: String,
