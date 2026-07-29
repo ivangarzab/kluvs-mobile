@@ -1,19 +1,19 @@
 package com.ivangarzab.kluvs.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -29,7 +28,8 @@ import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.settings.presentation.EditableProfile
 import com.ivangarzab.kluvs.settings.presentation.SettingsState
 import com.ivangarzab.kluvs.settings.presentation.SettingsViewModel
-import com.ivangarzab.kluvs.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -78,15 +78,9 @@ fun SettingsScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_back),
-                            contentDescription = stringResource(R.string.navigate_back)
-                        )
-                    }
-                }
+                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+                header = stringResource(R.string.settings_title),
+                onNavigateBack = onNavigateBack,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -109,11 +103,12 @@ fun SettingsScreenContent(
                 onSaveProfile = onSaveProfile,
             )
 
-            HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 12.dp),
+                color = KluvsTheme.colors.divider
+            )
 
             LegalSection(context = context)
-
-//            HorizontalDivider()
 
             AboutSection()
         }

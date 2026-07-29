@@ -1,7 +1,10 @@
 package com.ivangarzab.kluvs.clubs.presentation
 
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.model.AttendanceStatus
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.JoinPolicy
+import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.Closeable
 import kotlinx.coroutines.CoroutineScope
@@ -37,14 +40,20 @@ class ClubDetailsViewModelHelper : KoinComponent {
         return Closeable { job.cancel() }
     }
 
-    fun loadUserClubs(userId: String) = viewModel.loadUserClubs(userId)
+    fun loadUserClubs(userId: String, forceRefresh: Boolean = false) = viewModel.loadUserClubs(userId, forceRefresh)
     fun loadClubData(clubId: String) = viewModel.loadClubData(clubId)
     fun selectClub(clubId: String) = viewModel.selectClub(clubId)
-    fun refresh() = viewModel.refresh()
+    fun refresh(forceRefresh: Boolean = false) = viewModel.refresh(forceRefresh)
+
+    // Club creation
+    fun onCreateClub(userId: String, name: String) = viewModel.onCreateClub(userId, name)
+    fun onConsumeCreatedClubId() = viewModel.onConsumeCreatedClubId()
 
     // General tab
     fun onUpdateClubName(newName: String) = viewModel.onUpdateClubName(newName)
     fun onDeleteClub() = viewModel.onDeleteClub()
+    fun onUpdateJoinPolicy(joinPolicy: JoinPolicy) = viewModel.onUpdateJoinPolicy(joinPolicy)
+    fun onRotateInviteLink() = viewModel.onRotateInviteLink()
 
     // Session tab — dates passed as ISO strings to avoid LocalDateTime in Swift
     fun onCreateSession(book: Book, dueDateIso: String?) =
@@ -52,6 +61,13 @@ class ClubDetailsViewModelHelper : KoinComponent {
     fun onUpdateSession(book: Book?, dueDateIso: String?) =
         viewModel.onUpdateSession(book, dueDateIso?.toLocalDateTime())
     fun onDeleteSession() = viewModel.onDeleteSession()
+    fun onEndSession() = viewModel.onEndSession()
+    fun onToggleParticipation(memberId: String, isReading: Boolean) =
+        viewModel.onToggleParticipation(memberId, isReading)
+
+    /** Percent is passed as a plain Int (0-100) to avoid Float bridging quirks on the Swift side. */
+    fun onSaveProgress(type: ProgressType, currentPage: Int?, percentComplete: Int?, markFinished: Boolean) =
+        viewModel.onSaveProgress(type, currentPage, percentComplete?.toFloat(), markFinished)
 
     // Discussion operations — dates passed as ISO strings
     fun onCreateDiscussion(title: String, location: String, dateIso: String) {
@@ -61,6 +77,17 @@ class ClubDetailsViewModelHelper : KoinComponent {
     fun onUpdateDiscussion(discussionId: String, title: String?, location: String?, dateIso: String?) =
         viewModel.onUpdateDiscussion(discussionId, title, location, dateIso?.toLocalDateTime())
     fun onDeleteDiscussion(discussionId: String) = viewModel.onDeleteDiscussion(discussionId)
+
+    // Attendance operations
+    fun onLoadAttendanceRoster(discussionId: String) = viewModel.onLoadAttendanceRoster(discussionId)
+    fun onSetAttendance(discussionId: String, status: AttendanceStatus) =
+        viewModel.onSetAttendance(discussionId, status)
+
+    // Discussion note operations
+    fun onLoadDiscussionNote(discussionId: String) = viewModel.onLoadDiscussionNote(discussionId)
+    fun onSaveDiscussionNote(discussionId: String, content: String) =
+        viewModel.onSaveDiscussionNote(discussionId, content)
+    fun onDeleteDiscussionNote(discussionId: String) = viewModel.onDeleteDiscussionNote(discussionId)
 
     // Member operations
     fun onUpdateMemberRole(memberId: String, currentMemberId: String, newRole: Role) =

@@ -1,4 +1,5 @@
 import SwiftUI
+import DesignSystem
 
 struct MaterialBottomNavBar: View {
     @Binding var selectedTab: Int
@@ -6,24 +7,31 @@ struct MaterialBottomNavBar: View {
     var body: some View {
         HStack(spacing: 0) {
             MaterialNavBarItem(
-                icon: .club,
-                label: String(localized: "tab_clubs"),
+                icon: .user,
+                label: String(localized: "tab_me"),
                 isSelected: selectedTab == 0,
                 action: { selectedTab = 0 }
             )
 
             MaterialNavBarItem(
-                icon: .user,
-                label: String(localized: "tab_me"),
+                icon: .club,
+                label: String(localized: "tab_clubs"),
                 isSelected: selectedTab == 1,
                 action: { selectedTab = 1 }
             )
+
+            MaterialNavBarItem(
+                icon: .book,
+                label: String(localized: "tab_books"),
+                isSelected: selectedTab == 2,
+                action: { selectedTab = 2 }
+            )
         }
         .frame(height: 80)
-        .background(Color(UIColor.systemBackground))
+        .background(KluvsTheme.colors.bar)
         .overlay(
             Rectangle()
-                .fill(Color.gray.opacity(0.2))
+                .fill(KluvsTheme.colors.divider)
                 .frame(height: 0.5),
             alignment: .top
         )
@@ -31,7 +39,7 @@ struct MaterialBottomNavBar: View {
 }
 
 struct MaterialNavBarItem: View {
-    let icon: CustomIcon
+    let icon: IconType
     let label: String
     let isSelected: Bool
     let action: () -> Void
@@ -43,14 +51,14 @@ struct MaterialNavBarItem: View {
                     // Indicator background (like Android's indicatorColor)
                     if isSelected {
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.brandOrange.opacity(0.2))
+                            .fill(KluvsTheme.colors.accent.opacity(0.2))
                             .frame(width: 64, height: 32)
                     }
 
                     // Icon
-                    Image.custom(icon)
+                    icon.image
                         .font(.system(size: 24))
-                        .foregroundColor(isSelected ? .brandOrange : .secondary)
+                        .foregroundColor(isSelected ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted)
                         .scaleEffect(isSelected ? 1.0 : 0.85)
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isSelected)
                 }
@@ -58,7 +66,7 @@ struct MaterialNavBarItem: View {
                 // Label
                 Text(label)
                     .font(.caption)
-                    .foregroundColor(isSelected ? .brandOrange : .secondary)
+                    .foregroundColor(isSelected ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())

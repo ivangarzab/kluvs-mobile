@@ -1,13 +1,16 @@
 package com.ivangarzab.kluvs.data.repositories
 
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.api.models.ClubCreateRequestDto
+import com.ivangarzab.kluvs.api.models.ClubUpdateRequestDto
+import com.ivangarzab.kluvs.api.models.MemberDto
 import com.ivangarzab.kluvs.data.local.cache.CachePolicy
 import com.ivangarzab.kluvs.data.local.cache.CacheTTL
 import com.ivangarzab.kluvs.data.local.source.ClubLocalDataSource
-import com.ivangarzab.kluvs.data.remote.dtos.CreateClubRequestDto
-import com.ivangarzab.kluvs.data.remote.dtos.UpdateClubRequestDto
 import com.ivangarzab.kluvs.data.remote.source.ClubRemoteDataSource
 import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.kluvs.model.JoinPolicy
+import kotlinx.serialization.json.JsonObject
 
 /**
  * Repository for managing Club data.
@@ -30,15 +33,23 @@ interface ClubRepository {
     suspend fun getClub(clubId: String, serverId: String? = null, forceRefresh: Boolean = false): Result<Club>
 
     /**
-     * Creates a new club.
+     * Creates a new club. The backend does not infer the caller as a member — the creator
+     * must be passed explicitly as the first entry of the `members` array, which is how it
+     * becomes the club's owner (see `club/handlers/create.ts`).
      *
      * @param name The name of the club
+     * @param creatorMemberId The creating member's ID — becomes the club's owner
+     * @param creatorMemberName The creating member's display name
+     * @param creatorBooksRead The creating member's current books-read count (denormalized on the members row)
      * @param serverId Optional server ID for Discord integration (defaults to null for mobile-only clubs)
      * @param discordChannel Optional Discord channel to associate with this club
      * @return Result containing the created Club if successful, or an error if the operation failed
      */
     suspend fun createClub(
         name: String,
+        creatorMemberId: String,
+        creatorMemberName: String,
+        creatorBooksRead: Int = 0,
         serverId: String? = null,
         discordChannel: String? = null
     ): Result<Club>
@@ -50,13 +61,16 @@ interface ClubRepository {
      * @param serverId Optional server ID for Discord integration (defaults to null for mobile-only clubs)
      * @param name Optional new name for the club (null to keep current value)
      * @param discordChannel Optional new Discord channel (null to keep current value)
+     * @param joinPolicy Optional new join policy. Setting to INVITE_LINK creates (or reuses) an
+     *        active invite token; setting to PRIVATE deactivates all active invites (null to keep current value)
      * @return Result containing the updated Club if successful, or an error if the operation failed
      */
     suspend fun updateClub(
         clubId: String,
         serverId: String? = null,
         name: String? = null,
-        discordChannel: String? = null
+        discordChannel: String? = null,
+        joinPolicy: JoinPolicy? = null
     ): Result<Club>
 
     /**
@@ -133,14 +147,25 @@ internal class ClubRepositoryImpl(
 
     override suspend fun createClub(
         name: String,
+        creatorMemberId: String,
+        creatorMemberName: String,
+        creatorBooksRead: Int,
         serverId: String?,
         discordChannel: String?
     ): Result<Club> =
         clubRemoteDataSource.createClub(
-            CreateClubRequestDto(
+            ClubCreateRequestDto(
                 name = name,
-                server_id = serverId,
-                discord_channel = discordChannel
+                serverId = serverId,
+                discordChannel = discordChannel,
+                members = listOf(
+                    MemberDto(
+                        id = creatorMemberId.toIntOrNull() ?: 0,
+                        name = creatorMemberName,
+                        platformMetadata = JsonObject(emptyMap()),
+                        booksRead = creatorBooksRead
+                    )
+                )
             )
         )
 
@@ -148,14 +173,21 @@ internal class ClubRepositoryImpl(
         clubId: String,
         serverId: String?,
         name: String?,
-        discordChannel: String?
+        discordChannel: String?,
+        joinPolicy: JoinPolicy?
     ): Result<Club> =
         clubRemoteDataSource.updateClub(
-            UpdateClubRequestDto(
+            ClubUpdateRequestDto(
                 id = clubId,
-                server_id = serverId,
+                serverId = serverId,
                 name = name,
-                discord_channel = discordChannel
+                discordChannel = discordChannel,
+                joinPolicy = joinPolicy?.let {
+                    when (it) {
+                        JoinPolicy.PRIVATE -> ClubUpdateRequestDto.JoinPolicy.PRIVATE
+                        JoinPolicy.INVITE_LINK -> ClubUpdateRequestDto.JoinPolicy.INVITE_LINK
+                    }
+                }
             )
         )
 

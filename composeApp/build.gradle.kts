@@ -19,6 +19,7 @@ kotlin {
     
     sourceSets {
         androidMain.dependencies {
+            implementation(projects.designsystem)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.splashscreen)
@@ -62,8 +63,8 @@ android {
         applicationId = "com.ivangarzab.kluvs"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2
-        versionName = "0.0.2"
+        versionCode = 3
+        versionName = "0.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {

@@ -11,45 +11,40 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.auth.presentation.AuthMode
 import com.ivangarzab.kluvs.auth.presentation.AuthUiState
 import com.ivangarzab.kluvs.auth.presentation.LoginNavigation
 import com.ivangarzab.kluvs.model.AuthProvider
-import com.ivangarzab.kluvs.theme.KluvsTheme
-import com.ivangarzab.kluvs.theme.bgSignInDiscord
-import com.ivangarzab.kluvs.theme.bgSignInGoogle
-import com.ivangarzab.kluvs.theme.textSignInGoogle
-import com.ivangarzab.kluvs.theme.white
-import com.ivangarzab.kluvs.ui.components.InputField
-import com.ivangarzab.kluvs.ui.components.SocialButton
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.contentDarkPrimary
+import com.ivangarzab.kluvs.designsystem.theme.providerDiscordBg
+import com.ivangarzab.kluvs.designsystem.theme.providerGoogleBg
+import com.ivangarzab.kluvs.designsystem.theme.providerGoogleText
+import com.ivangarzab.kluvs.designsystem.components.fields.InputField
+import com.ivangarzab.kluvs.designsystem.components.fields.PasswordField
+import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.SocialButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
 import com.ivangarzab.kluvs.ui.components.TextDivider
 
 @Composable
@@ -82,9 +77,9 @@ fun AuthFormContent(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    actionColor = MaterialTheme.colorScheme.error
+                    containerColor = KluvsTheme.colors.card,
+                    contentColor = KluvsTheme.colors.danger,
+                    actionColor = KluvsTheme.colors.danger
                 )
             }
         },
@@ -99,8 +94,8 @@ fun AuthFormContent(
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = "Welcome to your Kluvs",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge
+                color = KluvsTheme.colors.content,
+                style = KluvsTheme.typography.headline.small
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -114,18 +109,18 @@ fun AuthFormContent(
                         R.string.create_a_new_account
                     }
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyLarge,
+                color = KluvsTheme.colors.contentMuted,
+                style = KluvsTheme.typography.body.large,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             SocialButton(
                 text = stringResource(R.string.continue_with_discord),
-                icon = painterResource(R.drawable.ic_discord),
+                icon = IconType.Discord,
                 iconSize = 20.dp,
-                backgroundColor = bgSignInDiscord,
-                textColor = white,
+                backgroundColor = providerDiscordBg,
+                textColor = contentDarkPrimary,
                 onClick = { onOAuthSignIn(AuthProvider.DISCORD) }
             )
 
@@ -133,10 +128,10 @@ fun AuthFormContent(
 
             SocialButton(
                 text = stringResource(R.string.continue_with_google),
-                icon = painterResource(R.drawable.ic_google),
+                icon = IconType.Google,
                 iconSize = 20.dp,
-                backgroundColor = bgSignInGoogle,
-                textColor = textSignInGoogle,
+                backgroundColor = providerGoogleBg,
+                textColor = providerGoogleText,
                 onClick = { onOAuthSignIn(AuthProvider.GOOGLE) }
             )
 
@@ -151,14 +146,11 @@ fun AuthFormContent(
                 label = stringResource(R.string.email),
                 value = state.emailField,
                 onValueChange = onEmailFieldChange,
-                iconRes = R.drawable.ic_email,
-                iconDescription = stringResource(R.string.description_email_text_field),
-                supportingText = state.emailError
-                    ?: stringResource(R.string.enter_valid_email_address),
-                supportingTextColor = if (state.emailError != null) {
-                    MaterialTheme.colorScheme.error
+                error = state.emailError,
+                helperText = if (state.emailError == null) {
+                    stringResource(R.string.enter_valid_email_address)
                 } else {
-                    Color.Gray
+                    null
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -168,20 +160,16 @@ fun AuthFormContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            InputField(
+            PasswordField(
                 modifier = Modifier.fillMaxWidth(),
-                isPassword = true,
                 label = stringResource(R.string.password),
                 value = state.passwordField,
                 onValueChange = onPasswordFieldChange,
-                iconRes = R.drawable.ic_password,
-                iconDescription = stringResource(R.string.description_password_text_field),
-                supportingText = state.passwordError
-                    ?: stringResource(R.string.min_eight_characters),
-                supportingTextColor = if (state.emailError != null) {
-                    MaterialTheme.colorScheme.error
+                error = state.passwordError,
+                helperText = if (state.passwordError == null) {
+                    stringResource(R.string.min_eight_characters)
                 } else {
-                    Color.Gray
+                    null
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -192,71 +180,54 @@ fun AuthFormContent(
                     }
                 ),
                 keyboardActions = KeyboardActions(
-                    onGo = { onSubmit()}
+                    onGo = { onSubmit() },
                 ),
             )
 
             if (mode == AuthMode.SIGNUP) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                InputField(
+                PasswordField(
                     modifier = Modifier.fillMaxWidth(),
-                    isPassword = true,
                     label = stringResource(R.string.confirm_password),
                     value = state.confirmPasswordField,
                     onValueChange = onConfirmPasswordFieldChange,
-                    iconRes = R.drawable.ic_password,
-                    iconDescription = stringResource(R.string.description_confirm_password_text_field),
-                    supportingText = state.confirmPasswordError
-                        ?: stringResource(R.string.match_password_above),
-                    supportingTextColor = if (state.emailError != null) {
-                        MaterialTheme.colorScheme.error
+                    error = state.confirmPasswordError,
+                    helperText = if (state.confirmPasswordError == null) {
+                        stringResource(R.string.match_password_above)
                     } else {
-                        Color.Gray
+                        null
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Go
                     ),
                     keyboardActions = KeyboardActions(
-                        onGo = { onSubmit() }
+                        onGo = { onSubmit() },
                     ),
                 )
             }
 
             if (mode == AuthMode.LOGIN) {
                 TextButton(
-                    modifier = Modifier
-                        .align(Alignment.End),
+                    modifier = Modifier.align(Alignment.End),
+                    text = stringResource(R.string.forgot_password),
                     onClick = { onNavigate(LoginNavigation.ForgetPassword) },
-                    content = {
-                        Text(
-                            text = stringResource(R.string.forgot_password),
-                            textAlign = TextAlign.Right,
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
+                    emphasized = true,
                 )
             } else {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Button(
+            PrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                onClick = { onSubmit() }
-            ) {
-                Text(
-                    text = if (mode == AuthMode.LOGIN) {
-                        stringResource(R.string.sign_in)
-                    } else {
-                        stringResource(R.string.sign_up)
-                    },
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.background
-                )
-            }
+                text = if (mode == AuthMode.LOGIN) {
+                    stringResource(R.string.sign_in)
+                } else {
+                    stringResource(R.string.sign_up)
+                },
+                onClick = { onSubmit() },
+            )
 
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -271,8 +242,8 @@ fun AuthFormContent(
                     } else {
                         stringResource(R.string.already_have_an_account)
                     },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
+                    color = KluvsTheme.colors.contentMuted,
+                    style = KluvsTheme.typography.body.medium,
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
@@ -293,9 +264,8 @@ fun AuthFormContent(
                     } else {
                         stringResource(R.string.sign_in)
                     },
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    color = KluvsTheme.colors.accent,
+                    style = KluvsTheme.typography.label,
                 )
             }
         }
@@ -307,7 +277,7 @@ fun AuthFormContent(
 fun Preview_LoginScreen() = KluvsTheme {
     AuthFormContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         mode = AuthMode.LOGIN,
         state = AuthUiState(),
@@ -325,7 +295,7 @@ fun Preview_LoginScreen() = KluvsTheme {
 fun Preview_SignupScreen() = KluvsTheme {
     AuthFormContent(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         mode = AuthMode.SIGNUP,
         state = AuthUiState(),

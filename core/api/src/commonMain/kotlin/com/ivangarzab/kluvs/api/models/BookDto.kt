@@ -23,9 +23,9 @@ import kotlinx.serialization.encoding.*
 /**
  * 
  *
- * @param id 
  * @param title 
  * @param author 
+ * @param id Local DB id. Absent/null for Google Books search results that have not been registered yet.
  * @param edition 
  * @param year 
  * @param isbn 
@@ -33,15 +33,16 @@ import kotlinx.serialization.encoding.*
  * @param imageUrl Cover image URL (HTTPS)
  * @param externalGoogleId Google Books volume ID for deduplication
  */
-@Serializable@Serializable
+@Serializable
 
 data class BookDto (
-
-    @SerialName(value = "id") @Required val id: kotlin.Int,
 
     @SerialName(value = "title") @Required val title: kotlin.String,
 
     @SerialName(value = "author") @Required val author: kotlin.String,
+
+    /* Local DB id. Absent/null for Google Books search results that have not been registered yet. */
+    @SerialName(value = "id") val id: kotlin.Int? = null,
 
     @SerialName(value = "edition") val edition: kotlin.String? = null,
 

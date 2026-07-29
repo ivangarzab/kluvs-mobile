@@ -3,13 +3,12 @@ package com.ivangarzab.kluvs.ui.me
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,13 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -35,28 +29,50 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.member.presentation.CurrentlyReadingBook
 import com.ivangarzab.kluvs.member.presentation.MeState
 import com.ivangarzab.kluvs.member.presentation.MeViewModel
+import com.ivangarzab.kluvs.member.presentation.ShelfItem
+import com.ivangarzab.kluvs.member.presentation.UpNextItem
 import com.ivangarzab.kluvs.member.presentation.UserProfile
 import com.ivangarzab.kluvs.member.presentation.UserStatistics
+import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.presentation.state.ScreenState
-import com.ivangarzab.kluvs.theme.KluvsTheme
-import com.ivangarzab.kluvs.ui.components.ErrorScreen
-import com.ivangarzab.kluvs.ui.components.LoadingScreen
-import com.ivangarzab.kluvs.ui.components.MemberAvatar
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
+import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
+import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
+import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
+import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
+import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
 import com.ivangarzab.kluvs.ui.utils.compressImage
 import org.koin.compose.viewmodel.koinViewModel
+
+/** Translation at the boundary into the hollow [ReadingProgressBottomSheet] — see its call site below. */
+private fun ProgressType.toTrackingMode(): ProgressTrackingMode = when (this) {
+    ProgressType.PAGE -> ProgressTrackingMode.PAGE
+    ProgressType.PERCENT -> ProgressTrackingMode.PERCENT
+}
+
+private fun ProgressTrackingMode.toDomain(): ProgressType = when (this) {
+    ProgressTrackingMode.PAGE -> ProgressType.PAGE
+    ProgressTrackingMode.PERCENT -> ProgressType.PERCENT
+}
 
 @Composable
 fun MeScreen(
@@ -68,6 +84,7 @@ fun MeScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    var editingShelfItem by remember { mutableStateOf<ShelfItem?>(null) }
 
     // Image picker launcher
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -100,25 +117,68 @@ fun MeScreen(
         )
     }
 
-    Box(modifier = modifier) {
-        MeScreenContent(
-            modifier = Modifier,
-            state = state,
-            onRetry = viewModel::refresh,
-            onSettingsClick = onNavigateToSettings,
-            onHelpClick = { /* TODO() */ },
-            onSignOutClick = viewModel::onSignOutClicked,
-            onAvatarClick = {
-                imagePickerLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+    Column(modifier = modifier.background(color = KluvsTheme.colors.background)) {
+        TopAppBar(
+            header = stringResource(R.string.me),
+            action = {
+                ActionMenu(
+                    items = listOf(
+                        ActionMenuItem(label = stringResource(R.string.reading_log), onClick = viewModel::onReadingLogClicked),
+                        ActionMenuItem(label = stringResource(R.string.settings), onClick = onNavigateToSettings),
+                        ActionMenuItem(label = stringResource(R.string.sign_out), onClick = viewModel::onSignOutClicked, isDestructive = true),
+                    ),
+                    contentDescription = stringResource(R.string.profile_menu)
                 )
-            }
+            },
         )
 
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        Box(modifier = Modifier.weight(1f)) {
+            MeScreenContent(
+                modifier = Modifier,
+                state = state,
+                onRetry = viewModel::refresh,
+                onRefresh = { viewModel.refresh(forceRefresh = true) },
+                onAvatarClick = {
+                    imagePickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                onUpdateProgress = { sessionId ->
+                    editingShelfItem = state.shelf.find { it.sessionId == sessionId }
+                }
+            )
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+
+            editingShelfItem?.let { item ->
+                // ReadingProgressBottomSheet is hollow (design-system primitives migration) — it
+                // reports back in ProgressTrackingMode, translated to the domain ProgressType here.
+                ReadingProgressBottomSheet(
+                    bookTitle = item.bookTitle,
+                    pageCount = item.bookPageCount,
+                    initialType = (item.ownProgress?.type ?: ProgressType.PAGE).toTrackingMode(),
+                    initialCurrentPage = item.ownProgress?.currentPage,
+                    initialPercentComplete = item.ownProgress?.percentComplete,
+                    initialMarkFinished = item.ownProgress?.isCompleted ?: false,
+                    onSave = { type, currentPage, percentComplete, markFinished ->
+                        viewModel.onSaveProgress(item.sessionId, type.toDomain(), currentPage, percentComplete, markFinished)
+                        editingShelfItem = null
+                    },
+                    onDismiss = { editingShelfItem = null }
+                )
+            }
+
+            if (state.showReadingLog) {
+                ReadingLogBottomSheet(
+                    log = state.readingLog,
+                    isLoading = state.isReadingLogLoading,
+                    onDismiss = viewModel::onReadingLogDismissed
+                )
+            }
+        }
     }
 }
 
@@ -127,20 +187,13 @@ fun LogoutConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.logout_confirmation_title)) },
-        text = { Text(stringResource(R.string.logout_confirmation_message)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.yes))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.no))
-            }
-        }
+    ConfirmationDialog(
+        title = stringResource(R.string.logout_confirmation_title),
+        message = stringResource(R.string.logout_confirmation_message),
+        confirmLabel = stringResource(R.string.sign_out),
+        isDestructive = true,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss
     )
 }
 
@@ -149,15 +202,15 @@ fun MeScreenContent(
     modifier: Modifier = Modifier,
     state: MeState,
     onRetry: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onHelpClick: () -> Unit,
-    onSignOutClick: () -> Unit,
+    onRefresh: () -> Unit = onRetry,
     onAvatarClick: () -> Unit = {},
+    onUpdateProgress: (sessionId: String) -> Unit = {},
 ) {
     val screenState = when {
+        state.profile != null -> ScreenState.Content
         state.isLoading -> ScreenState.Loading
         state.error != null -> ScreenState.Error(state.error!!)
-        else -> ScreenState.Content
+        else -> ScreenState.Empty
     }
 
     AnimatedContent(
@@ -168,50 +221,61 @@ fun MeScreenContent(
         label = "MeScreenTransition"
     ) { targetState ->
         when (targetState) {
-            is ScreenState.Loading -> LoadingScreen()
+            is ScreenState.Loading -> MeScreenSkeleton(modifier = modifier.fillMaxSize())
             is ScreenState.Error -> ErrorScreen(
                 message = targetState.message,
                 onRetry = onRetry
             )
             is ScreenState.Empty,
             is ScreenState.Content -> {
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
+                PullToRefreshContainer(
+                    isLoading = state.isLoading,
+                    onRefresh = onRefresh,
+                    modifier = modifier.fillMaxSize(),
                 ) {
-                    ProfileSection(
-                        avatarUrl = state.profile?.avatarUrl,
-                        name = state.profile?.name ?: "",
-                        handle = state.profile?.handle ?: "",
-                        joinDate = state.profile?.joinDate ?: "",
-                        isUploadingAvatar = state.isUploadingAvatar,
-                        onAvatarClick = onAvatarClick
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = KluvsTheme.colors.background)
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        ProfileSection(
+                            avatarUrl = state.profile?.avatarUrl,
+                            name = state.profile?.name ?: "",
+                            handle = state.profile?.handle ?: "",
+                            isUploadingAvatar = state.isUploadingAvatar,
+                            onAvatarClick = onAvatarClick
+                        )
 
-                    Divider()
+                        Divider()
 
-                    StatisticsSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        data = state.statistics
-                    )
+                        StatisticsSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            data = state.statistics,
+                            joinDate = state.profile?.joinDate
+                        )
 
-                    Divider()
+                        Divider()
 
-                    CurrentlyReadingSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        currentReadings = state.currentlyReading
-                    )
+                        UpNextSection(
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth(),
+                            upNext = state.upNext
+                        )
 
-                    Divider()
+                        if (state.upNext != null) {
+                            Divider()
+                        }
 
-                    FooterSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        onSettingsClick = onSettingsClick,
-                        onHelpClick = onHelpClick,
-                        onSignOutClick = onSignOutClick,
-                    )
+                        ShelfSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            shelf = state.shelf,
+                            onUpdateProgress = onUpdateProgress
+                        )
+                    }
                 }
             }
         }
@@ -224,148 +288,63 @@ private fun ProfileSection(
     avatarUrl: String?,
     name: String,
     handle: String,
-    joinDate: String,
     isUploadingAvatar: Boolean = false,
-    onAvatarClick: () -> Unit = {}
+    onAvatarClick: () -> Unit = {},
 ) {
-    Card(
+    Row(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar with edit button overlay
-            Box {
-                MemberAvatar(
-                    avatarUrl = avatarUrl,
-                    size = 60.dp,
-                    contentDescription = stringResource(R.string.profile_picture),
-                    onClick = onAvatarClick,
-                    isLoading = isUploadingAvatar
-                )
+        // Avatar with edit button overlay
+        Box {
+            Avatar(
+                name = name,
+                avatarUrl = avatarUrl,
+                size = 60.dp,
+                isOwn = true,
+                contentDescription = stringResource(R.string.profile_picture),
+                onClick = onAvatarClick,
+                isLoading = isUploadingAvatar
+            )
 
-                // Edit icon overlay
-                FloatingActionButton(
-                    onClick = onAvatarClick,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .align(Alignment.BottomEnd),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ) {
-                    Icon(
-                        painterResource(R.drawable.ic_edit),
-                        contentDescription = stringResource(R.string.edit_profile_picture),
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
-            }
-
-            Spacer(Modifier.padding(8.dp))
-
-            Column {
-                Text(
-                    text = name,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = handle,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = stringResource(R.string.member_since_x, joinDate),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
+            // Edit icon overlay
+            FloatingActionButton(
+                onClick = onAvatarClick,
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.BottomEnd),
+                containerColor = KluvsTheme.colors.accent,
+                contentColor = KluvsTheme.colors.onAccent,
+            ) {
+                Icon(
+                    type = IconType.Edit,
+                    contentDescription = stringResource(R.string.edit_profile_picture),
+                    modifier = Modifier.size(14.dp)
                 )
             }
         }
-    }
-}
 
-@Composable
-private fun FooterSection(
-    modifier: Modifier = Modifier,
-    onSettingsClick: () -> Unit,
-    onHelpClick: () -> Unit,
-    onSignOutClick: () -> Unit,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp)
-    ) {
-        FooterItem(
-            label = stringResource(R.string.settings),
-            icon = R.drawable.ic_settings,
-            onClick = onSettingsClick
-        )
+        Spacer(Modifier.padding(8.dp))
 
-        Divider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = MaterialTheme.colorScheme.inverseOnSurface
-        )
-
-        FooterItem(
-            label = stringResource(R.string.help_and_support),
-            icon = R.drawable.ic_help,
-            onClick = onHelpClick
-        )
-
-        Divider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = MaterialTheme.colorScheme.inverseOnSurface
-        )
-
-        FooterItem(
-            label = stringResource(R.string.sign_out),
-            labelColor = MaterialTheme.colorScheme.error,
-            icon = R.drawable.ic_signout,
-            iconColor = MaterialTheme.colorScheme.error,
-            onClick = onSignOutClick
-        )
-
-    }
-}
-
-@Composable
-private fun FooterItem(
-    modifier: Modifier = Modifier,
-    label: String,
-    labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    @DrawableRes icon: Int,
-    iconColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            modifier = Modifier.size(20.dp),
-            painter = painterResource(icon),
-            contentDescription = null,
-            tint = iconColor
-        )
-        Spacer(Modifier.padding(horizontal = 4.dp))
-        Text(
-            text = label,
-            color = labelColor,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column {
+            Text(
+                text = name,
+                color = KluvsTheme.colors.content,
+                style = KluvsTheme.typography.headline.small
+            )
+            Text(
+                text = "@$handle",
+                color = KluvsTheme.colors.contentMuted,
+                style = KluvsTheme.typography.body.medium
+            )
+        }
     }
 }
 
 @Composable
 private fun Divider(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surfaceVariant
+    color: Color = KluvsTheme.colors.divider
 ) {
     HorizontalDivider(modifier = modifier, color = color)
 }
@@ -373,30 +352,42 @@ private fun Divider(
 @PreviewLightDark
 @Composable
 fun Preview_MeScreen() = KluvsTheme {
-    MeScreenContent(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-        state = MeState(
-            isLoading = false,
-            profile = UserProfile(
-                memberId = "0",
-                name = "Quill",
-                handle = "@quill-bot",
-                joinDate = "2025",
-                avatarUrl = null
-            ),
-            statistics = UserStatistics(clubsCount = 6, booksRead = 2),
-            currentlyReading = listOf(
-                CurrentlyReadingBook(
-                    bookTitle = "1984",
-                    clubName = "Quill's Club",
-                    progress = 0.66f,
-                    dueDate = "Tomorrow"
+    Column(modifier = Modifier.background(color = KluvsTheme.colors.background)) {
+        TopAppBar(header = stringResource(R.string.me))
+
+        MeScreenContent(
+            state = MeState(
+                isLoading = false,
+                profile = UserProfile(
+                    memberId = "0",
+                    name = "Quill",
+                    handle = "quill-bot",
+                    joinDate = "2025",
+                    avatarUrl = null
+                ),
+                statistics = UserStatistics(clubsCount = 6, booksRead = 2),
+                upNext = UpNextItem(
+                    title = "End-of-Year Check-in",
+                    clubName = "Showcase Kluv",
+                    location = "Online",
+                    date = "January 1, 2027"
+                ),
+                shelf = listOf(
+                    ShelfItem(
+                        sessionId = "s0",
+                        bookId = "b0",
+                        bookTitle = "1984",
+                        bookAuthor = "George Orwell",
+                        bookCoverUrl = null,
+                        bookPageCount = null,
+                        clubId = "c0",
+                        clubName = "Quill's Club",
+                        nextDiscussionDate = "Tomorrow",
+                        ownProgress = null
+                    )
                 )
-            )
-        ),
-        onRetry = { },
-        onSettingsClick = { },
-        onHelpClick = { },
-        onSignOutClick = { },
-    )
+            ),
+            onRetry = { },
+        )
+    }
 }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
-import com.ivangarzab.kluvs.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import androidx.core.net.toUri
 
 private const val PRIVACY_POLICY_URL = "https://kluvs.com/privacy"
@@ -33,9 +32,9 @@ fun LegalSection(
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Text(
-            text = stringResource(R.string.legal_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            text = stringResource(R.string.legal_title).uppercase(),
+            style = KluvsTheme.typography.eyebrow,
+            color = KluvsTheme.colors.contentMuted
         )
 
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
@@ -45,14 +44,14 @@ fun LegalSection(
             onClick = { openCustomTab(context, PRIVACY_POLICY_URL) }
         )
 
-        HorizontalDivider(modifier = Modifier)
+        HorizontalDivider(color = KluvsTheme.colors.divider)
 
         LegalRow(
             label = stringResource(R.string.terms_of_use),
             onClick = { openCustomTab(context, TERMS_OF_USE_URL) }
         )
 
-        HorizontalDivider(modifier = Modifier)
+        HorizontalDivider(color = KluvsTheme.colors.divider)
     }
 }
 
@@ -70,8 +69,8 @@ private fun LegalRow(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
+            style = KluvsTheme.typography.label,
+            color = KluvsTheme.colors.accent,
         )
     }
 }

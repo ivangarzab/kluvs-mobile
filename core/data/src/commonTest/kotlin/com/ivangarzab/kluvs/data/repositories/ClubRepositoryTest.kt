@@ -1,9 +1,11 @@
 package com.ivangarzab.kluvs.data.repositories
 
+import com.ivangarzab.kluvs.api.models.ClubUpdateRequestDto
 import com.ivangarzab.kluvs.data.local.cache.CachePolicy
 import com.ivangarzab.kluvs.data.local.source.ClubLocalDataSource
 import com.ivangarzab.kluvs.data.remote.source.ClubRemoteDataSource
 import com.ivangarzab.kluvs.model.Club
+import com.ivangarzab.kluvs.model.JoinPolicy
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
@@ -107,7 +109,7 @@ class ClubRepositoryTest {
         )
         everySuspend { remoteDataSource.createClub(any()) } returns Result.success(expectedClub)
 
-        val result = repository.createClub(clubName, serverId, discordChannel)
+        val result = repository.createClub(clubName, "member-1", "Creator", 0, serverId, discordChannel)
 
         assertTrue(result.isSuccess)
         assertEquals(expectedClub, result.getOrNull())
@@ -128,7 +130,7 @@ class ClubRepositoryTest {
         )
         everySuspend { remoteDataSource.createClub(any()) } returns Result.success(expectedClub)
 
-        val result = repository.createClub(clubName, serverId, null)
+        val result = repository.createClub(clubName, "member-1", "Creator", 0, serverId, null)
 
         assertTrue(result.isSuccess)
         assertEquals(expectedClub, result.getOrNull())
@@ -142,7 +144,7 @@ class ClubRepositoryTest {
         val exception = Exception("Failed to create club")
         everySuspend { remoteDataSource.createClub(any()) } returns Result.failure(exception)
 
-        val result = repository.createClub("New Club", "server-456", null)
+        val result = repository.createClub("New Club", "member-1", "Creator", 0, "server-456", null)
 
         assertTrue(result.isFailure)
         assertEquals(exception, result.exceptionOrNull())
@@ -213,6 +215,53 @@ class ClubRepositoryTest {
         assertEquals("Updated", result.getOrNull()?.name)
         assertEquals("#original", result.getOrNull()?.discordChannel)
         verifySuspend { remoteDataSource.updateClub(any()) }
+    }
+
+    @Test
+    fun `updateClub with joinPolicy threads INVITE_LINK to the request DTO`() = runTest {
+        val clubId = "club-123"
+        val expectedClub = Club(id = clubId, name = "Club", joinPolicy = JoinPolicy.INVITE_LINK, inviteToken = "tok-1")
+        everySuspend { remoteDataSource.updateClub(any()) } returns Result.success(expectedClub)
+
+        val result = repository.updateClub(clubId, joinPolicy = JoinPolicy.INVITE_LINK)
+
+        assertTrue(result.isSuccess)
+        assertEquals(JoinPolicy.INVITE_LINK, result.getOrNull()?.joinPolicy)
+        verifySuspend {
+            remoteDataSource.updateClub(
+                ClubUpdateRequestDto(id = clubId, joinPolicy = ClubUpdateRequestDto.JoinPolicy.INVITE_LINK)
+            )
+        }
+    }
+
+    @Test
+    fun `updateClub with joinPolicy PRIVATE threads to the request DTO`() = runTest {
+        val clubId = "club-123"
+        val expectedClub = Club(id = clubId, name = "Club", joinPolicy = JoinPolicy.PRIVATE)
+        everySuspend { remoteDataSource.updateClub(any()) } returns Result.success(expectedClub)
+
+        val result = repository.updateClub(clubId, joinPolicy = JoinPolicy.PRIVATE)
+
+        assertTrue(result.isSuccess)
+        assertEquals(JoinPolicy.PRIVATE, result.getOrNull()?.joinPolicy)
+        verifySuspend {
+            remoteDataSource.updateClub(
+                ClubUpdateRequestDto(id = clubId, joinPolicy = ClubUpdateRequestDto.JoinPolicy.PRIVATE)
+            )
+        }
+    }
+
+    @Test
+    fun `updateClub with null joinPolicy does not set joinPolicy on the request DTO`() = runTest {
+        val clubId = "club-123"
+        val expectedClub = Club(id = clubId, name = "Updated")
+        everySuspend { remoteDataSource.updateClub(any()) } returns Result.success(expectedClub)
+
+        repository.updateClub(clubId, name = "Updated")
+
+        verifySuspend {
+            remoteDataSource.updateClub(ClubUpdateRequestDto(id = clubId, name = "Updated", joinPolicy = null))
+        }
     }
 
     @Test

@@ -22,6 +22,13 @@ class AuthViewModelWrapper: ObservableObject {
     @Published var passwordError: String? = nil
     @Published var confirmPasswordError: String? = nil
 
+    // Forgot password UI state
+    @Published var forgotPasswordEmailField: String = ""
+    @Published var forgotPasswordEmailError: String? = nil
+    @Published var isForgotPasswordLoading: Bool = false
+    @Published var isForgotPasswordEmailSent: Bool = false
+    @Published var forgotPasswordErrorMessage: String? = nil
+
     private let helper: AuthViewModelHelper
     private var cancellables: [Shared.Closeable] = []
 
@@ -33,24 +40,38 @@ class AuthViewModelWrapper: ObservableObject {
     private func startObserving() {
         // Observe auth state
         let stateCancellable = helper.observeState { [weak self] state in
-            DispatchQueue.main.async {
-                self?.authState = AuthStateWrapper.from(state)
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.authState = AuthStateWrapper.from(state)
             }
         }
         cancellables.append(stateCancellable)
 
         // Observe UI state
         let uiStateCancellable = helper.observeUiState { [weak self] uiState in
-            DispatchQueue.main.async {
-                self?.emailField = uiState.emailField
-                self?.passwordField = uiState.passwordField
-                self?.confirmPasswordField = uiState.confirmPasswordField
-                self?.emailError = uiState.emailError
-                self?.passwordError = uiState.passwordError
-                self?.confirmPasswordError = uiState.confirmPasswordError
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.emailField = uiState.emailField
+                self.passwordField = uiState.passwordField
+                self.confirmPasswordField = uiState.confirmPasswordField
+                self.emailError = uiState.emailError
+                self.passwordError = uiState.passwordError
+                self.confirmPasswordError = uiState.confirmPasswordError
             }
         }
         cancellables.append(uiStateCancellable)
+
+        // Observe forgot password state
+        let forgotPasswordCancellable = helper.observeForgotPasswordState { [weak self] state in
+            DispatchQueue.main.async {
+                self?.forgotPasswordEmailField = state.emailField
+                self?.forgotPasswordEmailError = state.emailError
+                self?.isForgotPasswordLoading = state.isLoading
+                self?.isForgotPasswordEmailSent = state.isEmailSent
+                self?.forgotPasswordErrorMessage = state.generalError?.toLocalizedMessage()
+            }
+        }
+        cancellables.append(forgotPasswordCancellable)
     }
 
     func onEmailChanged(_ value: String) {
@@ -95,6 +116,18 @@ class AuthViewModelWrapper: ObservableObject {
 
     func signInWithApple(idToken: String) {
         helper.signInWithApple(idToken: idToken)
+    }
+
+    func onForgotPasswordEmailChanged(_ value: String) {
+        helper.onForgotPasswordEmailChanged(value: value)
+    }
+
+    func sendPasswordResetEmail() {
+        helper.sendPasswordResetEmail()
+    }
+
+    func resetForgotPasswordState() {
+        helper.resetForgotPasswordState()
     }
 
     deinit {

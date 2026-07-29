@@ -1,65 +1,49 @@
 import SwiftUI
+import DesignSystem
 
 struct MainView: View {
     let userId: String
-    @State private var selectedTab = 0
+    var initialClubId: String? = nil
+    var onNavigateToJoin: () -> Void = {}
+    // Tab order is Me(0) - Clubs(1) - Books(2), but landing on an auto-joined club (deep link /
+    // post-signup join) still needs to open straight into the Clubs tab, not the default Me tab.
+    @State private var selectedTab: Int
 
-    private let titles = [
-        String(localized: "tab_clubs"),
-        String(localized: "tab_me")
-    ]
+    init(userId: String, initialClubId: String? = nil, onNavigateToJoin: @escaping () -> Void = {}) {
+        self.userId = userId
+        self.initialClubId = initialClubId
+        self.onNavigateToJoin = onNavigateToJoin
+        self._selectedTab = State(initialValue: initialClubId != nil ? 1 : 0)
+    }
 
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                // Custom Material-style TopAppBar
-                MaterialTopBar(title: titles[selectedTab])
+                // Clubs, Books, and Me each own their own top bar/heading UI (ClubsListView's
+                // masthead, BooksTopBar, MeTopBar), so the shared Material-style TopAppBar
+                // is unused for all tabs now.
 
                 // Content area
                 Group {
                     if selectedTab == 0 {
-                        ClubsView(userId: userId)
-                    } else {
                         MeView(userId: userId)
+                    } else if selectedTab == 1 {
+                        ClubsView(userId: userId, initialClubId: initialClubId, onNavigateToJoin: onNavigateToJoin)
+                    } else {
+                        BooksView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.kluvsBackground)
 
                 MaterialBottomNavBar(selectedTab: $selectedTab)
             }
+            .background(Color.kluvsBackground)
             .ignoresSafeArea(edges: .bottom)
-        }
-    }
-}
-
-// MARK: - Material-style TopAppBar
-struct MaterialTopBar: View {
-    let title: String
-    @Environment(\.safeAreaInsets) private var safeAreaInsets
-
-    var body: some View {
-        VStack(spacing: 0) {
-            // Title bar
-            HStack {
-                // Animated title with slot machine effect
-                Text(title)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .bottom).combined(with: .opacity),
-                        removal: .move(edge: .top).combined(with: .opacity)
-                    ))
-                    .id(title)
-
-                Spacer()
+            .onChange(of: initialClubId) { _, newValue in
+                if newValue != nil { selectedTab = 1 }
             }
-            .frame(height: 56)
-            .padding(.horizontal, 16)
-            .padding(.top, safeAreaInsets.top)
-            .background(Color(UIColor.systemBackground))
-            .animation(.easeInOut(duration: 0.3), value: title)
         }
-        .background(Color(UIColor.systemBackground))
     }
 }
 

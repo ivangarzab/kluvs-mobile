@@ -1,17 +1,21 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 struct MembersTab: View {
     let members: [Shared.MemberListItemInfo]
+    var participants: [Shared.SessionParticipantInfo] = []
     var currentUserId: String = ""
     var userRole: Shared.Role? = nil
     var onChangeRole: (String) -> Void = { _ in }
     var onRemoveMember: (String) -> Void = { _ in }
-
-    @State private var showRoleInfo = false
+    var onInviteMember: () -> Void = {}
 
     private var isAdminOrAbove: Bool { userRole == .owner || userRole == .admin }
     private var isOwner: Bool { userRole == .owner }
+    private var readingByMemberId: [String: Bool] {
+        Dictionary(uniqueKeysWithValues: participants.map { ($0.memberId, $0.isReading) })
+    }
 
     var body: some View {
         ScrollView {
@@ -19,143 +23,105 @@ struct MembersTab: View {
                 NoTabData(text: String(localized: "empty_no_members"))
             } else {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Header with member count and info button
                     HStack {
-                        Text(String(format: NSLocalizedString("label_members_section", comment: ""), Int32(members.count)))
-                            .font(.headline)
-
+                        Text("\(members.count) members")
+                            .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                            .foregroundColor(KluvsTheme.colors.contentMuted)
                         Spacer()
-
-                        Button(action: { showRoleInfo = true }) {
-                            Image("ic_info")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                                .foregroundColor(.secondary)
+                        if isAdminOrAbove {
+                            OutlinedButton(text: "+ Invite", action: onInviteMember)
                         }
                     }
-                    .padding(8)
+                    .padding(.bottom, 12)
 
-                    ForEach(Array(members.enumerated()), id: \.offset) { index, member in
+                    ForEach(Array(members.enumerated()), id: \.element.memberId) { index, member in
+                        let isSelf = member.userId == currentUserId
                         MemberListItem(
                             member: member,
-                            showChangeRole: isAdminOrAbove && member.userId != currentUserId,
-                            showRemoveMember: isOwner && member.userId != currentUserId && member.role != .owner,
+                            isSelf: isSelf,
+                            isReading: readingByMemberId[member.memberId],
+                            showAdminActions: isAdminOrAbove && (!isSelf || isOwner),
+                            showRemove: isOwner && !isSelf && member.role != .owner,
                             onChangeRole: { onChangeRole(member.memberId) },
-                            onRemoveMember: { onRemoveMember(member.memberId) }
+                            onRemove: { onRemoveMember(member.memberId) }
                         )
 
                         if index < members.count - 1 {
                             Divider()
-                                .padding(.vertical, 4)
                         }
                     }
+
+                    if members.count <= 1 && isAdminOrAbove {
+                        VStack(spacing: 16) {
+                            Text("Invite others to get the conversation going.")
+                                .kluvsStyle(KluvsTheme.typography.headline.small, feature: true)
+                                .foregroundColor(KluvsTheme.colors.contentMuted)
+                                .multilineTextAlignment(.center)
+                            PrimaryButton(text: "Invite Members", action: onInviteMember)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 20)
+                    }
                 }
-                .padding()
-            }
-        }
-        .sheet(isPresented: $showRoleInfo) {
-            RoleInfoDialog(onDismiss: { showRoleInfo = false })
-                .presentationDetents([.height(280)])
-                .presentationDragIndicator(.visible)
-        }
-    }
-}
-
-// MARK: - Role Info Dialog
-struct RoleInfoDialog: View {
-    let onDismiss: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Member Roles")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            VStack(alignment: .leading, spacing: 12) {
-                RoleInfoItem(
-                    role: .owner,
-                    description: "Club owner with full control and permissions"
-                )
-                RoleInfoItem(
-                    role: .admin,
-                    description: "Club administrator with elevated permissions"
-                )
-                RoleInfoItem(
-                    role: .member,
-                    description: "Regular club member"
-                )
-            }
-
-            HStack {
-                Spacer()
-                Button("Got it", action: onDismiss)
-                    .fontWeight(.medium)
-            }
-        }
-        .padding(20)
-    }
-}
-
-struct RoleInfoItem: View {
-    let role: Role
-    let description: String
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            MemberAvatar(avatarUrl: nil, size: 40, role: role)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(role.name.capitalized)
-                    .font(.headline)
-
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                .padding(16)
             }
         }
     }
 }
 
 // MARK: - Member List Item
-struct MemberListItem: View {
+
+private struct MemberListItem: View {
     let member: Shared.MemberListItemInfo
-    var showChangeRole: Bool = false
-    var showRemoveMember: Bool = false
+    var isSelf: Bool = false
+    var isReading: Bool? = nil
+    var showAdminActions: Bool = false
+    var showRemove: Bool = false
     var onChangeRole: () -> Void = {}
-    var onRemoveMember: () -> Void = {}
+    var onRemove: () -> Void = {}
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            MemberAvatar(
-                avatarUrl: member.avatarUrl,
-                size: 40,
-                role: member.role
-            )
+        HStack(alignment: .top, spacing: 14) {
+            Avatar(name: member.name, avatarUrl: member.avatarUrl, size: 40, memberId: member.memberId, isOwn: isSelf)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(member.name)
-                    .font(.body)
-                    .fontWeight(.medium)
-
+                HStack(spacing: 8) {
+                    Text(member.name)
+                        .kluvsStyle(KluvsTheme.typography.body.large)
+                        .foregroundColor(KluvsTheme.colors.content)
+                    if isSelf {
+                        Text("YOU")
+                            .kluvsStyle(KluvsTheme.typography.eyebrow)
+                            .foregroundColor(KluvsTheme.colors.accent)
+                    }
+                }
                 Text(member.handle)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
 
             Spacer()
 
-            if showChangeRole || showRemoveMember {
-                Menu {
-                    if showChangeRole {
-                        Button("Change Role") { onChangeRole() }
+            VStack(alignment: .trailing, spacing: 6) {
+                HStack(spacing: 4) {
+                    RoleEyebrow(role: member.role)
+                    if showAdminActions || showRemove {
+                        ActionMenu(items: {
+                            var items: [ActionMenuItem] = []
+                            if showAdminActions {
+                                items.append(ActionMenuItem(label: "Change Role", action: onChangeRole))
+                            }
+                            if showRemove {
+                                items.append(ActionMenuItem(label: "Remove", action: onRemove, isDestructive: true))
+                            }
+                            return items
+                        }())
                     }
-                    if showRemoveMember {
-                        Button("Remove from Club", role: .destructive) { onRemoveMember() }
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(.secondary)
+                }
+                if let isReading {
+                    Text(isReading ? "Reading" : "Skipping")
+                        .kluvsStyle(KluvsTheme.typography.label)
+                        .foregroundColor(isReading ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted)
                 }
             }
         }

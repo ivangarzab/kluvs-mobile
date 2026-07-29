@@ -17,7 +17,7 @@ package com.ivangarzab.kluvs.api.models
 
 import com.ivangarzab.kluvs.api.models.BookDto
 import com.ivangarzab.kluvs.api.models.DiscussionDto
-import com.ivangarzab.kluvs.api.models.MemberDto
+import com.ivangarzab.kluvs.api.models.SessionParticipantSummaryDto
 
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.*
@@ -33,9 +33,9 @@ import kotlinx.serialization.encoding.*
  * @param book 
  * @param dueDate 
  * @param discussions 
- * @param shameList 
+ * @param members Participation roster, as embedded within a club response's active_session.
  */
-@Serializable@Serializable
+@Serializable
 
 data class SessionDto (
 
@@ -54,7 +54,8 @@ data class SessionDto (
 
     @SerialName(value = "discussions") val discussions: kotlin.collections.List<DiscussionDto>? = null,
 
-    @SerialName(value = "shame_list") val shameList: kotlin.collections.List<MemberDto>? = null
+    /* Participation roster, as embedded within a club response's active_session. */
+    @SerialName(value = "members") val members: kotlin.collections.List<SessionParticipantSummaryDto>? = null
 
 ) {
 

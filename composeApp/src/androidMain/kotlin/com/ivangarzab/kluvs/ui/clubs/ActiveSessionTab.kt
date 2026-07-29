@@ -1,11 +1,14 @@
 package com.ivangarzab.kluvs.ui.clubs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,45 +18,52 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.clubs.presentation.ActiveSessionDetails
 import com.ivangarzab.kluvs.clubs.presentation.BookInfo
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionTimelineItemInfo
+import com.ivangarzab.kluvs.model.AttendanceRoster
+import com.ivangarzab.kluvs.model.AttendanceStatus
 import com.ivangarzab.kluvs.model.Role
-import com.ivangarzab.kluvs.theme.KluvsTheme
-import com.ivangarzab.kluvs.ui.components.NoTabData
+import com.ivangarzab.kluvs.clubs.presentation.SessionParticipantInfo
+import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.theme.brandPrimary
+import com.ivangarzab.kluvs.designsystem.theme.feature
+import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmDisabled
+import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceControl
+import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceOption
+import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.icons.IconType
+import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.NoTabData
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
+import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import kotlinx.datetime.LocalDateTime
+
+/** Translation at the boundary into the hollow [AttendanceControl] — see its call site below. */
+private fun AttendanceStatus.toOption(): AttendanceOption = when (this) {
+    AttendanceStatus.YES -> AttendanceOption.YES
+    AttendanceStatus.NO -> AttendanceOption.NO
+    AttendanceStatus.MAYBE -> AttendanceOption.MAYBE
+}
+
+private fun AttendanceOption.toDomain(): AttendanceStatus = when (this) {
+    AttendanceOption.YES -> AttendanceStatus.YES
+    AttendanceOption.NO -> AttendanceStatus.NO
+    AttendanceOption.MAYBE -> AttendanceStatus.MAYBE
+}
 
 @Composable
 fun ActiveSessionTab(
@@ -61,10 +71,13 @@ fun ActiveSessionTab(
     sessionDetails: ActiveSessionDetails?,
     userRole: Role? = null,
     onCreateSession: () -> Unit = {},
-    onEditSession: () -> Unit = {},
     onCreateDiscussion: () -> Unit = {},
     onEditDiscussion: (discussionId: String) -> Unit = {},
     onDeleteDiscussion: (discussionId: String) -> Unit = {},
+    onOpenNote: (discussionId: String) -> Unit = {},
+    discussionRosters: Map<String, AttendanceRoster> = emptyMap(),
+    onLoadAttendanceRoster: (discussionId: String) -> Unit = {},
+    onSetAttendance: (discussionId: String, status: AttendanceStatus) -> Unit = { _, _ -> },
 ) {
     val isOwner = userRole == Role.OWNER
     val isAdminOrAbove = userRole == Role.OWNER || userRole == Role.ADMIN
@@ -78,18 +91,14 @@ fun ActiveSessionTab(
             ) {
                 Text(
                     text = stringResource(R.string.no_session_details),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = KluvsTheme.typography.body.medium,
+                    color = KluvsTheme.colors.contentMuted
                 )
-                Button(onClick = onCreateSession) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Create Session")
-                }
+                PrimaryButton(
+                    text = "Create Session",
+                    onClick = onCreateSession,
+                    icon = IconType.Add,
+                )
             }
         } else {
             NoTabData(
@@ -100,78 +109,38 @@ fun ActiveSessionTab(
         return
     }
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Session Book Card
-        Card(
+    Column(modifier = modifier) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = sessionDetails.book.title,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(R.string.by_author, sessionDetails.book.author),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
-                                    append(stringResource(R.string.due_date))
-                                }
-                                append(" ${sessionDetails.dueDate}")
-                            },
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    if (isOwner) {
-                        IconButton(onClick = onEditSession) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_edit),
-                                contentDescription = "Edit session",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
+            if (sessionDetails.discussions.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.x_discussions_scheduled, sessionDetails.discussions.size),
+                    color = KluvsTheme.colors.contentMuted,
+                    style = KluvsTheme.typography.title.small.feature()
+                )
+            }
+            if (isAdminOrAbove) {
+                OutlinedButton(
+                    text = stringResource(R.string.add_discussion),
+                    onClick = onCreateDiscussion,
+                )
             }
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+        Spacer(Modifier.height(12.dp))
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Text(
-                text = stringResource(R.string.discussion_timeline),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            sessionDetails.discussions.let { discussions ->
+        sessionDetails.discussions.let { discussions ->
+            if (discussions.isEmpty()) {
+                Text(
+                    text = "No discussions scheduled yet.",
+                    color = KluvsTheme.colors.contentMuted,
+                    style = KluvsTheme.typography.body.medium,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            } else {
                 // Timeline
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -183,30 +152,14 @@ fun ActiveSessionTab(
                             isLast = index == discussions.size - 1,
                             showAdminActions = isAdminOrAbove,
                             onEdit = { onEditDiscussion(discussion.id) },
-                            onDelete = { onDeleteDiscussion(discussion.id) }
+                            onDelete = { onDeleteDiscussion(discussion.id) },
+                            onOpenNote = { onOpenNote(discussion.id) },
+                            attendanceRoster = discussionRosters[discussion.id],
+                            onLoadRoster = { onLoadAttendanceRoster(discussion.id) },
+                            onSetAttendance = { status -> onSetAttendance(discussion.id, status) }
                         )
                     }
                 }
-            }
-
-            if (isAdminOrAbove) {
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = onCreateDiscussion,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Add Discussion",
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
             }
         }
     }
@@ -220,85 +173,107 @@ private fun DiscussionTimelineItem(
     showAdminActions: Boolean = false,
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {},
+    onOpenNote: () -> Unit = {},
+    attendanceRoster: AttendanceRoster? = null,
+    onLoadRoster: () -> Unit = {},
+    onSetAttendance: (AttendanceStatus) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val lineColor = MaterialTheme.colorScheme.surfaceVariant
-    val rowColor = if (discussion.isNext) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-    } else {
-        MaterialTheme.colorScheme.background
-    }
+    LaunchedEffect(discussion.id) { onLoadRoster() }
+
+    // A dot/line is "lit" (copper) once its discussion is past or is the current next one —
+    // this is what makes the rail read as a continuous copper thread through completed items.
+    val isLit = discussion.isPast || discussion.isNext
+    val neutralLineColor = KluvsTheme.colors.cardAlt
+    val litLineColor = brandPrimary.copy(alpha = 0.4f)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(color = rowColor, shape = RoundedCornerShape(8.dp)),
-        verticalAlignment = Alignment.CenterVertically
+            .height(IntrinsicSize.Min)
+            .alpha(if (discussion.isPast) 0.5f else 1f),
+        verticalAlignment = Alignment.Top
     ) {
-        Box(
-            modifier = Modifier.width(32.dp),
-            contentAlignment = Alignment.TopCenter
+        // Rail: fills the row's actual height (whatever the content column ends up
+        // needing, attendance pill included) so the connecting line never falls short.
+        Column(
+            modifier = Modifier
+                .width(32.dp)
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Vertical line through entire height
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Top line section
-                if (!isFirst) {
-                    Box(
-                        modifier = Modifier
-                            .width(2.dp)
-                            .height(40.dp)
-                            .background(lineColor)
-                    )
-                } else {
-                    Spacer(Modifier.height(40.dp))
-                }
-
-                // Spacer for bottom part
+            // Fixed offset down to the dot — lit if this discussion itself is past/next
+            // (the line leading in from a completed/current dot above).
+            if (!isFirst) {
                 Box(
                     modifier = Modifier
                         .width(2.dp)
-                        .height(60.dp)
-                        .background(if (!isLast) lineColor else Color.Transparent)
+                        .height(38.dp)
+                        .background(if (isLit) litLineColor else neutralLineColor)
                 )
+            } else {
+                Spacer(Modifier.height(38.dp))
             }
 
-            // Circle indicator positioned at top with padding
-            Box(
-                modifier = Modifier
-                    .padding(top = 38.dp)
-                    .size(24.dp)
-                    .background(
-                        color = if (discussion.isPast || discussion.isNext) {
-                            MaterialTheme.colorScheme.primary.copy(
-                                alpha = if (discussion.isPast) 0.75f else 1.0f
-                            )
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant
-                        },
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (discussion.isPast) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_checkmark),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.background,
-                        modifier = Modifier.size(16.dp)
+            // Dot indicator
+            Box(contentAlignment = Alignment.Center) {
+                if (discussion.isNext) {
+                    // Soft glow ring behind the "next" dot
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .background(brandPrimary.copy(alpha = 0.10f), CircleShape)
                     )
                 }
+                Box(
+                    modifier = Modifier
+                        .size(if (discussion.isNext) 24.dp else 16.dp)
+                        .background(
+                            color = when {
+                                discussion.isPast -> foregroundWarmDisabled
+                                discussion.isNext -> brandPrimary
+                                else -> Color.Transparent
+                            },
+                            shape = CircleShape
+                        )
+                        .then(
+                            if (!discussion.isPast && !discussion.isNext) {
+                                Modifier.border(1.dp, KluvsTheme.colors.divider, CircleShape)
+                            } else Modifier
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (discussion.isPast) {
+                        Icon(
+                            type = IconType.Checkmark,
+                            contentDescription = null,
+                            tint = KluvsTheme.colors.background,
+                            modifier = Modifier.size(10.dp)
+                        )
+                    }
+                }
             }
+
+            // Fills the rest of the row's height, down to the next dot — lit only if
+            // this discussion is past; the line out of "next" stays neutral.
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .width(2.dp)
+                    .background(
+                        when {
+                            isLast -> Color.Transparent
+                            discussion.isPast -> litLineColor
+                            else -> neutralLineColor
+                        }
+                    )
+            )
         }
 
         Spacer(Modifier.width(12.dp))
 
-        // Discussion content
-        val textColor = MaterialTheme.colorScheme.onSurface.copy(
-            alpha = if (discussion.isPast) 0.5f else 1.0f
-        )
+        val textColor = KluvsTheme.colors.content
+        val secondaryTextColor = KluvsTheme.colors.contentMuted
 
         Row(
             modifier = Modifier
@@ -308,10 +283,18 @@ private fun DiscussionTimelineItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                if (discussion.isNext) {
+                    Text(
+                        text = "UP NEXT",
+                        color = KluvsTheme.colors.accent,
+                        style = KluvsTheme.typography.eyebrow
+                    )
+                    Spacer(Modifier.height(2.dp))
+                }
                 Text(
                     text = discussion.title,
                     color = textColor,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = if (discussion.isNext) KluvsTheme.typography.title.medium else KluvsTheme.typography.title.small
                 )
                 Spacer(Modifier.height(4.dp))
                 Row(
@@ -320,72 +303,54 @@ private fun DiscussionTimelineItem(
                 ) {
                     Icon(
                         modifier = Modifier.size(16.dp),
-                        painter = painterResource(R.drawable.ic_location),
+                        type = IconType.Location,
                         contentDescription = null,
-                        tint = textColor
+                        tint = secondaryTextColor
                     )
                     Text(
                         text = discussion.location,
-                        color = textColor,
-                        style = MaterialTheme.typography.bodyMedium
+                        color = secondaryTextColor,
+                        style = KluvsTheme.typography.body.medium
                     )
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = discussion.date,
-                    color = textColor,
-                    style = MaterialTheme.typography.bodyMedium
+                    color = secondaryTextColor,
+                    style = KluvsTheme.typography.body.medium
                 )
-            }
-
-            if (showAdminActions) {
-                DiscussionOverflowMenu(
-                    onEdit = onEdit,
-                    onDelete = onDelete
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DiscussionOverflowMenu(
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Discussion options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Edit") },
-                onClick = {
-                    expanded = false
-                    onEdit()
-                }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = "Delete",
-                        color = MaterialTheme.colorScheme.error
+                Spacer(Modifier.height(8.dp))
+                // AttendanceControl is hollow (design-system primitives migration) — it doesn't
+                // know about AttendanceRoster/AttendanceStatus, so we translate at the boundary.
+                if (attendanceRoster != null) {
+                    AttendanceControl(
+                        counts = AttendanceStatus.entries.associateWith { status ->
+                            attendanceRoster.responses.count { it.status == status }
+                        }.mapKeys { (status, _) -> status.toOption() },
+                        selected = attendanceRoster.myStatus?.toOption(),
+                        disabled = discussion.isPast,
+                        onSelect = { option -> onSetAttendance(option.toDomain()) }
                     )
-                },
-                onClick = {
-                    expanded = false
-                    onDelete()
                 }
-            )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    type = IconType.Edit,
+                    contentDescription = "Discussion note",
+                    tint = KluvsTheme.colors.contentMuted,
+                    onClick = onOpenNote,
+                )
+                if (showAdminActions) {
+                    ActionMenu(
+                        items = listOf(
+                            ActionMenuItem(label = "Edit", onClick = onEdit),
+                            ActionMenuItem(label = "Delete", onClick = onDelete, isDestructive = true)
+                        ),
+                        contentDescription = "Discussion options"
+                    )
+                }
+            }
         }
     }
 }
@@ -395,12 +360,17 @@ private fun DiscussionOverflowMenu(
 fun Preview_ActiveSessionTab() = KluvsTheme {
     ActiveSessionTab(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = KluvsTheme.colors.background)
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         sessionDetails = ActiveSessionDetails(
             sessionId = "0",
             book = BookInfo(title = "1984", author = "George Orwell", year = "1948", pageCount = null),
+            bookId = "b0",
+            participants = listOf(
+                SessionParticipantInfo(memberId = "0", isReading = true),
+                SessionParticipantInfo(memberId = "1", isReading = false)
+            ),
             dueDate = "January 1st, 2030",
             rawDueDate = null,
             discussions = listOf(

@@ -1,5 +1,6 @@
 import SwiftUI
 import SafariServices
+import DesignSystem
 
 struct SettingsView: View {
     let userId: String
@@ -26,6 +27,7 @@ struct SettingsView: View {
                 )
 
                 Divider()
+                    .overlay(KluvsTheme.colors.divider)
                     .padding(.top, 12)
 
                 LegalSection()
@@ -35,12 +37,13 @@ struct SettingsView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
         }
+        .background(KluvsTheme.colors.background)
         .navigationTitle(String(localized: "settings_title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
-                    Image.custom(.back)
+                    IconType.back.image
                 }
             }
         }
@@ -78,84 +81,33 @@ struct EditProfileSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(String(localized: "edit_profile"))
-                .font(.headline)
+            Text(String(localized: "edit_profile").uppercased())
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
 
             Spacer()
                 .frame(height: 4)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(String(localized: "label_name"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            InputField(label: String(localized: "label_name"), value: $editedName)
 
-                TextField(String(localized: "label_name"), text: $editedName)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color(UIColor.systemGray4), lineWidth: 1)
-                    )
-            }
-
-            HandleInputField(handle: $editedHandle)
+            InputField(label: String(localized: "label_handle"), value: $editedHandle, prefix: "@")
 
             if let saveError = saveError {
                 Text(saveError)
-                    .font(.caption)
-                    .foregroundColor(.red)
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.danger)
                     .padding(.top, 4)
             }
 
-            Button(action: onSaveProfile) {
-                Group {
-                    if isSaving {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    } else {
-                        Text(String(localized: "button_save"))
-                            .font(.body)
-                            .fontWeight(.medium)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(!hasChanges || isSaving)
+            PrimaryButton(
+                text: isSaving ? String(localized: "button_save") + "…" : String(localized: "button_save"),
+                action: onSaveProfile,
+                enabled: hasChanges && !isSaving
+            )
+            .frame(maxWidth: .infinity)
             .padding(.top, 4)
         }
         .padding(.vertical, 12)
-    }
-}
-
-// MARK: - Handle Input Field
-
-private struct HandleInputField: View {
-    @Binding var handle: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "label_handle"))
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            HStack(spacing: 4) {
-                Text("@")
-                    .foregroundColor(.secondary)
-                    .padding(.leading, 12)
-
-                TextField(String(localized: "label_handle"), text: $handle)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .padding(.trailing, 12)
-                    .padding(.vertical, 12)
-            }
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color(UIColor.systemGray4), lineWidth: 1)
-            )
-        }
     }
 }
 
@@ -166,19 +118,20 @@ struct LegalSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(String(localized: "legal_title"))
-                .font(.headline)
+            Text(String(localized: "legal_title").uppercased())
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
                 .padding(.bottom, 8)
 
             LegalRow(label: String(localized: "privacy_policy")) {
                 safariUrl = URL(string: "https://kluvs.com/privacy")
             }
-            Divider()
+            Divider().overlay(KluvsTheme.colors.divider)
 
             LegalRow(label: String(localized: "terms_of_use")) {
                 safariUrl = URL(string: "https://kluvs.com/terms")
             }
-            Divider()
+            Divider().overlay(KluvsTheme.colors.divider)
         }
         .padding(.vertical, 12)
         .sheet(item: $safariUrl) { url in
@@ -196,12 +149,12 @@ private struct LegalRow: View {
         Button(action: action) {
             HStack {
                 Text(label)
-                    .font(.body)
-                    .foregroundColor(.accentColor)
+                    .kluvsStyle(KluvsTheme.typography.label)
+                    .foregroundColor(KluvsTheme.colors.accent)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
             .padding(.vertical, 12)
         }
@@ -239,9 +192,9 @@ struct AboutSection: View {
         HStack {
             Spacer()
             Text(String(format: NSLocalizedString("app_version", comment: ""), appVersion))
-                .font(.caption)
+                .kluvsStyle(KluvsTheme.typography.finePrint)
                 .italic()
-                .foregroundColor(.secondary)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
         }
         .padding(.vertical, 12)
     }
@@ -267,7 +220,7 @@ private struct SaveSuccessToast: View {
             }
         }
         .padding()
-        .background(Color.green.opacity(0.9))
+        .background(KluvsTheme.colors.success.opacity(0.9))
         .cornerRadius(8)
         .shadow(radius: 4)
         .onAppear {

@@ -1,59 +1,92 @@
 import SwiftUI
 import Shared
 import PhotosUI
+import DesignSystem
 
 struct MeView: View {
     let userId: String
     @StateObject private var viewModel = MeViewModelWrapper()
     @State private var showSettings = false
+    @State private var editingShelfItem: Shared.ShelfItem? = nil
+    @State private var progressType: Shared.ProgressType = .page
+    @State private var progressCurrentPageText = ""
+    @State private var progressPercentText = ""
+    @State private var progressMarkFinished = false
+    @State private var progressLastAutoTriggerValue: String? = nil
+    @State private var progressSheetHeader = "Track Progress"
 
     var body: some View {
-        ZStack {
-            if viewModel.isLoading {
-                LoadingView()
+        VStack(spacing: 0) {
+            MeTopBar(
+                onReadingLogClick: { viewModel.onReadingLogClicked() },
+                onSettingsClick: { showSettings = true },
+                onSignOutClick: { viewModel.onSignOutClicked() }
+            )
+
+            ZStack {
+                if viewModel.isLoading {
+                    MeScreenSkeleton()
+                        .transition(.opacity)
+                } else if let error = viewModel.error {
+                    ErrorView(message: error, onRetry: {
+                        viewModel.loadUserData(userId: userId)
+                    })
                     .transition(.opacity)
-            } else if let error = viewModel.error {
-                ErrorView(message: error, onRetry: {
-                    viewModel.loadUserData(userId: userId)
-                })
-                .transition(.opacity)
-            } else {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        if let profile = viewModel.profile {
-                            ProfileSection(
-                                profile: profile,
-                                isUploadingAvatar: viewModel.isUploadingAvatar,
-                                onAvatarPicked: { imageData in
-                                    viewModel.uploadAvatar(imageData: imageData)
-                                }
-                            )
-                        }
-
-                        Divider()
-                            .padding(.vertical, 8)
-
-                        if let statistics = viewModel.statistics {
-                            StatisticsSection(statistics: statistics)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            if let profile = viewModel.profile {
+                                ProfileSection(
+                                    profile: profile,
+                                    isUploadingAvatar: viewModel.isUploadingAvatar,
+                                    onAvatarPicked: { imageData in
+                                        viewModel.uploadAvatar(imageData: imageData)
+                                    }
+                                )
+                            }
 
                             Divider()
                                 .padding(.vertical, 8)
+
+                            if let statistics = viewModel.statistics {
+                                StatisticsSection(statistics: statistics, joinDate: viewModel.profile?.joinDate)
+
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            if viewModel.upNext != nil {
+                                UpNextSection(upNext: viewModel.upNext)
+
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            ShelfSection(
+                                shelf: viewModel.shelf,
+                                onUpdateProgress: { sessionId in
+                                    let item = viewModel.shelf.first { $0.sessionId == sessionId }
+                                    progressType = item?.ownProgress?.type ?? .page
+                                    let currentPage: Int32? = item?.ownProgress?.currentPage?.int32Value
+                                    progressCurrentPageText = currentPage.map { String($0) } ?? ""
+                                    let percentComplete: Float? = item?.ownProgress?.percentComplete?.floatValue
+                                    progressPercentText = percentComplete.map { formatPercent($0) } ?? ""
+                                    progressMarkFinished = item?.ownProgress?.isCompleted ?? false
+                                    progressLastAutoTriggerValue = nil
+                                    progressSheetHeader = item?.ownProgress != nil ? "Update Progress" : "Track Progress"
+                                    editingShelfItem = item
+                                }
+                            )
+
                         }
-
-                        CurrentlyReadingSection(currentReadings: viewModel.currentlyReading)
-
-                        FooterSection(
-                            onSignOut: { viewModel.onSignOutClicked() },
-                            onNavigateToSettings: { showSettings = true }
-                        )
+                        .padding(.horizontal, 16)
                     }
-                    .padding(16)
+                    .transition(.opacity)
                 }
-                .transition(.opacity)
             }
+            .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
+            .animation(.easeInOut(duration: 0.3), value: viewModel.error)
         }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
-        .animation(.easeInOut(duration: 0.3), value: viewModel.error)
         .overlay(alignment: .bottom) {
             if let snackbarError = viewModel.snackbarError {
                 SnackbarView(message: snackbarError) {
@@ -67,24 +100,71 @@ struct MeView: View {
         .onAppear {
             viewModel.loadUserData(userId: userId)
         }
-        .alert(isPresented: $viewModel.showLogoutConfirmation) {
-            Alert(
-                title: Text(NSLocalizedString("logout_confirmation_title", comment: "")),
-                message: Text(NSLocalizedString("logout_confirmation_message", comment: "")),
-                primaryButton: .destructive(Text(NSLocalizedString("yes", comment: ""))) {
-                    viewModel.onSignOutDialogConfirmed()
-                },
-                secondaryButton: .cancel(Text(NSLocalizedString("no", comment: ""))) {
-                    viewModel.onSignOutDialogDismissed()
-                }
-            )
-        }
+        .kluvsConfirmationDialog(
+            isPresented: $viewModel.showLogoutConfirmation,
+            title: NSLocalizedString("logout_confirmation_title", comment: ""),
+            message: NSLocalizedString("logout_confirmation_message", comment: ""),
+            confirmLabel: NSLocalizedString("yes", comment: ""),
+            dismissLabel: NSLocalizedString("no", comment: ""),
+            isDestructive: true,
+            onDismiss: { viewModel.onSignOutDialogDismissed() },
+            onConfirm: { viewModel.onSignOutDialogConfirmed() }
+        )
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView(userId: userId)
             }
         }
+        .kluvsBottomSheet(item: $editingShelfItem, header: progressSheetHeader) { item in
+            ReadingProgressFields(
+                bookTitle: item.bookTitle,
+                pageCount: item.bookPageCount?.int32Value,
+                progressType: $progressType,
+                currentPageText: $progressCurrentPageText,
+                percentText: $progressPercentText,
+                markFinished: $progressMarkFinished,
+                lastAutoTriggerValue: $progressLastAutoTriggerValue
+            )
+        } footer: { item in
+            let canSave: Bool = {
+                switch progressType {
+                case .page: return Int32(progressCurrentPageText) != nil
+                case .percent: return Float(progressPercentText) != nil
+                default: return false
+                }
+            }()
+            BottomSheetFooter(
+                actionLabel: "Save Progress",
+                onAction: {
+                    let page = progressType == .page ? Int32(progressCurrentPageText) : nil
+                    let percent: Int32? = progressType == .percent
+                        ? Float(progressPercentText).map { Int32(Swift.min(100, Swift.max(0, $0.rounded()))) }
+                        : nil
+                    viewModel.onSaveProgress(
+                        sessionId: item.sessionId,
+                        type: progressType,
+                        currentPage: page,
+                        percentComplete: percent,
+                        markFinished: progressMarkFinished
+                    )
+                    editingShelfItem = nil
+                },
+                onCancel: { editingShelfItem = nil },
+                actionEnabled: canSave
+            )
+        }
+        .kluvsBottomSheet(
+            isPresented: $viewModel.showReadingLog,
+            header: "Reading Log",
+            onDismiss: { viewModel.onReadingLogDismissed() }
+        ) {
+            ReadingLogFields(log: viewModel.readingLog, isLoading: viewModel.isReadingLogLoading)
+        }
     }
+}
+
+extension Shared.ShelfItem: @retroactive Identifiable {
+    public var id: String { sessionId }
 }
 
 // MARK: - Profile Section
@@ -113,11 +193,11 @@ struct ProfileSection: View {
                             .fill(Color.brandOrange.opacity(0.9))
                             .frame(width: 24, height: 24)
 
-                        Image.custom(CustomIcon.edit)
+                        IconType.edit.image
                             .resizable()
                             .scaledToFit()
                             .frame(width: 12, height: 12)
-                            .foregroundColor(.white)
+                            .foregroundColor(KluvsTheme.colors.onAccent)
                     }
                 }
                 .onChange(of: selectedItem) { newItem in
@@ -132,88 +212,17 @@ struct ProfileSection: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(profile.name)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .kluvsStyle(KluvsTheme.typography.headline.small)
+                    .foregroundColor(KluvsTheme.colors.content)
 
-                Text(profile.handle ?? "")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-
-                Text(String(format: NSLocalizedString("label_member_since", comment: ""), profile.joinDate))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                Text("@\(profile.handle ?? "")")
+                    .kluvsStyle(KluvsTheme.typography.body.medium)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
             }
 
             Spacer()
         }
         .padding()
-    }
-}
-
-// MARK: - Footer Section
-struct FooterSection: View {
-    let onSignOut: () -> Void
-    let onNavigateToSettings: () -> Void
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "button_settings"), icon: .settings, action: onNavigateToSettings)
-
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "button_help_support"), icon: .help, action: {
-                // TODO: Navigate to help & support
-            })
-
-            Divider()
-                .padding(.vertical, 12)
-
-            FooterItem(label: String(localized: "sign_out"), icon: .logout, labelColor: .red, iconColor: .red, action: onSignOut)
-        }
-    }
-}
-
-struct FooterItem: View {
-    let label: String
-    let icon: CustomIcon
-    let action: (() -> Void)?
-    var labelColor: Color = .primary
-    var iconColor: Color = .primary
-
-    init(label: String, icon: CustomIcon, labelColor: Color = .primary, iconColor: Color = .primary, action: (() -> Void)? = nil) {
-        self.label = label
-        self.icon = icon
-        self.labelColor = labelColor
-        self.iconColor = iconColor
-        self.action = action
-    }
-    
-    var iconSize = 18.0
-
-    var body: some View {
-        Button(action: {
-            action?()
-        }) {
-            HStack(spacing: 12) {
-                Image.custom(icon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: iconSize, height: iconSize)
-                    .foregroundColor(iconColor)
-
-                Text(label)
-                    .font(.body)
-                    .foregroundColor(labelColor)
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-        }
-        .disabled(action == nil)
     }
 }
 
@@ -237,7 +246,7 @@ struct SnackbarView: View {
             }
         }
         .padding()
-        .background(Color.red.opacity(0.9))
+        .background(KluvsTheme.colors.danger.opacity(0.9))
         .cornerRadius(8)
         .shadow(radius: 4)
         .onAppear {

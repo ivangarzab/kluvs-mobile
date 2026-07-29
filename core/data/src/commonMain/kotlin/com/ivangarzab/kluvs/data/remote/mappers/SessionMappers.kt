@@ -1,36 +1,35 @@
 package com.ivangarzab.kluvs.data.remote.mappers
 
-import com.ivangarzab.kluvs.data.remote.dtos.SessionDto
-import com.ivangarzab.kluvs.data.remote.dtos.SessionResponseDto
+import com.ivangarzab.kluvs.api.models.SessionDto
+import com.ivangarzab.kluvs.api.models.SessionParticipantSummaryDto
 import com.ivangarzab.kluvs.model.Session
+import com.ivangarzab.kluvs.model.SessionMember
 
 /**
- * Maps a [com.ivangarzab.kluvs.data.remote.dtos.SessionDto] from the API to a [Session] domain model.
+ * Maps a [SessionDto] from the API to a [Session] domain model.
  *
- * Note: SessionDto may have partial data (used in nested contexts).
- * For full session data, use [com.ivangarzab.kluvs.data.remote.dtos.SessionResponseDto.toDomain].
+ * Used both for the top-level `GET /session?id=` lookup and for sessions embedded
+ * within Club/Member responses as `active_session` — both use this same generated shape.
  */
 fun SessionDto.toDomain(): Session {
     return Session(
         id = id,
-        clubId = club_id ?: "",
+        clubId = clubId,
         book = book?.toDomain() ?: error("SessionDto missing required book data"),
-        dueDate = due_date?.parseDateString(),
-        discussions = discussions.map { it.toDomain() }
+        dueDate = dueDate?.parseDateString(),
+        discussions = discussions?.map { it.toDomain() } ?: emptyList(),
+        members = members?.map { it.toDomain() } ?: emptyList()
     )
 }
 
 /**
- * Maps a [com.ivangarzab.kluvs.data.remote.dtos.SessionResponseDto] from the API to a [Session] domain model.
- *
- * This is the full session response with all related data populated.
+ * Maps a [SessionParticipantSummaryDto] from the club response's `active_session.members`
+ * list to a [SessionMember] domain model.
  */
-fun SessionResponseDto.toDomain(): Session {
-    return Session(
-        id = id,
-        clubId = club.id,
-        book = book.toDomain(),
-        dueDate = due_date?.parseDateString(),
-        discussions = discussions.map { it.toDomain() }
+fun SessionParticipantSummaryDto.toDomain(): SessionMember {
+    return SessionMember(
+        memberId = memberId.toString(),
+        memberName = memberName,
+        isReading = isReading
     )
 }
