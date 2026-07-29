@@ -17,8 +17,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Relevant Changes
+    runs-on: ubuntu-latest
+    outputs:
+      kotlin: ${{ steps.filter.outputs.kotlin }}
+      ios: ${{ steps.filter.outputs.ios }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Filter Paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            kotlin:
+              - '**'
+              - '!.github/workflows/**'
+              - '!**/*.md'
+              - '!docs/**'
+              - '!.claude/**'
+            ios:
+              - '**'
+              - '!composeApp/**'
+              - '!designsystem/**'
+              - '!**/androidMain/**'
+              - '!.github/workflows/**'
+              - '!**/*.md'
+              - '!docs/**'
+              - '!.claude/**'
+
   kotlin-tests:
     name: Run Kotlin Tests
+    needs: changes
+    if: needs.changes.outputs.kotlin == 'true'
     runs-on: ubuntu-latest
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -80,8 +113,9 @@ jobs:
   # iOS tests
   ios-tests:
     name: Run iOS Tests
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
     runs-on: macos-latest
-    if: false #TODO: Make sure to uncomment once there are iOS tests!
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -131,7 +165,7 @@ jobs:
   test-summary:
     name: Unified Test Summary
     runs-on: ubuntu-latest
-    needs: [kotlin-tests, ios-tests]
+    needs: [changes, kotlin-tests, ios-tests]
     if: always()
 
     steps:
@@ -150,36 +184,46 @@ jobs:
           path: ios-test-results
 
       - name: Generate Unified Test Summary
+        env:
+          KOTLIN_RELEVANT: ${{ needs.changes.outputs.kotlin }}
+          IOS_RELEVANT: ${{ needs.changes.outputs.ios }}
+          KOTLIN_RESULT: ${{ needs.kotlin-tests.result }}
+          IOS_RESULT: ${{ needs.ios-tests.result }}
         run: |
           echo "## 🧪 Multi-Platform Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Path | Ran? | Result | Test files |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|--------|------------|" >> $GITHUB_STEP_SUMMARY
 
-          # Count Kotlin tests
-          KOTLIN_TEST_FILES=$(find kotlin-test-results -name "*.xml" 2>/dev/null | wc -l || echo "0")
-          echo "### Kotlin Tests (Common + Android)" >> $GITHUB_STEP_SUMMARY
-          if [ "$KOTLIN_TEST_FILES" -gt 0 ]; then
-            echo "✅ **Status:** Tests executed" >> $GITHUB_STEP_SUMMARY
-            echo "📄 **Test files:** $KOTLIN_TEST_FILES" >> $GITHUB_STEP_SUMMARY
+          # Kotlin row
+          KOTLIN_TEST_FILES=$(find kotlin-test-results -name "*.xml" 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$KOTLIN_RELEVANT" = "true" ]; then
+            case "$KOTLIN_RESULT" in
+              success) KOTLIN_ICON="✅" ;;
+              failure) KOTLIN_ICON="❌" ;;
+              *) KOTLIN_ICON="⚠️ ($KOTLIN_RESULT)" ;;
+            esac
+            echo "| Kotlin (Common + Android) | Yes | $KOTLIN_ICON | $KOTLIN_TEST_FILES |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **Status:** No test results found" >> $GITHUB_STEP_SUMMARY
+            echo "| Kotlin (Common + Android) | Skipped — no relevant changes | — | — |" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Count iOS tests
-          IOS_TEST_FILES=$(find ios-test-results -name "*.xml" 2>/dev/null | wc -l || echo "0")
-          echo "### iOS Tests" >> $GITHUB_STEP_SUMMARY
-          if [ "$IOS_TEST_FILES" -gt 0 ]; then
-            echo "✅ **Status:** Tests executed" >> $GITHUB_STEP_SUMMARY
-            echo "📄 **Test files:** $IOS_TEST_FILES" >> $GITHUB_STEP_SUMMARY
+          # iOS row
+          IOS_TEST_FILES=$(find ios-test-results -name "*.xml" 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$IOS_RELEVANT" = "true" ]; then
+            case "$IOS_RESULT" in
+              success) IOS_ICON="✅" ;;
+              failure) IOS_ICON="❌" ;;
+              *) IOS_ICON="⚠️ ($IOS_RESULT)" ;;
+            esac
+            echo "| iOS | Yes | $IOS_ICON | $IOS_TEST_FILES |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **Status:** No test results found" >> $GITHUB_STEP_SUMMARY
+            echo "| iOS | Skipped — no relevant changes | — | — |" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Total
+          echo "" >> $GITHUB_STEP_SUMMARY
           TOTAL_TEST_FILES=$((KOTLIN_TEST_FILES + IOS_TEST_FILES))
-          echo "### 📊 Total" >> $GITHUB_STEP_SUMMARY
-          echo "**Combined test files:** $TOTAL_TEST_FILES" >> $GITHUB_STEP_SUMMARY
+          echo "**Combined test files executed:** $TOTAL_TEST_FILES" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "---" >> $GITHUB_STEP_SUMMARY
