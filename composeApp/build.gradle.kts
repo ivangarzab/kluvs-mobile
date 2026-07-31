@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
+import java.util.Properties
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -55,6 +56,19 @@ kotlin {
     }
 }
 
+// Release signing: reads from ./keystore.properties locally (gitignored), or from
+// KEYSTORE_FILE/KEYSTORE_PASSWORD/KEY_ALIAS/KEY_PASSWORD env vars in CI.
+// If neither is present, release builds stay unsigned (dev builds off main gate this).
+val keystoreProperties = Properties().apply {
+    val propsFile = rootProject.file("keystore.properties")
+    if (propsFile.exists()) {
+        propsFile.inputStream().use { load(it) }
+    }
+}
+
+fun signingProp(propKey: String, envKey: String): String? =
+    keystoreProperties.getProperty(propKey) ?: System.getenv(envKey)
+
 android {
     namespace = "com.ivangarzab.kluvs"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -72,6 +86,17 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        val storeFilePath = signingProp("storeFile", "KEYSTORE_FILE")
+        if (storeFilePath != null) {
+            create("release") {
+                storeFile = file(storeFilePath)
+                storePassword = signingProp("storePassword", "KEYSTORE_PASSWORD")
+                keyAlias = signingProp("keyAlias", "KEY_ALIAS")
+                keyPassword = signingProp("keyPassword", "KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -80,6 +105,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfigs.findByName("release")?.let { signingConfig = it }
 
             firebaseAppDistribution {
                 serviceCredentialsFile = System.getenv("FIREBASE_CREDENTIALS_FILE")
