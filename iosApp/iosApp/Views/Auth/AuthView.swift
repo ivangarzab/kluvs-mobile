@@ -10,7 +10,7 @@ struct AuthView: View {
     @StateObject private var viewModel = AuthViewModelWrapper()
     @StateObject private var oauthHandler = OAuthCallbackHandler.shared
     @State private var authMode: AuthMode = .login
-    let onNavigateToForgotPassword: () -> Void
+    @State private var showForgotSheet = false
 
     var body: some View {
         Group {
@@ -39,7 +39,7 @@ struct AuthView: View {
                                 authMode = .login
                             }
                         case .forgetPassword:
-                            onNavigateToForgotPassword()
+                            showForgotSheet = true
                         }
                     }
                 )
@@ -51,6 +51,7 @@ struct AuthView: View {
                 oauthHandler.clearCallback()
             }
         }
+        .authForgotSheet(isPresented: $showForgotSheet, viewModel: viewModel)
     }
 
     private func openOAuthUrl(_ urlString: String) {
@@ -64,5 +65,5 @@ struct AuthView: View {
 }
 
 #Preview {
-    AuthView(onNavigateToForgotPassword: {})
+    AuthView()
 }

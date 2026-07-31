@@ -15,7 +15,6 @@ struct AuthFormView: View {
     let onNavigate: (LoginNavigation) -> Void
 
     @FocusState private var focusedField: Field?
-    @State private var showErrorAlert = false
     @State private var errorMessage: String?
 
     enum Field {
@@ -28,14 +27,16 @@ struct AuthFormView: View {
                 Spacer()
                     .frame(height: 24)
 
-                // Header
-                Text("Welcome to your Kluvs")
-                    .kluvsStyle(KluvsTheme.typography.headline.small)
-                    .foregroundColor(KluvsTheme.colors.content)
+                AuthMasthead(
+                    voicePhrase: mode == .login
+                        ? String(localized: "headline_welcome_back")
+                        : String(localized: "headline_welcome_in"),
+                    subhead: mode == .login
+                        ? String(localized: "hint_sign_in_subhead")
+                        : String(localized: "hint_sign_up_subhead")
+                )
 
-                Text(mode == .login ? "Sign in to your account" : "Create a new account")
-                    .kluvsStyle(KluvsTheme.typography.body.large)
-                    .foregroundColor(KluvsTheme.colors.contentMuted)
+                Spacer().frame(height: 8)
 
                 SocialButton(
                     text: String(localized: "button_continue_apple"),
@@ -54,7 +55,6 @@ struct AuthFormView: View {
                                     return
                                 }
                                 errorMessage = error.localizedDescription
-                                showErrorAlert = true
                             }
                         }
                     }
@@ -134,6 +134,10 @@ struct AuthFormView: View {
                     .focused($focusedField, equals: .confirmPassword)
                 }
 
+                if let errorMessage {
+                    ErrorBanner(message: errorMessage)
+                }
+
                 // Forgot password (login only)
                 if mode == .login {
                     HStack {
@@ -166,6 +170,10 @@ struct AuthFormView: View {
                     .foregroundColor(KluvsTheme.colors.accent)
                 }
 
+                Spacer().frame(height: 12)
+
+                AuthFooter()
+
                 Spacer()
             }
             .padding(16)
@@ -173,17 +181,8 @@ struct AuthFormView: View {
         .onChange(of: viewModel.authState) { _, newState in
             if case .error(let error) = newState {
                 errorMessage = error.toLocalizedMessage()
-                showErrorAlert = true
             }
         }
-        .kluvsConfirmationDialog(
-            isPresented: $showErrorAlert,
-            title: "Authentication Error",
-            message: errorMessage ?? "An unexpected error occurred",
-            confirmLabel: "OK",
-            dismissLabel: nil,
-            onConfirm: {}
-        )
     }
 }
 
