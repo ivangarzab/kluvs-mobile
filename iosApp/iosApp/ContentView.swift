@@ -17,11 +17,7 @@ struct ContentView: View {
                 case .initializing:
                     LoadingView()
                 case .unauthenticated:
-                    AuthView(
-                        onNavigateToForgotPassword: {
-                            navigationPath.append(AuthRoute.forgotPassword)
-                        }
-                    )
+                    AuthView()
                 case .authenticated(let userId):
                     MainView(
                         userId: userId,
@@ -30,12 +26,6 @@ struct ContentView: View {
                             navigationPath.append(MainRoute.join)
                         }
                     )
-                }
-            }
-            .navigationDestination(for: AuthRoute.self) { route in
-                switch route {
-                case .forgotPassword:
-                    ForgotPasswordView()
                 }
             }
             .navigationDestination(for: MainRoute.self) { route in
@@ -75,10 +65,6 @@ struct ContentView: View {
         }
         .toast(message: $autoJoinErrorMessage)
     }
-}
-
-enum AuthRoute: Hashable {
-    case forgotPassword
 }
 
 enum MainRoute: Hashable {

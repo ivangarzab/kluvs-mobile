@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ivangarzab.kluvs.auth.presentation.AuthMode
@@ -23,11 +26,18 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: AuthViewModel = koinViewModel(),
     onNavigateToSignUp: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    var showForgotSheet by remember { mutableStateOf(false) }
+
+    if (showForgotSheet) {
+        AuthForgotSheet(
+            viewModel = viewModel,
+            onDismiss = { showForgotSheet = false },
+        )
+    }
 
     // Collect OAuth callbacks from MainActivity
     LaunchedEffect(Unit) {
@@ -71,7 +81,7 @@ fun LoginScreen(
                 onNavigate = {
                     when (it) {
                         LoginNavigation.SignUp -> onNavigateToSignUp()
-                        else -> onNavigateToForgotPassword()
+                        else -> showForgotSheet = true
                     }
                 }
             )
