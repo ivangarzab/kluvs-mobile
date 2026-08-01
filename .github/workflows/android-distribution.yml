@@ -10,8 +10,8 @@ jobs:
     name: Build and Distribute Android
     runs-on: ubuntu-latest
     env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_INTEGRATION_URL: ${{ secrets.SUPABASE_INTEGRATION_URL }}
+      SUPABASE_INTEGRATION_KEY: ${{ secrets.SUPABASE_INTEGRATION_KEY }}
       SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
       # Path where we will store the service account JSON
       FIREBASE_CREDENTIALS_FILE: ${{ github.workspace }}/firebase-key.json
@@ -38,7 +38,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build and Upload to Firebase
-        run: ./gradlew :composeApp:assembleDebug :composeApp:appDistributionUploadDebug
+        run: ./gradlew :composeApp:assembleStaging :composeApp:appDistributionUploadStaging -Pbuildkonfig.flavor=integration
 
       - name: Cleanup Credentials
         if: always()

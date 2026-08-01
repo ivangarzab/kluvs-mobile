@@ -40,7 +40,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Signed Release Bundle
-        run: ./gradlew :composeApp:bundleRelease --quiet --console=plain
+        run: ./gradlew :composeApp:bundleRelease -Pbuildkonfig.flavor=production --quiet --console=plain
 
       - name: Cleanup Keystore
         if: always()

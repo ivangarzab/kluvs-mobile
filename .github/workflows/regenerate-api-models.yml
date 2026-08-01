@@ -44,11 +44,12 @@ jobs:
     runs-on: ubuntu-latest
     # Gradle evaluates every module's build.gradle.kts during configuration,
     # even when only :core:api:openApiGenerate is requested — :core:network's
-    # BuildKonfig block requires SUPABASE_URL/SUPABASE_KEY, and Sentry setup
-    # needs SENTRY_DNS. Same three vars every other workflow in this repo sets.
+    # BuildKonfig block requires SUPABASE_INTEGRATION_URL/KEY (via -Pbuildkonfig.flavor=integration
+    # below; this job never calls BuildKonfig at runtime, integration is just the safer default
+    # if that ever changes), and Sentry setup needs SENTRY_DNS.
     env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_INTEGRATION_URL: ${{ secrets.SUPABASE_INTEGRATION_URL }}
+      SUPABASE_INTEGRATION_KEY: ${{ secrets.SUPABASE_INTEGRATION_KEY }}
       SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
 
     steps:
@@ -90,7 +91,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Regenerate models
-        run: ./gradlew :core:api:openApiGenerate
+        run: ./gradlew :core:api:openApiGenerate -Pbuildkonfig.flavor=integration
 
       - name: Open PR with regenerated models
         uses: peter-evans/create-pull-request@v7
