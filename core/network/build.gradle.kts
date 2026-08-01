@@ -42,6 +42,42 @@ buildkonfig {
     exposeObjectWithName = "BuildKonfig"
 
     defaultConfigs {
+        // Testing Supabase credentials (used by integration tests, independent of flavor)
+        val testSupabaseUrl: String = getPropertyOrEnvVar("TEST_SUPABASE_URL")
+        val testSupabaseKey: String = getPropertyOrEnvVar("TEST_SUPABASE_KEY")
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "TEST_SUPABASE_KEY",
+            testSupabaseKey
+        )
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "TEST_SUPABASE_URL",
+            testSupabaseUrl
+        )
+    }
+
+    // Selected via the `buildkonfig.flavor` Gradle property (see gradle.properties),
+    // e.g. `./gradlew build -Pbuildkonfig.flavor=production`. Defaults to "integration".
+    defaultConfigs("integration") {
+        val supabaseUrl: String = getPropertyOrEnvVar("SUPABASE_INTEGRATION_URL")
+        val supabaseKey: String = getPropertyOrEnvVar("SUPABASE_INTEGRATION_KEY")
+        require(supabaseUrl.isNotEmpty() && supabaseKey.isNotEmpty()) {
+            "Make sure to provide SUPABASE_INTEGRATION_URL and SUPABASE_INTEGRATION_KEY in your global gradle.properties file."
+        }
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "SUPABASE_KEY",
+            supabaseKey
+        )
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "SUPABASE_URL",
+            supabaseUrl
+        )
+    }
+
+    defaultConfigs("production") {
         // Production Supabase credentials
         val supabaseUrl: String = getPropertyOrEnvVar("SUPABASE_URL")
         val supabaseKey: String = getPropertyOrEnvVar("SUPABASE_KEY")
@@ -57,20 +93,6 @@ buildkonfig {
             com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
             "SUPABASE_URL",
             supabaseUrl
-        )
-
-        // Testing Supabase credentials
-        val testSupabaseUrl: String = getPropertyOrEnvVar("TEST_SUPABASE_URL")
-        val testSupabaseKey: String = getPropertyOrEnvVar("TEST_SUPABASE_KEY")
-        buildConfigField(
-            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
-            "TEST_SUPABASE_KEY",
-            testSupabaseKey
-        )
-        buildConfigField(
-            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
-            "TEST_SUPABASE_URL",
-            testSupabaseUrl
         )
     }
 }
