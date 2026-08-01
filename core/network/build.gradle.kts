@@ -37,6 +37,12 @@ kotlin {
     }
 }
 
+// BuildKonfig evaluates every `defaultConfigs(flavor)` block below at configuration time,
+// regardless of which flavor `buildkonfig.flavor` actually selects — so without this check,
+// every Gradle invocation would require credentials for BOTH flavors, not just the active one.
+val selectedBuildkonfigFlavor: String =
+    providers.gradleProperty("buildkonfig.flavor").getOrElse("integration")
+
 buildkonfig {
     packageName = "com.ivangarzab.kluvs.network"
     exposeObjectWithName = "BuildKonfig"
@@ -62,8 +68,10 @@ buildkonfig {
     defaultConfigs("integration") {
         val supabaseUrl: String = getPropertyOrEnvVar("SUPABASE_INTEGRATION_URL")
         val supabaseKey: String = getPropertyOrEnvVar("SUPABASE_INTEGRATION_KEY")
-        require(supabaseUrl.isNotEmpty() && supabaseKey.isNotEmpty()) {
-            "Make sure to provide SUPABASE_INTEGRATION_URL and SUPABASE_INTEGRATION_KEY in your global gradle.properties file."
+        if (selectedBuildkonfigFlavor == "integration") {
+            require(supabaseUrl.isNotEmpty() && supabaseKey.isNotEmpty()) {
+                "Make sure to provide SUPABASE_INTEGRATION_URL and SUPABASE_INTEGRATION_KEY in your global gradle.properties file."
+            }
         }
         buildConfigField(
             com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
@@ -81,8 +89,10 @@ buildkonfig {
         // Production Supabase credentials
         val supabaseUrl: String = getPropertyOrEnvVar("SUPABASE_URL")
         val supabaseKey: String = getPropertyOrEnvVar("SUPABASE_KEY")
-        require(supabaseUrl.isNotEmpty() && supabaseKey.isNotEmpty()) {
-            "Make sure to provide the SUPABASE_URL and SUPABASE_KEY in your global gradle.properties file."
+        if (selectedBuildkonfigFlavor == "production") {
+            require(supabaseUrl.isNotEmpty() && supabaseKey.isNotEmpty()) {
+                "Make sure to provide the SUPABASE_URL and SUPABASE_KEY in your global gradle.properties file."
+            }
         }
         buildConfigField(
             com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
