@@ -182,6 +182,9 @@ internal class SessionRepositoryImpl(
         val result = sessionRemoteDataSource.createSession(
             SessionCreateRequestDto(
                 clubId = clubId,
+                // book_id is genuinely optional here: CreateSessionBottomSheet currently only
+                // supports manual book entry (id = ""), since search-driven book registration
+                // isn't wired up yet. A non-numeric id is expected, not a failure to guard against.
                 bookId = book.id.toIntOrNull(),
                 dueDate = dueDate?.toString(),
                 discussions = discussions?.map { it.toDto() }
@@ -261,10 +264,12 @@ internal class SessionRepositoryImpl(
 
     override suspend fun updateParticipation(sessionId: String, memberId: String, isReading: Boolean): Result<Unit> {
         Bark.d("Updating session participation (ID: $sessionId, Member ID: $memberId, isReading: $isReading)")
+        val memberIdInt = memberId.toIntOrNull()
+            ?: return Result.failure(IllegalArgumentException("Invalid member ID: $memberId"))
         val result = sessionRemoteDataSource.updateSession(
             SessionUpdateRequestDto(
                 id = sessionId,
-                sessionMembers = listOf(SessionMemberFlagInputDto(memberId.toInt(), isReading))
+                sessionMembers = listOf(SessionMemberFlagInputDto(memberIdInt, isReading))
             )
         )
 

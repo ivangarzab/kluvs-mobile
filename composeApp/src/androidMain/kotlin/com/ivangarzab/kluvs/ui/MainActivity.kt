@@ -30,7 +30,6 @@ import com.ivangarzab.kluvs.app.AutoJoinResult
 import com.ivangarzab.kluvs.app.NavigationState
 import com.ivangarzab.kluvs.app.PendingJoinCoordinator
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.ui.auth.ForgotPasswordScreen
 import com.ivangarzab.kluvs.ui.auth.LoginScreen
 import com.ivangarzab.kluvs.ui.auth.SignupScreen
 import com.ivangarzab.kluvs.ui.join.JoinScreen
@@ -136,9 +135,6 @@ fun MainNavHost(
                     onNavigateToSignUp = {
                         navController.navigate(NavDestinations.SIGNUP)
                     },
-                    onNavigateToForgotPassword = {
-                        navController.navigate(NavDestinations.FORGOT_PASSWORD)
-                    },
                 )
             }
             composable(NavDestinations.SIGNUP) {
@@ -146,14 +142,6 @@ fun MainNavHost(
                     onNavigateToLogIn = {
                         navController.navigate(NavDestinations.LOGIN)
                     },
-                    onNavigateToForgotPassword = {
-                        navController.navigate(NavDestinations.FORGOT_PASSWORD)
-                    },
-                )
-            }
-            composable(NavDestinations.FORGOT_PASSWORD) {
-                ForgotPasswordScreen(
-                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable(NavDestinations.MAIN) {
@@ -208,7 +196,6 @@ fun MainNavHost(
 object NavDestinations {
     const val LOGIN = "login"
     const val SIGNUP = "signup"
-    const val FORGOT_PASSWORD = "forgot_password"
     const val MAIN = "main"
     const val SETTINGS = "settings"
     const val JOIN = "join"

@@ -6,8 +6,56 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'  # matches bare version tags like 1.0.0, 2.3.1, etc.
 
 jobs:
+  build-signed-bundle:
+    name: Build Signed Release Bundle
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
+      KEYSTORE_FILE: ${{ github.workspace }}/release.jks
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Decode Release Keystore
+        run: echo '${{ secrets.KEYSTORE_BASE64 }}' | base64 --decode > "$KEYSTORE_FILE"
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: Build Signed Release Bundle
+        run: ./gradlew :composeApp:bundleRelease -Pbuildkonfig.flavor=production --quiet --console=plain
+
+      - name: Cleanup Keystore
+        if: always()
+        run: rm -f "$KEYSTORE_FILE"
+
+      - name: Upload Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: composeApp/build/outputs/bundle/release/*.aab
+          retention-days: 90
+
   create-release:
     name: Create GitHub Release
+    needs: build-signed-bundle
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,6 +66,12 @@ jobs:
         with:
           fetch-depth: 0  # Required for full commit history used in release notes generation
 
+      - name: Download Bundle Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-bundle
+          path: release-bundle
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -26,3 +80,4 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+          files: release-bundle/*.aab

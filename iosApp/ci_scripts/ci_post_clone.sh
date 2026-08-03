@@ -33,7 +33,9 @@ echo "⬇️ Fetching Sentry Framework..."
 
 # 6. RUN TESTS
 # We run this here to gate the build. If this fails, the build stops.
+# Explicit -Pbuildkonfig.flavor=integration: Xcode Cloud VMs are ephemeral (no persisted
+# gradle.properties), so this can't rely on a local default the way `./gradlew` alone can.
 echo "🧪 Running KMP Simulator Tests..."
-./gradlew iosSimulatorArm64Test '-PexcludeTests=**/*IntegrationTest*' --continue
+./gradlew iosSimulatorArm64Test '-PexcludeTests=**/*IntegrationTest*' -Pbuildkonfig.flavor=integration --continue
 
 echo "✅ Post-clone complete. Tests Passed. Environment ready for Xcode build. 🏁"

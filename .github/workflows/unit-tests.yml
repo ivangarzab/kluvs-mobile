@@ -21,8 +21,8 @@ jobs:
     name: Run Kotlin Tests
     runs-on: ubuntu-latest
     env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_INTEGRATION_URL: ${{ secrets.SUPABASE_INTEGRATION_URL }}
+      SUPABASE_INTEGRATION_KEY: ${{ secrets.SUPABASE_INTEGRATION_KEY }}
       TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
       TEST_SUPABASE_KEY: ${{ secrets.TEST_SUPABASE_KEY }}
       SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
@@ -46,7 +46,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Common Unit Tests
-        run: ./gradlew testDebugUnitTest -PexcludeTests="**/*IntegrationTest*" --continue
+        run: ./gradlew testDebugUnitTest -PexcludeTests="**/*IntegrationTest*" -Pbuildkonfig.flavor=integration --continue
 
       - name: Upload Kotlin Test Results
         uses: actions/upload-artifact@v4
@@ -83,8 +83,8 @@ jobs:
     runs-on: macos-latest
     if: false #TODO: Make sure to uncomment once there are iOS tests!
     env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_INTEGRATION_URL: ${{ secrets.SUPABASE_INTEGRATION_URL }}
+      SUPABASE_INTEGRATION_KEY: ${{ secrets.SUPABASE_INTEGRATION_KEY }}
       TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
       TEST_SUPABASE_KEY: ${{ secrets.TEST_SUPABASE_KEY }}
       SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
@@ -106,7 +106,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run iOS Unit Tests
-        run: ./gradlew iosSimulatorArm64Test --continue
+        run: ./gradlew iosSimulatorArm64Test -Pbuildkonfig.flavor=integration --continue
 
       - name: Upload iOS Test Results
         uses: actions/upload-artifact@v4

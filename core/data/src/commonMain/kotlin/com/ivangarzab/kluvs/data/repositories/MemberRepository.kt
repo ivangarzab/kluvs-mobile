@@ -205,9 +205,11 @@ internal class MemberRepositoryImpl(
         clubRoles: Map<String, String>?
     ): Result<Member> {
         Bark.d("Updating member (ID: $memberId)")
+        val memberIdInt = memberId.toIntOrNull()
+            ?: return Result.failure(IllegalArgumentException("Invalid member ID: $memberId"))
         val result = memberRemoteDataSource.updateMember(
             MemberUpdateRequestDto(
-                id = memberId.toInt(),
+                id = memberIdInt,
                 name = name,
                 handle = handle,
                 avatarPath = avatarPath,

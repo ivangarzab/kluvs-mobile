@@ -14,6 +14,7 @@ enum class IconType {
     Discord,
     Edit,
     Email,
+    Error,
     Google,
     Help,
     Location,

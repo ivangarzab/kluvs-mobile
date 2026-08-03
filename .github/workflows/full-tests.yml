@@ -21,8 +21,8 @@ jobs:
     name: Run All Tests
     runs-on: ubuntu-latest
     env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_INTEGRATION_URL: ${{ secrets.SUPABASE_INTEGRATION_URL }}
+      SUPABASE_INTEGRATION_KEY: ${{ secrets.SUPABASE_INTEGRATION_KEY }}
       SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
 
     steps:
@@ -90,12 +90,12 @@ jobs:
 
       - name: Run ALL Tests (Unit + Integration)
         working-directory: kluvs-mobile
-        run: ./gradlew testDebugUnitTest --continue
+        run: ./gradlew testDebugUnitTest -Pbuildkonfig.flavor=integration --continue
 
       - name: Generate Complete Kover Coverage Report
         if: always()
         working-directory: kluvs-mobile
-        run: ./gradlew koverXmlReport koverHtmlReport
+        run: ./gradlew koverXmlReport koverHtmlReport -Pbuildkonfig.flavor=integration
 
       - name: Upload Coverage to Codecov
         if: always()

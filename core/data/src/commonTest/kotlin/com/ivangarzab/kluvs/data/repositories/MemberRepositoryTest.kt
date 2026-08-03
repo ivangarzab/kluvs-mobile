@@ -360,6 +360,15 @@ class MemberRepositoryTest {
         verifySuspend { remoteDataSource.updateMember(any()) }
     }
 
+    @Test
+    fun `updateMember with non-numeric memberId returns Result failure without calling remote`() = runTest {
+        val result = repository.updateMember("not-a-number", name = "Updated")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { remoteDataSource.updateMember(any()) }
+    }
+
     // ========================================
     // DELETE MEMBER
     // ========================================
