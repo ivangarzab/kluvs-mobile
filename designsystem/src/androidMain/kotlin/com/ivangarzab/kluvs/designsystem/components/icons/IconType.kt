@@ -13,6 +13,7 @@ enum class IconType {
     Clubs,
     Discord,
     Edit,
+    EditNote,
     Email,
     Error,
     Google,
