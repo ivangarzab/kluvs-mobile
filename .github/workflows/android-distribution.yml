@@ -15,6 +15,10 @@ jobs:
       SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
       # Path where we will store the service account JSON
       FIREBASE_CREDENTIALS_FILE: ${{ github.workspace }}/firebase-key.json
+      KEYSTORE_FILE: ${{ github.workspace }}/release.jks
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
       - name: Checkout Code
@@ -34,6 +38,9 @@ jobs:
       - name: Create Firebase Service Account File
         run: echo '${{ secrets.FIREBASE_APP_DISTRIBUTION_CREDENTIALS_JSON }}' > $FIREBASE_CREDENTIALS_FILE
 
+      - name: Decode Release Keystore
+        run: echo '${{ secrets.KEYSTORE_BASE64 }}' | base64 --decode > "$KEYSTORE_FILE"
+
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
 
@@ -42,4 +49,6 @@ jobs:
 
       - name: Cleanup Credentials
         if: always()
-        run: rm -f $FIREBASE_CREDENTIALS_FILE
+        run: |
+          rm -f $FIREBASE_CREDENTIALS_FILE
+          rm -f "$KEYSTORE_FILE"
