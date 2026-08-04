@@ -78,6 +78,7 @@ internal fun IconType.toDrawableRes(): Int = when (this) {
     IconType.Help -> R.drawable.ic_help
     IconType.Location -> R.drawable.ic_location
     IconType.Password -> R.drawable.ic_password
+    IconType.Reading -> R.drawable.ic_reading
     IconType.Settings -> R.drawable.ic_settings
     IconType.SignOut -> R.drawable.ic_signout
     IconType.User -> R.drawable.ic_user

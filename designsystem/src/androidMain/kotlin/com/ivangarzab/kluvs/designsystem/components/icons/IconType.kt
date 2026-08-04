@@ -20,6 +20,7 @@ enum class IconType {
     Help,
     Location,
     Password,
+    Reading,
     Settings,
     SignOut,
     User,

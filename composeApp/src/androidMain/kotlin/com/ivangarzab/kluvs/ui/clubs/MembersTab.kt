@@ -30,6 +30,8 @@ import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
@@ -126,98 +128,6 @@ fun MembersTab(
 }
 
 @Composable
-private fun MemberListItem(
-    modifier: Modifier = Modifier,
-    memberId: String,
-    name: String,
-    handle: String,
-    avatarUrl: String? = null,
-    role: Role,
-    isSelf: Boolean = false,
-    isReading: Boolean? = null,
-    showAdminActions: Boolean = false,
-    showRemove: Boolean = false,
-    onChangeRole: () -> Unit = {},
-    onRemove: () -> Unit = {},
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Avatar(
-            name = name,
-            memberId = memberId,
-            avatarUrl = avatarUrl,
-            size = 40.dp,
-            isOwn = isSelf,
-            contentDescription = stringResource(R.string.avatar_of_x, name)
-        )
-
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = name,
-                    color = KluvsTheme.colors.content,
-                    style = KluvsTheme.typography.body.large
-                )
-                if (isSelf) {
-                    Text(
-                        text = stringResource(R.string.you).uppercase(),
-                        color = KluvsTheme.colors.accent,
-                        style = KluvsTheme.typography.eyebrow
-                    )
-                }
-            }
-            Text(
-                text = handle,
-                color = KluvsTheme.colors.contentMuted,
-                style = KluvsTheme.typography.body.medium
-            )
-        }
-
-        Column(
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RoleEyebrow(role = role)
-                if (showAdminActions || showRemove) {
-                    ActionMenu(
-                        items = buildList {
-                            if (showAdminActions) add(ActionMenuItem(label = "Change Role", onClick = onChangeRole))
-                            if (showRemove) add(ActionMenuItem(label = "Remove", onClick = onRemove, isDestructive = true))
-                        },
-                        contentDescription = "Member options"
-                    )
-                }
-            }
-
-            // Session participation indicator (mirrors the web members list)
-            isReading?.let { reading ->
-                Text(
-                    text = if (reading) "Reading" else "Skipping",
-                    color = if (reading) {
-                        KluvsTheme.colors.accent
-                    } else {
-                        KluvsTheme.colors.contentMuted
-                    },
-                    style = KluvsTheme.typography.label
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun MemberDivider() {
     HorizontalDivider(color = KluvsTheme.colors.cardAlt)
 }
@@ -230,11 +140,11 @@ fun Preview_MembersTab() = KluvsTheme {
             .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         members = listOf(
-            MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", "", role = Role.OWNER, userId = "u0"),
-            MemberListItemInfo("1", "Monica Michelle Morales", "@monica", "", role = Role.ADMIN, userId = "u1"),
-            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "@chitho23", "", role = Role.MEMBER, userId = "u2"),
-            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "@keto92", "", role = Role.MEMBER, userId = "u3"),
-            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "@josalinas", "", role = Role.MEMBER, userId = "u4"),
+            MemberListItemInfo("0", "Iván Garza Bermea", "ivangarzab", "", role = Role.OWNER, userId = "u0"),
+            MemberListItemInfo("1", "Monica Michelle Morales", "monica", "", role = Role.ADMIN, userId = "u1"),
+            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "chitho23", "", role = Role.MEMBER, userId = "u2"),
+            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "keto92", "", role = Role.MEMBER, userId = "u3"),
+            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "josalinas", "", role = Role.MEMBER, userId = "u4"),
             MemberListItemInfo("5", "Ginseng Joaquin Guzman", "gino1", "", role = Role.MEMBER, userId = "u5"),
         ),
         currentUserId = "u0",
