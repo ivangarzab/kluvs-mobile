@@ -7,15 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +25,7 @@ import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.fields.PickerField
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheetFooter
+import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsTimePicker
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import kotlinx.datetime.LocalDateTime
 
@@ -40,7 +38,8 @@ import kotlinx.datetime.LocalDateTime
  * canSave check, a real bug, now fixed to match web. Also adds the "READING SESSION" read-only
  * info box web shows ([bookTitle], the active session's book title), which this sheet never had.
  *
- * DatePickerDialog/TimePicker AlertDialogs stay native — system UI, not design-system content.
+ * DatePickerDialog stays native — system UI, not design-system content. TimePicker is shelled
+ * via [KluvsTimePicker] instead, to match every other sheet's header/footer chrome.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -143,25 +142,15 @@ fun DiscussionBottomSheet(
     }
 
     if (showTimePicker) {
-        val timePickerState = rememberTimePickerState(
+        KluvsTimePicker(
             initialHour = selectedHour,
             initialMinute = selectedMinute,
-            is24Hour = false
-        )
-        AlertDialog(
-            onDismissRequest = { showTimePicker = false },
-            title = { Text("Select Time") },
-            text = { TimePicker(state = timePickerState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    selectedHour = timePickerState.hour
-                    selectedMinute = timePickerState.minute
-                    showTimePicker = false
-                }) { Text("OK") }
+            onConfirm = { hour, minute ->
+                selectedHour = hour
+                selectedMinute = minute
+                showTimePicker = false
             },
-            dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
-            }
+            onDismiss = { showTimePicker = false },
         )
     }
 }

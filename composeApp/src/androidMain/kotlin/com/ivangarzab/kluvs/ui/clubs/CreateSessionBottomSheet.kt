@@ -2,15 +2,12 @@ package com.ivangarzab.kluvs.ui.clubs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +19,7 @@ import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.fields.PickerField
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheetFooter
+import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsTimePicker
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.model.Book
 import kotlinx.datetime.LocalDateTime
@@ -35,7 +33,8 @@ import kotlinx.datetime.LocalDateTime
  * reading" participation toggle is the same story: no allReading param exists on the shared
  * onCreateSession call today.
  *
- * DatePickerDialog/TimePicker AlertDialogs stay native — system UI, not design-system content.
+ * DatePickerDialog stays native — system UI, not design-system content. TimePicker is shelled
+ * via [KluvsTimePicker] instead, to match every other sheet's header/footer chrome.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,25 +107,15 @@ fun CreateSessionBottomSheet(
     }
 
     if (showTimePicker) {
-        val timePickerState = rememberTimePickerState(
+        KluvsTimePicker(
             initialHour = selectedHour,
             initialMinute = selectedMinute,
-            is24Hour = false
-        )
-        AlertDialog(
-            onDismissRequest = { showTimePicker = false },
-            title = { Text("Select Time") },
-            text = { TimePicker(state = timePickerState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    selectedHour = timePickerState.hour
-                    selectedMinute = timePickerState.minute
-                    showTimePicker = false
-                }) { Text("OK") }
+            onConfirm = { hour, minute ->
+                selectedHour = hour
+                selectedMinute = minute
+                showTimePicker = false
             },
-            dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
-            }
+            onDismiss = { showTimePicker = false },
         )
     }
 }
