@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -42,8 +43,10 @@ import com.ivangarzab.kluvs.member.presentation.UserStatistics
 import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
+import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
@@ -69,6 +72,7 @@ fun MeScreen(
     modifier: Modifier = Modifier,
     userId: String,
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToClubs: () -> Unit = {},
     viewModel: MeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -117,7 +121,8 @@ fun MeScreen(
                 onRefresh = { viewModel.refresh(forceRefresh = true) },
                 onUpdateProgress = { sessionId ->
                     editingShelfItem = state.shelf.find { it.sessionId == sessionId }
-                }
+                },
+                onNavigateToClubs = onNavigateToClubs,
             )
 
             SnackbarHost(
@@ -176,7 +181,14 @@ fun MeScreenContent(
     onRetry: () -> Unit,
     onRefresh: () -> Unit = onRetry,
     onUpdateProgress: (sessionId: String) -> Unit = {},
+    onNavigateToClubs: () -> Unit = {},
 ) {
+    // state.statistics.clubsCount (from GetUserStatisticsUseCase, already the source of the
+    // "4 CLUBS" stat shown above) is the real "no clubs" signal — null means stats haven't
+    // loaded or failed to load, not that the count is zero, so it deliberately does NOT count
+    // as empty here.
+    val hasNothingToShow = state.statistics?.clubsCount == 0
+
     val screenState = when {
         state.profile != null -> ScreenState.Content
         state.isLoading -> ScreenState.Loading
@@ -228,22 +240,31 @@ fun MeScreenContent(
 
                         Divider()
 
-                        UpNextSection(
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth(),
-                            upNext = state.upNext
-                        )
+                        if (hasNothingToShow) {
+                            EmptyState(
+                                modifier = Modifier.fillMaxWidth().height(280.dp),
+                                heading = "Nothing up next.",
+                                body = "Join or start a club and your next read will show up here.",
+                                action = { OutlinedButton(text = "Browse Clubs", onClick = onNavigateToClubs) },
+                            )
+                        } else {
+                            UpNextSection(
+                                modifier = Modifier
+                                    .padding(vertical = 8.dp)
+                                    .fillMaxWidth(),
+                                upNext = state.upNext
+                            )
 
-                        if (state.upNext != null) {
-                            Divider()
+                            if (state.upNext != null) {
+                                Divider()
+                            }
+
+                            ShelfSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                shelf = state.shelf,
+                                onUpdateProgress = onUpdateProgress
+                            )
                         }
-
-                        ShelfSection(
-                            modifier = Modifier.fillMaxWidth(),
-                            shelf = state.shelf,
-                            onUpdateProgress = onUpdateProgress
-                        )
                     }
                 }
             }

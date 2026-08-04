@@ -178,6 +178,7 @@ fun MainScreenContent(
                     modifier = contentModifier,
                     userId = userId,
                     onNavigateToSettings = onNavigateToSettings,
+                    onNavigateToClubs = { scope.launch { pagerState.animateScrollToPage(1) } },
                 )
                 1 -> ClubsScreen(
                     modifier = contentModifier,

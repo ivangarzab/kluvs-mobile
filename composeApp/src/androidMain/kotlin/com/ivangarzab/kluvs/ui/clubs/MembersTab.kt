@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
@@ -34,6 +33,7 @@ import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
@@ -106,23 +106,12 @@ fun MembersTab(
         }
 
         if (members.size <= 1 && isAdminOrAbove) {
-            Spacer(Modifier.height(20.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.invite_others_cta),
-                    style = KluvsTheme.typography.headline.small.feature(),
-                    color = KluvsTheme.colors.contentMuted,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(16.dp))
-                PrimaryButton(
-                    text = stringResource(R.string.invite_members),
-                    onClick = onInviteMember,
-                )
-            }
+            EmptyState(
+                modifier = Modifier.fillMaxWidth().height(220.dp),
+                heading = "Just you, for now.",
+                body = "Invite a few people and this club starts to feel like one.",
+                action = { PrimaryButton(text = stringResource(R.string.invite_members), onClick = onInviteMember) },
+            )
         }
     }
 }

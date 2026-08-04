@@ -48,6 +48,7 @@ import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
@@ -135,11 +136,12 @@ fun ActiveSessionTab(
 
         sessionDetails.discussions.let { discussions ->
             if (discussions.isEmpty()) {
-                Text(
-                    text = "No discussions scheduled yet.",
-                    color = KluvsTheme.colors.contentMuted,
-                    style = KluvsTheme.typography.body.medium,
-                    modifier = Modifier.padding(vertical = 12.dp)
+                // The "Add Discussion" button above already covers the CTA for admins, so this
+                // empty state carries no action of its own.
+                EmptyState(
+                    modifier = Modifier.fillMaxWidth().height(220.dp),
+                    heading = "No discussions scheduled.",
+                    body = "Once a discussion is set, it'll show up here.",
                 )
             } else {
                 // Timeline

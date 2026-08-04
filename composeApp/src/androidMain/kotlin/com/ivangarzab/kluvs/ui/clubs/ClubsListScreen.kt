@@ -39,6 +39,7 @@ import com.ivangarzab.kluvs.designsystem.components.bookcover.BookCoverPlacehold
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStack
 import com.ivangarzab.kluvs.designsystem.components.avatars.AvatarStackMember
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
@@ -197,27 +198,12 @@ private fun MemberAvatarInfo.toAvatarStackMember() = AvatarStackMember(
 
 @Composable
 private fun ClubsListEmptyState(modifier: Modifier = Modifier, onJoinWithCode: () -> Unit = {}) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "No clubs yet",
-                style = KluvsTheme.typography.headline.small,
-                color = KluvsTheme.colors.content
-            )
-            Text(
-                text = "Join a club to get started",
-                style = KluvsTheme.typography.body.medium,
-                color = KluvsTheme.colors.contentMuted
-            )
-            OutlinedButton(text = "Join with a code", onClick = onJoinWithCode)
-        }
-    }
+    EmptyState(
+        modifier = modifier,
+        heading = "No clubs yet.",
+        body = "Join a club or start your own to get things going.",
+        action = { OutlinedButton(text = "Join with a code", onClick = onJoinWithCode) },
+    )
 }
 
 @PreviewLightDark
