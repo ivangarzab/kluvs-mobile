@@ -166,7 +166,10 @@ private struct ShelfSectionView: View {
             .padding(.vertical, 4)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                // .top, not the default .center — otherwise a 2-line title pushes that card
+                // taller, and HStack's default center alignment drops its cover out of line with
+                // the shorter, 1-line-title cards next to it.
+                HStack(alignment: .top, spacing: 12) {
                     ForEach(entries, id: \.book.id) { entry in
                         BookCard(
                             book: entry.book,
