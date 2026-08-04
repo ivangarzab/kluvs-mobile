@@ -2,12 +2,7 @@ package com.ivangarzab.kluvs.ui.clubs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +15,7 @@ import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.fields.PickerField
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheetFooter
+import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsDatePicker
 import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsTimePicker
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.model.Book
@@ -32,8 +28,8 @@ import kotlinx.datetime.LocalDateTime
  * via pickers. Same manual-entry gap as CreateSessionBottomSheet vs. web's real book search —
  * documented there, not repeated here.
  *
- * DatePickerDialog stays native — system UI, not design-system content. TimePicker is shelled
- * via [KluvsTimePicker] instead, to match every other sheet's header/footer chrome.
+ * Date/time pickers are shelled via [KluvsDatePicker]/[KluvsTimePicker], to match every other
+ * sheet's header/footer chrome.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,21 +90,14 @@ fun EditSessionBottomSheet(
     }
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDateMillis)
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    selectedDateMillis = datePickerState.selectedDateMillis
-                    showDatePicker = false
-                }) { Text("OK") }
+        KluvsDatePicker(
+            initialSelectedDateMillis = selectedDateMillis,
+            onConfirm = { millis ->
+                selectedDateMillis = millis
+                showDatePicker = false
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
+            onDismiss = { showDatePicker = false },
+        )
     }
 
     if (showTimePicker) {
