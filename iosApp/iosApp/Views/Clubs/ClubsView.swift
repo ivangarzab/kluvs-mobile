@@ -595,7 +595,7 @@ private struct ClubDetailView: View {
             }
         )
         // Discussion note
-        .kluvsBottomSheet(item: $openNoteDiscussionId, header: "Note") { wrapper in
+        .kluvsBottomSheet(item: $openNoteDiscussionId, header: "Notes") { wrapper in
             let discussionId = wrapper.id
             DiscussionNoteFields(
                 discussionTitle: viewModel.activeSession?.discussions.first { $0.id == discussionId }?.title,

@@ -1,5 +1,6 @@
 import SwiftUI
 import SafariServices
+import PhotosUI
 import DesignSystem
 
 struct SettingsView: View {
@@ -12,6 +13,11 @@ struct SettingsView: View {
         ScrollView {
             VStack(spacing: 0) {
                 EditProfileSection(
+                    avatarUrl: viewModel.profile?.avatarUrl,
+                    isUploadingAvatar: viewModel.isUploadingAvatar,
+                    onAvatarPicked: { imageData in
+                        viewModel.uploadAvatar(imageData: imageData)
+                    },
                     editedName: Binding(
                         get: { viewModel.editedName },
                         set: { viewModel.onNameChanged($0) }
@@ -25,10 +31,6 @@ struct SettingsView: View {
                     saveError: viewModel.saveError,
                     onSaveProfile: { viewModel.onSaveProfile() }
                 )
-
-                Divider()
-                    .overlay(KluvsTheme.colors.divider)
-                    .padding(.top, 12)
 
                 LegalSection()
 
@@ -63,21 +65,33 @@ struct SettingsView: View {
                 }
                 .padding()
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+            } else if let avatarError = viewModel.avatarError {
+                SnackbarView(message: avatarError) {
+                    viewModel.clearAvatarError()
+                }
+                .padding()
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .animation(.easeInOut(duration: 0.3), value: showSaveSuccess)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.avatarError)
     }
 }
 
 // MARK: - Edit Profile Section
 
 struct EditProfileSection: View {
+    let avatarUrl: String?
+    var isUploadingAvatar: Bool = false
+    var onAvatarPicked: ((Data) -> Void)? = nil
     @Binding var editedName: String
     @Binding var editedHandle: String
     let hasChanges: Bool
     let isSaving: Bool
     let saveError: String?
     let onSaveProfile: () -> Void
+
+    @State private var selectedItem: PhotosPickerItem? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -87,6 +101,39 @@ struct EditProfileSection: View {
 
             Spacer()
                 .frame(height: 4)
+
+            ZStack(alignment: .bottomTrailing) {
+                MemberAvatar(
+                    avatarUrl: avatarUrl,
+                    size: 64,
+                    isLoading: isUploadingAvatar,
+                    onClick: nil
+                )
+
+                PhotosPicker(selection: $selectedItem, matching: .images) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.brandOrange.opacity(0.9))
+                            .frame(width: 24, height: 24)
+
+                        IconType.edit.image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
+                            .foregroundColor(KluvsTheme.colors.onAccent)
+                    }
+                }
+                .onChange(of: selectedItem) { newItem in
+                    Task {
+                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                            let compressedData = compressImage(data)
+                            onAvatarPicked?(compressedData)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.bottom, 4)
 
             InputField(label: String(localized: "label_name"), value: $editedName)
 
@@ -132,6 +179,11 @@ struct LegalSection: View {
                 safariUrl = URL(string: "https://kluvs.com/terms")
             }
             Divider().overlay(KluvsTheme.colors.divider)
+
+            LegalRow(label: String(localized: "data_deletion")) {
+                safariUrl = URL(string: "https://kluvs.com/delete-account")
+            }
+            Divider().overlay(KluvsTheme.colors.divider)
         }
         .padding(.vertical, 12)
         .sheet(item: $safariUrl) { url in
@@ -149,7 +201,7 @@ private struct LegalRow: View {
         Button(action: action) {
             HStack {
                 Text(label)
-                    .kluvsStyle(KluvsTheme.typography.label)
+                    .kluvsStyle(KluvsTheme.typography.body.large)
                     .foregroundColor(KluvsTheme.colors.accent)
                 Spacer()
                 Image(systemName: "chevron.right")

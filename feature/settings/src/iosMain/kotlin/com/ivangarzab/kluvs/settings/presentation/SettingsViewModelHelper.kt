@@ -37,4 +37,8 @@ class SettingsViewModelHelper : KoinComponent {
     fun onSaveProfile() = viewModel.onSaveProfile()
 
     fun onDismissSaveSuccess() = viewModel.onDismissSaveSuccess()
+
+    fun uploadAvatar(imageData: ByteArray) = viewModel.uploadAvatar(imageData)
+
+    fun clearAvatarError() = viewModel.clearAvatarError()
 }

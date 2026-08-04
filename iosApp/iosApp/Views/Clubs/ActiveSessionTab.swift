@@ -164,19 +164,21 @@ struct DiscussionTimelineItem: View {
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                HStack(spacing: 0) {
-                    Button(action: onOpenNote) {
-                        Image(systemName: "pencil")
-                            .foregroundColor(KluvsTheme.colors.contentMuted)
-                            .padding(.vertical, 12)
-                    }
-
+                VStack(alignment: .center, spacing: 0) {
                     if showAdminActions {
                         ActionMenu(items: [
                             ActionMenuItem(label: "Edit", action: onEdit),
                             ActionMenuItem(label: "Delete", action: onDelete, isDestructive: true),
                         ])
                     }
+
+                    IconButton(
+                        type: .editNote,
+                        contentDescription: "Discussion note",
+                        action: onOpenNote,
+                        tint: KluvsTheme.colors.contentMuted,
+                        iconSize: 20
+                    )
                 }
             }
         }

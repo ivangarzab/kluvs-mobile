@@ -10,12 +10,15 @@ import Shared
 class SettingsViewModelWrapper: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var error: String? = nil
+    @Published var profile: Shared.EditableProfile? = nil
     @Published var editedName: String = ""
     @Published var editedHandle: String = ""
     @Published var isSaving: Bool = false
     @Published var saveError: String? = nil
     @Published var saveSuccess: Bool = false
     @Published var hasChanges: Bool = false
+    @Published var isUploadingAvatar: Bool = false
+    @Published var avatarError: String? = nil
 
     private let helper: SettingsViewModelHelper
     private var cancellables: [Shared.Closeable] = []
@@ -31,12 +34,15 @@ class SettingsViewModelWrapper: ObservableObject {
                 guard let self else { return }
                 self.isLoading = state.isLoading
                 self.error = state.error
+                self.profile = state.profile
                 self.editedName = state.editedName
                 self.editedHandle = state.editedHandle
                 self.isSaving = state.isSaving
                 self.saveError = state.saveError
                 self.saveSuccess = state.saveSuccess
                 self.hasChanges = state.hasChanges
+                self.isUploadingAvatar = state.isUploadingAvatar
+                self.avatarError = state.avatarError
             }
         }
         cancellables.append(stateCancellable)
@@ -60,6 +66,22 @@ class SettingsViewModelWrapper: ObservableObject {
 
     func onDismissSaveSuccess() {
         helper.onDismissSaveSuccess()
+    }
+
+    func uploadAvatar(imageData: Data) {
+        let byteArray = KotlinByteArray(size: Int32(imageData.count))
+        imageData.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+            if let baseAddress = bytes.baseAddress {
+                for i in 0..<imageData.count {
+                    byteArray.set(index: Int32(i), value: Int8(bitPattern: baseAddress.load(fromByteOffset: i, as: UInt8.self)))
+                }
+            }
+        }
+        helper.uploadAvatar(imageData: byteArray)
+    }
+
+    func clearAvatarError() {
+        helper.clearAvatarError()
     }
 
     deinit {
