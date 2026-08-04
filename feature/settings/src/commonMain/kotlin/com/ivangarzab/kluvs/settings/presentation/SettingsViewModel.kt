@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.settings.domain.GetEditableProfileUseCase
+import com.ivangarzab.kluvs.settings.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateUserProfileUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(
     private val getEditableProfile: GetEditableProfileUseCase,
-    private val updateUserProfile: UpdateUserProfileUseCase
+    private val updateUserProfile: UpdateUserProfileUseCase,
+    private val updateAvatarUseCase: UpdateAvatarUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -94,6 +96,42 @@ class SettingsViewModel(
 
     fun onDismissSaveSuccess() {
         _state.update { it.copy(saveSuccess = false) }
+    }
+
+    fun uploadAvatar(imageData: ByteArray) {
+        viewModelScope.launch {
+            _state.update { it.copy(isUploadingAvatar = true, avatarError = null) }
+
+            val memberId = _state.value.profile?.memberId
+            if (memberId == null) {
+                Bark.e("No member ID available to update avatar. Please retry.", null)
+                _state.update {
+                    it.copy(
+                        isUploadingAvatar = false,
+                        avatarError = "No member ID available"
+                    )
+                }
+                return@launch
+            }
+
+            updateAvatarUseCase(memberId, imageData)
+                .onSuccess { newAvatarUrl ->
+                    Bark.i("Avatar uploaded successfully (ID: $memberId)")
+                    _state.update {
+                        it.copy(profile = it.profile?.copy(avatarUrl = newAvatarUrl))
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Failed to upload avatar (ID: $memberId). Please retry.", error)
+                    _state.update { it.copy(avatarError = error.message) }
+                }
+
+            _state.update { it.copy(isUploadingAvatar = false) }
+        }
+    }
+
+    fun clearAvatarError() {
+        _state.update { it.copy(avatarError = null) }
     }
 
     private fun computeHasChanges(state: SettingsState): Boolean {

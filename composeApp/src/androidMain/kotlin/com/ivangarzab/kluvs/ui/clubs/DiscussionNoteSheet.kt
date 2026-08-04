@@ -21,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.clubs.presentation.DiscussionNoteInfo
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.TextButton
@@ -46,7 +48,7 @@ private const val NOTE_MAX_LENGTH = 4000
  * conversion: this component has two modes with different action pairs depending on internal
  * state, not the fixed Cancel/Action shape BottomSheetFooter assumes. Kept the raw multi-line
  * OutlinedTextField for the note editor rather than forcing it into InputField — InputField
- * requires a label, which would be redundant given the sheet header already says "Note".
+ * requires a label, which would be redundant given the sheet header already says "Notes".
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +64,7 @@ fun DiscussionNoteSheet(
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     BottomSheet(
-        header = "Note",
+        header = stringResource(R.string.discussion_notes_title),
         onDismiss = onDismiss,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

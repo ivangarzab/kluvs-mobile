@@ -2,9 +2,7 @@ package com.ivangarzab.kluvs.ui.settings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,14 +19,6 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 @Composable
 fun AboutSection(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
-        Text(
-            text = stringResource(R.string.about_title).uppercase(),
-            style = KluvsTheme.typography.eyebrow,
-            color = KluvsTheme.colors.contentMuted
-        )
-
-        Spacer(Modifier.height(12.dp))
-
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.CenterEnd

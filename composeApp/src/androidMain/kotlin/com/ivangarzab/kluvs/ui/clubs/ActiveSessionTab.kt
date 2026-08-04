@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -143,6 +144,7 @@ fun ActiveSessionTab(
             } else {
                 // Timeline
                 LazyColumn(
+                    contentPadding = PaddingValues(bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     itemsIndexed(discussions) { index, discussion ->
@@ -334,13 +336,7 @@ private fun DiscussionTimelineItem(
                 }
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    type = IconType.Edit,
-                    contentDescription = "Discussion note",
-                    tint = KluvsTheme.colors.contentMuted,
-                    onClick = onOpenNote,
-                )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 if (showAdminActions) {
                     ActionMenu(
                         items = listOf(
@@ -350,6 +346,13 @@ private fun DiscussionTimelineItem(
                         contentDescription = "Discussion options"
                     )
                 }
+                IconButton(
+                    type = IconType.EditNote,
+                    contentDescription = "Discussion note",
+                    tint = KluvsTheme.colors.contentMuted,
+                    onClick = onOpenNote,
+                    iconSize = 20.dp,
+                )
             }
         }
     }

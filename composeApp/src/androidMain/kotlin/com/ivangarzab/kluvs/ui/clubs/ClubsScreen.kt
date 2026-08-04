@@ -409,6 +409,14 @@ fun ClubsScreenContent(
                             .fillMaxSize()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
 
+                        // ActiveSessionTab's discussion list handles its own bottom inset via
+                        // LazyColumn contentPadding, so its bottom edge scrolls with content
+                        // instead of pinning a fixed gap above the nav bar regardless of scroll position.
+                        val discussionsTabModifier = Modifier
+                            .background(color = KluvsTheme.colors.background)
+                            .fillMaxSize()
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+
                         PullToRefreshContainer(
                             isLoading = state.isLoading,
                             onRefresh = onRefresh,
@@ -439,7 +447,7 @@ fun ClubsScreenContent(
                                         }
                                     )
                                     1 -> ActiveSessionTab(
-                                        modifier = tabModifier,
+                                        modifier = discussionsTabModifier,
                                         sessionDetails = state.activeSession,
                                         userRole = state.userRole,
                                         onCreateSession = { showCreateSessionSheet = true },

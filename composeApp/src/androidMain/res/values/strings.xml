@@ -40,8 +40,11 @@
     <string name="club_name">Club Name</string>
     <string name="x_members">%s members</string>
     <string name="invite">+ Invite</string>
+    <string name="member_reading">Reading</string>
+    <string name="member_skipping">Skipping</string>
     <string name="x_discussions_scheduled">%s scheduled</string>
     <string name="add_discussion">+ Add</string>
+    <string name="discussion_notes_title">Notes</string>
     <string name="invite_members">Invite Members</string>
     <string name="invite_others_cta">Invite others to get the conversation going.</string>
     <string name="books_read">Books</string>
@@ -112,7 +115,7 @@
     <string name="legal_title">Legal</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_of_use">Terms of Use</string>
-    <string name="about_title">About</string>
+    <string name="data_deletion">Data Deletion</string>
 
     <string name="navigate_back">Navigate back</string>
 

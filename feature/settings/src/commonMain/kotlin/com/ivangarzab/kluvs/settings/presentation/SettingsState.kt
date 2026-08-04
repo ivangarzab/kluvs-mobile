@@ -12,5 +12,8 @@ data class SettingsState(
     val saveError: String? = null,
     val saveSuccess: Boolean = false,
     // Derived: are there unsaved changes?
-    val hasChanges: Boolean = false
+    val hasChanges: Boolean = false,
+    // Avatar upload state
+    val isUploadingAvatar: Boolean = false,
+    val avatarError: String? = null
 )
