@@ -57,16 +57,20 @@ class BooksViewModel(
 
     fun search(query: String) {
         if (query.isBlank()) {
-            _state.update { it.copy(searchResults = emptyList(), searchError = null, isSearching = false) }
+            _state.update {
+                it.copy(searchResults = emptyList(), searchTotal = 0, searchError = null, isSearching = false)
+            }
             return
         }
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true, searchError = null) }
 
             searchBooks(query)
-                .onSuccess { books ->
-                    Bark.i("Book search complete (${books.size} results)")
-                    _state.update { it.copy(isSearching = false, searchResults = books) }
+                .onSuccess { result ->
+                    Bark.i("Book search complete (${result.books.size} results, total: ${result.total})")
+                    _state.update {
+                        it.copy(isSearching = false, searchResults = result.books, searchTotal = result.total)
+                    }
                 }
                 .onFailure { error ->
                     Bark.e("Book search failed. Please retry.", error)
@@ -74,9 +78,36 @@ class BooksViewModel(
                         it.copy(
                             isSearching = false,
                             searchResults = emptyList(),
+                            searchTotal = 0,
                             searchError = error.message ?: "Search failed"
                         )
                     }
+                }
+        }
+    }
+
+    fun loadMoreSearchResults() {
+        val current = _state.value
+        if (current.isSearching || current.isLoadingMore || !current.hasMoreSearchResults || current.query.isBlank()) {
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingMore = true) }
+
+            searchBooks(current.query, offset = current.searchResults.size)
+                .onSuccess { result ->
+                    Bark.i("Loaded more book search results (+${result.books.size}, total: ${result.total})")
+                    _state.update {
+                        it.copy(
+                            isLoadingMore = false,
+                            searchResults = it.searchResults + result.books,
+                            searchTotal = result.total
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Failed to load more book search results. Please retry.", error)
+                    _state.update { it.copy(isLoadingMore = false) }
                 }
         }
     }

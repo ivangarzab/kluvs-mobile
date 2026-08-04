@@ -5,6 +5,7 @@ import com.ivangarzab.kluvs.api.models.BookRegistrationRequestDto
 import com.ivangarzab.kluvs.data.remote.api.BookService
 import com.ivangarzab.kluvs.data.remote.mappers.toDomain
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 
 /**
  * Remote data source for Book operations.
@@ -20,9 +21,10 @@ interface BookRemoteDataSource {
      * Searches for books matching the given query.
      *
      * @param query Free-text search query
-     * @return Result containing a list of matching [Book]s, or an error
+     * @param offset 0-based index of the first result to return, for pagination
+     * @return Result containing the page of matching [Book]s plus the backend's total count, or an error
      */
-    suspend fun searchBooks(query: String): Result<List<Book>>
+    suspend fun searchBooks(query: String, offset: Int = 0): Result<BookSearchResult>
 
     /**
      * Registers a book with the API (creates if not exists, or returns existing).
@@ -37,12 +39,13 @@ class BookRemoteDataSourceImpl(
     private val bookService: BookService
 ) : BookRemoteDataSource {
 
-    override suspend fun searchBooks(query: String): Result<List<Book>> {
+    override suspend fun searchBooks(query: String, offset: Int): Result<BookSearchResult> {
         return try {
-            val response = bookService.search(query)
+            val response = bookService.search(query, offset = offset)
             val books = response.books ?: emptyList()
-            Bark.i("Book search returned ${books.size} results (query: \"$query\")")
-            Result.success(books.map { it.toDomain() })
+            val total = response.total ?: 0
+            Bark.i("Book search returned ${books.size} results (query: \"$query\", offset: $offset, total: $total)")
+            Result.success(BookSearchResult(books = books.map { it.toDomain() }, total = total))
         } catch (e: Exception) {
             Bark.e("Failed to search books (query: \"$query\").", e)
             Result.failure(e)

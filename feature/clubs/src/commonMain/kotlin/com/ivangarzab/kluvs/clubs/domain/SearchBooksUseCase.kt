@@ -2,7 +2,7 @@ package com.ivangarzab.kluvs.clubs.domain
 
 import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.repositories.BookRepository
-import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 
 /**
  * UseCase for searching books by a free-text query.
@@ -18,10 +18,11 @@ class SearchBooksUseCase(
      * Searches for books matching the given query.
      *
      * @param query Free-text search query
-     * @return Result containing a list of matching [Book]s, or an error
+     * @param offset 0-based index of the first result to return, for pagination
+     * @return Result containing the page of matching books plus the backend's total count, or an error
      */
-    suspend operator fun invoke(query: String): Result<List<Book>> {
-        Bark.d("Searching books via use case (query: \"$query\")")
-        return bookRepository.searchBooks(query)
+    suspend operator fun invoke(query: String, offset: Int = 0): Result<BookSearchResult> {
+        Bark.d("Searching books via use case (query: \"$query\", offset: $offset)")
+        return bookRepository.searchBooks(query, offset)
     }
 }

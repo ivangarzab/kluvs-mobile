@@ -237,9 +237,19 @@ private struct SearchContent: View {
                                 book: book,
                                 onTap: { onBookTap(book) }
                             )
+                            .onAppear {
+                                if book.id == viewModel.searchResults.last?.id {
+                                    viewModel.loadMoreSearchResults()
+                                }
+                            }
                         }
                     }
                     .padding(16)
+
+                    if viewModel.isLoadingMore {
+                        ProgressView()
+                            .padding(.vertical, 16)
+                    }
                 }
             }
         }
