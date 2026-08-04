@@ -59,9 +59,13 @@ struct BooksView: View {
                         path.append(BookRoute(book: book))
                     })
                 } else {
-                    ShelfContent(viewModel: viewModel, onBookTap: { book in
-                        path.append(BookRoute(book: book))
-                    })
+                    ShelfContent(
+                        viewModel: viewModel,
+                        onBookTap: { book in
+                            path.append(BookRoute(book: book))
+                        },
+                        onSearchBooks: { isSearchActive = true }
+                    )
                 }
             }
             .navigationDestination(for: BookRoute.self) { route in
@@ -107,6 +111,7 @@ struct BooksView: View {
 private struct ShelfContent: View {
     @ObservedObject var viewModel: BooksViewModelWrapper
     let onBookTap: (Shared.Book) -> Void
+    var onSearchBooks: () -> Void = {}
 
     var body: some View {
         switch viewModel.shelfScreenState {
@@ -115,12 +120,11 @@ private struct ShelfContent: View {
         case .error(let message):
             ErrorView(message: message, onRetry: { viewModel.loadShelf() })
         case .empty:
-            VStack {
-                Spacer()
-                Text(String(localized: "no_books_shelved"))
-                    .kluvsStyle(KluvsTheme.typography.body.large)
-                    .foregroundColor(KluvsTheme.colors.contentMuted)
-                Spacer()
+            EmptyState(
+                heading: "Nothing shelved yet.",
+                body: "Search for a book and add it to Want to Read, Read, or Not Finished."
+            ) {
+                OutlinedButton(text: "Search Books", action: onSearchBooks)
             }
         case .content:
             ScrollView {
@@ -236,28 +240,14 @@ private struct SearchContent: View {
     }
 }
 
+// Neither the "haven't searched yet" nor the "no matches" variant has a real destination to
+// send the user to, so this carries no action.
 private struct SearchEmptyState: View {
     let heading: String
     let bodyText: String
 
     var body: some View {
-        VStack {
-            Spacer()
-            VStack(spacing: 16) {
-                StackedCoverPlaceholder()
-                VStack(spacing: 4) {
-                    Text(heading)
-                        .font(.ebGaramondMediumItalic(size: 28))
-                        .foregroundColor(KluvsTheme.colors.contentMuted)
-                    Text(bodyText)
-                        .kluvsStyle(KluvsTheme.typography.body.medium)
-                        .foregroundColor(KluvsTheme.colors.contentMuted)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
-            }
-            Spacer()
-        }
+        EmptyState(heading: heading, body: bodyText)
     }
 }
 

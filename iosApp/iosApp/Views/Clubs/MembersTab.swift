@@ -52,15 +52,13 @@ struct MembersTab: View {
                     }
 
                     if members.count <= 1 && isAdminOrAbove {
-                        VStack(spacing: 16) {
-                            Text("Invite others to get the conversation going.")
-                                .kluvsStyle(KluvsTheme.typography.headline.small, feature: true)
-                                .foregroundColor(KluvsTheme.colors.contentMuted)
-                                .multilineTextAlignment(.center)
+                        EmptyState(
+                            heading: "Just you, for now.",
+                            body: "Invite a few people and this club starts to feel like one."
+                        ) {
                             PrimaryButton(text: "Invite Members", action: onInviteMember)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 20)
+                        .frame(height: 220)
                     }
                 }
                 .padding(16)

@@ -35,10 +35,13 @@ struct ActiveSessionTab: View {
                     .padding(.bottom, 12)
 
                     if session.discussions.isEmpty {
-                        Text("No discussions scheduled yet.")
-                            .kluvsStyle(KluvsTheme.typography.body.medium)
-                            .foregroundColor(KluvsTheme.colors.contentMuted)
-                            .padding(.vertical, 12)
+                        // The "+ Add" button above already covers the CTA for admins, so this
+                        // empty state carries no action of its own.
+                        EmptyState(
+                            heading: "No discussions scheduled.",
+                            body: "Once a discussion is set, it'll show up here."
+                        )
+                        .frame(height: 220)
                     } else {
                         ForEach(Array(session.discussions.enumerated()), id: \.offset) { index, discussion in
                             DiscussionTimelineItem(

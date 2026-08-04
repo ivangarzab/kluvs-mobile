@@ -4,6 +4,7 @@ import DesignSystem
 
 struct MeView: View {
     let userId: String
+    var onNavigateToClubs: () -> Void = {}
     @StateObject private var viewModel = MeViewModelWrapper()
     @State private var showSettings = false
     @State private var editingShelfItem: Shared.ShelfItem? = nil
@@ -48,29 +49,41 @@ struct MeView: View {
                                     .padding(.vertical, 8)
                             }
 
-                            if viewModel.upNext != nil {
-                                UpNextSection(upNext: viewModel.upNext)
+                            // statistics.clubsCount (already the source of the "4 CLUBS" stat
+                            // above) is the real "no clubs" signal — nil means stats haven't
+                            // loaded or failed to load, not that the count is zero, so it
+                            // deliberately does NOT count as empty here. Mirrors Android's
+                            // MeScreenContent.
+                            if viewModel.statistics?.clubsCount == 0 {
+                                EmptyState(
+                                    heading: "Nothing up next.",
+                                    body: "Join or start a club and your next read will show up here."
+                                )
+                                .frame(height: 280)
+                            } else {
+                                if viewModel.upNext != nil {
+                                    UpNextSection(upNext: viewModel.upNext)
 
-                                Divider()
-                                    .padding(.vertical, 8)
-                            }
-
-                            ShelfSection(
-                                shelf: viewModel.shelf,
-                                onUpdateProgress: { sessionId in
-                                    let item = viewModel.shelf.first { $0.sessionId == sessionId }
-                                    progressType = item?.ownProgress?.type ?? .page
-                                    let currentPage: Int32? = item?.ownProgress?.currentPage?.int32Value
-                                    progressCurrentPageText = currentPage.map { String($0) } ?? ""
-                                    let percentComplete: Float? = item?.ownProgress?.percentComplete?.floatValue
-                                    progressPercentText = percentComplete.map { formatPercent($0) } ?? ""
-                                    progressMarkFinished = item?.ownProgress?.isCompleted ?? false
-                                    progressLastAutoTriggerValue = nil
-                                    progressSheetHeader = item?.ownProgress != nil ? "Update Progress" : "Track Progress"
-                                    editingShelfItem = item
+                                    Divider()
+                                        .padding(.vertical, 8)
                                 }
-                            )
 
+                                ShelfSection(
+                                    shelf: viewModel.shelf,
+                                    onUpdateProgress: { sessionId in
+                                        let item = viewModel.shelf.first { $0.sessionId == sessionId }
+                                        progressType = item?.ownProgress?.type ?? .page
+                                        let currentPage: Int32? = item?.ownProgress?.currentPage?.int32Value
+                                        progressCurrentPageText = currentPage.map { String($0) } ?? ""
+                                        let percentComplete: Float? = item?.ownProgress?.percentComplete?.floatValue
+                                        progressPercentText = percentComplete.map { formatPercent($0) } ?? ""
+                                        progressMarkFinished = item?.ownProgress?.isCompleted ?? false
+                                        progressLastAutoTriggerValue = nil
+                                        progressSheetHeader = item?.ownProgress != nil ? "Update Progress" : "Track Progress"
+                                        editingShelfItem = item
+                                    }
+                                )
+                            }
                         }
                         .padding(.horizontal, 16)
                     }

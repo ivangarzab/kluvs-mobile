@@ -26,7 +26,7 @@ struct MainView: View {
                 // Content area
                 Group {
                     if selectedTab == 0 {
-                        MeView(userId: userId)
+                        MeView(userId: userId, onNavigateToClubs: { selectedTab = 1 })
                     } else if selectedTab == 1 {
                         ClubsView(userId: userId, initialClubId: initialClubId, onNavigateToJoin: onNavigateToJoin)
                     } else {
