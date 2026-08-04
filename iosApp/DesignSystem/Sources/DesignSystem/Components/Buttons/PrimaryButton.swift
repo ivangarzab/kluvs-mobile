@@ -6,6 +6,12 @@ import SwiftUI
 ///
 /// Deliberately does not override the icon/text color per-caller: `KluvsTheme.colors.onAccent`
 /// (white) already has correct, DS-canonical contrast against the copper fill in both themes.
+///
+/// Disabled state mirrors M3's own `ButtonDefaults` disabled colors, which Android's
+/// `PrimaryButton` inherits for free by not overriding `colors:` — `disabledContainerColor` =
+/// `onSurface` at 12% alpha, `disabledContentColor` = `onSurface` at 38% alpha (`onSurface` is
+/// `KluvsTheme.colors.content` here, per Theme.kt's role mapping). A flat `.opacity()` dim of the
+/// full copper fill looked wrong because it kept the copper hue instead of Android's neutral gray.
 public struct PrimaryButton: View {
     let text: String
     let action: () -> Void
@@ -19,23 +25,30 @@ public struct PrimaryButton: View {
         self.icon = icon
     }
 
+    private var containerColor: Color {
+        enabled ? KluvsTheme.colors.accent : KluvsTheme.colors.content.opacity(0.12)
+    }
+
+    private var contentColor: Color {
+        enabled ? KluvsTheme.colors.onAccent : KluvsTheme.colors.content.opacity(0.38)
+    }
+
     public var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 if let icon {
-                    Icon(type: icon, contentDescription: nil, tint: KluvsTheme.colors.onAccent)
+                    Icon(type: icon, contentDescription: nil, tint: contentColor)
                         .frame(width: 18, height: 18)
                 }
                 Text(text).kluvsStyle(KluvsTheme.typography.label)
             }
-            .foregroundColor(KluvsTheme.colors.onAccent)
+            .foregroundColor(contentColor)
             .padding(.vertical, 12)
             .padding(.horizontal, 24)
-            .background(KluvsTheme.colors.accent)
+            .background(containerColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .disabled(!enabled)
-        .opacity(enabled ? 1 : 0.4)
     }
 }
 

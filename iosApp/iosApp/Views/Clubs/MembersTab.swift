@@ -81,9 +81,11 @@ private struct MemberListItem: View {
     var onRemove: () -> Void = {}
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .center, spacing: 14) {
             Avatar(name: member.name, avatarUrl: member.avatarUrl, size: 40, memberId: member.memberId, isOwn: isSelf)
 
+            // Identity column carries as much weight as the right rail's two tiers instead of
+            // looking sparse next to it — matches Android's MemberListItem.
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
                     Text(member.name)
@@ -95,16 +97,27 @@ private struct MemberListItem: View {
                             .foregroundColor(KluvsTheme.colors.accent)
                     }
                 }
-                Text(member.handle)
+                Text("@\(member.handle)")
                     .kluvsStyle(KluvsTheme.typography.body.medium)
                     .foregroundColor(KluvsTheme.colors.contentMuted)
             }
+            .padding(.vertical, 8)
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 4) {
-                    RoleEyebrow(role: member.role)
+            VStack(alignment: .trailing, spacing: 0) {
+                HStack(spacing: 8) {
+                    if let isReading {
+                        // 16pt icon inside 8pt padding = 32pt total box, matching Android's
+                        // Modifier.size(32.dp).padding(8.dp) (fixed outer box, smaller visible icon).
+                        Icon(
+                            type: .reading,
+                            contentDescription: isReading ? "Reading" : "Skipping",
+                            tint: isReading ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted
+                        )
+                        .frame(width: 16, height: 16)
+                        .padding(8)
+                    }
                     if showAdminActions || showRemove {
                         ActionMenu(items: {
                             var items: [ActionMenuItem] = []
@@ -118,10 +131,10 @@ private struct MemberListItem: View {
                         }())
                     }
                 }
-                if let isReading {
-                    Text(isReading ? "Reading" : "Skipping")
-                        .kluvsStyle(KluvsTheme.typography.label)
-                        .foregroundColor(isReading ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted)
+                if member.role != .member {
+                    RoleEyebrow(role: member.role)
+                } else {
+                    Spacer().frame(height: 16)
                 }
             }
         }

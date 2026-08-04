@@ -172,6 +172,9 @@ class AppleSignInHandlerTests: XCTestCase {
         handler.$isProcessing
             .sink { isProcessing in
                 receivedValues.append(isProcessing)
+                if receivedValues.count == 3 {
+                    expectation.fulfill()
+                }
             }
             .store(in: &cancellables)
 
@@ -181,13 +184,9 @@ class AppleSignInHandlerTests: XCTestCase {
         Bark.d("Emitted isProcessing: true → false")
 
         // Then
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(receivedValues, [false, true, false])
-            Bark.d("✅ Publisher emitted \(receivedValues.count) values: \(receivedValues)")
-            expectation.fulfill()
-        }
-
         wait(for: [expectation], timeout: 1.0)
+        XCTAssertEqual(receivedValues, [false, true, false])
+        Bark.d("✅ Publisher emitted \(receivedValues.count) values: \(receivedValues)")
     }
 
     func testErrorPublisher_MultipleChanges() {

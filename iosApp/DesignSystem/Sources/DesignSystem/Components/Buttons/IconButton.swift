@@ -11,25 +11,28 @@ public struct IconButton: View {
     let action: () -> Void
     var enabled: Bool
     var tint: Color?
+    var iconSize: CGFloat
 
     public init(
         type: IconType,
         contentDescription: String?,
         action: @escaping () -> Void,
         enabled: Bool = true,
-        tint: Color? = nil
+        tint: Color? = nil,
+        iconSize: CGFloat = 24
     ) {
         self.type = type
         self.contentDescription = contentDescription
         self.action = action
         self.enabled = enabled
         self.tint = tint
+        self.iconSize = iconSize
     }
 
     public var body: some View {
         Button(action: action) {
             Icon(type: type, contentDescription: contentDescription, tint: tint)
-                .frame(width: 24, height: 24)
+                .frame(width: iconSize, height: iconSize)
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Rectangle())
         }
