@@ -8,5 +8,6 @@ package com.ivangarzab.kluvs.settings.presentation
 data class EditableProfile(
     val memberId: String,
     val name: String,
-    val handle: String
+    val handle: String,
+    val avatarUrl: String? = null
 )

@@ -1,5 +1,8 @@
 package com.ivangarzab.kluvs.ui.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,11 +12,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,7 @@ import com.ivangarzab.kluvs.settings.presentation.SettingsState
 import com.ivangarzab.kluvs.settings.presentation.SettingsViewModel
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.ui.utils.compressImage
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -42,6 +44,17 @@ fun SettingsScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            context.contentResolver.openInputStream(it)?.use { inputStream ->
+                val bytes = compressImage(inputStream.readBytes())
+                viewModel.uploadAvatar(bytes)
+            }
+        }
+    }
+
     LaunchedEffect(userId) {
         viewModel.loadProfile(userId)
     }
@@ -53,6 +66,13 @@ fun SettingsScreen(
         }
     }
 
+    LaunchedEffect(state.avatarError) {
+        state.avatarError?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearAvatarError()
+        }
+    }
+
     SettingsScreenContent(
         state = state,
         snackbarHostState = snackbarHostState,
@@ -60,6 +80,11 @@ fun SettingsScreen(
         onNameChanged = viewModel::onNameChanged,
         onHandleChanged = viewModel::onHandleChanged,
         onSaveProfile = viewModel::onSaveProfile,
+        onAvatarClick = {
+            imagePickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        },
     )
 }
 
@@ -72,6 +97,7 @@ fun SettingsScreenContent(
     onNameChanged: (String) -> Unit = {},
     onHandleChanged: (String) -> Unit = {},
     onSaveProfile: () -> Unit = {},
+    onAvatarClick: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -93,6 +119,10 @@ fun SettingsScreenContent(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             EditProfileSection(
+                avatarUrl = state.profile?.avatarUrl,
+                name = state.editedName,
+                isUploadingAvatar = state.isUploadingAvatar,
+                onAvatarClick = onAvatarClick,
                 editedName = state.editedName,
                 editedHandle = state.editedHandle,
                 hasChanges = state.hasChanges,
@@ -101,11 +131,6 @@ fun SettingsScreenContent(
                 onNameChanged = onNameChanged,
                 onHandleChanged = onHandleChanged,
                 onSaveProfile = onSaveProfile,
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(top = 12.dp),
-                color = KluvsTheme.colors.divider
             )
 
             LegalSection(context = context)

@@ -38,9 +38,7 @@ class MeViewModelHelper : KoinComponent {
 
     fun confirmLogout() = viewModel.onSignOutDialogConfirmed()
 
-    fun uploadAvatar(imageData: ByteArray) = viewModel.uploadAvatar(imageData)
-
-    fun clearAvatarError() = viewModel.clearAvatarError()
+    fun clearSnackbarError() = viewModel.clearSnackbarError()
 
     /** [percentComplete] is a plain Int (0-100) — converted to Float internally, mirroring ClubDetailsViewModelHelper. */
     fun onSaveProgress(sessionId: String, type: ProgressType, currentPage: Int?, percentComplete: Int?, markFinished: Boolean) =
