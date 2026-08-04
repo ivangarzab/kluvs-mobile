@@ -10,45 +10,43 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                EditProfileSection(
-                    avatarUrl: viewModel.profile?.avatarUrl,
-                    isUploadingAvatar: viewModel.isUploadingAvatar,
-                    onAvatarPicked: { imageData in
-                        viewModel.uploadAvatar(imageData: imageData)
-                    },
-                    editedName: Binding(
-                        get: { viewModel.editedName },
-                        set: { viewModel.onNameChanged($0) }
-                    ),
-                    editedHandle: Binding(
-                        get: { viewModel.editedHandle },
-                        set: { viewModel.onHandleChanged($0) }
-                    ),
-                    hasChanges: viewModel.hasChanges,
-                    isSaving: viewModel.isSaving,
-                    saveError: viewModel.saveError,
-                    onSaveProfile: { viewModel.onSaveProfile() }
-                )
+        VStack(spacing: 0) {
+            // DS `TopAppBar`, matching Android's `SettingsScreen` — not `.navigationTitle`/
+            // `.toolbar`, which don't share Kluvs's branded chrome (eyebrow style, back icon).
+            TopAppBar(header: String(localized: "settings_title"), onNavigateBack: { dismiss() })
 
-                LegalSection()
+            ScrollView {
+                VStack(spacing: 0) {
+                    EditProfileSection(
+                        avatarUrl: viewModel.profile?.avatarUrl,
+                        isUploadingAvatar: viewModel.isUploadingAvatar,
+                        onAvatarPicked: { imageData in
+                            viewModel.uploadAvatar(imageData: imageData)
+                        },
+                        editedName: Binding(
+                            get: { viewModel.editedName },
+                            set: { viewModel.onNameChanged($0) }
+                        ),
+                        editedHandle: Binding(
+                            get: { viewModel.editedHandle },
+                            set: { viewModel.onHandleChanged($0) }
+                        ),
+                        hasChanges: viewModel.hasChanges,
+                        isSaving: viewModel.isSaving,
+                        saveError: viewModel.saveError,
+                        onSaveProfile: { viewModel.onSaveProfile() }
+                    )
 
-                AboutSection()
+                    LegalSection()
+
+                    AboutSection()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
         }
         .background(KluvsTheme.colors.background)
-        .navigationTitle(String(localized: "settings_title"))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    IconType.back.image
-                }
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.loadProfile(userId: userId)
         }

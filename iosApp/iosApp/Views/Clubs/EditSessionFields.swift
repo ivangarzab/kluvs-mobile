@@ -15,10 +15,7 @@ struct EditSessionFields: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("BOOK")
-                    .kluvsStyle(KluvsTheme.typography.eyebrow)
-                    .foregroundColor(KluvsTheme.colors.contentMuted)
-                InputField(label: "Title", value: $bookTitle)
+                InputField(label: "Book Title", value: $bookTitle)
                 InputField(label: "Author", value: $bookAuthor)
             }
 

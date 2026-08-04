@@ -10,8 +10,8 @@ import DesignSystem
 /// header: the title fades out in place while a bordered search field scales in from the right,
 /// landing where the search button used to be).
 ///
-/// Single-row mode (no `title`) — the current design has one "Books" heading, not a separate
-/// eyebrow+headline split; not inventing a two-row hierarchy the screen doesn't otherwise have.
+/// Two-row mode (`header` "Books" + `title` "Your Shelf") — mirrors Android's
+/// `SearchTopAppBar(header = books, title = your_shelf_title)`.
 struct BooksTopBar: View {
     @Binding var isSearchActive: Bool
     var isSearching: Bool = false
@@ -24,6 +24,7 @@ struct BooksTopBar: View {
             header: String(localized: "books"),
             isSearchActive: $isSearchActive,
             searchQuery: $query,
+            title: String(localized: "your_shelf_title"),
             isSearchLoading: isSearching,
             searchPlaceholder: String(localized: "search_books_hint")
         )

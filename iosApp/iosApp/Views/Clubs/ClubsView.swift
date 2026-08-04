@@ -40,7 +40,7 @@ struct ClubsView: View {
             VStack(spacing: 0) {
                 // Always rendered, matching Android's ClubsListScreen - the header must not
                 // disappear during loading/error/empty, only the content below it changes.
-                TopAppBar(header: "Your", title: "Clubs") {
+                TopAppBar(header: "Your", title: "Kluvs") {
                     // Empty state already shows its own "Join with a code" button.
                     if !isEmptyScreenState {
                         OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })

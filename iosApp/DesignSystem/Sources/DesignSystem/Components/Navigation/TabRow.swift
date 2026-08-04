@@ -45,7 +45,9 @@ public struct TabRow: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.top, 12)
+        // M3's own `Tab` enforces a 48dp minimum row height; matching it here (top padding alone
+        // left this visibly thinner than Android's tab row).
+        .padding(.vertical, 12)
         .background(KluvsTheme.colors.background)
         .animation(.easeInOut(duration: 0.2), value: selectedIndex)
     }

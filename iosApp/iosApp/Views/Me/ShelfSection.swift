@@ -29,7 +29,9 @@ struct ShelfSection: View {
                 }
             }
         }
-        .padding()
+        // Not `.padding()` — the outer VStack in `MeView` already applies horizontal padding to
+        // every section; adding it again here doubled it, same bug as `ProfileSection`.
+        .padding(.vertical, 16)
     }
 }
 

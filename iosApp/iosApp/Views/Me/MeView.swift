@@ -186,7 +186,10 @@ struct ProfileSection: View {
 
             Spacer()
         }
-        .padding()
+        // Not `.padding()` — the outer VStack in `MeView` already applies horizontal padding to
+        // every section; adding it again here doubled it (16 + 16), leaving this section visibly
+        // more indented than StatisticsSection right below it, which has none of its own.
+        .padding(.vertical, 16)
     }
 }
 
