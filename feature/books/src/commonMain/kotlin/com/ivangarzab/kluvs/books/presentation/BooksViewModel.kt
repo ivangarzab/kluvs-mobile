@@ -69,7 +69,11 @@ class BooksViewModel(
                 .onSuccess { result ->
                     Bark.i("Book search complete (${result.books.size} results, total: ${result.total})")
                     _state.update {
-                        it.copy(isSearching = false, searchResults = result.books, searchTotal = result.total)
+                        it.copy(
+                            isSearching = false,
+                            searchResults = result.books.distinctBy { book -> book.id },
+                            searchTotal = result.total
+                        )
                     }
                 }
                 .onFailure { error ->
@@ -98,9 +102,17 @@ class BooksViewModel(
                 .onSuccess { result ->
                     Bark.i("Loaded more book search results (+${result.books.size}, total: ${result.total})")
                     _state.update {
+                        // The backend's underlying Google Books pagination isn't guaranteed
+                        // non-overlapping between calls, so a "next page" can repeat a book
+                        // already on screen — de-dupe by id, since a repeated grid key crashes
+                        // Compose's LazyVerticalGrid outright.
+                        val existingIds = it.searchResults.mapTo(mutableSetOf()) { book -> book.id }
+                        val newBooks = result.books
+                            .filterNot { book -> book.id in existingIds }
+                            .distinctBy { book -> book.id }
                         it.copy(
                             isLoadingMore = false,
-                            searchResults = it.searchResults + result.books,
+                            searchResults = it.searchResults + newBooks,
                             searchTotal = result.total
                         )
                     }

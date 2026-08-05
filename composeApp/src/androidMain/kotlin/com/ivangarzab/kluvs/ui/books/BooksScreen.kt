@@ -26,7 +26,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -67,6 +66,7 @@ import com.ivangarzab.kluvs.designsystem.theme.ibmPlexSans
 import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import kotlinx.coroutines.delay
@@ -313,6 +313,7 @@ private fun ShelfSection(
         ) {
             items(entries, key = { it.book.id }) { entry ->
                 BookCard(
+                    modifier = Modifier.width(120.dp),
                     book = entry.book,
                     shelfSource = entry.source,
                     onClick = { onBookClick(entry.book) }
@@ -363,13 +364,14 @@ private fun SearchContent(
 
                 LazyVerticalGrid(
                     state = gridState,
-                    columns = GridCells.Adaptive(minSize = 120.dp),
+                    columns = GridCells.Fixed(3),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     gridItems(state.searchResults, key = { it.id }) { book ->
                         BookCard(
+                            modifier = Modifier.fillMaxWidth(),
                             book = book,
                             onClick = { onBookClick(book) }
                         )
@@ -382,7 +384,7 @@ private fun SearchContent(
                                     .padding(vertical = 16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                LoadingSpinner()
                             }
                         }
                     }

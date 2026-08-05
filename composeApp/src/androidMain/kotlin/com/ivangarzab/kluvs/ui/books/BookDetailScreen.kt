@@ -242,6 +242,7 @@ fun BookDetailScreenContent(
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(authorBooks, key = { it.id }) { authorBook ->
                             BookCard(
+                                modifier = Modifier.width(120.dp),
                                 book = authorBook,
                                 onClick = { onNavigateToBook(authorBook) }
                             )

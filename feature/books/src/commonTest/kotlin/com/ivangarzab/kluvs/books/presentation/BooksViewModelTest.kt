@@ -179,6 +179,26 @@ class BooksViewModelTest {
     }
 
     @Test
+    fun `loadMoreSearchResults drops books already present from an overlapping next page`() = runTest {
+        // Google Books' pagination isn't guaranteed non-overlapping between calls, so the
+        // "next page" can repeat a book already in searchResults. A repeated grid key crashes
+        // Compose's LazyVerticalGrid outright, so these must never reach the state as dupes.
+        everySuspend { bookRepository.searchBooks("hobbit", 0) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 3))
+        viewModel.onQueryChange("hobbit")
+        viewModel.search("hobbit")
+
+        val secondBook = testBook.copy(id = "43", title = "The Fellowship of the Ring")
+        everySuspend { bookRepository.searchBooks("hobbit", 1) } returns
+            Result.success(BookSearchResult(books = listOf(testBook, secondBook), total = 3))
+
+        viewModel.loadMoreSearchResults()
+
+        val state = viewModel.state.value
+        assertEquals(listOf("42", "43"), state.searchResults.map { it.id })
+    }
+
+    @Test
     fun `loadMoreSearchResults does nothing once all results are loaded`() = runTest {
         everySuspend { bookRepository.searchBooks("hobbit", 0) } returns
             Result.success(BookSearchResult(books = listOf(testBook), total = 1))

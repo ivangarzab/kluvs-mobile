@@ -247,10 +247,13 @@ private struct SearchContent: View {
                     .padding(16)
 
                     if viewModel.isLoadingMore {
-                        ProgressView()
+                        LoadingSpinner(size: 24)
                             .padding(.vertical, 16)
                     }
                 }
+                // The only other way to dismiss the keyboard is the search bar's back arrow,
+                // which also exits search — this lets scrolling the results dismiss it instead.
+                .scrollDismissesKeyboard(.immediately)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
