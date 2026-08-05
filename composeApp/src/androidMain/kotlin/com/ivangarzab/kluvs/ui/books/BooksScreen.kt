@@ -21,8 +21,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SnackbarHost
@@ -35,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,6 +66,7 @@ import com.ivangarzab.kluvs.designsystem.theme.ibmPlexSans
 import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import kotlinx.coroutines.delay
@@ -117,6 +121,7 @@ fun BooksScreen(
                     onRefreshShelf = { viewModel.loadShelf(forceRefresh = true) },
                     onQueryChange = viewModel::onQueryChange,
                     onSearch = viewModel::search,
+                    onLoadMoreSearchResults = viewModel::loadMoreSearchResults,
                     onBookClick = { book ->
                         selectedBook = book
                         navController.navigate("detail/${book.id}")
@@ -155,6 +160,7 @@ fun BooksScreenContent(
     onRefreshShelf: () -> Unit = onRetryShelf,
     onQueryChange: (String) -> Unit = {},
     onSearch: (String) -> Unit = {},
+    onLoadMoreSearchResults: () -> Unit = {},
     onBookClick: (Book) -> Unit = {}
 ) {
     var view by remember { mutableStateOf(BooksView.Shelf) }
@@ -202,6 +208,7 @@ fun BooksScreenContent(
                     modifier = Modifier.weight(1f),
                     state = state,
                     onRetry = { onSearch(state.query) },
+                    onLoadMore = onLoadMoreSearchResults,
                     onBookClick = onBookClick
                 )
             }
@@ -306,6 +313,7 @@ private fun ShelfSection(
         ) {
             items(entries, key = { it.book.id }) { entry ->
                 BookCard(
+                    modifier = Modifier.width(120.dp),
                     book = entry.book,
                     shelfSource = entry.source,
                     onClick = { onBookClick(entry.book) }
@@ -320,6 +328,7 @@ private fun SearchContent(
     modifier: Modifier = Modifier,
     state: BooksState,
     onRetry: () -> Unit,
+    onLoadMore: () -> Unit = {},
     onBookClick: (Book) -> Unit
 ) {
     val searchError = state.searchError
@@ -341,17 +350,43 @@ private fun SearchContent(
                 )
             }
             else -> {
+                val gridState = rememberLazyGridState()
+
+                LaunchedEffect(gridState, state.searchResults.size) {
+                    snapshotFlow {
+                        val layoutInfo = gridState.layoutInfo
+                        val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+                        lastVisibleIndex >= layoutInfo.totalItemsCount - 4
+                    }.collect { isNearEnd ->
+                        if (isNearEnd) onLoadMore()
+                    }
+                }
+
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 120.dp),
+                    state = gridState,
+                    columns = GridCells.Fixed(3),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     gridItems(state.searchResults, key = { it.id }) { book ->
                         BookCard(
+                            modifier = Modifier.fillMaxWidth(),
                             book = book,
                             onClick = { onBookClick(book) }
                         )
+                    }
+                    if (state.isLoadingMore) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                LoadingSpinner()
+                            }
+                        }
                     }
                 }
             }

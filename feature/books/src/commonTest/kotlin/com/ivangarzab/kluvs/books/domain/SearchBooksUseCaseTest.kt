@@ -2,10 +2,12 @@ package com.ivangarzab.kluvs.books.domain
 
 import com.ivangarzab.kluvs.data.repositories.BookRepository
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -33,29 +35,42 @@ class SearchBooksUseCaseTest {
 
     @Test
     fun `invoke returns books from repository`() = runTest {
-        everySuspend { bookRepository.searchBooks(any()) } returns Result.success(listOf(testBook))
+        everySuspend { bookRepository.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 1))
 
         val result = useCase("hobbit")
 
         assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull()?.size)
-        assertEquals("The Hobbit", result.getOrNull()?.first()?.title)
+        assertEquals(1, result.getOrNull()?.books?.size)
+        assertEquals("The Hobbit", result.getOrNull()?.books?.first()?.title)
+        assertEquals(1, result.getOrNull()?.total)
     }
 
     @Test
     fun `invoke returns empty list when no results`() = runTest {
-        everySuspend { bookRepository.searchBooks(any()) } returns Result.success(emptyList())
+        everySuspend { bookRepository.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = emptyList(), total = 0))
 
         val result = useCase("xyzzy")
 
         assertTrue(result.isSuccess)
-        assertEquals(0, result.getOrNull()?.size)
+        assertEquals(0, result.getOrNull()?.books?.size)
+    }
+
+    @Test
+    fun `invoke passes offset through to the repository`() = runTest {
+        everySuspend { bookRepository.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 25))
+
+        useCase("hobbit", offset = 10)
+
+        verifySuspend { bookRepository.searchBooks("hobbit", 10) }
     }
 
     @Test
     fun `invoke propagates failure from repository`() = runTest {
         val exception = Exception("Network error")
-        everySuspend { bookRepository.searchBooks(any()) } returns Result.failure(exception)
+        everySuspend { bookRepository.searchBooks(any(), any()) } returns Result.failure(exception)
 
         val result = useCase("hobbit")
 

@@ -237,10 +237,23 @@ private struct SearchContent: View {
                                 book: book,
                                 onTap: { onBookTap(book) }
                             )
+                            .onAppear {
+                                if book.id == viewModel.searchResults.last?.id {
+                                    viewModel.loadMoreSearchResults()
+                                }
+                            }
                         }
                     }
                     .padding(16)
+
+                    if viewModel.isLoadingMore {
+                        LoadingSpinner(size: 24)
+                            .padding(.vertical, 16)
+                    }
                 }
+                // The only other way to dismiss the keyboard is the search bar's back arrow,
+                // which also exits search — this lets scrolling the results dismiss it instead.
+                .scrollDismissesKeyboard(.immediately)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

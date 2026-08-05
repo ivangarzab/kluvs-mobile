@@ -4,6 +4,7 @@ import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.data.local.source.BookLocalDataSource
 import com.ivangarzab.kluvs.data.remote.source.BookRemoteDataSource
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 
 /**
  * Repository for Book data.
@@ -21,9 +22,10 @@ interface BookRepository {
      * Results come directly from the remote API and are not cached.
      *
      * @param query Free-text search query
-     * @return Result containing a list of matching [Book]s, or an error
+     * @param offset 0-based index of the first result to return, for pagination
+     * @return Result containing the page of matching [Book]s plus the backend's total count, or an error
      */
-    suspend fun searchBooks(query: String): Result<List<Book>>
+    suspend fun searchBooks(query: String, offset: Int = 0): Result<BookSearchResult>
 
     /**
      * Registers a book with the backend (creates if not exists, returns existing otherwise).
@@ -42,11 +44,11 @@ internal class BookRepositoryImpl(
     private val bookLocalDataSource: BookLocalDataSource
 ) : BookRepository {
 
-    override suspend fun searchBooks(query: String): Result<List<Book>> {
-        Bark.d("Searching books (query: \"$query\")")
-        return bookRemoteDataSource.searchBooks(query)
-            .onSuccess { books ->
-                Bark.i("Book search complete (${books.size} results)")
+    override suspend fun searchBooks(query: String, offset: Int): Result<BookSearchResult> {
+        Bark.d("Searching books (query: \"$query\", offset: $offset)")
+        return bookRemoteDataSource.searchBooks(query, offset)
+            .onSuccess { result ->
+                Bark.i("Book search complete (${result.books.size} results, total: ${result.total})")
             }.onFailure { error ->
                 Bark.e("Book search failed. Check network and retry.", error)
             }

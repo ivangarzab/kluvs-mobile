@@ -9,12 +9,14 @@ import com.ivangarzab.kluvs.data.repositories.BookRepository
 import com.ivangarzab.kluvs.data.repositories.LikeRepository
 import com.ivangarzab.kluvs.data.repositories.ShelfRepository
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 import com.ivangarzab.kluvs.model.ShelfEntry
 import com.ivangarzab.kluvs.model.ShelfStatus
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -97,19 +99,21 @@ class BooksViewModelTest {
 
     @Test
     fun `search updates state with results on success`() = runTest {
-        everySuspend { bookRepository.searchBooks(any()) } returns Result.success(listOf(testBook))
+        everySuspend { bookRepository.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 1))
 
         viewModel.search("hobbit")
 
         val state = viewModel.state.value
         assertTrue(!state.isSearching)
         assertEquals(1, state.searchResults.size)
+        assertEquals(1, state.searchTotal)
         assertNull(state.searchError)
     }
 
     @Test
     fun `search updates state with error on failure`() = runTest {
-        everySuspend { bookRepository.searchBooks(any()) } returns Result.failure(Exception("Search failed"))
+        everySuspend { bookRepository.searchBooks(any(), any()) } returns Result.failure(Exception("Search failed"))
 
         viewModel.search("hobbit")
 
@@ -126,6 +130,91 @@ class BooksViewModelTest {
         val state = viewModel.state.value
         assertTrue(state.searchResults.isEmpty())
         assertTrue(!state.isSearching)
+    }
+
+    @Test
+    fun `search replaces previous results and resets paging state on a new query`() = runTest {
+        val secondBook = testBook.copy(id = "43", title = "The Fellowship of the Ring")
+        everySuspend { bookRepository.searchBooks("hobbit", 0) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 2))
+        everySuspend { bookRepository.searchBooks("hobbit", 1) } returns
+            Result.success(BookSearchResult(books = listOf(secondBook), total = 2))
+        viewModel.onQueryChange("hobbit")
+        viewModel.search("hobbit")
+        viewModel.loadMoreSearchResults()
+        assertEquals(2, viewModel.state.value.searchResults.size)
+
+        val otherBook = testBook.copy(id = "99", title = "Dune")
+        everySuspend { bookRepository.searchBooks("dune", 0) } returns
+            Result.success(BookSearchResult(books = listOf(otherBook), total = 1))
+        viewModel.onQueryChange("dune")
+        viewModel.search("dune")
+
+        val state = viewModel.state.value
+        assertEquals(1, state.searchResults.size)
+        assertEquals("Dune", state.searchResults.first().title)
+        assertEquals(1, state.searchTotal)
+    }
+
+    // ---- loadMoreSearchResults ----
+
+    @Test
+    fun `loadMoreSearchResults appends results and advances offset`() = runTest {
+        everySuspend { bookRepository.searchBooks("hobbit", 0) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 2))
+        viewModel.onQueryChange("hobbit")
+        viewModel.search("hobbit")
+
+        val secondBook = testBook.copy(id = "43", title = "The Fellowship of the Ring")
+        everySuspend { bookRepository.searchBooks("hobbit", 1) } returns
+            Result.success(BookSearchResult(books = listOf(secondBook), total = 2))
+
+        viewModel.loadMoreSearchResults()
+
+        val state = viewModel.state.value
+        assertTrue(!state.isLoadingMore)
+        assertEquals(2, state.searchResults.size)
+        assertEquals("The Fellowship of the Ring", state.searchResults.last().title)
+        verifySuspend { bookRepository.searchBooks("hobbit", 1) }
+    }
+
+    @Test
+    fun `loadMoreSearchResults drops books already present from an overlapping next page`() = runTest {
+        // Google Books' pagination isn't guaranteed non-overlapping between calls, so the
+        // "next page" can repeat a book already in searchResults. A repeated grid key crashes
+        // Compose's LazyVerticalGrid outright, so these must never reach the state as dupes.
+        everySuspend { bookRepository.searchBooks("hobbit", 0) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 3))
+        viewModel.onQueryChange("hobbit")
+        viewModel.search("hobbit")
+
+        val secondBook = testBook.copy(id = "43", title = "The Fellowship of the Ring")
+        everySuspend { bookRepository.searchBooks("hobbit", 1) } returns
+            Result.success(BookSearchResult(books = listOf(testBook, secondBook), total = 3))
+
+        viewModel.loadMoreSearchResults()
+
+        val state = viewModel.state.value
+        assertEquals(listOf("42", "43"), state.searchResults.map { it.id })
+    }
+
+    @Test
+    fun `loadMoreSearchResults does nothing once all results are loaded`() = runTest {
+        everySuspend { bookRepository.searchBooks("hobbit", 0) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 1))
+        viewModel.onQueryChange("hobbit")
+        viewModel.search("hobbit")
+
+        viewModel.loadMoreSearchResults()
+
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.exactly(1)) { bookRepository.searchBooks(any(), any()) }
+    }
+
+    @Test
+    fun `loadMoreSearchResults does nothing without a prior search`() = runTest {
+        viewModel.loadMoreSearchResults()
+
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { bookRepository.searchBooks(any(), any()) }
     }
 
     // ---- shelf mutations ----
