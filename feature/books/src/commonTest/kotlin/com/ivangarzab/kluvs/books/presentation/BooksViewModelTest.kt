@@ -92,7 +92,7 @@ class BooksViewModelTest {
 
         val state = viewModel.state.value
         assertTrue(!state.isLoadingShelf)
-        assertEquals("Network error", state.shelfError)
+        assertEquals("Something went wrong. Please try again.", state.shelfError)
     }
 
     // ---- search ----
@@ -119,7 +119,7 @@ class BooksViewModelTest {
 
         val state = viewModel.state.value
         assertTrue(!state.isSearching)
-        assertEquals("Search failed", state.searchError)
+        assertEquals("Something went wrong. Please try again.", state.searchError)
         assertTrue(state.searchResults.isEmpty())
     }
 

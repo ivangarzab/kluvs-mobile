@@ -3,6 +3,8 @@ package com.ivangarzab.kluvs.clubs.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.data.error.toAppError
+import com.ivangarzab.kluvs.presentation.error.toUserMessage
 import com.ivangarzab.kluvs.clubs.domain.ClearAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.CreateClubUseCase
 import com.ivangarzab.kluvs.clubs.domain.CreateDiscussionNoteUseCase
@@ -115,7 +117,7 @@ class ClubDetailsViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: "Failed to load clubs"
+                            error = error.toAppError().toUserMessage()
                         )
                     }
                 }
@@ -168,14 +170,14 @@ class ClubDetailsViewModel(
 
             // Aggregate errors
             val errors = listOfNotNull(
-                detailsResult.exceptionOrNull()?.message,
-                sessionResult.exceptionOrNull()?.message,
-                membersResult.exceptionOrNull()?.message
+                detailsResult.exceptionOrNull()?.toAppError()?.toUserMessage(),
+                sessionResult.exceptionOrNull()?.toAppError()?.toUserMessage(),
+                membersResult.exceptionOrNull()?.toAppError()?.toUserMessage()
             )
             val error = when {
                 errors.isEmpty() -> null
                 errors.distinct().size == 1 -> errors.first() // All errors are identical
-                else -> "Multiple errors occurred"
+                else -> "Multiple things went wrong. Please try again."
             }
             error?.let { e ->
                 Bark.e("Failed to fetch club details (ID: $clubId). Serving cached data if available.", Exception(e))

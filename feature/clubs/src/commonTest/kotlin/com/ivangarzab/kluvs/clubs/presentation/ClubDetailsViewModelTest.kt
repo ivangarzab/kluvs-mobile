@@ -264,14 +264,13 @@ class ClubDetailsViewModelTest {
     @Test
     fun `loadClubData handles error from repository`() = runTest {
         val clubId = "club-123"
-        val errorMessage = "Failed to fetch club"
-        everySuspend { clubRepository.getClub(clubId) } returns Result.failure(Exception(errorMessage))
+        everySuspend { clubRepository.getClub(clubId) } returns Result.failure(Exception("Failed to fetch club"))
 
         viewModel.loadClubData(clubId)
 
         val state = viewModel.state.value
         assertFalse(state.isLoading)
-        assertEquals(errorMessage, state.error)
+        assertEquals("Something went wrong. Please try again.", state.error)
         assertNull(state.currentClubDetails)
         assertNull(state.activeSession)
         assertTrue(state.members.isEmpty())
@@ -349,7 +348,7 @@ class ClubDetailsViewModelTest {
         everySuspend { clubRepository.getClub(clubId) } returns Result.failure(Exception("Error"))
 
         viewModel.loadClubData(clubId)
-        assertEquals("Error", viewModel.state.value.error)
+        assertEquals("Something went wrong. Please try again.", viewModel.state.value.error)
 
         val club = Club(
             id = clubId, name = "Test Club", serverId = null, discordChannel = null,

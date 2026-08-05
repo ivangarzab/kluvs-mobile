@@ -8,6 +8,8 @@ import com.ivangarzab.kluvs.books.domain.GetShelfUseCase
 import com.ivangarzab.kluvs.books.domain.RemoveFromShelfUseCase
 import com.ivangarzab.kluvs.books.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.books.domain.ToggleLikeUseCase
+import com.ivangarzab.kluvs.data.error.toAppError
+import com.ivangarzab.kluvs.presentation.error.toUserMessage
 import com.ivangarzab.kluvs.model.ShelfEntry
 import com.ivangarzab.kluvs.model.ShelfStatus
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +46,7 @@ class BooksViewModel(
                     _state.update {
                         it.copy(
                             isLoadingShelf = false,
-                            shelfError = error.message ?: "Failed to load shelf"
+                            shelfError = error.toAppError().toUserMessage()
                         )
                     }
                 }
@@ -83,7 +85,7 @@ class BooksViewModel(
                             isSearching = false,
                             searchResults = emptyList(),
                             searchTotal = 0,
-                            searchError = error.message ?: "Search failed"
+                            searchError = error.toAppError().toUserMessage()
                         )
                     }
                 }

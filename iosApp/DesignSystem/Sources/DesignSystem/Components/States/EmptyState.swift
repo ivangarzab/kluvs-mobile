@@ -121,19 +121,28 @@ private func generateHexEdges(width: CGFloat, height: CGFloat) -> [HexEdge] {
     return kept
 }
 
-/// The reusable "nothing here" state — design-system/docs/states.md § Empty State. One
-/// illustration (Fragmented Hex Grid) reused everywhere; only heading, body, and the optional
-/// `action` slot change per screen. Omit `action` for states with no real next step (e.g. "no
-/// search results yet") rather than filling it with a button that goes nowhere useful. Mirrors
-/// Android's `EmptyState` composable.
+/// The reusable "nothing here" / "couldn't load this" state shell — design-system/docs/states.md
+/// § Empty State. One illustration (Fragmented Hex Grid) reused everywhere; only heading, body,
+/// `lineColor`, and the optional `action` slot change per screen. Omit `action` for states with
+/// no real next step (e.g. "no search results yet") rather than filling it with a button that
+/// goes nowhere useful. `lineColor` defaults to the quiet empty-state tone; `ErrorView` overrides
+/// it to `danger` red so the same illustration reads as a failure, not absence. Mirrors Android's
+/// `EmptyState` composable.
 public struct EmptyState<Action: View>: View {
     private let heading: String
     private let bodyText: String
+    private let lineColor: Color
     private let action: Action
 
-    public init(heading: String, body: String, @ViewBuilder action: () -> Action = { EmptyView() }) {
+    public init(
+        heading: String,
+        body: String,
+        lineColor: Color = KluvsTheme.colors.disabled,
+        @ViewBuilder action: () -> Action = { EmptyView() }
+    ) {
         self.heading = heading
         self.bodyText = body
+        self.lineColor = lineColor
         self.action = action()
     }
 
@@ -149,7 +158,7 @@ public struct EmptyState<Action: View>: View {
                     }
                     context.stroke(
                         path,
-                        with: .color(KluvsTheme.colors.disabled),
+                        with: .color(lineColor),
                         style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round)
                     )
                 }
