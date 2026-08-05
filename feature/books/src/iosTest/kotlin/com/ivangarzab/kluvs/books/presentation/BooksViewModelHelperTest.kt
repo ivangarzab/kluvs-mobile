@@ -162,6 +162,7 @@ class BooksViewModelHelperTest {
         val receivedStates = mutableListOf<BooksState>()
         val closeable = helper.observeState { state -> receivedStates.add(state) }
 
+        helper.onQueryChange("hail")
         helper.search("hail")
         helper.loadMoreSearchResults()
 
