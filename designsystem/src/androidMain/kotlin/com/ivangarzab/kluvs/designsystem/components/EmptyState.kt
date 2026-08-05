@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalDensity
@@ -140,7 +141,13 @@ fun EmptyState(
     // Sizing is entirely the caller's responsibility via [modifier] — fillMaxSize() for a
     // full-screen empty state, a bounded height for a section-level one (e.g. inside a tab
     // that already has content above it).
-    BoxWithConstraints(modifier = modifier) {
+    //
+    // clipToBounds() matters here specifically: generateHexEdges deliberately keeps cells whose
+    // vertices fall slightly outside [0, widthPx]x[0, heightPx] (so boundary hexagons look
+    // naturally cropped instead of leaving a suspiciously clean edge), and Compose doesn't clip
+    // a composable's own drawing to its layout bounds by default. Without this, those edges
+    // paint straight through into whatever sits above/below/beside this box.
+    BoxWithConstraints(modifier = modifier.clipToBounds()) {
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
         val hexRadiusPx = with(density) { HEX_RADIUS.toPx() }
