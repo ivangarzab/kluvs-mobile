@@ -42,6 +42,7 @@ import com.ivangarzab.kluvs.member.presentation.UserStatistics
 import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
@@ -117,7 +118,7 @@ fun MeScreen(
                 onRefresh = { viewModel.refresh(forceRefresh = true) },
                 onUpdateProgress = { sessionId ->
                     editingShelfItem = state.shelf.find { it.sessionId == sessionId }
-                }
+                },
             )
 
             SnackbarHost(
@@ -177,6 +178,12 @@ fun MeScreenContent(
     onRefresh: () -> Unit = onRetry,
     onUpdateProgress: (sessionId: String) -> Unit = {},
 ) {
+    // state.statistics.clubsCount (from GetUserStatisticsUseCase, already the source of the
+    // "4 CLUBS" stat shown above) is the real "no clubs" signal — null means stats haven't
+    // loaded or failed to load, not that the count is zero, so it deliberately does NOT count
+    // as empty here.
+    val hasNothingToShow = state.statistics?.clubsCount == 0
+
     val screenState = when {
         state.profile != null -> ScreenState.Content
         state.isLoading -> ScreenState.Loading
@@ -204,46 +211,81 @@ fun MeScreenContent(
                     onRefresh = onRefresh,
                     modifier = modifier.fillMaxSize(),
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = KluvsTheme.colors.background)
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        ProfileSection(
-                            avatarUrl = state.profile?.avatarUrl,
-                            name = state.profile?.name ?: "",
-                            handle = state.profile?.handle ?: ""
-                        )
-
-                        Divider()
-
-                        StatisticsSection(
-                            modifier = Modifier.fillMaxWidth(),
-                            data = state.statistics,
-                            joinDate = state.profile?.joinDate
-                        )
-
-                        Divider()
-
-                        UpNextSection(
+                    // hasNothingToShow skips verticalScroll entirely (rather than just adding
+                    // fillMaxSize/weight inside it) — a scrollable Column gives its children
+                    // unbounded height, so the EmptyState below could never actually fill the
+                    // remaining viewport space if it stayed nested in one.
+                    if (hasNothingToShow) {
+                        Column(
                             modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth(),
-                            upNext = state.upNext
-                        )
+                                .fillMaxSize()
+                                .background(color = KluvsTheme.colors.background)
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ProfileSection(
+                                avatarUrl = state.profile?.avatarUrl,
+                                name = state.profile?.name ?: "",
+                                handle = state.profile?.handle ?: ""
+                            )
 
-                        if (state.upNext != null) {
                             Divider()
-                        }
 
-                        ShelfSection(
-                            modifier = Modifier.fillMaxWidth(),
-                            shelf = state.shelf,
-                            onUpdateProgress = onUpdateProgress
-                        )
+                            StatisticsSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                data = state.statistics,
+                                joinDate = state.profile?.joinDate
+                            )
+
+                            Divider()
+
+                            EmptyState(
+                                modifier = Modifier.fillMaxWidth().weight(1f),
+                                heading = "Nothing to track yet.",
+                                body = "Join or start a club and your next read will show up here."
+                            )
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = KluvsTheme.colors.background)
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ProfileSection(
+                                avatarUrl = state.profile?.avatarUrl,
+                                name = state.profile?.name ?: "",
+                                handle = state.profile?.handle ?: ""
+                            )
+
+                            Divider()
+
+                            StatisticsSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                data = state.statistics,
+                                joinDate = state.profile?.joinDate
+                            )
+
+                            Divider()
+
+                            if (state.upNext != null) {
+                                UpNextSection(
+                                    modifier = Modifier
+                                        .padding(vertical = 8.dp)
+                                        .fillMaxWidth(),
+                                    upNext = state.upNext
+                                )
+                                Divider()
+                            }
+
+                            ShelfSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                shelf = state.shelf,
+                                onUpdateProgress = onUpdateProgress
+                            )
+                        }
                     }
                 }
             }

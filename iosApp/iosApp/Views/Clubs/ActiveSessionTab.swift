@@ -18,55 +18,60 @@ struct ActiveSessionTab: View {
     private var isAdminOrAbove: Bool { userRole == .owner || userRole == .admin }
 
     var body: some View {
-        ScrollView {
+        // A ScrollView also proposes unbounded height to its content, so it can't be a shared
+        // wrapper around these whole-tab EmptyStates without them getting stuck at their own
+        // small intrinsic size — only the actual discussion list scrolls.
+        Group {
             if let session = sessionDetails {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        if !session.discussions.isEmpty {
-                            Text("\(session.discussions.count) scheduled")
-                                .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
-                                .foregroundColor(KluvsTheme.colors.contentMuted)
-                        }
-                        Spacer()
+                if session.discussions.isEmpty {
+                    EmptyState(
+                        heading: "No discussions scheduled.",
+                        body: "Once a discussion is set, it'll show up here."
+                    ) {
                         if isAdminOrAbove {
-                            OutlinedButton(text: "+ Add", action: onCreateDiscussion)
+                            SecondaryButton(text: "Add Discussion", action: onCreateDiscussion)
                         }
                     }
-                    .padding(.bottom, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack {
+                                Text("\(session.discussions.count) scheduled")
+                                    .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                                    .foregroundColor(KluvsTheme.colors.contentMuted)
+                                Spacer()
+                                if isAdminOrAbove {
+                                    SecondaryButton(text: "+ Add", action: onCreateDiscussion)
+                                }
+                            }
+                            .padding(.bottom, 12)
 
-                    if session.discussions.isEmpty {
-                        Text("No discussions scheduled yet.")
-                            .kluvsStyle(KluvsTheme.typography.body.medium)
-                            .foregroundColor(KluvsTheme.colors.contentMuted)
-                            .padding(.vertical, 12)
-                    } else {
-                        ForEach(Array(session.discussions.enumerated()), id: \.offset) { index, discussion in
-                            DiscussionTimelineItem(
-                                discussion: discussion,
-                                isFirst: index == 0,
-                                isLast: index == session.discussions.count - 1,
-                                showAdminActions: isAdminOrAbove,
-                                onEdit: { onEditDiscussion(discussion.id) },
-                                onDelete: { onDeleteDiscussion(discussion.id) },
-                                onOpenNote: { onOpenNote(discussion.id) },
-                                attendanceRoster: discussionRosters[discussion.id],
-                                onLoadRoster: { onLoadAttendanceRoster(discussion.id) },
-                                onSetAttendance: { status in onSetAttendance(discussion.id, status) }
-                            )
+                            ForEach(Array(session.discussions.enumerated()), id: \.offset) { index, discussion in
+                                DiscussionTimelineItem(
+                                    discussion: discussion,
+                                    isFirst: index == 0,
+                                    isLast: index == session.discussions.count - 1,
+                                    showAdminActions: isAdminOrAbove,
+                                    onEdit: { onEditDiscussion(discussion.id) },
+                                    onDelete: { onDeleteDiscussion(discussion.id) },
+                                    onOpenNote: { onOpenNote(discussion.id) },
+                                    attendanceRoster: discussionRosters[discussion.id],
+                                    onLoadRoster: { onLoadAttendanceRoster(discussion.id) },
+                                    onSetAttendance: { status in onSetAttendance(discussion.id, status) }
+                                )
+                            }
                         }
+                        .padding(16)
                     }
                 }
-                .padding(16)
             } else {
                 if isOwner {
-                    VStack(spacing: 12) {
-                        Text(String(localized: "empty_no_session_details"))
-                            .kluvsStyle(KluvsTheme.typography.body.medium)
-                            .foregroundColor(KluvsTheme.colors.contentMuted)
-
-                        PrimaryButton(text: "Create Session", action: onCreateSession, icon: .add)
-                    }
-                    .padding()
+                    EmptyState(
+                        heading: "Nothing to discuss yet.",
+                        body: "Once a session starts, you can schedule discussions and track RSVPs here."
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     NoTabData(text: String(localized: "empty_no_session_details"))
                 }

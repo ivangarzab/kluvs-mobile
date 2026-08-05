@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
@@ -29,11 +28,12 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
-import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
@@ -60,6 +60,7 @@ fun MembersTab(
 
     val isAdminOrAbove = userRole == Role.OWNER || userRole == Role.ADMIN
     val isOwner = userRole == Role.OWNER
+    val showEmptyState = members.size <= 1 && isAdminOrAbove
 
     Column(modifier = modifier) {
         Row(
@@ -72,7 +73,9 @@ fun MembersTab(
                 color = KluvsTheme.colors.contentMuted,
                 style = KluvsTheme.typography.title.small.feature()
             )
-            if (isAdminOrAbove) {
+            // The EmptyState below already carries its own "Invite Members" action, so this
+            // would just be a redundant second invite button.
+            if (isAdminOrAbove && !showEmptyState) {
                 OutlinedButton(
                     text = stringResource(R.string.invite),
                     onClick = onInviteMember
@@ -105,24 +108,13 @@ fun MembersTab(
             }
         }
 
-        if (members.size <= 1 && isAdminOrAbove) {
-            Spacer(Modifier.height(20.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.invite_others_cta),
-                    style = KluvsTheme.typography.headline.small.feature(),
-                    color = KluvsTheme.colors.contentMuted,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(16.dp))
-                PrimaryButton(
-                    text = stringResource(R.string.invite_members),
-                    onClick = onInviteMember,
-                )
-            }
+        if (showEmptyState) {
+            EmptyState(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                heading = "Just you, for now.",
+                body = "Invite a few people and this club starts to feel like one.",
+                action = { SecondaryButton(text = stringResource(R.string.invite_members), onClick = onInviteMember) },
+            )
         }
     }
 }

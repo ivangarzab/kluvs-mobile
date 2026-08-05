@@ -39,9 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -59,12 +56,13 @@ import com.ivangarzab.kluvs.model.ShelfSource
 import com.ivangarzab.kluvs.model.ShelfStatus
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.theme.ebGaramond
 import com.ivangarzab.kluvs.designsystem.theme.foregroundLightSecondary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundLightTertiary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmTertiary
 import com.ivangarzab.kluvs.designsystem.theme.ibmPlexSans
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import kotlinx.coroutines.delay
@@ -195,7 +193,8 @@ fun BooksScreenContent(
                     state = state,
                     onRetry = onRetryShelf,
                     onRefresh = onRefreshShelf,
-                    onBookClick = onBookClick
+                    onBookClick = onBookClick,
+                    onSearchBooks = { view = BooksView.Search }
                 )
             }
             BooksView.Search -> {
@@ -216,7 +215,8 @@ private fun ShelfContent(
     state: BooksState,
     onRetry: () -> Unit,
     onRefresh: () -> Unit = onRetry,
-    onBookClick: (Book) -> Unit
+    onBookClick: (Book) -> Unit,
+    onSearchBooks: () -> Unit = {}
 ) {
     val shelfError = state.shelfError
     val screenState = when {
@@ -236,13 +236,12 @@ private fun ShelfContent(
             is ScreenState.Loading -> BooksShelfSkeleton(modifier = Modifier.fillMaxSize())
             is ScreenState.Error -> ErrorScreen(message = targetState.message, onRetry = onRetry)
             is ScreenState.Empty -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.no_books_shelved),
-                        style = KluvsTheme.typography.body.large,
-                        color = KluvsTheme.colors.contentMuted
-                    )
-                }
+                EmptyState(
+                    modifier = Modifier.fillMaxSize(),
+                    heading = "Nothing shelved yet.",
+                    body = "Search for a book and add it to Want to Read, Read, or Not Finished.",
+                    action = { SecondaryButton(text = "Search Books", onClick = onSearchBooks) },
+                )
             }
             is ScreenState.Content -> {
                 PullToRefreshContainer(
@@ -362,34 +361,9 @@ private fun SearchContent(
 
 @Composable
 private fun SearchEmptyState(heading: String, body: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            modifier = Modifier.padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            StackedCoverPlaceholder()
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = heading,
-                    fontFamily = ebGaramond,
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 28.sp,
-                    color = KluvsTheme.colors.contentMuted
-                )
-                Text(
-                    text = body,
-                    style = KluvsTheme.typography.body.medium,
-                    color = KluvsTheme.colors.contentMuted,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
+    // Neither the "haven't searched yet" nor the "no matches" variant has a real destination
+    // to send the user to, so this carries no action.
+    EmptyState(modifier = Modifier.fillMaxSize(), heading = heading, body = body)
 }
 
 @Composable

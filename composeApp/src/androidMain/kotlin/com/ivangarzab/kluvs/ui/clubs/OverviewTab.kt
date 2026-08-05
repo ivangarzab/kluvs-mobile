@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
@@ -46,6 +45,7 @@ import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.designsystem.components.progress.OwnProgressRow
 import kotlinx.datetime.LocalDateTime
@@ -82,45 +82,52 @@ fun OverviewTab(
     val isAdminOrAbove = userRole == Role.OWNER || userRole == Role.ADMIN
     val currentMemberId = members.find { it.userId == currentUserId }?.memberId
 
+    // A scrollable Column can't force a child to fill the viewport (unbounded height
+    // constraints), which is what left NoActiveSessionState stuck at its own small intrinsic
+    // size instead of covering the tab. Handling it as an early return — same shape as
+    // ActiveSessionTab's no-session branch — lets it size against the real, bounded `modifier`
+    // (fillMaxSize from the tab pager) instead.
+    if (sessionDetails == null) {
+        NoActiveSessionState(
+            modifier = modifier,
+            isAdminOrAbove = isAdminOrAbove,
+            onCreateSession = onCreateSession
+        )
+        return
+    }
+
+    val readingParticipants = sessionDetails.participants.filter { it.isReading }
+    val readingMembers = readingParticipants.mapNotNull { participant ->
+        members.find { it.memberId == participant.memberId }
+    }.map { AvatarStackMember(id = it.memberId, name = it.name, avatarUrl = it.avatarUrl) }
+    val isOwnReading = currentMemberId != null &&
+        sessionDetails.participants.any { it.memberId == currentMemberId && it.isReading }
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        if (sessionDetails != null) {
-            val readingParticipants = sessionDetails.participants.filter { it.isReading }
-            val readingMembers = readingParticipants.mapNotNull { participant ->
-                members.find { it.memberId == participant.memberId }
-            }.map { AvatarStackMember(id = it.memberId, name = it.name, avatarUrl = it.avatarUrl) }
-            val isOwnReading = currentMemberId != null &&
-                sessionDetails.participants.any { it.memberId == currentMemberId && it.isReading }
+        SessionSummary(
+            sessionDetails = sessionDetails,
+            ownProgress = ownProgress,
+            readingMembers = readingMembers,
+            readingCount = readingParticipants.size,
+            totalMemberCount = clubDetails.memberCount,
+            isAdminOrAbove = isAdminOrAbove,
+            isOwnReading = isOwnReading,
+            canToggleParticipation = currentMemberId != null,
+            onEditSession = onEditSession,
+            onEndSession = onEndSession,
+            onUpdateProgress = onUpdateProgress,
+            onToggleParticipation = onToggleParticipation
+        )
 
-            SessionSummary(
-                sessionDetails = sessionDetails,
-                ownProgress = ownProgress,
-                readingMembers = readingMembers,
-                readingCount = readingParticipants.size,
-                totalMemberCount = clubDetails.memberCount,
-                isAdminOrAbove = isAdminOrAbove,
-                isOwnReading = isOwnReading,
-                canToggleParticipation = currentMemberId != null,
-                onEditSession = onEditSession,
-                onEndSession = onEndSession,
-                onUpdateProgress = onUpdateProgress,
-                onToggleParticipation = onToggleParticipation
-            )
-
-            val nextDiscussion = sessionDetails.discussions.firstOrNull { it.isNext }
-            if (nextDiscussion != null) {
-                HorizontalDivider(color = KluvsTheme.colors.cardAlt)
-                UpNextTeaser(discussion = nextDiscussion)
-                HorizontalDivider(color = KluvsTheme.colors.cardAlt)
-            }
-        } else {
-            NoActiveSessionState(
-                isAdminOrAbove = isAdminOrAbove,
-                onCreateSession = onCreateSession
-            )
+        val nextDiscussion = sessionDetails.discussions.firstOrNull { it.isNext }
+        if (nextDiscussion != null) {
+            HorizontalDivider(color = KluvsTheme.colors.cardAlt)
+            UpNextTeaser(discussion = nextDiscussion)
+            HorizontalDivider(color = KluvsTheme.colors.cardAlt)
         }
     }
 }
@@ -258,30 +265,16 @@ private fun NoActiveSessionState(
     onCreateSession: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(R.string.no_session_yet_eyebrow).uppercase(),
-            style = KluvsTheme.typography.eyebrow,
-            color = KluvsTheme.colors.contentMuted
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.start_reading_together),
-            style = KluvsTheme.typography.headline.small.feature(),
-            color = KluvsTheme.colors.content,
-            textAlign = TextAlign.Center
-        )
-        if (isAdminOrAbove) {
-            Spacer(Modifier.height(16.dp))
-            PrimaryButton(
-                text = stringResource(R.string.start_session),
-                onClick = onCreateSession,
-            )
-        }
-    }
+    EmptyState(
+        modifier = modifier.fillMaxSize(),
+        heading = "No active session yet.",
+        body = "Start a session to begin reading together.",
+        action = if (isAdminOrAbove) {
+            // Primary, not Secondary like other EmptyState actions — starting a session is
+            // the single most important next step for a brand-new club.
+            { PrimaryButton(text = stringResource(R.string.start_session), onClick = onCreateSession) }
+        } else null,
+    )
 }
 
 @Composable

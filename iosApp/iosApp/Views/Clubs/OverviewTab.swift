@@ -23,23 +23,27 @@ struct OverviewTab: View {
     private var currentMemberId: String? { members.first { $0.userId == currentUserId }?.memberId }
 
     var body: some View {
-        ScrollView {
+        Group {
             if clubDetails == nil {
                 NoTabData(text: String(localized: "empty_no_club_details"))
             } else if let session = sessionDetails {
-                VStack(alignment: .leading, spacing: 20) {
-                    sessionSummary(session: session)
+                // Only the actual session content scrolls — a ScrollView also proposes
+                // unbounded height to its content, so noActiveSessionState below is kept
+                // outside of it entirely, otherwise it can't fill the tab either.
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        sessionSummary(session: session)
 
-                    if let next = session.discussions.first(where: { $0.isNext }) {
-                        Divider()
-                        upNextTeaser(discussion: next)
-                        Divider()
+                        if let next = session.discussions.first(where: { $0.isNext }) {
+                            Divider()
+                            upNextTeaser(discussion: next)
+                            Divider()
+                        }
                     }
+                    .padding(16)
                 }
-                .padding(16)
             } else {
                 noActiveSessionState
-                    .padding(16)
             }
         }
     }
@@ -151,20 +155,17 @@ struct OverviewTab: View {
     // MARK: - No Active Session
 
     private var noActiveSessionState: some View {
-        VStack(spacing: 8) {
-            Text("NO SESSION YET")
-                .kluvsStyle(KluvsTheme.typography.eyebrow)
-                .foregroundColor(KluvsTheme.colors.contentMuted)
-            Text("Start reading together.")
-                .kluvsStyle(KluvsTheme.typography.headline.small, feature: true)
-                .foregroundColor(KluvsTheme.colors.content)
-                .multilineTextAlignment(.center)
+        EmptyState(
+            heading: "No active session yet.",
+            body: "Start a session to begin reading together."
+        ) {
             if isAdminOrAbove {
+                // Primary, not Secondary like other EmptyState actions — starting a session
+                // is the single most important next step for a brand-new club.
                 PrimaryButton(text: "Start Session", action: onCreateSession)
-                    .padding(.top, 8)
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Up Next

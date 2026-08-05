@@ -44,10 +44,10 @@ import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmDisabled
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceControl
 import com.ivangarzab.kluvs.designsystem.components.controls.AttendanceOption
 import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
-import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
-import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
@@ -85,22 +85,11 @@ fun ActiveSessionTab(
 
     if (sessionDetails == null) {
         if (isOwner) {
-            Column(
-                modifier = modifier,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
-            ) {
-                Text(
-                    text = stringResource(R.string.no_session_details),
-                    style = KluvsTheme.typography.body.medium,
-                    color = KluvsTheme.colors.contentMuted
-                )
-                PrimaryButton(
-                    text = "Create Session",
-                    onClick = onCreateSession,
-                    icon = IconType.Add,
-                )
-            }
+            EmptyState(
+                modifier = modifier.fillMaxSize(),
+                heading = "Nothing to discuss yet.",
+                body = "Once a session starts, you can schedule discussions and track RSVPs here.",
+            )
         } else {
             NoTabData(
                 modifier = modifier,
@@ -111,35 +100,37 @@ fun ActiveSessionTab(
     }
 
     Column(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (sessionDetails.discussions.isNotEmpty()) {
+        if (sessionDetails.discussions.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = stringResource(R.string.x_discussions_scheduled, sessionDetails.discussions.size),
                     color = KluvsTheme.colors.contentMuted,
                     style = KluvsTheme.typography.title.small.feature()
                 )
+                if (isAdminOrAbove) {
+                    SecondaryButton(
+                        text = stringResource(R.string.add_discussion),
+                        onClick = onCreateDiscussion,
+                    )
+                }
             }
-            if (isAdminOrAbove) {
-                OutlinedButton(
-                    text = stringResource(R.string.add_discussion),
-                    onClick = onCreateDiscussion,
-                )
-            }
-        }
 
-        Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
+        }
 
         sessionDetails.discussions.let { discussions ->
             if (discussions.isEmpty()) {
-                Text(
-                    text = "No discussions scheduled yet.",
-                    color = KluvsTheme.colors.contentMuted,
-                    style = KluvsTheme.typography.body.medium,
-                    modifier = Modifier.padding(vertical = 12.dp)
+                EmptyState(
+                    modifier = Modifier.fillMaxSize(),
+                    heading = "No discussions scheduled.",
+                    body = "Once a discussion is set, it'll show up here.",
+                    action = if (isAdminOrAbove) {
+                        { SecondaryButton(text = "Add Discussion", onClick = onCreateDiscussion) }
+                    } else null,
                 )
             } else {
                 // Timeline

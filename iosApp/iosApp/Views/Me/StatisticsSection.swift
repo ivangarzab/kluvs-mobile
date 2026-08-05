@@ -17,12 +17,12 @@ struct StatisticsSection: View {
     var body: some View {
         HStack(spacing: 0) {
             StatColumn(
-                value: statistics.clubsCount > 0 ? "\(statistics.clubsCount)" : String(localized: "label_not_available"),
+                value: "\(statistics.clubsCount)",
                 label: String(localized: "stat_number_of_clubs")
             )
             statDivider
             StatColumn(
-                value: statistics.booksRead > 0 ? "\(statistics.booksRead)" : String(localized: "label_not_available"),
+                value: "\(statistics.booksRead)",
                 label: String(localized: "stat_books_read")
             )
             statDivider

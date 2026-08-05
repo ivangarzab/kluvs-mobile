@@ -56,14 +56,19 @@ struct ClubsView: View {
                             viewModel.loadUserClubs(userId: userId)
                         })
                     case .empty:
-                        VStack(spacing: 8) {
-                            Text(String(localized: "empty_no_clubs"))
-                                .kluvsStyle(KluvsTheme.typography.headline.small)
-                                .foregroundColor(KluvsTheme.colors.content)
-                            Text(String(localized: "empty_no_clubs_hint"))
-                                .kluvsStyle(KluvsTheme.typography.body.medium)
-                                .foregroundColor(KluvsTheme.colors.contentMuted)
-                            OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
+                        ZStack(alignment: .bottomTrailing) {
+                            EmptyState(
+                                heading: "No clubs yet.",
+                                body: "Join a club or start your own to get things going."
+                            ) {
+                                SecondaryButton(text: "Join with a code", action: { showJoinSheet = true })
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                            ClubsFAB(action: {
+                                newClubName = ""
+                                showCreateClubSheet = true
+                            })
                         }
                     case .content:
                         ClubsListView(

@@ -31,6 +31,38 @@ struct MeView: View {
                         viewModel.loadUserData(userId: userId)
                     })
                     .transition(.opacity)
+                }
+                // statistics.clubsCount (already the source of the "4 CLUBS" stat above) is the
+                // real "no clubs" signal — nil means stats haven't loaded or failed to load,
+                // not that the count is zero, so it deliberately does NOT count as empty here.
+                // Mirrors Android's MeScreenContent. The empty case skips ScrollView entirely
+                // (rather than just adding a frame inside it) — a ScrollView also proposes
+                // unbounded height to its content, so the EmptyState could never actually fill
+                // the remaining space if it stayed nested in one.
+                else if viewModel.statistics?.clubsCount == 0 {
+                    VStack(spacing: 0) {
+                        if let profile = viewModel.profile {
+                            ProfileSection(profile: profile)
+                        }
+
+                        Divider()
+                            .padding(.vertical, 8)
+
+                        if let statistics = viewModel.statistics {
+                            StatisticsSection(statistics: statistics, joinDate: viewModel.profile?.joinDate)
+
+                            Divider()
+                                .padding(.vertical, 8)
+                        }
+
+                        EmptyState(
+                            heading: "Nothing to track yet.",
+                            body: "Join or start a club and your next read will show up here."
+                        )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .padding(.horizontal, 16)
+                    .transition(.opacity)
                 } else {
                     ScrollView {
                         VStack(spacing: 0) {
@@ -70,7 +102,6 @@ struct MeView: View {
                                     editingShelfItem = item
                                 }
                             )
-
                         }
                         .padding(.horizontal, 16)
                     }
