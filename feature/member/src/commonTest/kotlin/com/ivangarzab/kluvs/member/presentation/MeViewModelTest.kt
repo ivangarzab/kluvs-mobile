@@ -227,8 +227,7 @@ class MeViewModelTest {
     fun `loadUserData handles error from member repository`() = runTest {
         // Given
         val userId = "user-123"
-        val errorMessage = "Failed to fetch member"
-        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.failure(Exception(errorMessage))
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.failure(Exception("Failed to fetch member"))
 
         // When
         viewModel.loadUserData(userId)
@@ -236,7 +235,7 @@ class MeViewModelTest {
         // Then
         val state = viewModel.state.value
         assertFalse(state.isLoading)
-        assertEquals(errorMessage, state.error)
+        assertEquals("Something went wrong. Please try again.", state.error)
         assertNull(state.profile)
         assertNull(state.statistics)
         assertTrue(state.shelf.isEmpty())
@@ -316,7 +315,7 @@ class MeViewModelTest {
 
         // Load data with error
         viewModel.loadUserData(userId)
-        assertEquals("Error", viewModel.state.value.error)
+        assertEquals("Something went wrong. Please try again.", viewModel.state.value.error)
 
         // Given - Now succeed
         val member = Member(

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.auth.domain.SignOutUseCase
+import com.ivangarzab.kluvs.data.error.toAppError
+import com.ivangarzab.kluvs.presentation.error.toUserMessage
 import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.member.domain.GetOnYourShelfUseCase
 import com.ivangarzab.kluvs.member.domain.GetReadingLogUseCase
@@ -52,14 +54,14 @@ class MeViewModel(
 
             // Aggregate errors
             val errors = listOfNotNull(
-                profileResult.exceptionOrNull()?.message,
-                statsResult.exceptionOrNull()?.message,
-                shelfResult.exceptionOrNull()?.message
+                profileResult.exceptionOrNull()?.toAppError()?.toUserMessage(),
+                statsResult.exceptionOrNull()?.toAppError()?.toUserMessage(),
+                shelfResult.exceptionOrNull()?.toAppError()?.toUserMessage()
             )
             val error = when {
                 errors.isEmpty() -> null
                 errors.distinct().size == 1 -> errors.first() // All errors are identical
-                else -> "Multiple errors occurred"
+                else -> "Multiple things went wrong. Please try again."
             }
             error?.let { e ->
                 Bark.e("Failed to fetch member details (ID: $userId). Serving cached data if available.", Exception(e))
