@@ -35,13 +35,13 @@ fun StatisticsSection(
     ) {
         StatColumn(
             modifier = Modifier.weight(1f),
-            value = data?.clubsCount?.takeIf { it > 0 }?.toString() ?: stringResource(R.string.na),
+            value = data?.clubsCount?.toString() ?: "0",
             label = stringResource(R.string.no_of_clubs)
         )
         StatDivider()
         StatColumn(
             modifier = Modifier.weight(1f),
-            value = data?.booksRead?.takeIf { it > 0 }?.toString() ?: stringResource(R.string.na),
+            value = data?.booksRead?.toString() ?: "0",
             label = stringResource(R.string.books_read)
         )
         StatDivider()

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -46,7 +45,6 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
-import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
@@ -72,7 +70,6 @@ fun MeScreen(
     modifier: Modifier = Modifier,
     userId: String,
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToClubs: () -> Unit = {},
     viewModel: MeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -122,7 +119,6 @@ fun MeScreen(
                 onUpdateProgress = { sessionId ->
                     editingShelfItem = state.shelf.find { it.sessionId == sessionId }
                 },
-                onNavigateToClubs = onNavigateToClubs,
             )
 
             SnackbarHost(
@@ -181,7 +177,6 @@ fun MeScreenContent(
     onRetry: () -> Unit,
     onRefresh: () -> Unit = onRetry,
     onUpdateProgress: (sessionId: String) -> Unit = {},
-    onNavigateToClubs: () -> Unit = {},
 ) {
     // state.statistics.clubsCount (from GetUserStatisticsUseCase, already the source of the
     // "4 CLUBS" stat shown above) is the real "no clubs" signal — null means stats haven't
@@ -216,46 +211,72 @@ fun MeScreenContent(
                     onRefresh = onRefresh,
                     modifier = modifier.fillMaxSize(),
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = KluvsTheme.colors.background)
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        ProfileSection(
-                            avatarUrl = state.profile?.avatarUrl,
-                            name = state.profile?.name ?: "",
-                            handle = state.profile?.handle ?: ""
-                        )
+                    // hasNothingToShow skips verticalScroll entirely (rather than just adding
+                    // fillMaxSize/weight inside it) — a scrollable Column gives its children
+                    // unbounded height, so the EmptyState below could never actually fill the
+                    // remaining viewport space if it stayed nested in one.
+                    if (hasNothingToShow) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = KluvsTheme.colors.background)
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ProfileSection(
+                                avatarUrl = state.profile?.avatarUrl,
+                                name = state.profile?.name ?: "",
+                                handle = state.profile?.handle ?: ""
+                            )
 
-                        Divider()
+                            Divider()
 
-                        StatisticsSection(
-                            modifier = Modifier.fillMaxWidth(),
-                            data = state.statistics,
-                            joinDate = state.profile?.joinDate
-                        )
+                            StatisticsSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                data = state.statistics,
+                                joinDate = state.profile?.joinDate
+                            )
 
-                        Divider()
+                            Divider()
 
-                        if (hasNothingToShow) {
                             EmptyState(
-                                modifier = Modifier.fillMaxWidth().height(280.dp),
-                                heading = "Nothing up next.",
-                                body = "Join or start a club and your next read will show up here.",
-                                action = { OutlinedButton(text = "Browse Clubs", onClick = onNavigateToClubs) },
+                                modifier = Modifier.fillMaxWidth().weight(1f),
+                                heading = "Nothing to track yet.",
+                                body = "Join or start a club and your next read will show up here."
                             )
-                        } else {
-                            UpNextSection(
-                                modifier = Modifier
-                                    .padding(vertical = 8.dp)
-                                    .fillMaxWidth(),
-                                upNext = state.upNext
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = KluvsTheme.colors.background)
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ProfileSection(
+                                avatarUrl = state.profile?.avatarUrl,
+                                name = state.profile?.name ?: "",
+                                handle = state.profile?.handle ?: ""
                             )
+
+                            Divider()
+
+                            StatisticsSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                data = state.statistics,
+                                joinDate = state.profile?.joinDate
+                            )
+
+                            Divider()
 
                             if (state.upNext != null) {
+                                UpNextSection(
+                                    modifier = Modifier
+                                        .padding(vertical = 8.dp)
+                                        .fillMaxWidth(),
+                                    upNext = state.upNext
+                                )
                                 Divider()
                             }
 

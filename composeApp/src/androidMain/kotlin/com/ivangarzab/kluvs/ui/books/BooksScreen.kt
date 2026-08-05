@@ -62,7 +62,7 @@ import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmTertiary
 import com.ivangarzab.kluvs.designsystem.theme.ibmPlexSans
 import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
-import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import kotlinx.coroutines.delay
@@ -240,7 +240,7 @@ private fun ShelfContent(
                     modifier = Modifier.fillMaxSize(),
                     heading = "Nothing shelved yet.",
                     body = "Search for a book and add it to Want to Read, Read, or Not Finished.",
-                    action = { OutlinedButton(text = "Search Books", onClick = onSearchBooks) },
+                    action = { SecondaryButton(text = "Search Books", onClick = onSearchBooks) },
                 )
             }
             is ScreenState.Content -> {
