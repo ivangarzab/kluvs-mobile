@@ -491,6 +491,17 @@
         }
       }
     },
+    "error_something_went_wrong" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong."
+          }
+        }
+      }
+    },
     "error_unexpected" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -122,10 +123,12 @@ private fun generateHexEdges(widthPx: Float, heightPx: Float, hexRadiusPx: Float
 }
 
 /**
- * The reusable "nothing here" state — design-system/docs/states.md § Empty State. One
- * illustration (Fragmented Hex Grid) reused everywhere; only heading, body, and the optional
- * [action] slot change per screen. [action] is left null for states with no real next step
- * (e.g. "no search results yet") rather than filled with a button that goes nowhere useful.
+ * The reusable "nothing here" / "couldn't load this" state shell — design-system/docs/states.md
+ * § Empty State. One illustration (Fragmented Hex Grid) reused everywhere; only heading, body,
+ * [lineColor], and the optional [action] slot change per screen. [action] is left null for
+ * states with no real next step (e.g. "no search results yet") rather than filled with a button
+ * that goes nowhere useful. [lineColor] defaults to the quiet empty-state tone; [ErrorScreen]
+ * overrides it to `danger` red so the same illustration reads as a failure, not absence.
  */
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -133,9 +136,9 @@ fun EmptyState(
     heading: String,
     body: String,
     modifier: Modifier = Modifier,
+    lineColor: Color = KluvsTheme.colors.disabled,
     action: @Composable (() -> Unit)? = null,
 ) {
-    val strokeColor = KluvsTheme.colors.disabled
     val density = LocalDensity.current
 
     // Sizing is entirely the caller's responsibility via [modifier] — fillMaxSize() for a
@@ -157,7 +160,7 @@ fun EmptyState(
         Canvas(modifier = Modifier.fillMaxSize()) {
             edges.forEach { edge ->
                 drawLine(
-                    color = strokeColor,
+                    color = lineColor,
                     start = edge.start,
                     end = edge.end,
                     strokeWidth = strokeWidthPx,
