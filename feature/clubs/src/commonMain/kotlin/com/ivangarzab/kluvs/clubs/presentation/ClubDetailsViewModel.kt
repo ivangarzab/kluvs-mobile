@@ -36,6 +36,7 @@ import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.JoinPolicy
 import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -82,6 +83,7 @@ class ClubDetailsViewModel(
     val state: StateFlow<ClubDetailsState> = _state.asStateFlow()
 
     private var currentClubId: String? = null
+    private var loadClubDataJob: Job? = null
 
     /**
      * Loads the user's clubs and displays the first club.
@@ -129,7 +131,13 @@ class ClubDetailsViewModel(
     fun loadClubData(clubId: String, forceRefresh: Boolean = false) {
         currentClubId = clubId
 
-        viewModelScope.launch {
+        // Cancel any still-in-flight load for a previously-selected club — without this, a
+        // slower fetch for club A can resolve after the user has already navigated into club
+        // B and overwrite B's state with A's data (the exact "wrong club" bug this guards
+        // against). The `currentClubId != clubId` check below is defense-in-depth for the
+        // narrow window where cancellation races with completion.
+        loadClubDataJob?.cancel()
+        loadClubDataJob = viewModelScope.launch {
             // Reset state for subsequent calls
             _state.update {
                 it.copy(
@@ -172,6 +180,8 @@ class ClubDetailsViewModel(
             error?.let { e ->
                 Bark.e("Failed to fetch club details (ID: $clubId). Serving cached data if available.", Exception(e))
             } ?: Bark.i("Successfully loaded club details (ID: $clubId)")
+
+            if (currentClubId != clubId) return@launch
 
             // Update state with all results
             _state.update {
