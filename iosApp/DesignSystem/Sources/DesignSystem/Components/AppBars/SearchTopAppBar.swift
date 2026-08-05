@@ -1,6 +1,5 @@
 import SwiftUI
 
-private let contentFadeDuration = 0.15
 private let searchUnfurlDuration = 0.2
 private let titleRowHeight: CGFloat = 64
 
@@ -49,30 +48,44 @@ public struct SearchTopAppBar<Action: View>: View {
         (isSearchActive || title == nil) ? topAppBarRowHeight : topAppBarRowHeight + titleRowHeight
     }
 
+    // Stacking several independent `.animation(_:value:)` modifiers (one per property, plus one
+    // on the outer frame height) let SwiftUI run them as separate, uncoordinated transactions —
+    // visibly, the bar's height collapse would outrun the content fade/unfurl and the whole bar
+    // would momentarily rocket up off the top of the screen. Driving every animatable change
+    // (opacity, scale, frame height) from a single `withAnimation` at the two toggle sites keeps
+    // them in one transaction instead.
+    private func setSearchActive(_ active: Bool) {
+        withAnimation(.easeInOut(duration: searchUnfurlDuration)) {
+            isSearchActive = active
+        }
+    }
+
     public var body: some View {
         ZStack(alignment: .topLeading) {
             TopAppBar(header: header, title: title, onNavigateBack: onNavigateBack) {
                 Group {
                     action()
-                    OutlinedIconButton(type: .search, contentDescription: "Search", action: { isSearchActive = true }, enabled: !isSearchActive)
+                    OutlinedIconButton(type: .search, contentDescription: "Search", action: { setSearchActive(true) }, enabled: !isSearchActive)
                 }
             }
             .opacity(isSearchActive ? 0 : 1)
-            .animation(.easeInOut(duration: contentFadeDuration), value: isSearchActive)
 
             HStack {
-                IconButton(type: .arrowBack, contentDescription: "Close search", action: { isSearchActive = false }, tint: KluvsTheme.colors.content)
+                IconButton(type: .arrowBack, contentDescription: "Close search", action: { setSearchActive(false) }, tint: KluvsTheme.colors.content)
                 SearchField(value: $searchQuery, placeholder: searchPlaceholder, isLoading: isSearchLoading, focus: $isSearchFieldFocused)
             }
             .padding(.horizontal, 8)
             .frame(height: topAppBarRowHeight)
             .scaleEffect(x: isSearchActive ? 1 : 0, y: 1, anchor: .trailing)
             .opacity(isSearchActive ? 1 : 0)
-            .animation(.easeInOut(duration: searchUnfurlDuration), value: isSearchActive)
         }
         .frame(height: barHeight)
-        .animation(.easeOut(duration: searchUnfurlDuration), value: barHeight)
         .clipped()
+        // Focusing SearchField below brings up the keyboard, and without this, SwiftUI's
+        // automatic keyboard-avoidance shifts this whole bar upward (toward/behind the status
+        // bar) to keep room for it — even though the field is already at the very top of the
+        // screen and never needs to move. This bar manages its own layout; opt it out entirely.
+        .ignoresSafeArea(.keyboard, edges: .all)
         // Mirrors Android's LaunchedEffect(isSearchActive): opening search focuses the field
         // (and shows the keyboard); closing it explicitly resigns focus, since SwiftUI won't
         // dismiss the keyboard on its own just because the field scaled/faded out.

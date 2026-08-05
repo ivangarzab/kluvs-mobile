@@ -16,52 +16,64 @@ struct MembersTab: View {
     private var readingByMemberId: [String: Bool] {
         Dictionary(uniqueKeysWithValues: participants.map { ($0.memberId, $0.isReading) })
     }
+    private var showEmptyState: Bool { members.count <= 1 && isAdminOrAbove }
 
     var body: some View {
-        ScrollView {
-            if members.isEmpty {
-                NoTabData(text: String(localized: "empty_no_members"))
-            } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        Text("\(members.count) members")
-                            .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
-                            .foregroundColor(KluvsTheme.colors.contentMuted)
-                        Spacer()
-                        if isAdminOrAbove {
-                            OutlinedButton(text: "+ Invite", action: onInviteMember)
-                        }
-                    }
-                    .padding(.bottom, 12)
-
-                    ForEach(Array(members.enumerated()), id: \.element.memberId) { index, member in
-                        let isSelf = member.userId == currentUserId
-                        MemberListItem(
-                            member: member,
-                            isSelf: isSelf,
-                            isReading: readingByMemberId[member.memberId],
-                            showAdminActions: isAdminOrAbove && (!isSelf || isOwner),
-                            showRemove: isOwner && !isSelf && member.role != .owner,
-                            onChangeRole: { onChangeRole(member.memberId) },
-                            onRemove: { onRemoveMember(member.memberId) }
-                        )
-
-                        if index < members.count - 1 {
-                            Divider()
-                        }
-                    }
-
-                    if members.count <= 1 && isAdminOrAbove {
-                        EmptyState(
-                            heading: "Just you, for now.",
-                            body: "Invite a few people and this club starts to feel like one."
-                        ) {
-                            PrimaryButton(text: "Invite Members", action: onInviteMember)
-                        }
-                        .frame(height: 220)
+        if members.isEmpty {
+            NoTabData(text: String(localized: "empty_no_members"))
+        } else {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("\(members.count) members")
+                        .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
+                    Spacer()
+                    // The EmptyState below already carries its own "Invite Members" action, so
+                    // this would just be a redundant second invite button.
+                    if isAdminOrAbove && !showEmptyState {
+                        OutlinedButton(text: "+ Invite", action: onInviteMember)
                     }
                 }
-                .padding(16)
+                .padding(.bottom, 12)
+
+                if showEmptyState {
+                    // At most one member — nothing to scroll, so the row (if any) plus the
+                    // EmptyState below just fill the tab directly. A ScrollView also proposes
+                    // unbounded height to its content, so it can't be used here or the
+                    // EmptyState gets stuck at its own small intrinsic size instead.
+                    memberRows
+                    EmptyState(
+                        heading: "Just you, for now.",
+                        body: "Invite a few people and this club starts to feel like one."
+                    ) {
+                        SecondaryButton(text: "Invite Members", action: onInviteMember)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        memberRows
+                    }
+                }
+            }
+            .padding(16)
+        }
+    }
+
+    private var memberRows: some View {
+        ForEach(Array(members.enumerated()), id: \.element.memberId) { index, member in
+            let isSelf = member.userId == currentUserId
+            MemberListItem(
+                member: member,
+                isSelf: isSelf,
+                isReading: readingByMemberId[member.memberId],
+                showAdminActions: isAdminOrAbove && (!isSelf || isOwner),
+                showRemove: isOwner && !isSelf && member.role != .owner,
+                onChangeRole: { onChangeRole(member.memberId) },
+                onRemove: { onRemoveMember(member.memberId) }
+            )
+
+            if index < members.count - 1 {
+                Divider()
             }
         }
     }

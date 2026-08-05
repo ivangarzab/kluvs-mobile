@@ -80,6 +80,13 @@ struct BooksView: View {
                     }
                 )
             }
+            // BooksTopBar already provides this screen's own header (mirrors Android's
+            // MainView comment: every tab owns its top bar, the system one is unused). Left
+            // showing, its empty large-title bar still reserves space and appears to be what
+            // was fighting our custom bar's own height animation when search opened the
+            // keyboard — the visible symptom being the whole bar jumping up toward the status
+            // bar.
+            .toolbar(.hidden, for: .navigationBar)
         }
         .onAppear { viewModel.loadShelf() }
         .onChange(of: viewModel.query) { _, query in
@@ -124,7 +131,7 @@ private struct ShelfContent: View {
                 heading: "Nothing shelved yet.",
                 body: "Search for a book and add it to Want to Read, Read, or Not Finished."
             ) {
-                OutlinedButton(text: "Search Books", action: onSearchBooks)
+                SecondaryButton(text: "Search Books", action: onSearchBooks)
             }
         case .content:
             ScrollView {

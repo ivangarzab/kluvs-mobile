@@ -56,11 +56,19 @@ struct ClubsView: View {
                             viewModel.loadUserClubs(userId: userId)
                         })
                     case .empty:
-                        EmptyState(
-                            heading: "No clubs yet.",
-                            body: "Join a club or start your own to get things going."
-                        ) {
-                            OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
+                        ZStack(alignment: .bottomTrailing) {
+                            EmptyState(
+                                heading: "No clubs yet.",
+                                body: "Join a club or start your own to get things going."
+                            ) {
+                                SecondaryButton(text: "Join with a code", action: { showJoinSheet = true })
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                            ClubsFAB(action: {
+                                newClubName = ""
+                                showCreateClubSheet = true
+                            })
                         }
                     case .content:
                         ClubsListView(
