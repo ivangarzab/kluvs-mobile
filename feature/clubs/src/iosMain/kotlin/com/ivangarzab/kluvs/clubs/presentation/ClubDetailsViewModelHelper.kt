@@ -105,6 +105,9 @@ class ClubDetailsViewModelHelper : KoinComponent {
         null -> null
     }
 
+    /** Whether [result] is the failure case — Swift can't pattern-match the sealed class directly. */
+    fun isOperationError(result: OperationResult?): Boolean = result is OperationResult.Error
+
     // ── Date helpers ──────────────────────────────────────────────────────────
 
     /** Converts a [LocalDateTime] to an ISO string for iOS date pickers. */

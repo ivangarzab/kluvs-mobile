@@ -16,8 +16,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,6 +39,9 @@ import com.ivangarzab.kluvs.designsystem.theme.contentDarkPrimary
 import com.ivangarzab.kluvs.designsystem.theme.providerDiscordBg
 import com.ivangarzab.kluvs.designsystem.theme.providerGoogleBg
 import com.ivangarzab.kluvs.designsystem.theme.providerGoogleText
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.fields.PasswordField
 import com.ivangarzab.kluvs.designsystem.components.icons.IconType
@@ -56,7 +63,20 @@ fun AuthFormContent(
     onOAuthSignIn: (AuthProvider) -> Unit,
     onNavigate: (LoginNavigation) -> Unit,
 ) {
-    Scaffold(modifier = modifier) { paddingValues ->
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(
+                KluvsSnackbarVisuals(message = it, variant = SnackbarVariant.DANGER)
+            )
+        }
+    }
+
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState, snackbar = { KluvsSnackbar(it) }) },
+    ) { paddingValues ->
         Column(
             modifier = modifier
                 .padding(paddingValues)
@@ -172,11 +192,6 @@ fun AuthFormContent(
                         onGo = { onSubmit() },
                     ),
                 )
-            }
-
-            if (errorMessage != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                ErrorBanner(message = errorMessage)
             }
 
             if (mode == AuthMode.LOGIN) {

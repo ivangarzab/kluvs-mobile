@@ -15,6 +15,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -68,7 +71,9 @@ fun SettingsScreen(
 
     LaunchedEffect(state.avatarError) {
         state.avatarError?.let { error ->
-            snackbarHostState.showSnackbar(error)
+            snackbarHostState.showSnackbar(
+                KluvsSnackbarVisuals(message = error, variant = SnackbarVariant.DANGER)
+            )
             viewModel.clearAvatarError()
         }
     }
@@ -109,7 +114,7 @@ fun SettingsScreenContent(
                 onNavigateBack = onNavigateBack,
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState, snackbar = { KluvsSnackbar(it) }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier

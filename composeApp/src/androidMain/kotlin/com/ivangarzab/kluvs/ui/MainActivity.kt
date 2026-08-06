@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -118,7 +121,12 @@ fun MainNavHost(
             when (result) {
                 is AutoJoinResult.Success -> autoJoinedClubId = result.clubId
                 is AutoJoinResult.Failure -> {
-                    snackbarHostState.showSnackbar(result.message ?: "Failed to join club")
+                    snackbarHostState.showSnackbar(
+                        KluvsSnackbarVisuals(
+                            message = result.message ?: "Failed to join club",
+                            variant = SnackbarVariant.DANGER,
+                        )
+                    )
                 }
             }
         }
@@ -188,7 +196,8 @@ fun MainNavHost(
         }
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackbar = { KluvsSnackbar(it) }
         )
     }
 }

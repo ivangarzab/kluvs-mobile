@@ -19,6 +19,7 @@ public enum IconType {
     case arrowBack, add, search, moreVert, chevronRight, chevronDown, check, close
     case favorite, favoriteOutline
     case editNote, reading
+    case error
 
     /// The asset-catalog name for custom-drawable cases, `nil` for SF Symbol-backed ones.
     var assetName: String? {
@@ -64,6 +65,8 @@ public enum IconType {
         // Placeholder SF Symbols — swap during the planned iconography pass, not meant as final.
         case .editNote: "pencil.and.list.clipboard"
         case .reading: "book.fill"
+        // Matches Android's IconType.Error -> Icons.Filled.Warning mapping.
+        case .error: "exclamationmark.triangle.fill"
         default: nil
         }
     }
