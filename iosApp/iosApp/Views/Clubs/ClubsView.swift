@@ -368,7 +368,7 @@ private struct ClubDetailView: View {
         .snackbar(Binding(
             get: {
                 viewModel.operationMessage.map {
-                    SnackbarData(message: $0, variant: viewModel.operationIsError ? .danger : .neutral)
+                    SnackbarData(message: $0, variant: viewModel.operationIsError ? .danger : .success)
                 }
             },
             set: { if $0 == nil { viewModel.onConsumeOperationResult() } }

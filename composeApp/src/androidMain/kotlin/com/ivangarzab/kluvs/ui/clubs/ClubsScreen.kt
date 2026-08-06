@@ -111,7 +111,7 @@ fun ClubsScreen(
     LaunchedEffect(state.operationResult) {
         state.operationResult?.let { result ->
             val (message, variant) = when (result) {
-                is OperationResult.Success -> result.message to SnackbarVariant.NEUTRAL
+                is OperationResult.Success -> result.message to SnackbarVariant.SUCCESS
                 is OperationResult.Error -> result.message to SnackbarVariant.DANGER
             }
             snackbarHostState.showSnackbar(KluvsSnackbarVisuals(message = message, variant = variant))
