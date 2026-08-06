@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import DesignSystem
 
 struct ContentView: View {
     @StateObject private var appCoordinator = AppCoordinatorWrapper()
@@ -63,7 +64,10 @@ struct ContentView: View {
             }
             pendingJoinCoordinator.onConsumeAutoJoinResult()
         }
-        .toast(message: $autoJoinErrorMessage)
+        .snackbar(Binding(
+            get: { autoJoinErrorMessage.map { SnackbarData(message: $0, variant: .danger) } },
+            set: { if $0 == nil { autoJoinErrorMessage = nil } }
+        ))
     }
 }
 

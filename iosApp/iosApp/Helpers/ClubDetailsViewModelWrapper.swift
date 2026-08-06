@@ -29,6 +29,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var discussionNotes: [String: Shared.DiscussionNoteInfo] = [:]
     @Published var isOperationInProgress: Bool = false
     @Published var operationMessage: String? = nil
+    @Published var operationIsError: Bool = false
     @Published var createdClubId: String? = nil
     /// ISO-8601 string for the active session's due date, or nil if none.
     @Published var sessionDueDateIso: String? = nil
@@ -63,6 +64,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
                 self.discussionNotes = state.discussionNotes
                 self.isOperationInProgress = state.isOperationInProgress
                 self.operationMessage = self.helper.operationResultMessage(result: state.operationResult)
+                self.operationIsError = self.helper.isOperationError(result: state.operationResult)
                 self.createdClubId = state.createdClubId
                 self.sessionDueDateIso = self.helper.localDateTimeToIso(dateTime: state.activeSession?.rawDueDate)
             }

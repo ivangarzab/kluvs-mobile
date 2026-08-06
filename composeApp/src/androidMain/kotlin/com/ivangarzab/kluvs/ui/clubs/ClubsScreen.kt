@@ -21,6 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -107,11 +110,11 @@ fun ClubsScreen(
     // Show snackbar whenever operationResult is set, then consume it
     LaunchedEffect(state.operationResult) {
         state.operationResult?.let { result ->
-            val message = when (result) {
-                is OperationResult.Success -> result.message
-                is OperationResult.Error -> result.message
+            val (message, variant) = when (result) {
+                is OperationResult.Success -> result.message to SnackbarVariant.SUCCESS
+                is OperationResult.Error -> result.message to SnackbarVariant.DANGER
             }
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(KluvsSnackbarVisuals(message = message, variant = variant))
             viewModel.onConsumeOperationResult()
         }
     }
@@ -215,7 +218,8 @@ fun ClubsScreen(
         }
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackbar = { KluvsSnackbar(it) }
         )
     }
 }
