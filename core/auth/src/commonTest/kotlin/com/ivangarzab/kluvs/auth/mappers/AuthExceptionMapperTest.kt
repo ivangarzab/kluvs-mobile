@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.auth.mappers
 
 import com.ivangarzab.kluvs.auth.domain.AuthError
+import com.ivangarzab.kluvs.auth.domain.EmailConfirmationRequiredException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -22,6 +23,12 @@ class AuthExceptionMapperTest {
     fun `maps email not confirmed exception`() {
         val exception = Exception("Email not confirmed")
         assertEquals(AuthError.EmailNotConfirmed, exception.toAuthError())
+    }
+
+    @Test
+    fun `maps email confirmation required exception`() {
+        val exception = EmailConfirmationRequiredException()
+        assertEquals(AuthError.EmailConfirmationRequired, exception.toAuthError())
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.auth.mappers
 
 import com.ivangarzab.kluvs.auth.domain.AuthError
+import com.ivangarzab.kluvs.auth.domain.EmailConfirmationRequiredException
 import io.github.jan.supabase.auth.exception.AuthErrorCode
 import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.exceptions.HttpRequestException
@@ -20,6 +21,7 @@ import io.ktor.client.plugins.HttpRequestTimeoutException
  * for mapping them to localized strings using platform resources.
  */
 fun Exception.toAuthError(): AuthError = when (this) {
+    is EmailConfirmationRequiredException -> AuthError.EmailConfirmationRequired
     is AuthRestException -> errorCode.toAuthError() ?: messageToAuthError()
     is HttpRequestTimeoutException -> AuthError.NoConnection
     is HttpRequestException -> AuthError.NoConnection

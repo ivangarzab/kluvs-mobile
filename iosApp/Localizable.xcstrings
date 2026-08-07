@@ -855,6 +855,17 @@
         }
       }
     },
+    "label_signup_confirmation_sent_to" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmation link sent to"
+          }
+        }
+      }
+    },
     "legal_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1376,6 +1387,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open the link from your email to choose a new password."
+          }
+        }
+      }
+    },
+    "text_signup_confirmation_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the link from your email to finish setting up your account."
           }
         }
       }

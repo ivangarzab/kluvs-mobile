@@ -86,6 +86,9 @@ class AuthRepositoryImpl(
 
             Bark.i("User successfully signed up and authenticated")
             Result.success(user)
+        } catch (e: EmailConfirmationRequiredException) {
+            Bark.i("Email sign up succeeded, pending email confirmation")
+            Result.failure(e.toAuthError())
         } catch (e: Exception) {
             Bark.e("Email sign up failed. Check email format and try again.", e)
             Result.failure(e.toAuthError())

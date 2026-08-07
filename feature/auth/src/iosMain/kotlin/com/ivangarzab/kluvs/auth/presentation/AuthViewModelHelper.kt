@@ -74,4 +74,6 @@ class AuthViewModelHelper : KoinComponent {
     fun onOAuthUrlLaunched() = viewModel.onOAuthUrlLaunched()
 
     fun signInWithApple(idToken: String) = viewModel.signInWithApple(idToken)
+
+    fun dismissEmailConfirmationSheet() = viewModel.dismissEmailConfirmationSheet()
 }

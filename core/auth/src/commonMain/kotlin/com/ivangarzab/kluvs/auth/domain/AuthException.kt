@@ -13,6 +13,9 @@ sealed class AuthError : Exception() {
     /** Email address has not been verified */
     data object EmailNotConfirmed : AuthError()
 
+    /** Sign up succeeded but requires email confirmation before a session can be created */
+    data object EmailConfirmationRequired : AuthError()
+
     /** No internet connection available */
     data object NoConnection : AuthError()
 
@@ -34,3 +37,10 @@ sealed class AuthError : Exception() {
     /** Unexpected error occurred */
     data object UnexpectedError : AuthError()
 }
+
+/**
+ * Thrown when email sign up succeeds but Supabase requires email confirmation before a
+ * session is created (i.e. no session exists yet, but no auth failure occurred either).
+ */
+class EmailConfirmationRequiredException :
+    Exception("Sign up succeeded but requires email confirmation")

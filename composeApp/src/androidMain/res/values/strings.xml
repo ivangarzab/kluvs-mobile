@@ -86,6 +86,10 @@
     <string name="reset_link_sent_to">Reset link sent to</string>
     <string name="reset_link_sent_body">Open the link from your email to choose a new password.</string>
 
+    <!-- Sign Up Confirmation Sheet -->
+    <string name="signup_confirmation_sent_to">Confirmation link sent to</string>
+    <string name="signup_confirmation_body">Open the link from your email to finish setting up your account.</string>
+
     <!-- Auth Error Messages -->
     <string name="error_invalid_credentials">Invalid email or password</string>
     <string name="error_email_not_confirmed">Please verify your email address</string>

@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.auth.remote
 
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.auth.domain.EmailConfirmationRequiredException
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
@@ -35,12 +36,16 @@ class AuthServiceImpl(
                 this.password = password
             }
 
-            // After sign up, user is automatically signed in
+            // If the Supabase project requires email confirmation, sign up succeeds but no
+            // session is created until the user confirms via email — this is not a failure.
             val session = auth.currentSessionOrNull()
-                ?: throw IllegalStateException("Sign up succeeded but no session was created")
+                ?: throw EmailConfirmationRequiredException()
 
             Bark.i("User signed up and authenticated")
             session
+        } catch (e: EmailConfirmationRequiredException) {
+            Bark.i("Email sign up succeeded, pending email confirmation")
+            throw e
         } catch (e: Exception) {
             Bark.e("Email sign up failed. User may need to retry.", e)
             throw e
