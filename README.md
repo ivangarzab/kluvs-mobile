@@ -10,7 +10,7 @@
 
 ## ℹ️ About
 
-**Kluvs** is a Kotlin Multiplatform mobile application for managing book clubs and reading sessions across Discord communities.
+**Kluvs** is a Kotlin Multiplatform mobile application for managing book clubs and reading sessions. Clubs can optionally link to a Discord server for community features via the companion bot, but Discord is not required — clubs work standalone through the app or web dashboard.
 
 ## ✨ Features
 

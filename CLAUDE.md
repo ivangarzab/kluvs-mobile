@@ -47,7 +47,7 @@ When including build or test steps in plans or agent execution, use `--quiet` fl
 
 ## Project Overview
 
-**Kluvs** is a Kotlin Multiplatform mobile application for managing book clubs and reading sessions across Discord communities. The app uses Compose Multiplatform for UI and Supabase for backend services.
+**Kluvs** is a Kotlin Multiplatform mobile application for managing book clubs and reading sessions. Clubs can optionally link to a Discord server (via the companion bot, `kluvs-bot`) for community features, but Discord is not required — the app and web dashboard both work standalone for web-only clubs (`clubs.discord_channel` is nullable; NULL means not linked to Discord). Android UI is Compose Multiplatform; iOS UI is native SwiftUI (see `iosApp/iosApp/Views/`) sharing business logic via the `:shared` module. Supabase is the backend. The app has six user-facing areas: **Auth** (login/signup/forgot password/OAuth), **Clubs** (club details, sessions, discussions, members, invites), **Books** (shelf, search, book detail/enrichment), **Member/Me** (profile, stats, reading log), **Settings** (profile edit, legal, about), and **Join** (invite-link redemption). The project is heading toward a first public Beta release.
 
 ## Build Commands
 
@@ -188,40 +188,50 @@ Reports are generated in `shared/build/reports/kover/html/`
 
 ### Module Structure
 
-The project follows a multi-module architecture. See `docs/MODULE_GRAPH.md` for the full dependency graph.
+The project follows a multi-module architecture. **`docs/MODULE_GRAPH.md` and `docs/NAVIGATION.md` are stale** (they document a 3-feature-module app with no `designsystem` or `core/database`) — treat this section and `settings.gradle.kts` as the source of truth for the module list until those docs get refreshed.
 
 ```
 kluvs-mobile/
-├── composeApp/           # Android UI (Compose Multiplatform)
-├── iosApp/               # iOS application entry point
-├── shared/               # iOS framework export + DI setup + AppCoordinator
+├── composeApp/           # Android UI (Compose Multiplatform) — NavHost, MainActivity, MainScreen (3-tab bottom nav: Me/Clubs/Books)
+├── iosApp/               # iOS application (native SwiftUI) — Views/{Auth,Clubs,Books,Me,Join}; DesignSystem/ Swift package for DS parity
+├── shared/                # iOS framework export + DI setup + AppCoordinator
+├── designsystem/         # Android Compose DS module — EmptyState (Fragmented Hex Grid), ErrorScreen, KluvsSnackbar, skeletons, tokens
 ├── core/
-│   ├── model/            # Domain models (User, Club, Member, etc.)
+│   ├── model/            # Domain models (User, Club, Member, etc.) — leaf module, no deps
+│   ├── api/              # 100% generated OpenAPI models — never hand-edit, see rule below
 │   ├── network/          # Supabase client, BuildKonfig, serializers
-│   ├── auth/             # Authentication logic and repository
-│   ├── data/             # Repositories and remote data sources
+│   ├── database/         # Room DB — DAOs (Book/Club/Discussion/Member/Progress/Shelf/etc), backs cache-first repos
+│   ├── auth/              # Authentication logic and repository
+│   ├── data/              # Repositories (cache-first via core:database) and remote data sources
 │   └── presentation/     # Shared UI utilities (FormatDateTimeUseCase)
 └── feature/
-    ├── auth/             # Auth UI (AuthViewModel)
-    ├── clubs/            # Club details UI (ClubDetailsViewModel)
-    └── member/           # Profile UI (MeViewModel)
+    ├── auth/             # Auth UI (AuthViewModel) — login, signup, forgot password, OAuth (Discord/Google; Apple is iOS-only)
+    ├── clubs/            # Club details UI (ClubDetailsViewModel) — sessions, discussions, attendance, members, invite links
+    ├── books/            # Books UI (BooksViewModel, BookDetailsViewModel) — shelf, paginated search, detail/enrichment
+    ├── member/           # Profile UI (MeViewModel) — Me screen, reading log
+    ├── settings/         # Settings UI (SettingsViewModel) — profile edit, avatar upload, legal, about
+    └── join/             # Invite-link redemption UI (JoinViewModel) — see note below
 ```
 
-Each module has its own `README.md` with detailed documentation.
+Each module has its own `README.md` with detailed documentation (not all modules have one yet — `shared/README.md` is the most complete example to follow).
+
+**Note on `feature/join`:** the full-screen `JoinScreen`/`JoinView` route (`NavDestinations.JOIN`) is registered but not reachable from any in-app UI action or deep link today. Real "join with a code" UX goes through `JoinBottomSheet` inside the authenticated Clubs tab. If deep-link handling for raw `https://kluvs.com/join/{token}` invite URLs is in scope for Beta, that's an open gap, not an existing bug.
 
 ### Data Layer Architecture
 
-The data layer follows a clean architecture pattern (located in `:core:data`):
+The data layer follows a clean architecture pattern (located in `:core:data`, backed by `:core:database`):
 
 1. **Services** (`core/data/.../remote/api/`) - Direct Supabase API communication
-   - `ServerService`, `ClubService`, `MemberService`, `SessionService`
+   - `ServerService`, `ClubService`, `MemberService`, `SessionService`, `BookService`, and others
 
 2. **Remote Data Sources** (`core/data/.../remote/source/`) - Transform DTOs to domain models
    - Use mappers to convert between DTOs and domain models
 
-3. **Repositories** (`core/data/.../repositories/`) - Abstract data access
+3. **Repositories** (`core/data/.../repositories/`) - Abstract data access, cache-first via Room (`:core:database`)
    - Expose clean domain interfaces
-   - Designed to support local caching in the future
+   - **Local caching is implemented**, not just designed-for: repositories check Room first (unless `forceRefresh = true`, used by pull-to-refresh), serve cached data if present/complete/within its `CacheTTL` window, otherwise fetch remote and write back to Room
+   - On remote failure, repositories fall back to serving stale cached data if available rather than hard-failing
+   - "Complete" is meaningful here — e.g. a `Club` cached incidentally from a Member response (missing `members`) is treated as incomplete and triggers a real refresh rather than being served as-is
 
 ### Dependency Injection with Koin
 
@@ -229,14 +239,18 @@ All dependency injection is managed through Koin with modular organization:
 
 - **`platformDataModule`** - Platform-specific dependencies (Android/iOS SecureStorage)
 - **`coreNetworkModule`** - Supabase client
+- **`coreDatabaseModule`** - Room database and DAOs
 - **`coreDataModule`** - Services, data sources, repositories
 - **`coreAuthModule`** - Auth service and repository
 - **`corePresentationModule`** - Shared presentation utilities
 - **`authFeatureModule`** - AuthViewModel
 - **`clubsFeatureModule`** - Club-related ViewModels and UseCases
+- **`booksFeatureModule`** - Books-related ViewModels and UseCases
 - **`memberFeatureModule`** - Member-related ViewModels and UseCases
+- **`settingsFeatureModule`** - SettingsViewModel
+- **`joinFeatureModule`** - JoinViewModel
 
-Koin is initialized in `shared/src/commonMain/kotlin/com/ivangarzab/kluvs/di/KoinHelper.kt`
+Koin is initialized in `shared/src/commonMain/kotlin/com/ivangarzab/kluvs/di/KoinHelper.kt`. Follow the `koin-watcher` skill whenever adding a new injectable class or module — it auto-loads on DI-shaped work.
 
 ### Configuration Management
 
@@ -266,11 +280,15 @@ Tests are co-located with their implementations in each module:
   - `:core:model` - Model tests
   - `:core:auth` - Auth repository and mapper tests
   - `:core:data` - Repository, data source, and mapper tests
+  - `:core:database` - DAO and Room migration tests
   - `:core:network` - Serializer tests
   - `:core:presentation` - Utility tests
   - `:feature:auth` - AuthViewModel tests
   - `:feature:clubs` - Club UseCase and ViewModel tests
+  - `:feature:books` - Books/BookDetails UseCase and ViewModel tests
   - `:feature:member` - Member UseCase and ViewModel tests
+  - `:feature:settings` - SettingsViewModel tests
+  - `:feature:join` - JoinViewModel tests
 
 - **Integration Tests** - Tests against real Supabase instance
   - Located in `shared/src/commonTest/`
@@ -285,6 +303,19 @@ Tests are co-located with their implementations in each module:
 ### Code Review
 
 Use the `code-review` skill (`/code-review`) to perform a project-aware review of staged changes, a file, or a module. It checks architecture boundaries, Koin registration, Bark usage, KMP hygiene, test coverage, and conventional commit format.
+
+### Repo-Internal Skills (`.claude/skills/`)
+
+These are scoped to this repo (not portable — see `../CLAUDE.md`'s Skills section for the distinction). Several auto-load based on context; only `new-kmp-feature` and `code-review` are typically invoked explicitly:
+
+| Skill | When it applies |
+|---|---|
+| `new-kmp-feature` | New screen/feature module/ViewModel — enforces the 4-phase approach. Invoke explicitly. |
+| `code-review` | `/code-review` — project-aware review of staged changes/file/module. Invoke explicitly. |
+| `bark-logging` | Auto-loads on any log statement / Bark call / exception handling work. |
+| `koin-watcher` | Auto-loads when adding injectable classes or wiring Koin modules. |
+| `migrate-room-db` | Auto-loads on schema changes — full workflow for a Room `MigrationXToY.kt`. |
+| `sync-api-contract` | Auto-loads when the backend OpenAPI spec changes and mobile DTOs need regenerating — see the codegen verification rule at the top of this file. |
 
 ## CI/CD
 
