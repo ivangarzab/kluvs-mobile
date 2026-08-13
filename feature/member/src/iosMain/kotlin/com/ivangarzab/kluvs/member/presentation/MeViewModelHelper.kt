@@ -30,7 +30,7 @@ class MeViewModelHelper : KoinComponent {
 
     fun loadUserData(userId: String) = viewModel.loadUserData(userId)
 
-    fun refresh() = viewModel.refresh()
+    fun refresh(forceRefresh: Boolean = false) = viewModel.refresh(forceRefresh)
 
     fun showLogoutConfirmation() = viewModel.onSignOutClicked()
 

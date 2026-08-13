@@ -54,8 +54,8 @@ class MeViewModelWrapper: ObservableObject {
         helper.loadUserData(userId: userId)
     }
 
-    func refresh() {
-        helper.refresh()
+    func refresh(forceRefresh: Bool = false) {
+        helper.refresh(forceRefresh: forceRefresh)
     }
 
     func onSignOutClicked() {

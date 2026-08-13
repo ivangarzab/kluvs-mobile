@@ -358,6 +358,9 @@ private struct ClubDetailView: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .background(Color.kluvsBackground)
+                .kluvsPullToRefresh(isRefreshing: viewModel.isLoading) {
+                    viewModel.refresh(forceRefresh: true)
+                }
             }
         }
         .background(Color.kluvsBackground)
