@@ -44,3 +44,13 @@ sealed class AuthError : Exception() {
  */
 class EmailConfirmationRequiredException :
     Exception("Sign up succeeded but requires email confirmation")
+
+/**
+ * Thrown when signing up with an email that's already registered.
+ *
+ * GoTrue doesn't return an error for this case when email confirmations are enabled — to avoid
+ * leaking which emails are registered, it responds with a fake "success" (null session) that's
+ * indistinguishable from a genuine new sign-up pending confirmation, except that [io.github.jan.supabase.auth.user.UserInfo.identities]
+ * comes back empty instead of containing the newly created identity.
+ */
+class UserAlreadyExistsException : Exception("An account with this email already exists")
