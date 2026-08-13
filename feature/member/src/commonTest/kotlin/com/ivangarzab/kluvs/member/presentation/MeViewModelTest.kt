@@ -216,11 +216,11 @@ class MeViewModelTest {
         assertEquals(3, state.statistics?.clubsCount)
         assertEquals(12, state.statistics?.booksRead)
 
-        // Shelf
+        // Shelf — neither session has discussions, so rows fall back to alphabetical by title
         assertEquals(2, state.shelf.size)
-        assertEquals("The Hobbit", state.shelf[0].bookTitle)
-        assertEquals("Fantasy Readers", state.shelf[0].clubName)
-        assertEquals("Dune", state.shelf[1].bookTitle)
+        assertEquals("Dune", state.shelf[0].bookTitle)
+        assertEquals("Sci-Fi Club", state.shelf[0].clubName)
+        assertEquals("The Hobbit", state.shelf[1].bookTitle)
     }
 
     @Test
