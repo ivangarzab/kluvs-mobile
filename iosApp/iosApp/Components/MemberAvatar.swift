@@ -3,7 +3,9 @@ import Shared
 import DesignSystem
 
 /**
- * Displays a member's avatar image with fallback to placeholder.
+ * Displays a member's avatar image with fallback to initials on the brand copper background
+ * (mirrors Android's `Avatar(isOwn = true)` — the "own profile" case never uses the generic
+ * hue palette, matching web/Android).
  *
  * Shows a colored rim and role icon overlay for OWNER (gold crown) and ADMIN (blue shield).
  * - Crown sits at the top edge of the avatar
@@ -12,6 +14,7 @@ import DesignSystem
 struct MemberAvatar: View {
     let avatarUrl: String?
     let size: CGFloat
+    var name: String = ""
     var role: Role? = nil
     var isLoading: Bool = false
     var onClick: (() -> Void)? = nil
@@ -70,62 +73,25 @@ struct MemberAvatar: View {
 
     @ViewBuilder
     private var avatarView: some View {
-        ZStack {
-            if let urlString = avatarUrl, !urlString.isEmpty, let url = URL(string: urlString) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        placeholderView
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: size, height: size)
-                            .clipShape(Circle())
-                    case .failure:
-                        placeholderView
-                    @unknown default:
-                        placeholderView
-                    }
-                }
-            } else {
-                placeholderView
-            }
-
-            if isLoading {
+        // isOwn: true forces the copper "own user" background for the initials fallback,
+        // matching Android's Avatar(isOwn = true) used at both MemberAvatar call sites (Me's
+        // profile section, Settings' edit-profile avatar) — never the generic hue palette.
+        Avatar(name: name, avatarUrl: avatarUrl, size: size, isOwn: true, isLoading: isLoading)
+            .overlay(
                 Circle()
-                    .fill(Color.black.opacity(0.5))
-                    .frame(width: size, height: size)
-
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(size / 60)
-            }
-        }
-        .frame(width: size, height: size)
-        .overlay(
-            Circle()
-                .strokeBorder(rimColor ?? Color.clear, lineWidth: 2)
-        )
-    }
-
-    private var placeholderView: some View {
-        Image("img_fallback")
-            .resizable()
-            .scaledToFill()
-            .frame(width: size, height: size)
-            .clipShape(Circle())
+                    .strokeBorder(rimColor ?? Color.clear, lineWidth: 2)
+            )
     }
 }
 
 #Preview {
     VStack(spacing: 20) {
         HStack(spacing: 16) {
-            MemberAvatar(avatarUrl: nil, size: 60, role: .member)
-            MemberAvatar(avatarUrl: nil, size: 60, role: .admin)
-            MemberAvatar(avatarUrl: nil, size: 60, role: .owner)
+            MemberAvatar(avatarUrl: nil, size: 60, name: "Jane Doe", role: .member)
+            MemberAvatar(avatarUrl: nil, size: 60, name: "Jane Doe", role: .admin)
+            MemberAvatar(avatarUrl: nil, size: 60, name: "Jane Doe", role: .owner)
         }
-        MemberAvatar(avatarUrl: nil, size: 60, isLoading: true)
+        MemberAvatar(avatarUrl: nil, size: 60, name: "Jane Doe", isLoading: true)
     }
     .padding()
 }

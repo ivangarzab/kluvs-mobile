@@ -204,6 +204,7 @@ struct ProfileSection: View {
             MemberAvatar(
                 avatarUrl: profile.avatarUrl,
                 size: 64,
+                name: profile.name,
                 isLoading: false,
                 onClick: nil
             )

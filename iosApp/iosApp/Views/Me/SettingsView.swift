@@ -104,6 +104,7 @@ struct EditProfileSection: View {
                 MemberAvatar(
                     avatarUrl: avatarUrl,
                     size: 64,
+                    name: editedName,
                     isLoading: isUploadingAvatar,
                     onClick: nil
                 )
