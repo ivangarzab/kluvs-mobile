@@ -20,7 +20,7 @@ struct LoginView: View {
                 LoadingView()
             case .authenticated:
                 EmptyView()
-            case .unauthenticated, .error:
+            case .unauthenticated, .error, .emailConfirmationPending:
                 AuthFormView(
                     mode: .login,
                     viewModel: viewModel,

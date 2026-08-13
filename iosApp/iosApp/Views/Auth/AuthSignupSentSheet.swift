@@ -48,7 +48,9 @@ private struct AuthSignupSheetSent: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(20)
+        .background(KluvsTheme.colors.cardAlt)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 

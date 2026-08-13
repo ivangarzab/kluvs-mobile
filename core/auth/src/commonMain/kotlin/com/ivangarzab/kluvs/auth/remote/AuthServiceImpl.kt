@@ -31,7 +31,10 @@ class AuthServiceImpl(
         Bark.v("Email sign up initiated")
 
         return try {
-            auth.signUpWith(Email) {
+            // Confirmation emails redirect back into the app via the same deep link OAuth uses
+            // (kluvs://auth/callback) — without this, GoTrue falls back to the project's raw
+            // site_url, which has no page to land on.
+            auth.signUpWith(Email, redirectUrl = REDIRECT_URL) {
                 this.email = email
                 this.password = password
             }
