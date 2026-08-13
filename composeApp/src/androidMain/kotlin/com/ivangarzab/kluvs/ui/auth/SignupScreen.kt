@@ -39,6 +39,13 @@ fun SignupScreen(
         )
     }
 
+    if (state is AuthState.EmailConfirmationPending) {
+        AuthSignUpConfirmationSheet(
+            email = (state as AuthState.EmailConfirmationPending).email,
+            onDismiss = viewModel::dismissEmailConfirmationSheet,
+        )
+    }
+
     // Collect OAuth callbacks from MainActivity
     LaunchedEffect(Unit) {
         OAuthCallbackHandler.callbacks.collect { callbackUrl ->
@@ -61,6 +68,7 @@ fun SignupScreen(
         is AuthState.Authenticated -> { /* No-op */ }
         is AuthState.OAuthPending -> LoadingScreen() // Show loading while browser opens
         is AuthState.Unauthenticated,
+        is AuthState.EmailConfirmationPending,
         is AuthState.Error -> {
             AuthFormContent(
                 modifier = modifier,

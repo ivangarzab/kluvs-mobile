@@ -376,6 +376,42 @@ class AuthViewModelTest {
         assertEquals(AuthError.UserAlreadyExists, (viewModel.state.value as AuthState.Error).error)
     }
 
+    @Test
+    fun `signUp with email confirmation required updates state to pending and clears form`() = runTest {
+        // Given
+        viewModel.onEmailFieldChanged("new@example.com")
+        viewModel.onPasswordFieldChanged("password123")
+        viewModel.onConfirmPasswordFieldChanged("password123")
+        everySuspend { authRepository.signUpWithEmail("new@example.com", "password123") } returns
+            Result.failure(AuthError.EmailConfirmationRequired)
+
+        // When
+        viewModel.validateAndSignUp()
+
+        // Then
+        assertIs<AuthState.EmailConfirmationPending>(viewModel.state.value)
+        assertEquals("new@example.com", (viewModel.state.value as AuthState.EmailConfirmationPending).email)
+        assertEquals("", viewModel.uiState.value.emailField)
+        assertEquals("", viewModel.uiState.value.passwordField)
+    }
+
+    @Test
+    fun `dismissEmailConfirmationSheet resets state to unauthenticated`() = runTest {
+        // Given
+        viewModel.onEmailFieldChanged("new@example.com")
+        viewModel.onPasswordFieldChanged("password123")
+        viewModel.onConfirmPasswordFieldChanged("password123")
+        everySuspend { authRepository.signUpWithEmail("new@example.com", "password123") } returns
+            Result.failure(AuthError.EmailConfirmationRequired)
+        viewModel.validateAndSignUp()
+
+        // When
+        viewModel.dismissEmailConfirmationSheet()
+
+        // Then
+        assertIs<AuthState.Unauthenticated>(viewModel.state.value)
+    }
+
     // ========== Sign Out Tests ==========
 
     @Test

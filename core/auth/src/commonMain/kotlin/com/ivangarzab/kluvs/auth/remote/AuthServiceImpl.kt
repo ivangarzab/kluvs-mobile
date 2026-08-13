@@ -1,6 +1,8 @@
 package com.ivangarzab.kluvs.auth.remote
 
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.auth.domain.EmailConfirmationRequiredException
+import com.ivangarzab.kluvs.auth.domain.UserAlreadyExistsException
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
@@ -30,17 +32,37 @@ class AuthServiceImpl(
         Bark.v("Email sign up initiated")
 
         return try {
-            auth.signUpWith(Email) {
+            // Confirmation emails redirect back into the app via the same deep link OAuth uses
+            // (kluvs://auth/callback) — without this, GoTrue falls back to the project's raw
+            // site_url, which has no page to land on.
+            val userInfo = auth.signUpWith(Email, redirectUrl = REDIRECT_URL) {
                 this.email = email
                 this.password = password
             }
 
-            // After sign up, user is automatically signed in
             val session = auth.currentSessionOrNull()
-                ?: throw IllegalStateException("Sign up succeeded but no session was created")
+            if (session != null) {
+                Bark.i("User signed up and authenticated")
+                return session
+            }
 
-            Bark.i("User signed up and authenticated")
-            session
+            // GoTrue doesn't error when the email is already registered — to avoid leaking which
+            // emails exist, it fakes a "success" (null session) indistinguishable from a genuine
+            // pending-confirmation sign up, except that identities comes back empty instead of
+            // containing the newly created identity.
+            if (userInfo?.identities.isNullOrEmpty()) {
+                throw UserAlreadyExistsException()
+            }
+
+            // Otherwise the Supabase project requires email confirmation: sign up succeeded but
+            // no session is created until the user confirms via email — this is not a failure.
+            throw EmailConfirmationRequiredException()
+        } catch (e: UserAlreadyExistsException) {
+            Bark.i("Email sign up rejected, account already exists")
+            throw e
+        } catch (e: EmailConfirmationRequiredException) {
+            Bark.i("Email sign up succeeded, pending email confirmation")
+            throw e
         } catch (e: Exception) {
             Bark.e("Email sign up failed. User may need to retry.", e)
             throw e

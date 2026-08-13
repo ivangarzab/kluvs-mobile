@@ -18,6 +18,7 @@ import com.ivangarzab.kluvs.auth.domain.AuthError
 fun AuthError.toLocalizedMessage(): String = when (this) {
     is AuthError.InvalidCredentials -> stringResource(R.string.error_invalid_credentials)
     is AuthError.EmailNotConfirmed -> stringResource(R.string.error_email_not_confirmed)
+    is AuthError.EmailConfirmationRequired -> stringResource(R.string.check_your_inbox)
     is AuthError.NoConnection -> stringResource(R.string.error_no_connection)
     is AuthError.RateLimitExceeded -> stringResource(R.string.error_rate_limit_exceeded)
     is AuthError.UserNotFound -> stringResource(R.string.error_user_not_found)
