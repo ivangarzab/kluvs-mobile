@@ -20,6 +20,10 @@ class AuthViewModel(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
+    companion object {
+        private val EMAIL_REGEX = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
+    }
+
     private val _state = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
     val state: StateFlow<AuthState> = _state.asStateFlow()
 
@@ -62,7 +66,7 @@ class AuthViewModel(
     fun validateAndSignIn() {
         val emailError = when {
             _uiState.value.emailField.isBlank() -> "Email is required"
-            !_uiState.value.emailField.contains("@") -> "Please enter a valid email"
+            !EMAIL_REGEX.matches(_uiState.value.emailField) -> "Please enter a valid email"
             else -> null
         }
 
@@ -83,7 +87,7 @@ class AuthViewModel(
     fun validateAndSignUp() {
         val emailError = when {
             _uiState.value.emailField.isBlank() -> "Email is required"
-            !_uiState.value.emailField.contains("@") -> "Please enter a valid email"
+            !EMAIL_REGEX.matches(_uiState.value.emailField) -> "Please enter a valid email"
             else -> null
         }
 
@@ -161,7 +165,7 @@ class AuthViewModel(
     fun sendPasswordResetEmail() {
         val emailError = when {
             _forgotPasswordState.value.emailField.isBlank() -> "Email is required"
-            !_forgotPasswordState.value.emailField.contains("@") -> "Please enter a valid email"
+            !EMAIL_REGEX.matches(_forgotPasswordState.value.emailField) -> "Please enter a valid email"
             else -> null
         }
 
