@@ -54,14 +54,16 @@ class GetOnYourShelfUseCase(
             var nearestDiscussion: Discussion? = null
             var nearestDiscussionClubName: String? = null
 
-            val items = clubs.mapNotNull { club ->
+            // Paired with each item's raw next-discussion date (pre-formatting) so the shelf can
+            // be sorted below: soonest discussion first, then alphabetically by title for rows
+            // with nothing upcoming.
+            val entries = clubs.mapNotNull { club ->
                 val fullClub = clubRepository.getClub(club.id, forceRefresh = forceRefresh).getOrNull()
                 fullClub?.activeSession?.let { session ->
                     val ownProgress = getSessionProgress(session.id, session.book.pageCount).getOrNull()
                     val upcomingDiscussions = session.discussions.filter { it.date > now }
-                    val nextDiscussionDate = upcomingDiscussions
-                        .minByOrNull { it.date }
-                        ?.let { formatDateTime(it.date, DateTimeFormat.DATE_ONLY) }
+                    val rawNextDiscussionDate = upcomingDiscussions.minByOrNull { it.date }?.date
+                    val nextDiscussionDate = rawNextDiscussionDate?.let { formatDateTime(it, DateTimeFormat.DATE_ONLY) }
 
                     upcomingDiscussions.minByOrNull { it.date }?.let { candidate ->
                         if (nearestDiscussion == null || candidate.date < nearestDiscussion!!.date) {
@@ -83,9 +85,17 @@ class GetOnYourShelfUseCase(
                         ownProgress = ownProgress
                     )
                     Bark.d("Added shelf item (Title: ${session.book.title}, Club: ${club.name})")
-                    item
+                    item to rawNextDiscussionDate
                 }
             }
+
+            val items = entries.sortedWith(
+                compareBy(
+                    { it.second == null },
+                    { it.second },
+                    { it.first.bookTitle.lowercase() }
+                )
+            ).map { it.first }
 
             val upNext = nearestDiscussion?.let { discussion ->
                 UpNextItem(
