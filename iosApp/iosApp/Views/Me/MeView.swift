@@ -105,6 +105,9 @@ struct MeView: View {
                         }
                         .padding(.horizontal, 16)
                     }
+                    .kluvsPullToRefresh(isRefreshing: viewModel.isLoading) {
+                        viewModel.refresh(forceRefresh: true)
+                    }
                     .transition(.opacity)
                 }
             }
