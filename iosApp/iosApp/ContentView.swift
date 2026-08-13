@@ -68,6 +68,7 @@ struct ContentView: View {
             get: { autoJoinErrorMessage.map { SnackbarData(message: $0, variant: .danger) } },
             set: { if $0 == nil { autoJoinErrorMessage = nil } }
         ))
+        .kluvsDismissKeyboardOnTap()
     }
 }
 
