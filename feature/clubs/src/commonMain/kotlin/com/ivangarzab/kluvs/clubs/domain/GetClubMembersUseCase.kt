@@ -42,7 +42,7 @@ class GetClubMembersUseCase(
                     MemberListItemInfo(
                         memberId = member.id,
                         name = member.name,
-                        handle = member.handle ?: "@",
+                        handle = member.handle ?: "",
                         avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath),
                         role = clubMember.role,
                         userId = member.userId

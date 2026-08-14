@@ -15,7 +15,7 @@ fun MemberDto.toDomain(): Member {
     return Member(
         id = id.toString(),
         name = name,
-        handle = handle,
+        handle = handle.normalizeHandle(),
         avatarPath = avatarPath,
         booksRead = booksRead ?: 0,
         userId = userId,
@@ -36,7 +36,7 @@ fun MemberGetResponseDto.toDomain(): Member {
     return Member(
         id = id.toString(),
         name = name,
-        handle = handle,
+        handle = handle.normalizeHandle(),
         avatarPath = avatarPath,
         booksRead = booksRead ?: 0,
         userId = userId,
@@ -45,3 +45,13 @@ fun MemberGetResponseDto.toDomain(): Member {
         shameClubs = shameClubs?.map { it.toDomain() } ?: emptyList()
     )
 }
+
+/**
+ * Strips any leading "@" from a raw handle straight off the API boundary, so [Member.handle]
+ * is always the bare handle domain-wide. Historically some clients (this app included, see
+ * `UpdateUserProfileUseCase`) saved the handle with "@" already baked in, while display code
+ * everywhere else also prepends its own "@" — the combination doubled up as "@@handle" for any
+ * member whose handle was ever saved that way. `trimStart` (not `removePrefix`, which only
+ * strips one) also self-heals rows that got double-saved before this fix existed.
+ */
+internal fun String?.normalizeHandle(): String? = this?.trimStart('@')

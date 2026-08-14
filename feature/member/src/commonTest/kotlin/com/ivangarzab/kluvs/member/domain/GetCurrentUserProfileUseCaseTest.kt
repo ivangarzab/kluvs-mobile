@@ -52,7 +52,7 @@ class GetCurrentUserProfileUseCaseTest {
         val profile = result.getOrNull()!!
         assertEquals("member-456", profile.memberId)
         assertEquals("John Doe", profile.name)
-        assertEquals("@johndoe", profile.handle)
+        assertEquals("johndoe", profile.handle)
         assertEquals("2025", profile.joinDate) // Placeholder until we add created_at
         assertNull(profile.avatarUrl)
         verifySuspend { memberRepository.getMemberByUserId(userId) }
@@ -77,7 +77,7 @@ class GetCurrentUserProfileUseCaseTest {
 
         // Then
         assertTrue(result.isSuccess)
-        assertEquals("@alicesmith", result.getOrNull()?.handle)
+        assertEquals("alicesmith", result.getOrNull()?.handle)
         verifySuspend { memberRepository.getMemberByUserId(userId) }
     }
 
@@ -99,7 +99,7 @@ class GetCurrentUserProfileUseCaseTest {
 
         // Then
         assertTrue(result.isSuccess)
-        assertEquals("@maryjanewatson", result.getOrNull()?.handle)
+        assertEquals("maryjanewatson", result.getOrNull()?.handle)
         verifySuspend { memberRepository.getMemberByUserId(userId) }
     }
 

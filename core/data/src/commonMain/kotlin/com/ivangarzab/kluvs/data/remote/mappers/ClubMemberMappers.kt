@@ -18,7 +18,7 @@ fun ClubMemberDto.toDomain(): ClubMember {
         member = Member(
             id = id?.toString() ?: "",
             name = name ?: "",
-            handle = handle,
+            handle = handle.normalizeHandle(),
             avatarPath = avatarPath,
             booksRead = booksRead ?: 0,
             userId = null, // Not present on this embedded wrapper
