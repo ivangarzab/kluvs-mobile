@@ -54,10 +54,11 @@ class GetCurrentUserProfileUseCase(
 
     /**
     * Generates a handle from a member's name.
-    * Converts "John Doe" to "@johndoe".
+    * Converts "John Doe" to "johndoe" — bare, no "@". [UserProfile.handle] is always the bare
+    * handle domain-wide; call sites add their own "@" when displaying it.
     */
     private fun generateHandleFromName(name: String): String {
-        return "@${name.lowercase().replace(" ", "")}"
+        return name.lowercase().replace(" ", "")
     }
 
 }

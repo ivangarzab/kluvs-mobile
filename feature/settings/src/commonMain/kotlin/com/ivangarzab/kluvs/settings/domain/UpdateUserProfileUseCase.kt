@@ -38,12 +38,14 @@ class UpdateUserProfileUseCase(
             )
         }
 
-        val fullHandle = "@$handle"
-        Bark.d("Updating user profile (Member ID: $memberId, Name: $name, Handle: $fullHandle)")
+        // Stored bare, without "@" — matches the backend's convention (see seed.sql) and every
+        // display site, which prepends its own "@". Saving it pre-prefixed here used to double
+        // up as "@@handle" wherever it was shown.
+        Bark.d("Updating user profile (Member ID: $memberId, Name: $name, Handle: $handle)")
         return memberRepository.updateMember(
             memberId = memberId,
             name = name,
-            handle = fullHandle
+            handle = handle
         ).map { }.onFailure { error ->
             Bark.e("Failed to update profile (Member ID: $memberId).", error)
         }

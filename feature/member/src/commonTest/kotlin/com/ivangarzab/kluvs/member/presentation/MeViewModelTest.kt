@@ -210,7 +210,7 @@ class MeViewModelTest {
         // Profile
         assertEquals("member-1", state.profile?.memberId)
         assertEquals("Alice Johnson", state.profile?.name)
-        assertEquals("@alicejohnson", state.profile?.handle)
+        assertEquals("alicejohnson", state.profile?.handle)
 
         // Statistics
         assertEquals(3, state.statistics?.clubsCount)
@@ -351,7 +351,7 @@ class MeViewModelTest {
         viewModel.loadUserData(userId)
 
         // Then
-        assertEquals("@johndoe", viewModel.state.value.profile?.handle)
+        assertEquals("johndoe", viewModel.state.value.profile?.handle)
     }
 
     @Test
