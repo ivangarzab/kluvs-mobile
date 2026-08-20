@@ -209,9 +209,12 @@ struct DiscussionTimelineItem: View {
                         .frame(width: 16, height: 16)
                 }
                 if discussion.isPast {
-                    IconType.checkmark.image
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(KluvsTheme.colors.background)
+                    // .checkmark is a custom asset (ic_checkmark), not an SF Symbol — `.font()`
+                    // only resizes SF Symbols, so it was a no-op here and the glyph rendered at
+                    // its native intrinsic size instead of the intended tiny size. `Icon` is
+                    // resizable and matches Android's 10dp mark inside its 16dp dot.
+                    Icon(type: .checkmark, contentDescription: nil, tint: KluvsTheme.colors.background)
+                        .frame(width: 10, height: 10)
                 }
             }
         }
