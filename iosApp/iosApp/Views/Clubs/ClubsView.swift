@@ -421,6 +421,12 @@ private struct ClubDetailView: View {
             isDestructive: true,
             onConfirm: { viewModel.onDeleteClub() }
         )
+        .onChange(of: viewModel.deletedClubId) { _, newValue in
+            if newValue != nil {
+                dismiss()
+                viewModel.onConsumeDeletedClubId()
+            }
+        }
         // Create session
         .kluvsBottomSheet(isPresented: $showCreateSessionSheet, header: "Create Session") {
             CreateSessionFields(

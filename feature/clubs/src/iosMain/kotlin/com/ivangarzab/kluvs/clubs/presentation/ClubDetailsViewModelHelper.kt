@@ -52,6 +52,7 @@ class ClubDetailsViewModelHelper : KoinComponent {
     // General tab
     fun onUpdateClubName(newName: String) = viewModel.onUpdateClubName(newName)
     fun onDeleteClub() = viewModel.onDeleteClub()
+    fun onConsumeDeletedClubId() = viewModel.onConsumeDeletedClubId()
     fun onUpdateJoinPolicy(joinPolicy: JoinPolicy) = viewModel.onUpdateJoinPolicy(joinPolicy)
     fun onRotateInviteLink() = viewModel.onRotateInviteLink()
 
