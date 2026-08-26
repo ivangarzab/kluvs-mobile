@@ -122,6 +122,7 @@ fun ClubsScreen(
     // Navigate into a just-created club, then consume the signal
     LaunchedEffect(state.createdClubId) {
         state.createdClubId?.let { clubId ->
+            viewModel.selectClub(clubId)
             navController.navigate("detail/$clubId")
             viewModel.onConsumeCreatedClubId()
         }
