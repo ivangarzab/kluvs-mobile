@@ -252,7 +252,7 @@ class MemberMappersTest {
     }
 
     @Test
-    fun `MemberDto with @-prefixed handle strips the @`() {
+    fun `MemberDto with at-sign-prefixed handle strips the prefix`() {
         // Given: A MemberDto whose handle already has "@" baked in (legacy corrupted data,
         // or a client that saves it that way) — display code everywhere prepends its own "@",
         // so the domain model must always expose the bare handle.
@@ -272,7 +272,7 @@ class MemberMappersTest {
     }
 
     @Test
-    fun `MemberDto with doubly @-prefixed handle strips both`() {
+    fun `MemberDto with doubly at-sign-prefixed handle strips both`() {
         // Given: A handle saved twice by the pre-fix bug ("@@testuser")
         val dto = MemberDto(
             id = 1,
