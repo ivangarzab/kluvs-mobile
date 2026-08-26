@@ -96,6 +96,7 @@ struct ClubsView: View {
         }
         .onChange(of: viewModel.createdClubId) { _, newValue in
             if let clubId = newValue {
+                viewModel.selectClub(clubId: clubId)
                 path.append(clubId)
                 viewModel.onConsumeCreatedClubId()
             }
