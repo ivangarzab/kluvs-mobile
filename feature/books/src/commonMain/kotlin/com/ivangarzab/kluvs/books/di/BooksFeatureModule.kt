@@ -4,6 +4,7 @@ import com.ivangarzab.kluvs.books.domain.AssignShelfUseCase
 import com.ivangarzab.kluvs.books.domain.GetBookEnrichmentUseCase
 import com.ivangarzab.kluvs.books.domain.GetLikeStatusUseCase
 import com.ivangarzab.kluvs.books.domain.GetShelfUseCase
+import com.ivangarzab.kluvs.books.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.books.domain.RemoveFromShelfUseCase
 import com.ivangarzab.kluvs.books.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.books.domain.ToggleLikeUseCase
@@ -21,6 +22,7 @@ val booksFeatureModule = module {
     factoryOf(::SearchBooksUseCase)
     factoryOf(::GetBookEnrichmentUseCase)
     factoryOf(::GetLikeStatusUseCase)
+    factoryOf(::RegisterBookUseCase)
 
     // ViewModels
     factoryOf(::BooksViewModel)
