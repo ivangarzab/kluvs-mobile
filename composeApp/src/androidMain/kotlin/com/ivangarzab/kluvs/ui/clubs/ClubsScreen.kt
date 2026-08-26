@@ -128,6 +128,14 @@ fun ClubsScreen(
         }
     }
 
+    // Navigate back out of a just-deleted club's detail screen, then consume the signal
+    LaunchedEffect(state.deletedClubId) {
+        state.deletedClubId?.let {
+            navController.popBackStack()
+            viewModel.onConsumeDeletedClubId()
+        }
+    }
+
     // Navigate into a club opened from outside this tab (e.g. auto-join after sign-in)
     LaunchedEffect(initialClubId) {
         initialClubId?.let { clubId ->

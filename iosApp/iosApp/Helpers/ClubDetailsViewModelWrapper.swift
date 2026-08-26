@@ -32,6 +32,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var operationMessage: String? = nil
     @Published var operationIsError: Bool = false
     @Published var createdClubId: String? = nil
+    @Published var deletedClubId: String? = nil
     /// ISO-8601 string for the active session's due date, or nil if none.
     @Published var sessionDueDateIso: String? = nil
 
@@ -68,6 +69,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
                 self.operationMessage = self.helper.operationResultMessage(result: state.operationResult)
                 self.operationIsError = self.helper.isOperationError(result: state.operationResult)
                 self.createdClubId = state.createdClubId
+                self.deletedClubId = state.deletedClubId
                 self.sessionDueDateIso = self.helper.localDateTimeToIso(dateTime: state.activeSession?.rawDueDate)
             }
         }
@@ -85,6 +87,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     // General tab
     func onUpdateClubName(_ newName: String) { helper.onUpdateClubName(newName: newName) }
     func onDeleteClub() { helper.onDeleteClub() }
+    func onConsumeDeletedClubId() { helper.onConsumeDeletedClubId() }
     func onUpdateJoinPolicy(_ joinPolicy: Shared.JoinPolicy) { helper.onUpdateJoinPolicy(joinPolicy: joinPolicy) }
     func onRotateInviteLink() { helper.onRotateInviteLink() }
 

@@ -267,12 +267,44 @@ class ClubDetailsViewModel(
         }
     }
 
+    /**
+     * Deletes the current club. Unlike other mutations, this doesn't go through
+     * [launchMutation] — refreshing a club that was just deleted would just error out.
+     * Instead it signals [ClubDetailsState.deletedClubId] so the UI navigates back out of
+     * the now-gone club's detail screen.
+     */
     fun onDeleteClub() {
         val role = _state.value.userRole ?: return
         val clubId = currentClubId ?: return
-        launchMutation("Club deleted") {
+        viewModelScope.launch {
+            _state.update { it.copy(isOperationInProgress = true) }
             deleteClubUseCase(DeleteClubUseCase.Params(clubId), role)
+                .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isOperationInProgress = false,
+                            availableClubs = it.availableClubs.filterNot { club -> club.id == clubId },
+                            deletedClubId = clubId,
+                            operationResult = OperationResult.Success("Club deleted")
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Operation failed: Delete club. ${error.message}", error)
+                    _state.update {
+                        it.copy(
+                            isOperationInProgress = false,
+                            operationResult = OperationResult.Error(
+                                error.message ?: "An unexpected error occurred"
+                            )
+                        )
+                    }
+                }
         }
+    }
+
+    fun onConsumeDeletedClubId() {
+        _state.update { it.copy(deletedClubId = null) }
     }
 
     /**

@@ -552,6 +552,48 @@ class ClubDetailsViewModelTest {
     // -------------------------------------------------------------------------
 
     @Test
+    fun `onDeleteClub sets deletedClubId and removes the club from availableClubs on success`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Doomed Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.OWNER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { clubRepository.deleteClub(clubId = clubId) } returns Result.success("Club deleted")
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onDeleteClub()
+
+        val state = viewModel.state.value
+        assertEquals(clubId, state.deletedClubId)
+        assertTrue(state.availableClubs.none { it.id == clubId })
+        assertIs<OperationResult.Success>(state.operationResult)
+    }
+
+    @Test
+    fun `onConsumeDeletedClubId clears deletedClubId`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Doomed Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.OWNER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { clubRepository.deleteClub(clubId = clubId) } returns Result.success("Club deleted")
+        viewModel.loadUserClubs("u1")
+        viewModel.onDeleteClub()
+
+        viewModel.onConsumeDeletedClubId()
+
+        assertEquals(null, viewModel.state.value.deletedClubId)
+    }
+
+    @Test
     fun `onUpdateClubName sets operationResult Success on success`() = runTest {
         val clubId = "club-1"
         val updatedClub = Club(
