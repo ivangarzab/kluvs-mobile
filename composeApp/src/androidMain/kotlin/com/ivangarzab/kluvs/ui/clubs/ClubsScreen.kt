@@ -206,11 +206,11 @@ fun ClubsScreen(
                     onSaveDiscussionNote = viewModel::onSaveDiscussionNote,
                     onDeleteDiscussionNote = viewModel::onDeleteDiscussionNote,
                     onUpdateMemberRole = { memberId, newRole ->
-                        val currentMemberId = state.members.find { it.userId == userId }?.memberId ?: return@ClubsScreenContent
+                        val currentMemberId = state.currentMemberId ?: return@ClubsScreenContent
                         viewModel.onUpdateMemberRole(memberId, currentMemberId, newRole)
                     },
                     onRemoveMember = { memberId ->
-                        val currentMemberId = state.members.find { it.userId == userId }?.memberId ?: return@ClubsScreenContent
+                        val currentMemberId = state.currentMemberId ?: return@ClubsScreenContent
                         viewModel.onRemoveMember(memberId, currentMemberId)
                     }
                 )
@@ -439,14 +439,13 @@ fun ClubsScreenContent(
                                         ownProgress = state.ownProgress,
                                         userRole = state.userRole,
                                         members = state.members,
-                                        currentUserId = currentUserId,
+                                        currentMemberId = state.currentMemberId,
                                         onEditSession = { showEditSessionSheet = true },
                                         onEndSession = { showEndSessionDialog = true },
                                         onUpdateProgress = { showProgressSheet = true },
                                         onCreateSession = { showCreateSessionSheet = true },
                                         onToggleParticipation = { isReading ->
-                                            val currentMemberId = state.members.find { it.userId == currentUserId }?.memberId
-                                                ?: return@OverviewTab
+                                            val currentMemberId = state.currentMemberId ?: return@OverviewTab
                                             onToggleParticipation(currentMemberId, isReading)
                                         }
                                     )

@@ -13,6 +13,13 @@ data class ClubDetailsState(
     val activeSession: ActiveSessionDetails? = null,
     val ownProgress: OwnProgressInfo? = null,
     val members: List<MemberListItemInfo> = emptyList(),
+    /**
+     * The signed-in user's own member ID, resolved independently of [members] (see
+     * [com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase]) — a stale/failed roster
+     * fetch no longer silently hides membership-gated actions that don't actually need the
+     * roster at all (opt-in/out, change role, remove member).
+     */
+    val currentMemberId: String? = null,
     val userRole: Role? = null,
     val isOperationInProgress: Boolean = false,
     val operationResult: OperationResult? = null,

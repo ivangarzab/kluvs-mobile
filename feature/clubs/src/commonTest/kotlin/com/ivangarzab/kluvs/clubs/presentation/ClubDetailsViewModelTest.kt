@@ -14,6 +14,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetAttendanceRosterUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
@@ -89,6 +90,7 @@ class ClubDetailsViewModelTest {
     private lateinit var getActiveSession: GetActiveSessionUseCase
     private lateinit var getClubMembers: GetClubMembersUseCase
     private lateinit var getMemberClubs: GetMemberClubsUseCase
+    private lateinit var getCurrentMemberId: GetCurrentMemberIdUseCase
     private lateinit var createClubUseCase: CreateClubUseCase
     private lateinit var updateClubUseCase: UpdateClubUseCase
     private lateinit var updateJoinPolicyUseCase: UpdateJoinPolicyUseCase
@@ -138,6 +140,7 @@ class ClubDetailsViewModelTest {
         getActiveSession = GetActiveSessionUseCase(clubRepository, formatDateTime)
         getClubMembers = GetClubMembersUseCase(clubRepository, avatarRepository)
         getMemberClubs = GetMemberClubsUseCase(memberRepository, clubRepository, avatarRepository)
+        getCurrentMemberId = GetCurrentMemberIdUseCase(memberRepository)
         createClubUseCase = CreateClubUseCase(clubRepository, memberRepository)
         updateClubUseCase = UpdateClubUseCase(clubRepository)
         updateJoinPolicyUseCase = UpdateJoinPolicyUseCase(clubRepository)
@@ -164,7 +167,7 @@ class ClubDetailsViewModelTest {
         deleteDiscussionNoteUseCase = DeleteDiscussionNoteUseCase(discussionNoteRepository)
 
         viewModel = ClubDetailsViewModel(
-            getClubDetails, getActiveSession, getClubMembers, getMemberClubs,
+            getClubDetails, getActiveSession, getClubMembers, getMemberClubs, getCurrentMemberId,
             createClubUseCase,
             updateClubUseCase, updateJoinPolicyUseCase, rotateInviteLinkUseCase,
             deleteClubUseCase, createSessionUseCase,
@@ -179,6 +182,15 @@ class ClubDetailsViewModelTest {
         )
 
         every { avatarRepository.getAvatarUrl(null) } returns null
+
+        // Default resolution for GetCurrentMemberIdUseCase's independent lookup (fired on
+        // every loadClubData call once loadUserClubs has set currentUserId) — most tests don't
+        // exercise the participation-toggle/role-change plumbing this feeds, so give it an
+        // inert default here rather than repeating it in every test. Individual tests can still
+        // override with a more specific stub where they care about the resolved member ID.
+        everySuspend { memberRepository.getMemberByUserId(any(), any()) } returns Result.success(
+            Member(id = "default-member-id", name = "Current User", userId = "u1")
+        )
         everySuspend { progressRepository.getProgress(any(), any(), any()) } returns Result.success(emptyList())
     }
 
@@ -245,6 +257,36 @@ class ClubDetailsViewModelTest {
         assertEquals("session-1", state.activeSession?.sessionId)
         assertEquals(2, state.members.size)
         assertEquals("Alice", state.members[0].name)
+    }
+
+    @Test
+    fun `loadClubData resolves currentMemberId even when the club's member roster omits the signed-in user`() = runTest {
+        // Regression test: currentMemberId used to be derived by searching this same club's
+        // member roster for the signed-in user's userId — a stale/incomplete roster (missing
+        // the signed-in user, e.g. a just-joined member not yet reflected in a cached list)
+        // silently hid every membership-gated action (participation toggle, change role, remove
+        // member) with no error. It's now resolved via GetCurrentMemberIdUseCase, independent
+        // of this club's roster entirely.
+        val userId = "u1"
+        val clubId = "club-123"
+        val club = Club(
+            id = clubId, name = "Test Club", serverId = null, discordChannel = null,
+            // Roster deliberately does NOT include a member with userId == "u1".
+            members = listOf(ClubMember(role = Role.MEMBER, Member(id = "m2", userId = "u2", name = "Bob", booksRead = 0, clubs = null))),
+            activeSession = null, pastSessions = emptyList(), shameList = emptyList()
+        )
+        // Overrides the generic setup() default so this test can assert on a distinct ID —
+        // any() for forceRefresh since GetMemberClubsUseCase always forces it while
+        // GetCurrentMemberIdUseCase uses loadClubData's own (here: default false).
+        val signedInMember = Member(id = "current-member-id", userId = userId, name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId(userId, any()) } returns Result.success(signedInMember)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+
+        viewModel.loadUserClubs(userId)
+
+        val state = viewModel.state.value
+        assertEquals("current-member-id", state.currentMemberId)
+        assertTrue(state.members.none { it.userId == userId })
     }
 
     @Test

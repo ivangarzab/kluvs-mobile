@@ -24,6 +24,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var activeSession: Shared.ActiveSessionDetails? = nil
     @Published var ownProgress: Shared.OwnProgressInfo? = nil
     @Published var members: [Shared.MemberListItemInfo] = []
+    @Published var currentMemberId: String? = nil
     @Published var userRole: Shared.Role? = nil
     @Published var discussionRosters: [String: Shared.AttendanceRoster] = [:]
     @Published var discussionNotes: [String: Shared.DiscussionNoteInfo] = [:]
@@ -59,6 +60,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
                 self.activeSession = state.activeSession
                 self.ownProgress = state.ownProgress
                 self.members = state.members
+                self.currentMemberId = state.currentMemberId
                 self.userRole = state.userRole
                 self.discussionRosters = state.discussionRosters
                 self.discussionNotes = state.discussionNotes
