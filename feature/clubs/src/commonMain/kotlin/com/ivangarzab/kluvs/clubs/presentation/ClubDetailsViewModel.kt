@@ -19,6 +19,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetAttendanceRosterUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
@@ -55,6 +56,7 @@ class ClubDetailsViewModel(
     private val getActiveSession: GetActiveSessionUseCase,
     private val getClubMembers: GetClubMembersUseCase,
     private val getMemberClubsUseCase: GetMemberClubsUseCase,
+    private val getCurrentMemberId: GetCurrentMemberIdUseCase,
     private val createClubUseCase: CreateClubUseCase,
     private val updateClubUseCase: UpdateClubUseCase,
     private val updateJoinPolicyUseCase: UpdateJoinPolicyUseCase,
@@ -85,6 +87,7 @@ class ClubDetailsViewModel(
     val state: StateFlow<ClubDetailsState> = _state.asStateFlow()
 
     private var currentClubId: String? = null
+    private var currentUserId: String? = null
     private var loadClubDataJob: Job? = null
 
     /**
@@ -92,6 +95,7 @@ class ClubDetailsViewModel(
      * If the user has no clubs, sets state to show empty state.
      */
     fun loadUserClubs(userId: String, forceRefresh: Boolean = false) {
+        currentUserId = userId
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
@@ -148,14 +152,18 @@ class ClubDetailsViewModel(
                     currentClubDetails = null,
                     activeSession = null,
                     ownProgress = null,
-                    members = emptyList()
+                    members = emptyList(),
+                    currentMemberId = null
                 )
             }
 
-            // Launch all 3 UseCase calls in parallel
+            // Launch all UseCase calls in parallel
             val deferredDetails = async { getClubDetails(clubId, forceRefresh) }
             val deferredSession = async { getActiveSession(clubId, forceRefresh) }
             val deferredMembers = async { getClubMembers(clubId, forceRefresh) }
+            // Independent of the club roster fetch above on purpose — see
+            // GetCurrentMemberIdUseCase's doc for why this can't just be read off `members`.
+            val deferredMemberId = currentUserId?.let { uid -> async { getCurrentMemberId(uid, forceRefresh) } }
 
             // Await all results
             val detailsResult = deferredDetails.await()
@@ -167,6 +175,10 @@ class ClubDetailsViewModel(
             val ownProgress = sessionResult.getOrNull()?.let { session ->
                 getSessionProgressUseCase(session.sessionId, session.book.pageCount).getOrNull()
             }
+
+            // Like ownProgress, a failure here is non-blocking — membership-gated actions
+            // simply stay hidden rather than the whole club screen erroring out over it.
+            val currentMemberId = deferredMemberId?.await()?.getOrNull()
 
             // Aggregate errors
             val errors = listOfNotNull(
@@ -194,7 +206,8 @@ class ClubDetailsViewModel(
                     currentClubDetails = detailsResult.getOrNull(),
                     activeSession = sessionResult.getOrNull(),
                     ownProgress = ownProgress,
-                    members = membersResult.getOrNull() ?: emptyList()
+                    members = membersResult.getOrNull() ?: emptyList(),
+                    currentMemberId = currentMemberId
                 )
             }
         }

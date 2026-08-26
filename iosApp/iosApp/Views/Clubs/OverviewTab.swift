@@ -12,7 +12,7 @@ struct OverviewTab: View {
     var ownProgress: Shared.OwnProgressInfo? = nil
     var userRole: Shared.Role? = nil
     var members: [Shared.MemberListItemInfo] = []
-    var currentUserId: String = ""
+    var currentMemberId: String? = nil
     var onEditSession: () -> Void = {}
     var onEndSession: () -> Void = {}
     var onUpdateProgress: () -> Void = {}
@@ -20,7 +20,6 @@ struct OverviewTab: View {
     var onToggleParticipation: (Bool) -> Void = { _ in }
 
     private var isAdminOrAbove: Bool { userRole == .owner || userRole == .admin }
-    private var currentMemberId: String? { members.first { $0.userId == currentUserId }?.memberId }
 
     var body: some View {
         Group {

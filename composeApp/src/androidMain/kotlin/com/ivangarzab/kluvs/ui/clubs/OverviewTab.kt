@@ -64,7 +64,7 @@ fun OverviewTab(
     ownProgress: OwnProgressInfo? = null,
     userRole: Role? = null,
     members: List<MemberListItemInfo> = emptyList(),
-    currentUserId: String? = null,
+    currentMemberId: String? = null,
     onEditSession: () -> Unit = {},
     onEndSession: () -> Unit = {},
     onUpdateProgress: () -> Unit = {},
@@ -80,7 +80,6 @@ fun OverviewTab(
     }
 
     val isAdminOrAbove = userRole == Role.OWNER || userRole == Role.ADMIN
-    val currentMemberId = members.find { it.userId == currentUserId }?.memberId
 
     // A scrollable Column can't force a child to fill the viewport (unbounded height
     // constraints), which is what left NoActiveSessionState stuck at its own small intrinsic
@@ -372,7 +371,7 @@ fun Preview_OverviewTab() = KluvsTheme {
         members = listOf(
             MemberListItemInfo(memberId = "0", name = "Ana Silva", handle = "@ana", avatarUrl = null, role = Role.OWNER, userId = "u0")
         ),
-        currentUserId = "u0",
+        currentMemberId = "0",
         userRole = Role.OWNER
     )
 }

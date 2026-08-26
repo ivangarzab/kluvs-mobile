@@ -191,10 +191,10 @@ private struct ClubDetailView: View {
     @State private var selectedRole: Shared.Role = .member
     @State private var removingMemberId: String? = nil
 
-    /// Returns the current user's memberId from the members list (needed for role/remove calls).
-    private var currentMemberId: String? {
-        viewModel.members.first { $0.userId == userId }?.memberId
-    }
+    /// The current user's own memberId (needed for role/remove calls and the Overview tab's
+    /// participation toggle) — resolved independently of the club's member roster, see
+    /// GetCurrentMemberIdUseCase's doc for why.
+    private var currentMemberId: String? { viewModel.currentMemberId }
 
     /// Resets Create Session's fields fresh each time it opens — since the sheet is now a
     /// persistent overlay rather than a re-instantiated `.sheet()` presentation, its `@State`
@@ -313,7 +313,7 @@ private struct ClubDetailView: View {
                         ownProgress: viewModel.ownProgress,
                         userRole: viewModel.userRole,
                         members: viewModel.members,
-                        currentUserId: userId,
+                        currentMemberId: viewModel.currentMemberId,
                         onEditSession: { openEditSession() },
                         onEndSession: { showEndSessionAlert = true },
                         onUpdateProgress: { openProgressSheet() },
