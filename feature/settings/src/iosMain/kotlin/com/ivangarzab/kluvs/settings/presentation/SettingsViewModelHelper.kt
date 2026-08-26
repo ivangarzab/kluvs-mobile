@@ -40,5 +40,7 @@ class SettingsViewModelHelper : KoinComponent {
 
     fun uploadAvatar(imageData: ByteArray) = viewModel.uploadAvatar(imageData)
 
+    fun onAvatarPickFailed(reason: String?) = viewModel.onAvatarPickFailed(reason)
+
     fun clearAvatarError() = viewModel.clearAvatarError()
 }

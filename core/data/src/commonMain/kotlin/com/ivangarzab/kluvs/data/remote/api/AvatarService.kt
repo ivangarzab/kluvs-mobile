@@ -37,7 +37,7 @@ internal class AvatarServiceImpl(private val supabase: SupabaseClient) : AvatarS
     ): Result<String> {
         Bark.d("Uploading avatar for member (ID: $memberId, size: ${imageData.size} bytes)")
         return try {
-            val path = "$memberId/${Clock.System.now().toEpochMilliseconds()}.png"
+            val path = "$memberId/${Clock.System.now().toEpochMilliseconds()}.jpg"
             supabase.storage.from(BUCKET).upload(
                 path = path,
                 data = imageData

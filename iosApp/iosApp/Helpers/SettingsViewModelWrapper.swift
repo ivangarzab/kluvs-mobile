@@ -80,6 +80,10 @@ class SettingsViewModelWrapper: ObservableObject {
         helper.uploadAvatar(imageData: byteArray)
     }
 
+    func onAvatarPickFailed(reason: String?) {
+        helper.onAvatarPickFailed(reason: reason)
+    }
+
     func clearAvatarError() {
         helper.clearAvatarError()
     }

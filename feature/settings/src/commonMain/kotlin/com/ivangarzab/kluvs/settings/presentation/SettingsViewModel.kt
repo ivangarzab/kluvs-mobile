@@ -130,6 +130,12 @@ class SettingsViewModel(
         }
     }
 
+    /** Surfaces a failure that happened while reading/compressing a picked image, before upload was even attempted. */
+    fun onAvatarPickFailed(reason: String?) {
+        Bark.e("Failed to read picked avatar image. ${reason.orEmpty()}", null)
+        _state.update { it.copy(avatarError = "Failed to read selected image") }
+    }
+
     fun clearAvatarError() {
         _state.update { it.copy(avatarError = null) }
     }
