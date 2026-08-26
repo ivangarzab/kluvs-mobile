@@ -97,7 +97,7 @@ fun MembersTab(
                     role = member.role,
                     isSelf = isSelf,
                     isReading = readingByMemberId[member.memberId],
-                    showAdminActions = isAdminOrAbove && (!isSelf || isOwner),
+                    showAdminActions = isAdminOrAbove && (!isSelf || isOwner) && member.role != Role.OWNER,
                     showRemove = isOwner && !isSelf && member.role != Role.OWNER,
                     onChangeRole = { onChangeRole(member.memberId) },
                     onRemove = { onRemoveMember(member.memberId) }
