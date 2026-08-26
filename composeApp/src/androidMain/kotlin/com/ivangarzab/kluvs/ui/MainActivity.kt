@@ -103,8 +103,13 @@ fun MainNavHost(
                 }
             }
             is NavigationState.Authenticated -> {
-                // Only navigate if not already on main
-                if (navController.currentDestination?.route != NavDestinations.MAIN) {
+                // Only reset to MAIN if we're not already somewhere in the authenticated
+                // flow. Without this, a config change (e.g. rotation) recreates the
+                // composition and reruns this effect from scratch — if the user was on
+                // Settings at the time, checking against MAIN alone would treat that as
+                // "not navigated yet" and force the whole back stack (including Settings)
+                // back to MAIN, silently kicking them out of the screen they were on.
+                if (navController.currentDestination?.route !in NavDestinations.AUTHENTICATED_ROUTES) {
                     navController.navigate(NavDestinations.MAIN) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -164,7 +169,7 @@ fun MainNavHost(
                     )
                 }
             }
-            composable("${NavDestinations.SETTINGS}/{userId}") { backStackEntry ->
+            composable(NavDestinations.SETTINGS_ROUTE) { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
                 SettingsScreen(
                     userId = userId,
@@ -207,5 +212,9 @@ object NavDestinations {
     const val SIGNUP = "signup"
     const val MAIN = "main"
     const val SETTINGS = "settings"
+    const val SETTINGS_ROUTE = "$SETTINGS/{userId}"
     const val JOIN = "join"
+
+    /** Routes reachable while [NavigationState.Authenticated] — not just [MAIN] itself. */
+    val AUTHENTICATED_ROUTES = setOf(MAIN, SETTINGS_ROUTE, JOIN)
 }
