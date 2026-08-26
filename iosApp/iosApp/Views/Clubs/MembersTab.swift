@@ -66,7 +66,7 @@ struct MembersTab: View {
                 member: member,
                 isSelf: isSelf,
                 isReading: readingByMemberId[member.memberId],
-                showAdminActions: isAdminOrAbove && (!isSelf || isOwner),
+                showAdminActions: isAdminOrAbove && (!isSelf || isOwner) && member.role != .owner,
                 showRemove: isOwner && !isSelf && member.role != .owner,
                 onChangeRole: { onChangeRole(member.memberId) },
                 onRemove: { onRemoveMember(member.memberId) }
