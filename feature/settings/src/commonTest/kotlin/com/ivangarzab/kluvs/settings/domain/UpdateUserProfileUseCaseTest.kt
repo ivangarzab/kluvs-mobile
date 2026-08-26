@@ -39,7 +39,7 @@ class UpdateUserProfileUseCaseTest {
     }
 
     @Test
-    fun `handle is saved without the @ prefix`() = runTest {
+    fun `handle is saved without the at-sign prefix`() = runTest {
         // Given — the backend's own convention (see kluvs-backend's seed.sql) stores the bare
         // handle; every display site prepends its own "@", so saving it pre-prefixed here used
         // to double up as "@@handle" wherever it was shown.
