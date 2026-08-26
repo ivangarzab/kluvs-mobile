@@ -23,6 +23,9 @@ struct SettingsView: View {
                         onAvatarPicked: { imageData in
                             viewModel.uploadAvatar(imageData: imageData)
                         },
+                        onAvatarPickFailed: { reason in
+                            viewModel.onAvatarPickFailed(reason: reason)
+                        },
                         editedName: Binding(
                             get: { viewModel.editedName },
                             set: { viewModel.onNameChanged($0) }
@@ -82,6 +85,7 @@ struct EditProfileSection: View {
     let avatarUrl: String?
     var isUploadingAvatar: Bool = false
     var onAvatarPicked: ((Data) -> Void)? = nil
+    var onAvatarPickFailed: ((String?) -> Void)? = nil
     @Binding var editedName: String
     @Binding var editedHandle: String
     let hasChanges: Bool
@@ -123,10 +127,17 @@ struct EditProfileSection: View {
                     }
                 }
                 .onChange(of: selectedItem) { newItem in
+                    guard let newItem else { return }
                     Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                        do {
+                            guard let data = try await newItem.loadTransferable(type: Data.self) else {
+                                onAvatarPickFailed?("loadTransferable returned nil data")
+                                return
+                            }
                             let compressedData = compressImage(data)
                             onAvatarPicked?(compressedData)
+                        } catch {
+                            onAvatarPickFailed?(error.localizedDescription)
                         }
                     }
                 }

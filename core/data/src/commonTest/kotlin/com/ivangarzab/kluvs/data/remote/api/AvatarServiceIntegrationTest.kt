@@ -139,12 +139,12 @@ class AvatarServiceIntegrationTest {
             }
             assertTrue(uploadResult.isSuccess, "Upload should return success. Error: ${uploadResult.exceptionOrNull()?.message}")
 
-            // Path is now $memberId/$timestamp.png — verify structure, not exact value
+            // Path is now $memberId/$timestamp.jpg — verify structure, not exact value
             val path = uploadResult.getOrNull()
             assertNotNull(path)
             uploadedPath = path
             assertTrue(path.startsWith("$memberId/"), "Path should be under the member's folder")
-            assertTrue(path.endsWith(".png"), "Path should end with .png")
+            assertTrue(path.endsWith(".jpg"), "Path should end with .jpg")
 
             // Verify: file actually exists in Supabase Storage
             val fileName = path.substringAfter("$memberId/")
