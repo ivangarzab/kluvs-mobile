@@ -122,9 +122,7 @@ fun BookDetailScreenContent(
     val volumeInfo = state.enrichment?.volumeInfo
 
     Column(
-        modifier = modifier
-            .background(color = KluvsTheme.colors.background)
-            .verticalScroll(rememberScrollState())
+        modifier = modifier.background(color = KluvsTheme.colors.background)
     ) {
         TopAppBar(
             header = stringResource(R.string.book_eyebrow),
@@ -143,7 +141,10 @@ fun BookDetailScreenContent(
         }
 
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).padding(bottom = 32.dp),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // Cover header
