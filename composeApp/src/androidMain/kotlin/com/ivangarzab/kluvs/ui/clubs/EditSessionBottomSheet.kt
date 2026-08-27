@@ -10,54 +10,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.ivangarzab.kluvs.clubs.presentation.BookInfo
-import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.fields.PickerField
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheetFooter
 import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsDatePicker
-import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsTimePicker
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.model.Book
 import kotlinx.datetime.LocalDateTime
 
 /**
  * Bottom sheet for editing an existing reading session.
  *
- * Pre-fills book title and author from the current session. The due date/time are entered fresh
- * via pickers. Same manual-entry gap as CreateSessionBottomSheet vs. web's real book search —
- * documented there, not repeated here.
+ * Only the due date is editable here — the session's book is intentionally not, matching
+ * web's `EditSessionModal`: changing a book is treated as ending the current session and
+ * starting a new one (a separate "Change Book" flow), not an edit. That flow is out of scope
+ * here; this sheet simply doesn't offer a book field.
  *
- * Date/time pickers are shelled via [KluvsDatePicker]/[KluvsTimePicker], to match every other
- * sheet's header/footer chrome.
+ * Due date is day-only — no time-of-day picker. A picked date is modeled as a deadline of
+ * end-of-that-day (23:59) when built into a [LocalDateTime] for the shared session model.
+ *
+ * Date picker is shelled via [KluvsDatePicker], to match every other sheet's header/footer chrome.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditSessionBottomSheet(
-    currentBook: BookInfo?,
     initialDueDate: LocalDateTime? = null,
-    onSave: (book: Book?, dueDate: LocalDateTime?) -> Unit,
+    onSave: (dueDate: LocalDateTime?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val initialDueDateMillis = remember { initialDueDate?.let { localDateTimeToDateMillis(it) } }
-    var bookTitle by remember { mutableStateOf(currentBook?.title ?: "") }
-    var bookAuthor by remember { mutableStateOf(currentBook?.author ?: "") }
     var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
     var selectedDateMillis by remember { mutableStateOf<Long?>(initialDueDateMillis) }
-    var selectedHour by remember { mutableStateOf(initialDueDate?.hour ?: 19) }
-    var selectedMinute by remember { mutableStateOf(initialDueDate?.minute ?: 0) }
 
     val dateDisplayText = selectedDateMillis?.let { formatDateMillis(it) } ?: ""
-    val timeDisplayText = selectedDateMillis?.let {
-        "${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}"
-    } ?: ""
 
-    val hasChanges = bookTitle.trim() != (currentBook?.title ?: "") ||
-        bookAuthor.trim() != (currentBook?.author ?: "") ||
-        selectedDateMillis != initialDueDateMillis ||
-        selectedHour != (initialDueDate?.hour ?: 19) ||
-        selectedMinute != (initialDueDate?.minute ?: 0)
+    val hasChanges = selectedDateMillis != initialDueDateMillis
 
     BottomSheet(
         header = "Edit Session",
@@ -66,13 +52,8 @@ fun EditSessionBottomSheet(
             BottomSheetFooter(
                 actionLabel = "Save",
                 onAction = {
-                    val book = if (bookTitle.isNotBlank() && bookAuthor.isNotBlank()) {
-                        Book(id = "", title = bookTitle.trim(), author = bookAuthor.trim(), isbn = null)
-                    } else null
-                    val dueDate = selectedDateMillis?.let { millis ->
-                        buildLocalDateTime(millis, selectedHour, selectedMinute)
-                    }
-                    onSave(book, dueDate)
+                    val dueDate = selectedDateMillis?.let { millis -> buildLocalDateTime(millis, 23, 59) }
+                    onSave(dueDate)
                 },
                 onCancel = onDismiss,
                 actionEnabled = hasChanges,
@@ -80,12 +61,7 @@ fun EditSessionBottomSheet(
         },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            InputField(label = "Book Title", value = bookTitle, onValueChange = { bookTitle = it })
-            InputField(label = "Author", value = bookAuthor, onValueChange = { bookAuthor = it })
             PickerField(label = "Due Date (optional)", value = dateDisplayText, onClick = { showDatePicker = true })
-            if (selectedDateMillis != null) {
-                PickerField(label = "Time (optional)", value = timeDisplayText, onClick = { showTimePicker = true })
-            }
         }
     }
 
@@ -99,27 +75,13 @@ fun EditSessionBottomSheet(
             onDismiss = { showDatePicker = false },
         )
     }
-
-    if (showTimePicker) {
-        KluvsTimePicker(
-            initialHour = selectedHour,
-            initialMinute = selectedMinute,
-            onConfirm = { hour, minute ->
-                selectedHour = hour
-                selectedMinute = minute
-                showTimePicker = false
-            },
-            onDismiss = { showTimePicker = false },
-        )
-    }
 }
 
 @PreviewLightDark
 @Composable
 fun Preview_EditSessionBottomSheet() = KluvsTheme {
     EditSessionBottomSheet(
-        currentBook = BookInfo(title = "1984", author = "George Orwell", year = "1948", pageCount = 169),
-        onSave = { _, _ -> },
+        onSave = { _ -> },
         onDismiss = {}
     )
 }

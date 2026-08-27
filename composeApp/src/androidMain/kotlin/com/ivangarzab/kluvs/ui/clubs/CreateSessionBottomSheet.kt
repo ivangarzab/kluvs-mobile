@@ -10,12 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.ivangarzab.kluvs.designsystem.components.fields.InputField
 import com.ivangarzab.kluvs.designsystem.components.fields.PickerField
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.BottomSheetFooter
 import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsDatePicker
-import com.ivangarzab.kluvs.designsystem.components.pickers.KluvsTimePicker
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.model.Book
 import kotlinx.datetime.LocalDateTime
@@ -23,33 +21,36 @@ import kotlinx.datetime.LocalDateTime
 /**
  * Bottom sheet for creating a new reading session.
  *
- * Collects book title, author, and an optional due date/time. Full book search (via
- * SearchBooksUseCase) is a planned follow-up; for now the user enters book details manually —
- * matches web's NewSessionModal gap, which uses a real BookSearchInput instead. Web's "all members
- * reading" participation toggle is the same story: no allReading param exists on the shared
- * onCreateSession call today.
+ * Book selection is a real search-and-select field ([BookSearchField]) backed by
+ * [com.ivangarzab.kluvs.clubs.presentation.ClubDetailsViewModel]'s book-search state —
+ * selecting a result registers it server-side to obtain a real `bookId`, matching web's
+ * `NewSessionModal`/`BookSearchInput`.
  *
- * Date/time pickers are shelled via [KluvsDatePicker]/[KluvsTimePicker], to match every other
- * sheet's header/footer chrome.
+ * Due date is day-only — no time-of-day picker. A picked date is modeled as a deadline of
+ * end-of-that-day (23:59) when built into a [LocalDateTime] for the shared session model.
+ *
+ * Date picker is shelled via [KluvsDatePicker], to match every other sheet's header/footer chrome.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateSessionBottomSheet(
+    bookSearchQuery: String,
+    bookSearchResults: List<Book>,
+    selectedBook: Book?,
+    isSearchingBooks: Boolean,
+    isRegisteringBook: Boolean,
+    bookSearchError: String?,
+    onBookSearchQueryChange: (String) -> Unit,
+    onSearchBooks: (String) -> Unit,
+    onSelectBook: (Book) -> Unit,
+    onClearBook: () -> Unit,
     onSave: (book: Book, dueDate: LocalDateTime?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var bookTitle by remember { mutableStateOf("") }
-    var bookAuthor by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
-    var selectedHour by remember { mutableStateOf(19) }
-    var selectedMinute by remember { mutableStateOf(0) }
 
     val dateDisplayText = selectedDateMillis?.let { formatDateMillis(it) } ?: ""
-    val timeDisplayText = selectedDateMillis?.let {
-        "${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}"
-    } ?: ""
 
     BottomSheet(
         header = "Create Session",
@@ -58,29 +59,28 @@ fun CreateSessionBottomSheet(
             BottomSheetFooter(
                 actionLabel = "Create",
                 onAction = {
-                    val book = Book(
-                        id = "",
-                        title = bookTitle.trim(),
-                        author = bookAuthor.trim(),
-                        isbn = null
-                    )
-                    val dueDate = selectedDateMillis?.let { millis ->
-                        buildLocalDateTime(millis, selectedHour, selectedMinute)
-                    }
-                    onSave(book, dueDate)
+                    val dueDate = selectedDateMillis?.let { millis -> buildLocalDateTime(millis, 23, 59) }
+                    selectedBook?.let { onSave(it, dueDate) }
                 },
                 onCancel = onDismiss,
-                actionEnabled = bookTitle.isNotBlank() && bookAuthor.isNotBlank(),
+                actionEnabled = selectedBook != null,
             )
         },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            InputField(label = "Book Title", value = bookTitle, onValueChange = { bookTitle = it })
-            InputField(label = "Author", value = bookAuthor, onValueChange = { bookAuthor = it })
+            BookSearchField(
+                query = bookSearchQuery,
+                onQueryChange = onBookSearchQueryChange,
+                onSearch = onSearchBooks,
+                results = bookSearchResults,
+                selectedBook = selectedBook,
+                isSearching = isSearchingBooks,
+                isRegistering = isRegisteringBook,
+                error = bookSearchError,
+                onSelect = onSelectBook,
+                onClear = onClearBook,
+            )
             PickerField(label = "Due Date (optional)", value = dateDisplayText, onClick = { showDatePicker = true })
-            if (selectedDateMillis != null) {
-                PickerField(label = "Time (optional)", value = timeDisplayText, onClick = { showTimePicker = true })
-            }
         }
     }
 
@@ -94,25 +94,22 @@ fun CreateSessionBottomSheet(
             onDismiss = { showDatePicker = false },
         )
     }
-
-    if (showTimePicker) {
-        KluvsTimePicker(
-            initialHour = selectedHour,
-            initialMinute = selectedMinute,
-            onConfirm = { hour, minute ->
-                selectedHour = hour
-                selectedMinute = minute
-                showTimePicker = false
-            },
-            onDismiss = { showTimePicker = false },
-        )
-    }
 }
 
 @PreviewLightDark
 @Composable
 fun Preview_CreateSessionBottomSheet() = KluvsTheme {
     CreateSessionBottomSheet(
+        bookSearchQuery = "",
+        bookSearchResults = emptyList(),
+        selectedBook = null,
+        isSearchingBooks = false,
+        isRegisteringBook = false,
+        bookSearchError = null,
+        onBookSearchQueryChange = {},
+        onSearchBooks = {},
+        onSelectBook = {},
+        onClearBook = {},
         onSave = { _, _ -> },
         onDismiss = {}
     )

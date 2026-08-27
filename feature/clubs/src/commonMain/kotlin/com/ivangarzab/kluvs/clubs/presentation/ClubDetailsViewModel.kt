@@ -23,8 +23,10 @@ import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
+import com.ivangarzab.kluvs.clubs.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.clubs.domain.RemoveMemberUseCase
 import com.ivangarzab.kluvs.clubs.domain.RotateInviteLinkUseCase
+import com.ivangarzab.kluvs.clubs.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.presentation.progress.SaveProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.SetAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.ToggleSessionParticipationUseCase
@@ -57,6 +59,8 @@ class ClubDetailsViewModel(
     private val getClubMembers: GetClubMembersUseCase,
     private val getMemberClubsUseCase: GetMemberClubsUseCase,
     private val getCurrentMemberId: GetCurrentMemberIdUseCase,
+    private val searchBooksUseCase: SearchBooksUseCase,
+    private val registerBookUseCase: RegisterBookUseCase,
     private val createClubUseCase: CreateClubUseCase,
     private val updateClubUseCase: UpdateClubUseCase,
     private val updateJoinPolicyUseCase: UpdateJoinPolicyUseCase,
@@ -335,6 +339,82 @@ class ClubDetailsViewModel(
     // -------------------------------------------------------------------------
     // Session tab operations
     // -------------------------------------------------------------------------
+
+    fun onBookSearchQueryChange(query: String) {
+        _state.update { it.copy(bookSearchQuery = query) }
+    }
+
+    /** Searches for books matching [query]; a blank query just clears any prior results. */
+    fun onSearchBooks(query: String) {
+        if (query.isBlank()) {
+            _state.update { it.copy(bookSearchResults = emptyList(), bookSearchError = null, isSearchingBooks = false) }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isSearchingBooks = true, bookSearchError = null) }
+            searchBooksUseCase(query)
+                .onSuccess { result ->
+                    _state.update { it.copy(isSearchingBooks = false, bookSearchResults = result.books) }
+                }
+                .onFailure { error ->
+                    Bark.e("Book search failed. Please retry.", error)
+                    _state.update {
+                        it.copy(
+                            isSearchingBooks = false,
+                            bookSearchResults = emptyList(),
+                            bookSearchError = error.toAppError().toUserMessage()
+                        )
+                    }
+                }
+        }
+    }
+
+    /**
+     * Selects a book from search results and registers it with the backend to obtain a
+     * real, server-assigned ID — registration is unconditional (idempotent upsert) on every
+     * selection, matching web's `BookSearchInput`, not just for not-yet-registered books.
+     */
+    fun onSelectBook(book: Book) {
+        viewModelScope.launch {
+            _state.update { it.copy(isRegisteringBook = true) }
+            registerBookUseCase(book)
+                .onSuccess { registered ->
+                    _state.update {
+                        it.copy(
+                            isRegisteringBook = false,
+                            selectedBook = registered,
+                            bookSearchResults = emptyList(),
+                            bookSearchQuery = registered.title
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Book registration failed. Please retry.", error)
+                    _state.update {
+                        it.copy(isRegisteringBook = false, bookSearchError = error.toAppError().toUserMessage())
+                    }
+                }
+        }
+    }
+
+    /** Clears the selected book, returning the Create Session sheet's book field to search mode. */
+    fun onClearSelectedBook() {
+        _state.update { it.copy(selectedBook = null, bookSearchQuery = "", bookSearchResults = emptyList()) }
+    }
+
+    /** Resets book-search state; call when the Create Session sheet opens and when it closes. */
+    fun onResetBookSearch() {
+        _state.update {
+            it.copy(
+                bookSearchQuery = "",
+                bookSearchResults = emptyList(),
+                isSearchingBooks = false,
+                bookSearchError = null,
+                selectedBook = null,
+                isRegisteringBook = false
+            )
+        }
+    }
 
     fun onCreateSession(book: Book, dueDate: LocalDateTime?) {
         val role = _state.value.userRole ?: return
