@@ -59,9 +59,13 @@ struct BooksView: View {
                         path.append(BookRoute(book: book))
                     })
                 } else {
-                    ShelfContent(viewModel: viewModel, onBookTap: { book in
-                        path.append(BookRoute(book: book))
-                    })
+                    ShelfContent(
+                        viewModel: viewModel,
+                        onBookTap: { book in
+                            path.append(BookRoute(book: book))
+                        },
+                        onSearchBooks: { isSearchActive = true }
+                    )
                 }
             }
             .navigationDestination(for: BookRoute.self) { route in
@@ -76,6 +80,13 @@ struct BooksView: View {
                     }
                 )
             }
+            // BooksTopBar already provides this screen's own header (mirrors Android's
+            // MainView comment: every tab owns its top bar, the system one is unused). Left
+            // showing, its empty large-title bar still reserves space and appears to be what
+            // was fighting our custom bar's own height animation when search opened the
+            // keyboard — the visible symptom being the whole bar jumping up toward the status
+            // bar.
+            .toolbar(.hidden, for: .navigationBar)
         }
         .onAppear { viewModel.loadShelf() }
         .onChange(of: viewModel.query) { _, query in
@@ -107,6 +118,7 @@ struct BooksView: View {
 private struct ShelfContent: View {
     @ObservedObject var viewModel: BooksViewModelWrapper
     let onBookTap: (Shared.Book) -> Void
+    var onSearchBooks: () -> Void = {}
 
     var body: some View {
         switch viewModel.shelfScreenState {
@@ -115,12 +127,11 @@ private struct ShelfContent: View {
         case .error(let message):
             ErrorView(message: message, onRetry: { viewModel.loadShelf() })
         case .empty:
-            VStack {
-                Spacer()
-                Text(String(localized: "no_books_shelved"))
-                    .kluvsStyle(KluvsTheme.typography.body.large)
-                    .foregroundColor(KluvsTheme.colors.contentMuted)
-                Spacer()
+            EmptyState(
+                heading: "Nothing shelved yet.",
+                body: "Search for a book and add it to Want to Read, Read, or Not Finished."
+            ) {
+                SecondaryButton(text: "Search Books", action: onSearchBooks)
             }
         case .content:
             ScrollView {
@@ -166,7 +177,10 @@ private struct ShelfSectionView: View {
             .padding(.vertical, 4)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                // .top, not the default .center — otherwise a 2-line title pushes that card
+                // taller, and HStack's default center alignment drops its cover out of line with
+                // the shorter, 1-line-title cards next to it.
+                HStack(alignment: .top, spacing: 12) {
                     ForEach(entries, id: \.book.id) { entry in
                         BookCard(
                             book: entry.book,
@@ -223,38 +237,37 @@ private struct SearchContent: View {
                                 book: book,
                                 onTap: { onBookTap(book) }
                             )
+                            .onAppear {
+                                if book.id == viewModel.searchResults.last?.id {
+                                    viewModel.loadMoreSearchResults()
+                                }
+                            }
                         }
                     }
                     .padding(16)
+
+                    if viewModel.isLoadingMore {
+                        LoadingSpinner(size: 24)
+                            .padding(.vertical, 16)
+                    }
                 }
+                // The only other way to dismiss the keyboard is the search bar's back arrow,
+                // which also exits search — this lets scrolling the results dismiss it instead.
+                .scrollDismissesKeyboard(.immediately)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
+// Neither the "haven't searched yet" nor the "no matches" variant has a real destination to
+// send the user to, so this carries no action.
 private struct SearchEmptyState: View {
     let heading: String
     let bodyText: String
 
     var body: some View {
-        VStack {
-            Spacer()
-            VStack(spacing: 16) {
-                StackedCoverPlaceholder()
-                VStack(spacing: 4) {
-                    Text(heading)
-                        .font(.ebGaramondMediumItalic(size: 28))
-                        .foregroundColor(KluvsTheme.colors.contentMuted)
-                    Text(bodyText)
-                        .kluvsStyle(KluvsTheme.typography.body.medium)
-                        .foregroundColor(KluvsTheme.colors.contentMuted)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
-            }
-            Spacer()
-        }
+        EmptyState(heading: heading, body: bodyText)
     }
 }
 

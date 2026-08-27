@@ -15,7 +15,7 @@ struct AuthFormView: View {
     let onNavigate: (LoginNavigation) -> Void
 
     @FocusState private var focusedField: Field?
-    @State private var errorMessage: String?
+    @State private var snackbarData: SnackbarData?
 
     enum Field {
         case email, password, confirmPassword
@@ -54,7 +54,7 @@ struct AuthFormView: View {
                                    authError.code == .canceled {
                                     return
                                 }
-                                errorMessage = error.localizedDescription
+                                snackbarData = SnackbarData(message: error.localizedDescription, variant: .danger)
                             }
                         }
                     }
@@ -134,10 +134,6 @@ struct AuthFormView: View {
                     .focused($focusedField, equals: .confirmPassword)
                 }
 
-                if let errorMessage {
-                    ErrorBanner(message: errorMessage)
-                }
-
                 // Forgot password (login only)
                 if mode == .login {
                     HStack {
@@ -178,9 +174,20 @@ struct AuthFormView: View {
             }
             .padding(16)
         }
-        .onChange(of: viewModel.authState) { _, newState in
-            if case .error(let error) = newState {
-                errorMessage = error.toLocalizedMessage()
+        // Without this, `.snackbar`'s bottom-anchored overlay positions itself against the
+        // ScrollView's content height (landing next to AuthFooter) instead of the actual screen
+        // bottom — a ScrollView only claims as much height as its content needs unless told
+        // otherwise.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .snackbar($snackbarData)
+        // `.task(id:)`, not `.onChange` — this view is recreated fresh each time the parent
+        // switches away from `.loading` back to `.error` (a different switch case), so by the
+        // time it exists the state has already "changed" from `.onChange`'s perspective and it
+        // never fires. `.task(id:)` runs immediately on appearance for the current id too,
+        // matching Android's `LaunchedEffect(key)` semantics.
+        .task(id: viewModel.authState) {
+            if case .error(let error) = viewModel.authState {
+                snackbarData = SnackbarData(message: error.toLocalizedMessage(), variant: .danger)
             }
         }
     }

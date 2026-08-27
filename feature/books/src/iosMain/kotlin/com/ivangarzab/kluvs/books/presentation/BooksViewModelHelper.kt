@@ -31,6 +31,7 @@ class BooksViewModelHelper : KoinComponent {
     fun loadShelf(forceRefresh: Boolean) = viewModel.loadShelf(forceRefresh)
     fun onQueryChange(query: String) = viewModel.onQueryChange(query)
     fun search(query: String) = viewModel.search(query)
+    fun loadMoreSearchResults() = viewModel.loadMoreSearchResults()
     fun onAssignShelf(bookId: String, shelf: ShelfStatus) = viewModel.onAssignShelf(bookId, shelf)
     fun onRemoveFromShelf(bookId: String) = viewModel.onRemoveFromShelf(bookId)
     fun onToggleLike(bookId: String) = viewModel.onToggleLike(bookId)

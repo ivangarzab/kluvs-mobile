@@ -8,6 +8,8 @@ import com.ivangarzab.kluvs.books.domain.GetShelfUseCase
 import com.ivangarzab.kluvs.books.domain.RemoveFromShelfUseCase
 import com.ivangarzab.kluvs.books.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.books.domain.ToggleLikeUseCase
+import com.ivangarzab.kluvs.data.error.toAppError
+import com.ivangarzab.kluvs.presentation.error.toUserMessage
 import com.ivangarzab.kluvs.model.ShelfEntry
 import com.ivangarzab.kluvs.model.ShelfStatus
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +46,7 @@ class BooksViewModel(
                     _state.update {
                         it.copy(
                             isLoadingShelf = false,
-                            shelfError = error.message ?: "Failed to load shelf"
+                            shelfError = error.toAppError().toUserMessage()
                         )
                     }
                 }
@@ -57,16 +59,24 @@ class BooksViewModel(
 
     fun search(query: String) {
         if (query.isBlank()) {
-            _state.update { it.copy(searchResults = emptyList(), searchError = null, isSearching = false) }
+            _state.update {
+                it.copy(searchResults = emptyList(), searchTotal = 0, searchError = null, isSearching = false)
+            }
             return
         }
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true, searchError = null) }
 
             searchBooks(query)
-                .onSuccess { books ->
-                    Bark.i("Book search complete (${books.size} results)")
-                    _state.update { it.copy(isSearching = false, searchResults = books) }
+                .onSuccess { result ->
+                    Bark.i("Book search complete (${result.books.size} results, total: ${result.total})")
+                    _state.update {
+                        it.copy(
+                            isSearching = false,
+                            searchResults = result.books.distinctBy { book -> book.id },
+                            searchTotal = result.total
+                        )
+                    }
                 }
                 .onFailure { error ->
                     Bark.e("Book search failed. Please retry.", error)
@@ -74,9 +84,44 @@ class BooksViewModel(
                         it.copy(
                             isSearching = false,
                             searchResults = emptyList(),
-                            searchError = error.message ?: "Search failed"
+                            searchTotal = 0,
+                            searchError = error.toAppError().toUserMessage()
                         )
                     }
+                }
+        }
+    }
+
+    fun loadMoreSearchResults() {
+        val current = _state.value
+        if (current.isSearching || current.isLoadingMore || !current.hasMoreSearchResults || current.query.isBlank()) {
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingMore = true) }
+
+            searchBooks(current.query, offset = current.searchResults.size)
+                .onSuccess { result ->
+                    Bark.i("Loaded more book search results (+${result.books.size}, total: ${result.total})")
+                    _state.update {
+                        // The backend's underlying Google Books pagination isn't guaranteed
+                        // non-overlapping between calls, so a "next page" can repeat a book
+                        // already on screen — de-dupe by id, since a repeated grid key crashes
+                        // Compose's LazyVerticalGrid outright.
+                        val existingIds = it.searchResults.mapTo(mutableSetOf()) { book -> book.id }
+                        val newBooks = result.books
+                            .filterNot { book -> book.id in existingIds }
+                            .distinctBy { book -> book.id }
+                        it.copy(
+                            isLoadingMore = false,
+                            searchResults = it.searchResults + newBooks,
+                            searchTotal = result.total
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Failed to load more book search results. Please retry.", error)
+                    _state.update { it.copy(isLoadingMore = false) }
                 }
         }
     }

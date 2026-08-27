@@ -16,54 +16,64 @@ struct MembersTab: View {
     private var readingByMemberId: [String: Bool] {
         Dictionary(uniqueKeysWithValues: participants.map { ($0.memberId, $0.isReading) })
     }
+    private var showEmptyState: Bool { members.count <= 1 && isAdminOrAbove }
 
     var body: some View {
-        ScrollView {
-            if members.isEmpty {
-                NoTabData(text: String(localized: "empty_no_members"))
-            } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        Text("\(members.count) members")
-                            .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
-                            .foregroundColor(KluvsTheme.colors.contentMuted)
-                        Spacer()
-                        if isAdminOrAbove {
-                            OutlinedButton(text: "+ Invite", action: onInviteMember)
-                        }
-                    }
-                    .padding(.bottom, 12)
-
-                    ForEach(Array(members.enumerated()), id: \.element.memberId) { index, member in
-                        let isSelf = member.userId == currentUserId
-                        MemberListItem(
-                            member: member,
-                            isSelf: isSelf,
-                            isReading: readingByMemberId[member.memberId],
-                            showAdminActions: isAdminOrAbove && (!isSelf || isOwner),
-                            showRemove: isOwner && !isSelf && member.role != .owner,
-                            onChangeRole: { onChangeRole(member.memberId) },
-                            onRemove: { onRemoveMember(member.memberId) }
-                        )
-
-                        if index < members.count - 1 {
-                            Divider()
-                        }
-                    }
-
-                    if members.count <= 1 && isAdminOrAbove {
-                        VStack(spacing: 16) {
-                            Text("Invite others to get the conversation going.")
-                                .kluvsStyle(KluvsTheme.typography.headline.small, feature: true)
-                                .foregroundColor(KluvsTheme.colors.contentMuted)
-                                .multilineTextAlignment(.center)
-                            PrimaryButton(text: "Invite Members", action: onInviteMember)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 20)
+        if members.isEmpty {
+            NoTabData(text: String(localized: "empty_no_members"))
+        } else {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("\(members.count) members")
+                        .kluvsStyle(KluvsTheme.typography.title.small, feature: true)
+                        .foregroundColor(KluvsTheme.colors.contentMuted)
+                    Spacer()
+                    // The EmptyState below already carries its own "Invite Members" action, so
+                    // this would just be a redundant second invite button.
+                    if isAdminOrAbove && !showEmptyState {
+                        OutlinedButton(text: "+ Invite", action: onInviteMember)
                     }
                 }
-                .padding(16)
+                .padding(.bottom, 12)
+
+                if showEmptyState {
+                    // At most one member — nothing to scroll, so the row (if any) plus the
+                    // EmptyState below just fill the tab directly. A ScrollView also proposes
+                    // unbounded height to its content, so it can't be used here or the
+                    // EmptyState gets stuck at its own small intrinsic size instead.
+                    memberRows
+                    EmptyState(
+                        heading: "Just you, for now.",
+                        body: "Invite a few people and this club starts to feel like one."
+                    ) {
+                        SecondaryButton(text: "Invite Members", action: onInviteMember)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        memberRows
+                    }
+                }
+            }
+            .padding(16)
+        }
+    }
+
+    private var memberRows: some View {
+        ForEach(Array(members.enumerated()), id: \.element.memberId) { index, member in
+            let isSelf = member.userId == currentUserId
+            MemberListItem(
+                member: member,
+                isSelf: isSelf,
+                isReading: readingByMemberId[member.memberId],
+                showAdminActions: isAdminOrAbove && (!isSelf || isOwner) && member.role != .owner,
+                showRemove: isOwner && !isSelf && member.role != .owner,
+                onChangeRole: { onChangeRole(member.memberId) },
+                onRemove: { onRemoveMember(member.memberId) }
+            )
+
+            if index < members.count - 1 {
+                Divider()
             }
         }
     }
@@ -81,9 +91,11 @@ private struct MemberListItem: View {
     var onRemove: () -> Void = {}
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .center, spacing: 14) {
             Avatar(name: member.name, avatarUrl: member.avatarUrl, size: 40, memberId: member.memberId, isOwn: isSelf)
 
+            // Identity column carries as much weight as the right rail's two tiers instead of
+            // looking sparse next to it — matches Android's MemberListItem.
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
                     Text(member.name)
@@ -95,16 +107,27 @@ private struct MemberListItem: View {
                             .foregroundColor(KluvsTheme.colors.accent)
                     }
                 }
-                Text(member.handle)
+                Text("@\(member.handle)")
                     .kluvsStyle(KluvsTheme.typography.body.medium)
                     .foregroundColor(KluvsTheme.colors.contentMuted)
             }
+            .padding(.vertical, 8)
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(spacing: 4) {
-                    RoleEyebrow(role: member.role)
+            VStack(alignment: .trailing, spacing: 0) {
+                HStack(spacing: 8) {
+                    if let isReading {
+                        // 16pt icon inside 8pt padding = 32pt total box, matching Android's
+                        // Modifier.size(32.dp).padding(8.dp) (fixed outer box, smaller visible icon).
+                        Icon(
+                            type: .reading,
+                            contentDescription: isReading ? "Reading" : "Skipping",
+                            tint: isReading ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted
+                        )
+                        .frame(width: 16, height: 16)
+                        .padding(8)
+                    }
                     if showAdminActions || showRemove {
                         ActionMenu(items: {
                             var items: [ActionMenuItem] = []
@@ -118,10 +141,10 @@ private struct MemberListItem: View {
                         }())
                     }
                 }
-                if let isReading {
-                    Text(isReading ? "Reading" : "Skipping")
-                        .kluvsStyle(KluvsTheme.typography.label)
-                        .foregroundColor(isReading ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted)
+                if member.role != .member {
+                    RoleEyebrow(role: member.role)
+                } else {
+                    Spacer().frame(height: 16)
                 }
             }
         }

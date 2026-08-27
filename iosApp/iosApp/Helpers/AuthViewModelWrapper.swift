@@ -130,6 +130,10 @@ class AuthViewModelWrapper: ObservableObject {
         helper.resetForgotPasswordState()
     }
 
+    func dismissEmailConfirmationSheet() {
+        helper.dismissEmailConfirmationSheet()
+    }
+
     deinit {
         cancellables.forEach { $0.close() }
     }
@@ -142,6 +146,7 @@ enum AuthStateWrapper: Equatable {
     case authenticated(user: Shared.User)
     case error(error: Shared.AuthError)
     case oauthPending(url: String) // Why not just loading?
+    case emailConfirmationPending(email: String)
 
     // Custom Equatable implementation since Kotlin classes may not be Equatable
     static func == (lhs: AuthStateWrapper, rhs: AuthStateWrapper) -> Bool {
@@ -156,6 +161,8 @@ enum AuthStateWrapper: Equatable {
             return true // We just care that it's an error state
         case (.oauthPending(let lUrl), .oauthPending(let rUrl)):
             return lUrl == rUrl
+        case (.emailConfirmationPending(let lEmail), .emailConfirmationPending(let rEmail)):
+            return lEmail == rEmail
         default:
             return false
         }
@@ -172,6 +179,8 @@ enum AuthStateWrapper: Equatable {
             return .error(error: error.error)
         } else if let oauthPending = kotlinState as? Shared.AuthState.OAuthPending {
             return .oauthPending(url: oauthPending.url)
+        } else if let emailConfirmationPending = kotlinState as? Shared.AuthState.EmailConfirmationPending {
+            return .emailConfirmationPending(email: emailConfirmationPending.email)
         }
         return .unauthenticated
     }

@@ -12,7 +12,6 @@ import com.ivangarzab.kluvs.member.domain.GetCurrentUserProfileUseCase
 import com.ivangarzab.kluvs.member.domain.GetOnYourShelfUseCase
 import com.ivangarzab.kluvs.member.domain.GetReadingLogUseCase
 import com.ivangarzab.kluvs.member.domain.GetUserStatisticsUseCase
-import com.ivangarzab.kluvs.member.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
 import com.ivangarzab.kluvs.presentation.progress.SaveProgressUseCase
@@ -87,8 +86,6 @@ class MeViewModelHelperTest {
         val getReadingLog = GetReadingLogUseCase(sessionRepository)
         val saveProgress = SaveProgressUseCase(progressRepository)
         val signOut = SignOutUseCase(authRepository, database)
-        val updateAvatar = UpdateAvatarUseCase(avatarRepository, memberRepository)
-
 
         // Create real ViewModel with real use cases
         viewModel = MeViewModel(
@@ -97,8 +94,7 @@ class MeViewModelHelperTest {
             getOnYourShelf,
             getReadingLog,
             saveProgress,
-            signOut,
-            updateAvatar
+            signOut
         )
 
         // Start Koin with test module

@@ -6,6 +6,7 @@ import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.books.domain.AssignShelfUseCase
 import com.ivangarzab.kluvs.books.domain.GetBookEnrichmentUseCase
 import com.ivangarzab.kluvs.books.domain.GetLikeStatusUseCase
+import com.ivangarzab.kluvs.books.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.books.domain.RemoveFromShelfUseCase
 import com.ivangarzab.kluvs.books.domain.ToggleLikeUseCase
 import com.ivangarzab.kluvs.model.Book
@@ -30,7 +31,8 @@ class BookDetailsViewModel(
     private val getLikeStatus: GetLikeStatusUseCase,
     private val assignShelf: AssignShelfUseCase,
     private val removeFromShelf: RemoveFromShelfUseCase,
-    private val toggleLike: ToggleLikeUseCase
+    private val toggleLike: ToggleLikeUseCase,
+    private val registerBook: RegisterBookUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BookDetailsState())
@@ -63,16 +65,32 @@ class BookDetailsViewModel(
         }
 
         if (isRegistered) {
+            loadLikeStatus(book.id)
+        } else {
             viewModelScope.launch {
-                getLikeStatus(book.id)
-                    .onSuccess { liked ->
-                        Bark.i("Loaded like status (book ID: ${book.id}, liked: $liked)")
-                        _state.update { it.copy(isLiked = liked) }
+                registerBook(book)
+                    .onSuccess { registered ->
+                        Bark.i("Registered book from detail screen (ID: ${registered.id})")
+                        _state.update { it.copy(book = registered) }
+                        loadLikeStatus(registered.id)
                     }
                     .onFailure { error ->
-                        Bark.e("Failed to load like status (book ID: ${book.id}). Defaulting to unliked.", error)
+                        Bark.e("Failed to register book (title: ${book.title}). Shelf/like actions unavailable.", error)
                     }
             }
+        }
+    }
+
+    private fun loadLikeStatus(bookId: String) {
+        viewModelScope.launch {
+            getLikeStatus(bookId)
+                .onSuccess { liked ->
+                    Bark.i("Loaded like status (book ID: $bookId, liked: $liked)")
+                    _state.update { it.copy(isLiked = liked) }
+                }
+                .onFailure { error ->
+                    Bark.e("Failed to load like status (book ID: $bookId). Defaulting to unliked.", error)
+                }
         }
     }
 

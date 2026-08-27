@@ -1,4 +1,4 @@
-package com.ivangarzab.kluvs.member.domain
+package com.ivangarzab.kluvs.settings.domain
 
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository

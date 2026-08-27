@@ -91,27 +91,29 @@ struct BookDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 4) {
-                TopAppBar(header: String(localized: "book_eyebrow"), onNavigateBack: { dismiss() })
+        VStack(alignment: .leading, spacing: 4) {
+            TopAppBar(header: String(localized: "book_eyebrow"), onNavigateBack: { dismiss() })
 
-                if viewModel.isLoadingEnrichment {
-                    BookDetailSkeleton()
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
-                        .padding(.bottom, 32)
-                } else {
-                    if viewModel.isMutationInProgress {
-                        ProgressView()
-                            .progressViewStyle(LinearProgressViewStyle())
-                            .tint(.brandOrange)
-                    }
-
-                    if let currentBook = viewModel.book {
-                        content(for: currentBook)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 4) {
+                    if viewModel.isLoadingEnrichment {
+                        BookDetailSkeleton()
                             .padding(.horizontal, 16)
                             .padding(.top, 12)
                             .padding(.bottom, 32)
+                    } else {
+                        if viewModel.isMutationInProgress {
+                            ProgressView()
+                                .progressViewStyle(LinearProgressViewStyle())
+                                .tint(.brandOrange)
+                        }
+
+                        if let currentBook = viewModel.book {
+                            content(for: currentBook)
+                                .padding(.horizontal, 16)
+                                .padding(.top, 12)
+                                .padding(.bottom, 32)
+                        }
                     }
                 }
             }

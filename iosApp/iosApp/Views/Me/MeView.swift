@@ -1,6 +1,5 @@
 import SwiftUI
 import Shared
-import PhotosUI
 import DesignSystem
 
 struct MeView: View {
@@ -32,17 +31,43 @@ struct MeView: View {
                         viewModel.loadUserData(userId: userId)
                     })
                     .transition(.opacity)
+                }
+                // statistics.clubsCount (already the source of the "4 CLUBS" stat above) is the
+                // real "no clubs" signal — nil means stats haven't loaded or failed to load,
+                // not that the count is zero, so it deliberately does NOT count as empty here.
+                // Mirrors Android's MeScreenContent. The empty case skips ScrollView entirely
+                // (rather than just adding a frame inside it) — a ScrollView also proposes
+                // unbounded height to its content, so the EmptyState could never actually fill
+                // the remaining space if it stayed nested in one.
+                else if viewModel.statistics?.clubsCount == 0 {
+                    VStack(spacing: 0) {
+                        if let profile = viewModel.profile {
+                            ProfileSection(profile: profile)
+                        }
+
+                        Divider()
+                            .padding(.vertical, 8)
+
+                        if let statistics = viewModel.statistics {
+                            StatisticsSection(statistics: statistics, joinDate: viewModel.profile?.joinDate)
+
+                            Divider()
+                                .padding(.vertical, 8)
+                        }
+
+                        EmptyState(
+                            heading: "Nothing to track yet.",
+                            body: "Join or start a club and your next read will show up here."
+                        )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .padding(.horizontal, 16)
+                    .transition(.opacity)
                 } else {
                     ScrollView {
                         VStack(spacing: 0) {
                             if let profile = viewModel.profile {
-                                ProfileSection(
-                                    profile: profile,
-                                    isUploadingAvatar: viewModel.isUploadingAvatar,
-                                    onAvatarPicked: { imageData in
-                                        viewModel.uploadAvatar(imageData: imageData)
-                                    }
-                                )
+                                ProfileSection(profile: profile)
                             }
 
                             Divider()
@@ -77,9 +102,11 @@ struct MeView: View {
                                     editingShelfItem = item
                                 }
                             )
-
                         }
                         .padding(.horizontal, 16)
+                    }
+                    .kluvsPullToRefresh(isRefreshing: viewModel.isLoading) {
+                        viewModel.refresh(forceRefresh: true)
                     }
                     .transition(.opacity)
                 }
@@ -90,7 +117,7 @@ struct MeView: View {
         .overlay(alignment: .bottom) {
             if let snackbarError = viewModel.snackbarError {
                 SnackbarView(message: snackbarError) {
-                    viewModel.clearAvatarError()
+                    viewModel.clearSnackbarError()
                 }
                 .padding()
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -168,47 +195,19 @@ extension Shared.ShelfItem: @retroactive Identifiable {
 }
 
 // MARK: - Profile Section
+// Read-only — editing (including the avatar image) happens in Settings.
 struct ProfileSection: View {
     let profile: Shared.UserProfile
-    var isUploadingAvatar: Bool = false
-    var onAvatarPicked: ((Data) -> Void)? = nil
-
-    @State private var selectedItem: PhotosPickerItem? = nil
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
-            // Avatar with edit button
-            ZStack(alignment: .bottomTrailing) {
-                MemberAvatar(
-                    avatarUrl: profile.avatarUrl,
-                    size: 60,
-                    isLoading: isUploadingAvatar,
-                    onClick: nil
-                )
-
-                // Edit button overlay
-                PhotosPicker(selection: $selectedItem, matching: .images) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.brandOrange.opacity(0.9))
-                            .frame(width: 24, height: 24)
-
-                        IconType.edit.image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 12, height: 12)
-                            .foregroundColor(KluvsTheme.colors.onAccent)
-                    }
-                }
-                .onChange(of: selectedItem) { newItem in
-                    Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                            let compressedData = compressImage(data)
-                            onAvatarPicked?(compressedData)
-                        }
-                    }
-                }
-            }
+            MemberAvatar(
+                avatarUrl: profile.avatarUrl,
+                size: 64,
+                name: profile.name,
+                isLoading: false,
+                onClick: nil
+            )
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(profile.name)
@@ -222,7 +221,10 @@ struct ProfileSection: View {
 
             Spacer()
         }
-        .padding()
+        // Not `.padding()` — the outer VStack in `MeView` already applies horizontal padding to
+        // every section; adding it again here doubled it (16 + 16), leaving this section visibly
+        // more indented than StatisticsSection right below it, which has none of its own.
+        .padding(.vertical, 16)
     }
 }
 

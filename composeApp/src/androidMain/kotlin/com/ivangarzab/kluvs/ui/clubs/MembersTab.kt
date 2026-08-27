@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
@@ -29,9 +28,12 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.designsystem.theme.feature
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.buttons.OutlinedButton
-import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
+import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.NoTabData
 import com.ivangarzab.kluvs.ui.components.RoleEyebrow
 
@@ -58,6 +60,7 @@ fun MembersTab(
 
     val isAdminOrAbove = userRole == Role.OWNER || userRole == Role.ADMIN
     val isOwner = userRole == Role.OWNER
+    val showEmptyState = members.size <= 1 && isAdminOrAbove
 
     Column(modifier = modifier) {
         Row(
@@ -70,7 +73,9 @@ fun MembersTab(
                 color = KluvsTheme.colors.contentMuted,
                 style = KluvsTheme.typography.title.small.feature()
             )
-            if (isAdminOrAbove) {
+            // The EmptyState below already carries its own "Invite Members" action, so this
+            // would just be a redundant second invite button.
+            if (isAdminOrAbove && !showEmptyState) {
                 OutlinedButton(
                     text = stringResource(R.string.invite),
                     onClick = onInviteMember
@@ -92,7 +97,7 @@ fun MembersTab(
                     role = member.role,
                     isSelf = isSelf,
                     isReading = readingByMemberId[member.memberId],
-                    showAdminActions = isAdminOrAbove && (!isSelf || isOwner),
+                    showAdminActions = isAdminOrAbove && (!isSelf || isOwner) && member.role != Role.OWNER,
                     showRemove = isOwner && !isSelf && member.role != Role.OWNER,
                     onChangeRole = { onChangeRole(member.memberId) },
                     onRemove = { onRemoveMember(member.memberId) }
@@ -103,116 +108,13 @@ fun MembersTab(
             }
         }
 
-        if (members.size <= 1 && isAdminOrAbove) {
-            Spacer(Modifier.height(20.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.invite_others_cta),
-                    style = KluvsTheme.typography.headline.small.feature(),
-                    color = KluvsTheme.colors.contentMuted,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(16.dp))
-                PrimaryButton(
-                    text = stringResource(R.string.invite_members),
-                    onClick = onInviteMember,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MemberListItem(
-    modifier: Modifier = Modifier,
-    memberId: String,
-    name: String,
-    handle: String,
-    avatarUrl: String? = null,
-    role: Role,
-    isSelf: Boolean = false,
-    isReading: Boolean? = null,
-    showAdminActions: Boolean = false,
-    showRemove: Boolean = false,
-    onChangeRole: () -> Unit = {},
-    onRemove: () -> Unit = {},
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Avatar(
-            name = name,
-            memberId = memberId,
-            avatarUrl = avatarUrl,
-            size = 40.dp,
-            isOwn = isSelf,
-            contentDescription = stringResource(R.string.avatar_of_x, name)
-        )
-
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = name,
-                    color = KluvsTheme.colors.content,
-                    style = KluvsTheme.typography.body.large
-                )
-                if (isSelf) {
-                    Text(
-                        text = stringResource(R.string.you).uppercase(),
-                        color = KluvsTheme.colors.accent,
-                        style = KluvsTheme.typography.eyebrow
-                    )
-                }
-            }
-            Text(
-                text = handle,
-                color = KluvsTheme.colors.contentMuted,
-                style = KluvsTheme.typography.body.medium
+        if (showEmptyState) {
+            EmptyState(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                heading = "Just you, for now.",
+                body = "Invite a few people and this club starts to feel like one.",
+                action = { SecondaryButton(text = stringResource(R.string.invite_members), onClick = onInviteMember) },
             )
-        }
-
-        Column(
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RoleEyebrow(role = role)
-                if (showAdminActions || showRemove) {
-                    ActionMenu(
-                        items = buildList {
-                            if (showAdminActions) add(ActionMenuItem(label = "Change Role", onClick = onChangeRole))
-                            if (showRemove) add(ActionMenuItem(label = "Remove", onClick = onRemove, isDestructive = true))
-                        },
-                        contentDescription = "Member options"
-                    )
-                }
-            }
-
-            // Session participation indicator (mirrors the web members list)
-            isReading?.let { reading ->
-                Text(
-                    text = if (reading) "Reading" else "Skipping",
-                    color = if (reading) {
-                        KluvsTheme.colors.accent
-                    } else {
-                        KluvsTheme.colors.contentMuted
-                    },
-                    style = KluvsTheme.typography.label
-                )
-            }
         }
     }
 }
@@ -230,11 +132,11 @@ fun Preview_MembersTab() = KluvsTheme {
             .background(color = KluvsTheme.colors.card)
             .fillMaxSize(),
         members = listOf(
-            MemberListItemInfo("0", "Iván Garza Bermea", "@ivangarzab", "", role = Role.OWNER, userId = "u0"),
-            MemberListItemInfo("1", "Monica Michelle Morales", "@monica", "", role = Role.ADMIN, userId = "u1"),
-            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "@chitho23", "", role = Role.MEMBER, userId = "u2"),
-            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "@keto92", "", role = Role.MEMBER, userId = "u3"),
-            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "@josalinas", "", role = Role.MEMBER, userId = "u4"),
+            MemberListItemInfo("0", "Iván Garza Bermea", "ivangarzab", "", role = Role.OWNER, userId = "u0"),
+            MemberListItemInfo("1", "Monica Michelle Morales", "monica", "", role = Role.ADMIN, userId = "u1"),
+            MemberListItemInfo("2", "Marco \"Chitho\" Rivera", "chitho23", "", role = Role.MEMBER, userId = "u2"),
+            MemberListItemInfo("3", "Anacleto \"Keto\" Longoria", "keto92", "", role = Role.MEMBER, userId = "u3"),
+            MemberListItemInfo("4", "Joel Oscar Julian Salinas", "josalinas", "", role = Role.MEMBER, userId = "u4"),
             MemberListItemInfo("5", "Ginseng Joaquin Guzman", "gino1", "", role = Role.MEMBER, userId = "u5"),
         ),
         currentUserId = "u0",

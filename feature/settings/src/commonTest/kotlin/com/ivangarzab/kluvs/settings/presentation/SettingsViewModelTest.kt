@@ -1,10 +1,13 @@
 package com.ivangarzab.kluvs.settings.presentation
 
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.settings.domain.GetEditableProfileUseCase
+import com.ivangarzab.kluvs.settings.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateUserProfileUseCase
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
@@ -26,8 +29,10 @@ import kotlin.test.assertTrue
 class SettingsViewModelTest {
 
     private lateinit var memberRepository: MemberRepository
+    private lateinit var avatarRepository: AvatarRepository
     private lateinit var getEditableProfile: GetEditableProfileUseCase
     private lateinit var updateUserProfile: UpdateUserProfileUseCase
+    private lateinit var updateAvatarUseCase: UpdateAvatarUseCase
     private lateinit var viewModel: SettingsViewModel
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -55,9 +60,12 @@ class SettingsViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         memberRepository = mock<MemberRepository>()
-        getEditableProfile = GetEditableProfileUseCase(memberRepository)
+        avatarRepository = mock<AvatarRepository>()
+        getEditableProfile = GetEditableProfileUseCase(memberRepository, avatarRepository)
         updateUserProfile = UpdateUserProfileUseCase(memberRepository)
-        viewModel = SettingsViewModel(getEditableProfile, updateUserProfile)
+        updateAvatarUseCase = UpdateAvatarUseCase(avatarRepository, memberRepository)
+        viewModel = SettingsViewModel(getEditableProfile, updateUserProfile, updateAvatarUseCase)
+        every { avatarRepository.getAvatarUrl(null) } returns null
     }
 
     @AfterTest
@@ -259,5 +267,92 @@ class SettingsViewModelTest {
 
         // Then
         assertFalse(viewModel.state.value.saveSuccess)
+    }
+
+    // ========================================
+    // AVATAR UPLOAD
+    // ========================================
+
+    @Test
+    fun `uploadAvatar succeeds and updates avatar URL in state`() = runTest {
+        // Given: profile loaded (no avatar)
+        val imageData = ByteArray(100) { it.toByte() }
+        val storagePath = "$memberId/avatar.png"
+        val avatarUrl = "https://storage.example.com/$storagePath"
+        val memberWithAvatar = testMember.copy(avatarPath = storagePath)
+
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        viewModel.loadProfile(userId)
+
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(testMember)
+        everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.success(storagePath)
+        everySuspend { memberRepository.updateMember(memberId, avatarPath = storagePath) } returns Result.success(memberWithAvatar)
+        every { avatarRepository.getAvatarUrl(storagePath) } returns avatarUrl
+        // oldAvatarPath is null, so deleteAvatar is not called
+
+        // When
+        viewModel.uploadAvatar(imageData)
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isUploadingAvatar)
+        assertNull(state.avatarError)
+        assertEquals(avatarUrl, state.profile?.avatarUrl)
+    }
+
+    @Test
+    fun `uploadAvatar fails when no member ID available`() = runTest {
+        // Given: no profile loaded, so memberId is null
+        val imageData = ByteArray(100)
+
+        // When
+        viewModel.uploadAvatar(imageData)
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isUploadingAvatar)
+        assertTrue(state.avatarError != null)
+    }
+
+    @Test
+    fun `uploadAvatar handles upload failure`() = runTest {
+        // Given: profile loaded
+        val imageData = ByteArray(100)
+        val exception = Exception("Upload failed")
+
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        viewModel.loadProfile(userId)
+
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(testMember)
+        everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
+
+        // When
+        viewModel.uploadAvatar(imageData)
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isUploadingAvatar)
+        assertEquals("Upload failed", state.avatarError)
+    }
+
+    @Test
+    fun `clearAvatarError clears the error state`() = runTest {
+        // Given: profile loaded and an upload failed
+        val imageData = ByteArray(100)
+        val exception = Exception("Upload failed")
+
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        viewModel.loadProfile(userId)
+
+        everySuspend { memberRepository.getMember(memberId) } returns Result.success(testMember)
+        everySuspend { avatarRepository.uploadAvatar(memberId, imageData) } returns Result.failure(exception)
+        viewModel.uploadAvatar(imageData)
+        assertTrue(viewModel.state.value.avatarError != null)
+
+        // When
+        viewModel.clearAvatarError()
+
+        // Then
+        assertNull(viewModel.state.value.avatarError)
     }
 }

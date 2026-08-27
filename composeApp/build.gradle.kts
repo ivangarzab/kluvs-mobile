@@ -77,8 +77,8 @@ android {
         applicationId = "com.ivangarzab.kluvs"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 4
-        versionName = "0.0.4"
+        versionCode = 5
+        versionName = "0.0.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
@@ -188,6 +188,29 @@ tasks.matching { it.name in setOf("assembleStaging", "installStaging", "bundleSt
         check(flavor == "integration") {
             "Refusing to run '$name' with buildkonfig.flavor=\"$flavor\". " +
                 "Staging builds must be run with -Pbuildkonfig.flavor=integration, or your Firebase testers get production data."
+        }
+    }
+}
+
+// Guard against silently producing an unsigned staging/release artifact. `signingConfigs`
+// only creates the "release" signingConfig when a keystore is actually available (see above),
+// so a missing KEYSTORE_FILE/keystore.properties otherwise fails silently: the build still
+// succeeds, Firebase/Play just end up with an unsigned APK/AAB that no device can install.
+// Scoped to these tasks specifically (not the signingConfigs block itself) because that block
+// evaluates on every Gradle invocation, including plain local `assembleDebug`/`test` runs that
+// intentionally have no keystore configured.
+tasks.matching {
+    it.name in setOf(
+        "assembleRelease", "installRelease", "bundleRelease",
+        "assembleStaging", "installStaging", "bundleStaging",
+    )
+}.configureEach {
+    val hasReleaseSigningConfig = android.signingConfigs.findByName("release") != null
+    doFirst {
+        check(hasReleaseSigningConfig) {
+            "Refusing to run '$name': no \"release\" signingConfig is available. " +
+                "Set KEYSTORE_FILE/KEYSTORE_PASSWORD/KEY_ALIAS/KEY_PASSWORD (CI) or keystore.properties (local), " +
+                "or this task will silently produce an unsigned, uninstallable artifact."
         }
     }
 }

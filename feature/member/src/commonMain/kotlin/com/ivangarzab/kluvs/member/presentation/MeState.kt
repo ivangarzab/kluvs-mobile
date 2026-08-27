@@ -11,7 +11,6 @@ data class MeState(
     val upNext: UpNextItem? = null,
     val showLogoutConfirmation: Boolean = false,
     val snackbarError: String? = null,
-    val isUploadingAvatar: Boolean = false,
     val readingLog: ReadingLog? = null,
     val isReadingLogLoading: Boolean = false,
     val showReadingLog: Boolean = false,

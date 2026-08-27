@@ -39,6 +39,23 @@ class UpdateUserProfileUseCaseTest {
     }
 
     @Test
+    fun `handle is saved without the at-sign prefix`() = runTest {
+        // Given — the backend's own convention (see kluvs-backend's seed.sql) stores the bare
+        // handle; every display site prepends its own "@", so saving it pre-prefixed here used
+        // to double up as "@@handle" wherever it was shown.
+        val updatedMember = Member(id = "member-1", name = "Alice", handle = "alice_reads", booksRead = 5)
+        everySuspend { memberRepository.updateMember(any(), any(), any(), any(), any(), any(), any()) } returns Result.success(updatedMember)
+
+        // When
+        useCase("member-1", "Alice", "alice_reads")
+
+        // Then
+        verifySuspend {
+            memberRepository.updateMember(memberId = "member-1", name = "Alice", handle = "alice_reads", any(), any(), any(), any())
+        }
+    }
+
+    @Test
     fun `blank name returns validation error`() = runTest {
         // When
         val result = useCase("member-1", "  ", "alice_reads")

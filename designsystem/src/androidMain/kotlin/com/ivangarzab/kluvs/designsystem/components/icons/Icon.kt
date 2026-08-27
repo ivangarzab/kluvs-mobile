@@ -72,11 +72,13 @@ internal fun IconType.toDrawableRes(): Int = when (this) {
     IconType.Clubs -> R.drawable.ic_clubs
     IconType.Discord -> R.drawable.ic_discord
     IconType.Edit -> R.drawable.ic_edit
+    IconType.EditNote -> R.drawable.ic_edit_note
     IconType.Email -> R.drawable.ic_email
     IconType.Google -> R.drawable.ic_google
     IconType.Help -> R.drawable.ic_help
     IconType.Location -> R.drawable.ic_location
     IconType.Password -> R.drawable.ic_password
+    IconType.Reading -> R.drawable.ic_reading
     IconType.Settings -> R.drawable.ic_settings
     IconType.SignOut -> R.drawable.ic_signout
     IconType.User -> R.drawable.ic_user

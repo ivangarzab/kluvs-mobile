@@ -21,6 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -107,11 +110,11 @@ fun ClubsScreen(
     // Show snackbar whenever operationResult is set, then consume it
     LaunchedEffect(state.operationResult) {
         state.operationResult?.let { result ->
-            val message = when (result) {
-                is OperationResult.Success -> result.message
-                is OperationResult.Error -> result.message
+            val (message, variant) = when (result) {
+                is OperationResult.Success -> result.message to SnackbarVariant.SUCCESS
+                is OperationResult.Error -> result.message to SnackbarVariant.DANGER
             }
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(KluvsSnackbarVisuals(message = message, variant = variant))
             viewModel.onConsumeOperationResult()
         }
     }
@@ -119,8 +122,17 @@ fun ClubsScreen(
     // Navigate into a just-created club, then consume the signal
     LaunchedEffect(state.createdClubId) {
         state.createdClubId?.let { clubId ->
+            viewModel.selectClub(clubId)
             navController.navigate("detail/$clubId")
             viewModel.onConsumeCreatedClubId()
+        }
+    }
+
+    // Navigate back out of a just-deleted club's detail screen, then consume the signal
+    LaunchedEffect(state.deletedClubId) {
+        state.deletedClubId?.let {
+            navController.popBackStack()
+            viewModel.onConsumeDeletedClubId()
         }
     }
 
@@ -203,11 +215,11 @@ fun ClubsScreen(
                     onSaveDiscussionNote = viewModel::onSaveDiscussionNote,
                     onDeleteDiscussionNote = viewModel::onDeleteDiscussionNote,
                     onUpdateMemberRole = { memberId, newRole ->
-                        val currentMemberId = state.members.find { it.userId == userId }?.memberId ?: return@ClubsScreenContent
+                        val currentMemberId = state.currentMemberId ?: return@ClubsScreenContent
                         viewModel.onUpdateMemberRole(memberId, currentMemberId, newRole)
                     },
                     onRemoveMember = { memberId ->
-                        val currentMemberId = state.members.find { it.userId == userId }?.memberId ?: return@ClubsScreenContent
+                        val currentMemberId = state.currentMemberId ?: return@ClubsScreenContent
                         viewModel.onRemoveMember(memberId, currentMemberId)
                     }
                 )
@@ -215,7 +227,8 @@ fun ClubsScreen(
         }
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackbar = { KluvsSnackbar(it) }
         )
     }
 }
@@ -409,6 +422,14 @@ fun ClubsScreenContent(
                             .fillMaxSize()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
 
+                        // ActiveSessionTab's discussion list handles its own bottom inset via
+                        // LazyColumn contentPadding, so its bottom edge scrolls with content
+                        // instead of pinning a fixed gap above the nav bar regardless of scroll position.
+                        val discussionsTabModifier = Modifier
+                            .background(color = KluvsTheme.colors.background)
+                            .fillMaxSize()
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+
                         PullToRefreshContainer(
                             isLoading = state.isLoading,
                             onRefresh = onRefresh,
@@ -427,19 +448,18 @@ fun ClubsScreenContent(
                                         ownProgress = state.ownProgress,
                                         userRole = state.userRole,
                                         members = state.members,
-                                        currentUserId = currentUserId,
+                                        currentMemberId = state.currentMemberId,
                                         onEditSession = { showEditSessionSheet = true },
                                         onEndSession = { showEndSessionDialog = true },
                                         onUpdateProgress = { showProgressSheet = true },
                                         onCreateSession = { showCreateSessionSheet = true },
                                         onToggleParticipation = { isReading ->
-                                            val currentMemberId = state.members.find { it.userId == currentUserId }?.memberId
-                                                ?: return@OverviewTab
+                                            val currentMemberId = state.currentMemberId ?: return@OverviewTab
                                             onToggleParticipation(currentMemberId, isReading)
                                         }
                                     )
                                     1 -> ActiveSessionTab(
-                                        modifier = tabModifier,
+                                        modifier = discussionsTabModifier,
                                         sessionDetails = state.activeSession,
                                         userRole = state.userRole,
                                         onCreateSession = { showCreateSessionSheet = true },

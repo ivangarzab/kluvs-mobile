@@ -1,8 +1,5 @@
 package com.ivangarzab.kluvs.ui.me
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,15 +13,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -49,18 +45,16 @@ import com.ivangarzab.kluvs.member.presentation.UserStatistics
 import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenu
 import com.ivangarzab.kluvs.designsystem.components.menus.ActionMenuItem
-import com.ivangarzab.kluvs.designsystem.components.icons.Icon
 import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.ProgressTrackingMode
 import com.ivangarzab.kluvs.designsystem.components.ReadingProgressBottomSheet
 import com.ivangarzab.kluvs.designsystem.components.modals.ConfirmationDialog
-import com.ivangarzab.kluvs.ui.utils.compressImage
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Translation at the boundary into the hollow [ReadingProgressBottomSheet] — see its call site below. */
@@ -82,21 +76,8 @@ fun MeScreen(
     viewModel: MeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var editingShelfItem by remember { mutableStateOf<ShelfItem?>(null) }
-
-    // Image picker launcher
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        uri?.let {
-            context.contentResolver.openInputStream(it)?.use { inputStream ->
-                val bytes = compressImage(inputStream.readBytes())
-                viewModel.uploadAvatar(bytes)
-            }
-        }
-    }
 
     LaunchedEffect(userId) {
         viewModel.loadUserData(userId)
@@ -105,8 +86,10 @@ fun MeScreen(
     // Show snackbar for errors
     LaunchedEffect(state.snackbarError) {
         state.snackbarError?.let { error ->
-            snackbarHostState.showSnackbar(error)
-            viewModel.clearAvatarError()
+            snackbarHostState.showSnackbar(
+                KluvsSnackbarVisuals(message = error, variant = SnackbarVariant.DANGER)
+            )
+            viewModel.clearSnackbarError()
         }
     }
 
@@ -138,19 +121,15 @@ fun MeScreen(
                 state = state,
                 onRetry = viewModel::refresh,
                 onRefresh = { viewModel.refresh(forceRefresh = true) },
-                onAvatarClick = {
-                    imagePickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                },
                 onUpdateProgress = { sessionId ->
                     editingShelfItem = state.shelf.find { it.sessionId == sessionId }
-                }
+                },
             )
 
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.align(Alignment.BottomCenter)
+                modifier = Modifier.align(Alignment.BottomCenter),
+                snackbar = { KluvsSnackbar(it) }
             )
 
             editingShelfItem?.let { item ->
@@ -203,9 +182,14 @@ fun MeScreenContent(
     state: MeState,
     onRetry: () -> Unit,
     onRefresh: () -> Unit = onRetry,
-    onAvatarClick: () -> Unit = {},
     onUpdateProgress: (sessionId: String) -> Unit = {},
 ) {
+    // state.statistics.clubsCount (from GetUserStatisticsUseCase, already the source of the
+    // "4 CLUBS" stat shown above) is the real "no clubs" signal — null means stats haven't
+    // loaded or failed to load, not that the count is zero, so it deliberately does NOT count
+    // as empty here.
+    val hasNothingToShow = state.statistics?.clubsCount == 0
+
     val screenState = when {
         state.profile != null -> ScreenState.Content
         state.isLoading -> ScreenState.Loading
@@ -233,48 +217,81 @@ fun MeScreenContent(
                     onRefresh = onRefresh,
                     modifier = modifier.fillMaxSize(),
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = KluvsTheme.colors.background)
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        ProfileSection(
-                            avatarUrl = state.profile?.avatarUrl,
-                            name = state.profile?.name ?: "",
-                            handle = state.profile?.handle ?: "",
-                            isUploadingAvatar = state.isUploadingAvatar,
-                            onAvatarClick = onAvatarClick
-                        )
-
-                        Divider()
-
-                        StatisticsSection(
-                            modifier = Modifier.fillMaxWidth(),
-                            data = state.statistics,
-                            joinDate = state.profile?.joinDate
-                        )
-
-                        Divider()
-
-                        UpNextSection(
+                    // hasNothingToShow skips verticalScroll entirely (rather than just adding
+                    // fillMaxSize/weight inside it) — a scrollable Column gives its children
+                    // unbounded height, so the EmptyState below could never actually fill the
+                    // remaining viewport space if it stayed nested in one.
+                    if (hasNothingToShow) {
+                        Column(
                             modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth(),
-                            upNext = state.upNext
-                        )
+                                .fillMaxSize()
+                                .background(color = KluvsTheme.colors.background)
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ProfileSection(
+                                avatarUrl = state.profile?.avatarUrl,
+                                name = state.profile?.name ?: "",
+                                handle = state.profile?.handle ?: ""
+                            )
 
-                        if (state.upNext != null) {
                             Divider()
-                        }
 
-                        ShelfSection(
-                            modifier = Modifier.fillMaxWidth(),
-                            shelf = state.shelf,
-                            onUpdateProgress = onUpdateProgress
-                        )
+                            StatisticsSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                data = state.statistics,
+                                joinDate = state.profile?.joinDate
+                            )
+
+                            Divider()
+
+                            EmptyState(
+                                modifier = Modifier.fillMaxWidth().weight(1f),
+                                heading = "Nothing to track yet.",
+                                body = "Join or start a club and your next read will show up here."
+                            )
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = KluvsTheme.colors.background)
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ProfileSection(
+                                avatarUrl = state.profile?.avatarUrl,
+                                name = state.profile?.name ?: "",
+                                handle = state.profile?.handle ?: ""
+                            )
+
+                            Divider()
+
+                            StatisticsSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                data = state.statistics,
+                                joinDate = state.profile?.joinDate
+                            )
+
+                            Divider()
+
+                            if (state.upNext != null) {
+                                UpNextSection(
+                                    modifier = Modifier
+                                        .padding(vertical = 8.dp)
+                                        .fillMaxWidth(),
+                                    upNext = state.upNext
+                                )
+                                Divider()
+                            }
+
+                            ShelfSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                shelf = state.shelf,
+                                onUpdateProgress = onUpdateProgress
+                            )
+                        }
                     }
                 }
             }
@@ -288,41 +305,19 @@ private fun ProfileSection(
     avatarUrl: String?,
     name: String,
     handle: String,
-    isUploadingAvatar: Boolean = false,
-    onAvatarClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Avatar with edit button overlay
-        Box {
-            Avatar(
-                name = name,
-                avatarUrl = avatarUrl,
-                size = 60.dp,
-                isOwn = true,
-                contentDescription = stringResource(R.string.profile_picture),
-                onClick = onAvatarClick,
-                isLoading = isUploadingAvatar
-            )
-
-            // Edit icon overlay
-            FloatingActionButton(
-                onClick = onAvatarClick,
-                modifier = Modifier
-                    .size(24.dp)
-                    .align(Alignment.BottomEnd),
-                containerColor = KluvsTheme.colors.accent,
-                contentColor = KluvsTheme.colors.onAccent,
-            ) {
-                Icon(
-                    type = IconType.Edit,
-                    contentDescription = stringResource(R.string.edit_profile_picture),
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        }
+        // Read-only — editing (including the image) happens in Settings.
+        Avatar(
+            name = name,
+            avatarUrl = avatarUrl,
+            size = 64.dp,
+            isOwn = true,
+            contentDescription = stringResource(R.string.profile_picture)
+        )
 
         Spacer(Modifier.padding(8.dp))
 

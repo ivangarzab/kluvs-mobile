@@ -1,8 +1,10 @@
 package com.ivangarzab.kluvs.settings.domain
 
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.model.Member
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
@@ -15,26 +17,32 @@ import kotlin.test.assertTrue
 class GetEditableProfileUseCaseTest {
 
     private lateinit var memberRepository: MemberRepository
+    private lateinit var avatarRepository: AvatarRepository
     private lateinit var useCase: GetEditableProfileUseCase
 
     @BeforeTest
     fun setup() {
         memberRepository = mock<MemberRepository>()
-        useCase = GetEditableProfileUseCase(memberRepository)
+        avatarRepository = mock<AvatarRepository>()
+        useCase = GetEditableProfileUseCase(memberRepository, avatarRepository)
     }
 
     @Test
     fun `returns editable profile when repository succeeds`() = runTest {
         // Given
         val userId = "user-123"
+        val avatarPath = "member-456/avatar.png"
+        val avatarUrl = "https://storage.example.com/$avatarPath"
         val member = Member(
             id = "member-456",
             name = "John Doe",
             handle = "johndoe",
+            avatarPath = avatarPath,
             userId = userId,
             booksRead = 5
         )
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
+        every { avatarRepository.getAvatarUrl(avatarPath) } returns avatarUrl
 
         // When
         val result = useCase(userId)
@@ -45,6 +53,7 @@ class GetEditableProfileUseCaseTest {
         assertEquals("member-456", profile.memberId)
         assertEquals("John Doe", profile.name)
         assertEquals("johndoe", profile.handle)
+        assertEquals(avatarUrl, profile.avatarUrl)
         verifySuspend { memberRepository.getMemberByUserId(userId) }
     }
 
@@ -60,6 +69,7 @@ class GetEditableProfileUseCaseTest {
             booksRead = 0
         )
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
+        every { avatarRepository.getAvatarUrl(null) } returns null
 
         // When
         val result = useCase(userId)
@@ -82,6 +92,7 @@ class GetEditableProfileUseCaseTest {
             booksRead = 0
         )
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(member)
+        every { avatarRepository.getAvatarUrl(null) } returns null
 
         // When
         val result = useCase(userId)

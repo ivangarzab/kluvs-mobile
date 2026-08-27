@@ -10,6 +10,7 @@ import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -55,36 +56,54 @@ class BookRemoteDataSourceTest {
 
     @Test
     fun `searchBooks success returns list of books`() = runTest {
-        everySuspend { bookService.search(any(), any()) } returns BookSearchResponseDto(
+        everySuspend { bookService.search(any(), any(), any()) } returns BookSearchResponseDto(
             success = true,
-            books = listOf(testBookDto)
+            books = listOf(testBookDto),
+            total = 1
         )
 
         val result = dataSource.searchBooks("hobbit")
 
         assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull()?.size)
-        assertEquals("The Hobbit", result.getOrNull()?.first()?.title)
-        assertEquals("goog-hobbit", result.getOrNull()?.first()?.externalGoogleId)
+        assertEquals(1, result.getOrNull()?.books?.size)
+        assertEquals("The Hobbit", result.getOrNull()?.books?.first()?.title)
+        assertEquals("goog-hobbit", result.getOrNull()?.books?.first()?.externalGoogleId)
+        assertEquals(1, result.getOrNull()?.total)
     }
 
     @Test
     fun `searchBooks returns empty list when no results`() = runTest {
-        everySuspend { bookService.search(any(), any()) } returns BookSearchResponseDto(
+        everySuspend { bookService.search(any(), any(), any()) } returns BookSearchResponseDto(
             success = true,
-            books = emptyList()
+            books = emptyList(),
+            total = 0
         )
 
         val result = dataSource.searchBooks("xyzzy")
 
         assertTrue(result.isSuccess)
-        assertEquals(0, result.getOrNull()?.size)
+        assertEquals(0, result.getOrNull()?.books?.size)
+        assertEquals(0, result.getOrNull()?.total)
+    }
+
+    @Test
+    fun `searchBooks passes offset through to the service`() = runTest {
+        everySuspend { bookService.search(any(), any(), any()) } returns BookSearchResponseDto(
+            success = true,
+            books = listOf(testBookDto),
+            total = 25
+        )
+
+        val result = dataSource.searchBooks("hobbit", offset = 10)
+
+        assertTrue(result.isSuccess)
+        verifySuspend { bookService.search("hobbit", offset = 10) }
     }
 
     @Test
     fun `searchBooks failure returns Result failure`() = runTest {
         val exception = Exception("Network error")
-        everySuspend { bookService.search(any(), any()) } throws exception
+        everySuspend { bookService.search(any(), any(), any()) } throws exception
 
         val result = dataSource.searchBooks("hobbit")
 

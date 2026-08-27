@@ -1,5 +1,6 @@
 import SwiftUI
 import SafariServices
+import PhotosUI
 import DesignSystem
 
 struct SettingsView: View {
@@ -9,44 +10,46 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                EditProfileSection(
-                    editedName: Binding(
-                        get: { viewModel.editedName },
-                        set: { viewModel.onNameChanged($0) }
-                    ),
-                    editedHandle: Binding(
-                        get: { viewModel.editedHandle },
-                        set: { viewModel.onHandleChanged($0) }
-                    ),
-                    hasChanges: viewModel.hasChanges,
-                    isSaving: viewModel.isSaving,
-                    saveError: viewModel.saveError,
-                    onSaveProfile: { viewModel.onSaveProfile() }
-                )
+        VStack(spacing: 0) {
+            // DS `TopAppBar`, matching Android's `SettingsScreen` — not `.navigationTitle`/
+            // `.toolbar`, which don't share Kluvs's branded chrome (eyebrow style, back icon).
+            TopAppBar(header: String(localized: "settings_title"), onNavigateBack: { dismiss() })
 
-                Divider()
-                    .overlay(KluvsTheme.colors.divider)
-                    .padding(.top, 12)
+            ScrollView {
+                VStack(spacing: 0) {
+                    EditProfileSection(
+                        avatarUrl: viewModel.profile?.avatarUrl,
+                        isUploadingAvatar: viewModel.isUploadingAvatar,
+                        onAvatarPicked: { imageData in
+                            viewModel.uploadAvatar(imageData: imageData)
+                        },
+                        onAvatarPickFailed: { reason in
+                            viewModel.onAvatarPickFailed(reason: reason)
+                        },
+                        editedName: Binding(
+                            get: { viewModel.editedName },
+                            set: { viewModel.onNameChanged($0) }
+                        ),
+                        editedHandle: Binding(
+                            get: { viewModel.editedHandle },
+                            set: { viewModel.onHandleChanged($0) }
+                        ),
+                        hasChanges: viewModel.hasChanges,
+                        isSaving: viewModel.isSaving,
+                        saveError: viewModel.saveError,
+                        onSaveProfile: { viewModel.onSaveProfile() }
+                    )
 
-                LegalSection()
+                    LegalSection()
 
-                AboutSection()
+                    AboutSection()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
         }
         .background(KluvsTheme.colors.background)
-        .navigationTitle(String(localized: "settings_title"))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    IconType.back.image
-                }
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.loadProfile(userId: userId)
         }
@@ -63,21 +66,34 @@ struct SettingsView: View {
                 }
                 .padding()
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+            } else if let avatarError = viewModel.avatarError {
+                SnackbarView(message: avatarError) {
+                    viewModel.clearAvatarError()
+                }
+                .padding()
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .animation(.easeInOut(duration: 0.3), value: showSaveSuccess)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.avatarError)
     }
 }
 
 // MARK: - Edit Profile Section
 
 struct EditProfileSection: View {
+    let avatarUrl: String?
+    var isUploadingAvatar: Bool = false
+    var onAvatarPicked: ((Data) -> Void)? = nil
+    var onAvatarPickFailed: ((String?) -> Void)? = nil
     @Binding var editedName: String
     @Binding var editedHandle: String
     let hasChanges: Bool
     let isSaving: Bool
     let saveError: String?
     let onSaveProfile: () -> Void
+
+    @State private var selectedItem: PhotosPickerItem? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -87,6 +103,47 @@ struct EditProfileSection: View {
 
             Spacer()
                 .frame(height: 4)
+
+            ZStack(alignment: .bottomTrailing) {
+                MemberAvatar(
+                    avatarUrl: avatarUrl,
+                    size: 64,
+                    name: editedName,
+                    isLoading: isUploadingAvatar,
+                    onClick: nil
+                )
+
+                PhotosPicker(selection: $selectedItem, matching: .images) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.brandOrange.opacity(0.9))
+                            .frame(width: 24, height: 24)
+
+                        IconType.edit.image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
+                            .foregroundColor(KluvsTheme.colors.onAccent)
+                    }
+                }
+                .onChange(of: selectedItem) { newItem in
+                    guard let newItem else { return }
+                    Task {
+                        do {
+                            guard let data = try await newItem.loadTransferable(type: Data.self) else {
+                                onAvatarPickFailed?("loadTransferable returned nil data")
+                                return
+                            }
+                            let compressedData = compressImage(data)
+                            onAvatarPicked?(compressedData)
+                        } catch {
+                            onAvatarPickFailed?(error.localizedDescription)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.bottom, 4)
 
             InputField(label: String(localized: "label_name"), value: $editedName)
 
@@ -132,6 +189,11 @@ struct LegalSection: View {
                 safariUrl = URL(string: "https://kluvs.com/terms")
             }
             Divider().overlay(KluvsTheme.colors.divider)
+
+            LegalRow(label: String(localized: "data_deletion")) {
+                safariUrl = URL(string: "https://kluvs.com/delete-account")
+            }
+            Divider().overlay(KluvsTheme.colors.divider)
         }
         .padding(.vertical, 12)
         .sheet(item: $safariUrl) { url in
@@ -149,7 +211,7 @@ private struct LegalRow: View {
         Button(action: action) {
             HStack {
                 Text(label)
-                    .kluvsStyle(KluvsTheme.typography.label)
+                    .kluvsStyle(KluvsTheme.typography.body.large)
                     .foregroundColor(KluvsTheme.colors.accent)
                 Spacer()
                 Image(systemName: "chevron.right")

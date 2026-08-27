@@ -18,7 +18,6 @@ class MeViewModelWrapper: ObservableObject {
     @Published var upNext: Shared.UpNextItem? = nil
     @Published var showLogoutConfirmation: Bool = false
     @Published var snackbarError: String? = nil
-    @Published var isUploadingAvatar: Bool = false
     @Published var readingLog: Shared.ReadingLog? = nil
     @Published var isReadingLogLoading: Bool = false
     @Published var showReadingLog: Bool = false
@@ -43,7 +42,6 @@ class MeViewModelWrapper: ObservableObject {
                 self.upNext = state.upNext
                 self.showLogoutConfirmation = state.showLogoutConfirmation
                 self.snackbarError = state.snackbarError
-                self.isUploadingAvatar = state.isUploadingAvatar
                 self.readingLog = state.readingLog
                 self.isReadingLogLoading = state.isReadingLogLoading
                 self.showReadingLog = state.showReadingLog
@@ -56,8 +54,8 @@ class MeViewModelWrapper: ObservableObject {
         helper.loadUserData(userId: userId)
     }
 
-    func refresh() {
-        helper.refresh()
+    func refresh(forceRefresh: Bool = false) {
+        helper.refresh(forceRefresh: forceRefresh)
     }
 
     func onSignOutClicked() {
@@ -72,20 +70,8 @@ class MeViewModelWrapper: ObservableObject {
         helper.confirmLogout()
     }
 
-    func uploadAvatar(imageData: Data) {
-        let byteArray = KotlinByteArray(size: Int32(imageData.count))
-        imageData.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
-            if let baseAddress = bytes.baseAddress {
-                for i in 0..<imageData.count {
-                    byteArray.set(index: Int32(i), value: Int8(bitPattern: baseAddress.load(fromByteOffset: i, as: UInt8.self)))
-                }
-            }
-        }
-        helper.uploadAvatar(imageData: byteArray)
-    }
-
-    func clearAvatarError() {
-        helper.clearAvatarError()
+    func clearSnackbarError() {
+        helper.clearSnackbarError()
     }
 
     /// `percentComplete` is a plain Int (0-100) — the KMP helper converts it to Float internally.

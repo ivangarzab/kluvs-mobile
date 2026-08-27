@@ -30,17 +30,27 @@ struct ClubsListView: View {
             .background(Color.kluvsBackground)
             .kluvsPullToRefresh(isRefreshing: isRefreshing, onRefresh: onRefresh)
 
-            Button(action: onAddClub) {
-                Image(systemName: "plus")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.brandOnPrimary)
-                    .frame(width: 56, height: 56)
-                    .background(Color.brandOrange)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(radius: 4)
-            }
-            .padding(16)
+            ClubsFAB(action: onAddClub)
         }
+    }
+}
+
+/// The "+ New club" FAB — shared between the populated list and the empty state (both need it;
+/// only the loading/error states don't).
+struct ClubsFAB: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "plus")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.brandOnPrimary)
+                .frame(width: 56, height: 56)
+                .background(Color.brandOrange)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(radius: 4)
+        }
+        .padding(16)
     }
 }
 

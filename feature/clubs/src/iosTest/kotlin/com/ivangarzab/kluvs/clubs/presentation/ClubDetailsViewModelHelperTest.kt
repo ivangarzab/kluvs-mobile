@@ -14,6 +14,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetAttendanceRosterUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
@@ -100,10 +101,11 @@ class ClubDetailsViewModelHelperTest {
         val getActiveSession = GetActiveSessionUseCase(clubRepository, formatDateTime)
         val getClubMembers = GetClubMembersUseCase(clubRepository, avatarRepository)
         val getMemberClubs = GetMemberClubsUseCase(memberRepository, clubRepository, avatarRepository)
+        val getCurrentMemberId = GetCurrentMemberIdUseCase(memberRepository)
 
         // Create real ViewModel with real use cases
         viewModel = ClubDetailsViewModel(
-            getClubDetails, getActiveSession, getClubMembers, getMemberClubs,
+            getClubDetails, getActiveSession, getClubMembers, getMemberClubs, getCurrentMemberId,
             createClubUseCase = CreateClubUseCase(clubRepository, memberRepository),
             updateClubUseCase = UpdateClubUseCase(clubRepository),
             updateJoinPolicyUseCase = UpdateJoinPolicyUseCase(clubRepository),

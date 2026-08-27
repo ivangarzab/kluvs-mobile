@@ -13,8 +13,13 @@ import io.ktor.http.HttpMethod
 import io.ktor.utils.io.InternalAPI
 
 interface BookService {
-    /** Search books by query string. Returns up to [limit] results (null = server default). */
-    suspend fun search(query: String, limit: Int? = null): BookSearchResponseDto
+    /**
+     * Search books by query string.
+     *
+     * @param limit Max results for this page (null = server default).
+     * @param offset 0-based index of the first result to return (null = server default of 0).
+     */
+    suspend fun search(query: String, limit: Int? = null, offset: Int? = null): BookSearchResponseDto
 
     /** Look up a single book by ISBN. */
     suspend fun lookupByIsbn(isbn: String): BookLookupResponseDto
@@ -26,14 +31,15 @@ interface BookService {
 @OptIn(InternalAPI::class)
 internal class BookServiceImpl(private val supabase: SupabaseClient) : BookService {
 
-    override suspend fun search(query: String, limit: Int?): BookSearchResponseDto {
-        Bark.d("Searching books (query: \"$query\")")
+    override suspend fun search(query: String, limit: Int?, offset: Int?): BookSearchResponseDto {
+        Bark.d("Searching books (query: \"$query\", offset: ${offset ?: 0})")
         return try {
             val response = supabase.functions.invoke("book") {
                 method = HttpMethod.Get
                 url {
                     parameters.append("q", query)
                     if (limit != null) parameters.append("limit", limit.toString())
+                    if (offset != null) parameters.append("offset", offset.toString())
                 }
             }.body<BookSearchResponseDto>()
             Bark.v("Book search returned ${response.books?.size ?: 0} results")

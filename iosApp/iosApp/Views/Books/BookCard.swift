@@ -17,8 +17,13 @@ struct BookCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             ZStack(alignment: .topTrailing) {
+                // Explicit frame, not `.aspectRatio(_, contentMode: .fit)` — `.fit` sizes off
+                // whichever branch of `coverView` is active (loaded image vs. placeholder) instead
+                // of always landing on exactly 120x180, which is what made cards look inconsistently
+                // sized card-to-card. Mirrors Android's `fillMaxWidth().aspectRatio(2f/3f)`, which
+                // pins the width first rather than letting content dictate the frame.
                 coverView
-                    .aspectRatio(2.0 / 3.0, contentMode: .fit)
+                    .frame(width: 120, height: 180)
                     .clipShape(RoundedRectangle(cornerRadius: 4)) // radius.sm — design-system/docs/book-cover.md
 
                 if shelfSource == .session {
@@ -27,13 +32,10 @@ struct BookCard: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                // Reserve full 2-line height regardless of actual title length (real font
-                // metrics, not a guessed pixel height), so 1-line and 2-line titles don't
-                // produce differently sized cards in the same row.
                 Text(book.title)
                     .kluvsStyle(KluvsTheme.typography.title.small)
                     .foregroundColor(KluvsTheme.colors.content)
-                    .lineLimit(2, reservesSpace: true)
+                    .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                 Text(book.author)
                     .kluvsStyle(KluvsTheme.typography.caption)
@@ -41,10 +43,7 @@ struct BookCard: View {
                     .lineLimit(1)
                 // Always reserve the year line's height, even when there's no year to show —
                 // `book.year` is nullable, and omitting the row entirely made those cards shorter.
-                // `book.year` bridges as boxed `KotlinInt` (an NSNumber subclass); interpolating
-                // it directly invokes NSNumber's locale-aware `description` (e.g. "2,025") —
-                // pull out `.intValue` first for a plain digit string.
-                Text(book.year.map { "\($0.intValue)" } ?? " ")
+                Text(book.year.map(formattedYear) ?? " ")
                     .kluvsStyle(KluvsTheme.typography.caption)
                     .foregroundColor(book.year != nil ? KluvsTheme.colors.contentMuted : .clear)
             }
@@ -52,6 +51,16 @@ struct BookCard: View {
         .frame(width: 120)
         .contentShape(Rectangle())
         .onTapGesture(perform: onTap)
+    }
+
+    /// `book.year` bridges as boxed `KotlinInt` (an `NSNumber` subclass) — explicitly disabling
+    /// grouping via `NumberFormatter` here instead of trusting string interpolation to stay
+    /// ungrouped, no matter how the value got boxed upstream.
+    private func formattedYear(_ year: KotlinInt) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .none
+        formatter.usesGroupingSeparator = false
+        return formatter.string(from: year) ?? String(year.intValue)
     }
 
     @ViewBuilder

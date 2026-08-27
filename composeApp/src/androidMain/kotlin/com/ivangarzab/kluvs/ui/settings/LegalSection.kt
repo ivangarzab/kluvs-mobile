@@ -1,7 +1,6 @@
 package com.ivangarzab.kluvs.ui.settings
 
 import android.content.Context
-import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.core.net.toUri
 
 private const val PRIVACY_POLICY_URL = "https://kluvs.com/privacy"
 private const val TERMS_OF_USE_URL = "https://kluvs.com/terms"
+private const val DATA_DELETE_URL = "https://kluvs.com/delete-account"
 
 @Composable
 fun LegalSection(
@@ -52,6 +52,13 @@ fun LegalSection(
         )
 
         HorizontalDivider(color = KluvsTheme.colors.divider)
+
+        LegalRow(
+            label = stringResource(R.string.data_deletion),
+            onClick = { openCustomTab(context, DATA_DELETE_URL) }
+        )
+
+        HorizontalDivider(color = KluvsTheme.colors.divider)
     }
 }
 
@@ -69,7 +76,7 @@ private fun LegalRow(
     ) {
         Text(
             text = label,
-            style = KluvsTheme.typography.label,
+            style = KluvsTheme.typography.body.large,
             color = KluvsTheme.colors.accent,
         )
     }

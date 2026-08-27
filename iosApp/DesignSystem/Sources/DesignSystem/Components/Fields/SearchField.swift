@@ -37,6 +37,16 @@ public struct SearchField: View {
     private var accentColor: Color { isFocused ? KluvsTheme.colors.accent : KluvsTheme.colors.contentMuted }
     private var borderColor: Color { isFocused ? KluvsTheme.colors.accent : KluvsTheme.colors.divider }
 
+    // The keyboard's "search" submit button otherwise does nothing — this is the only way to
+    // dismiss the keyboard without also leaving search mode (the back arrow does that instead).
+    private func dismissKeyboard() {
+        if let focus {
+            focus.wrappedValue = false
+        } else {
+            localFocus = false
+        }
+    }
+
     public var body: some View {
         HStack(spacing: 8) {
             Group {
@@ -52,6 +62,7 @@ public struct SearchField: View {
             .foregroundColor(KluvsTheme.colors.content)
             .tint(KluvsTheme.colors.accent)
             .submitLabel(.search)
+            .onSubmit(dismissKeyboard)
             .disabled(!enabled)
 
             if !value.isEmpty {

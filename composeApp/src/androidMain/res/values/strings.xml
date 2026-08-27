@@ -40,8 +40,11 @@
     <string name="club_name">Club Name</string>
     <string name="x_members">%s members</string>
     <string name="invite">+ Invite</string>
+    <string name="member_reading">Reading</string>
+    <string name="member_skipping">Skipping</string>
     <string name="x_discussions_scheduled">%s scheduled</string>
     <string name="add_discussion">+ Add</string>
+    <string name="discussion_notes_title">Notes</string>
     <string name="invite_members">Invite Members</string>
     <string name="invite_others_cta">Invite others to get the conversation going.</string>
     <string name="books_read">Books</string>
@@ -83,6 +86,10 @@
     <string name="reset_link_sent_to">Reset link sent to</string>
     <string name="reset_link_sent_body">Open the link from your email to choose a new password.</string>
 
+    <!-- Sign Up Confirmation Sheet -->
+    <string name="signup_confirmation_sent_to">Confirmation link sent to</string>
+    <string name="signup_confirmation_body">Open the link from your email to finish setting up your account.</string>
+
     <!-- Auth Error Messages -->
     <string name="error_invalid_credentials">Invalid email or password</string>
     <string name="error_email_not_confirmed">Please verify your email address</string>
@@ -112,7 +119,7 @@
     <string name="legal_title">Legal</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_of_use">Terms of Use</string>
-    <string name="about_title">About</string>
+    <string name="data_deletion">Data Deletion</string>
 
     <string name="navigate_back">Navigate back</string>
 

@@ -24,7 +24,7 @@ struct AuthView: View {
                     .onAppear {
                         openOAuthUrl(url)
                     }
-            case .unauthenticated, .error:
+            case .unauthenticated, .error, .emailConfirmationPending:
                 AuthFormView(
                     mode: authMode,
                     viewModel: viewModel,
@@ -52,6 +52,34 @@ struct AuthView: View {
             }
         }
         .authForgotSheet(isPresented: $showForgotSheet, viewModel: viewModel)
+        .authSignupSentSheet(
+            isPresented: isEmailConfirmationPendingBinding,
+            email: emailConfirmationPendingEmail,
+            onDismiss: { viewModel.dismissEmailConfirmationSheet() }
+        )
+    }
+
+    private var emailConfirmationPendingEmail: String {
+        if case .emailConfirmationPending(let email) = viewModel.authState {
+            return email
+        }
+        return ""
+    }
+
+    private var isEmailConfirmationPendingBinding: Binding<Bool> {
+        Binding(
+            get: {
+                if case .emailConfirmationPending = viewModel.authState {
+                    return true
+                }
+                return false
+            },
+            set: { newValue in
+                if !newValue {
+                    viewModel.dismissEmailConfirmationSheet()
+                }
+            }
+        )
     }
 
     private func openOAuthUrl(_ urlString: String) {

@@ -40,7 +40,7 @@ struct ClubsView: View {
             VStack(spacing: 0) {
                 // Always rendered, matching Android's ClubsListScreen - the header must not
                 // disappear during loading/error/empty, only the content below it changes.
-                TopAppBar(header: "Your", title: "Clubs") {
+                TopAppBar(header: "Your", title: "Kluvs") {
                     // Empty state already shows its own "Join with a code" button.
                     if !isEmptyScreenState {
                         OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
@@ -56,14 +56,19 @@ struct ClubsView: View {
                             viewModel.loadUserClubs(userId: userId)
                         })
                     case .empty:
-                        VStack(spacing: 8) {
-                            Text(String(localized: "empty_no_clubs"))
-                                .kluvsStyle(KluvsTheme.typography.headline.small)
-                                .foregroundColor(KluvsTheme.colors.content)
-                            Text(String(localized: "empty_no_clubs_hint"))
-                                .kluvsStyle(KluvsTheme.typography.body.medium)
-                                .foregroundColor(KluvsTheme.colors.contentMuted)
-                            OutlinedButton(text: "Join with a code", action: { showJoinSheet = true })
+                        ZStack(alignment: .bottomTrailing) {
+                            EmptyState(
+                                heading: "No clubs yet.",
+                                body: "Join a club or start your own to get things going."
+                            ) {
+                                SecondaryButton(text: "Join with a code", action: { showJoinSheet = true })
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                            ClubsFAB(action: {
+                                newClubName = ""
+                                showCreateClubSheet = true
+                            })
                         }
                     case .content:
                         ClubsListView(
@@ -91,6 +96,7 @@ struct ClubsView: View {
         }
         .onChange(of: viewModel.createdClubId) { _, newValue in
             if let clubId = newValue {
+                viewModel.selectClub(clubId: clubId)
                 path.append(clubId)
                 viewModel.onConsumeCreatedClubId()
             }
@@ -186,10 +192,10 @@ private struct ClubDetailView: View {
     @State private var selectedRole: Shared.Role = .member
     @State private var removingMemberId: String? = nil
 
-    /// Returns the current user's memberId from the members list (needed for role/remove calls).
-    private var currentMemberId: String? {
-        viewModel.members.first { $0.userId == userId }?.memberId
-    }
+    /// The current user's own memberId (needed for role/remove calls and the Overview tab's
+    /// participation toggle) — resolved independently of the club's member roster, see
+    /// GetCurrentMemberIdUseCase's doc for why.
+    private var currentMemberId: String? { viewModel.currentMemberId }
 
     /// Resets Create Session's fields fresh each time it opens — since the sheet is now a
     /// persistent overlay rather than a re-instantiated `.sheet()` presentation, its `@State`
@@ -308,7 +314,7 @@ private struct ClubDetailView: View {
                         ownProgress: viewModel.ownProgress,
                         userRole: viewModel.userRole,
                         members: viewModel.members,
-                        currentUserId: userId,
+                        currentMemberId: viewModel.currentMemberId,
                         onEditSession: { openEditSession() },
                         onEndSession: { showEndSessionAlert = true },
                         onUpdateProgress: { openProgressSheet() },
@@ -353,15 +359,22 @@ private struct ClubDetailView: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .background(Color.kluvsBackground)
+                .kluvsPullToRefresh(isRefreshing: viewModel.isLoading) {
+                    viewModel.refresh(forceRefresh: true)
+                }
             }
         }
         .background(Color.kluvsBackground)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
-        // Operation result message — transient toast, not a blocking alert (matches
-        // Android's Snackbar; a tap-to-dismiss dialog on every read-toggle was obnoxious)
-        .toast(message: Binding(
-            get: { viewModel.operationMessage },
+        // Operation result message — transient snackbar, not a blocking alert (a tap-to-dismiss
+        // dialog on every read-toggle was obnoxious)
+        .snackbar(Binding(
+            get: {
+                viewModel.operationMessage.map {
+                    SnackbarData(message: $0, variant: viewModel.operationIsError ? .danger : .success)
+                }
+            },
             set: { if $0 == nil { viewModel.onConsumeOperationResult() } }
         ))
         // Share club invite link
@@ -408,6 +421,12 @@ private struct ClubDetailView: View {
             isDestructive: true,
             onConfirm: { viewModel.onDeleteClub() }
         )
+        .onChange(of: viewModel.deletedClubId) { _, newValue in
+            if newValue != nil {
+                dismiss()
+                viewModel.onConsumeDeletedClubId()
+            }
+        }
         // Create session
         .kluvsBottomSheet(isPresented: $showCreateSessionSheet, header: "Create Session") {
             CreateSessionFields(
@@ -595,7 +614,7 @@ private struct ClubDetailView: View {
             }
         )
         // Discussion note
-        .kluvsBottomSheet(item: $openNoteDiscussionId, header: "Note") { wrapper in
+        .kluvsBottomSheet(item: $openNoteDiscussionId, header: "Notes") { wrapper in
             let discussionId = wrapper.id
             DiscussionNoteFields(
                 discussionTitle: viewModel.activeSession?.discussions.first { $0.id == discussionId }?.title,

@@ -22,6 +22,8 @@ class BooksViewModelWrapper: ObservableObject {
     @Published var isSearching: Bool = false
     @Published var searchError: String? = nil
     @Published var searchResults: [Shared.Book] = []
+    @Published var isLoadingMore: Bool = false
+    @Published var hasMoreSearchResults: Bool = false
     @Published var isMutationInProgress: Bool = false
     @Published var operationError: String? = nil
 
@@ -50,6 +52,8 @@ class BooksViewModelWrapper: ObservableObject {
                 self.isSearching = state.isSearching
                 self.searchError = state.searchError
                 self.searchResults = state.searchResults
+                self.isLoadingMore = state.isLoadingMore
+                self.hasMoreSearchResults = state.hasMoreSearchResults
                 self.isMutationInProgress = state.isMutationInProgress
                 self.operationError = state.operationError
             }
@@ -60,6 +64,7 @@ class BooksViewModelWrapper: ObservableObject {
     func loadShelf(forceRefresh: Bool = false) { helper.loadShelf(forceRefresh: forceRefresh) }
     func onQueryChange(_ query: String) { helper.onQueryChange(query: query) }
     func search(_ query: String) { helper.search(query: query) }
+    func loadMoreSearchResults() { helper.loadMoreSearchResults() }
     func onAssignShelf(bookId: String, shelf: Shared.ShelfStatus) {
         helper.onAssignShelf(bookId: bookId, shelf: shelf)
     }

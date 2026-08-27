@@ -17,6 +17,14 @@ struct MainView: View {
     }
 
     var body: some View {
+        // This app shell (tab content + its own bottom nav) manages its own layout end to end,
+        // so it should never resize/reposition when a text field somewhere inside focuses and
+        // the keyboard appears. Without this, whichever ancestor above GeometryReader still
+        // respects the keyboard safe area shrinks the space *it* proposes to GeometryReader,
+        // and everything below — including tab bars positioned well away from the keyboard,
+        // like Books' search bar at the very top — shifts to compensate, which is what was
+        // making the search bar jump up toward (and partly under) the status bar the moment
+        // the keyboard opened.
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 // Clubs, Books, and Me each own their own top bar/heading UI (ClubsListView's
@@ -44,6 +52,7 @@ struct MainView: View {
                 if newValue != nil { selectedTab = 1 }
             }
         }
+        .ignoresSafeArea(.keyboard, edges: .all)
     }
 }
 

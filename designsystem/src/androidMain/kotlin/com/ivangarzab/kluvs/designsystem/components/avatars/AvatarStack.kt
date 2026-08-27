@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -70,11 +73,20 @@ fun AvatarStack(
                     .border(width = 2.dp, color = ringColor, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
+                val overflowFontSize = (size.value * 0.4f).sp
                 Text(
                     text = "+$extra",
                     color = Color.White,
                     fontWeight = FontWeight.Medium,
-                    fontSize = (size.value * 0.4f).sp
+                    fontSize = overflowFontSize,
+                    lineHeight = overflowFontSize,
+                    style = LocalTextStyle.current.copy(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false),
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Center,
+                            trim = LineHeightStyle.Trim.Both
+                        )
+                    )
                 )
             }
         }

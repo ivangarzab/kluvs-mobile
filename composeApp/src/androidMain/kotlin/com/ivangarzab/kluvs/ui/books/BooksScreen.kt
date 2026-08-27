@@ -21,12 +21,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,13 +40,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -59,12 +62,14 @@ import com.ivangarzab.kluvs.model.ShelfSource
 import com.ivangarzab.kluvs.model.ShelfStatus
 import com.ivangarzab.kluvs.presentation.state.ScreenState
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
-import com.ivangarzab.kluvs.designsystem.theme.ebGaramond
 import com.ivangarzab.kluvs.designsystem.theme.foregroundLightSecondary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundLightTertiary
 import com.ivangarzab.kluvs.designsystem.theme.foregroundWarmTertiary
 import com.ivangarzab.kluvs.designsystem.theme.ibmPlexSans
+import com.ivangarzab.kluvs.designsystem.components.EmptyState
 import com.ivangarzab.kluvs.designsystem.components.ErrorScreen
+import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
+import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.components.loading.PullToRefreshContainer
 import com.ivangarzab.kluvs.ui.components.LoadingScreen
 import kotlinx.coroutines.delay
@@ -101,7 +106,9 @@ fun BooksScreen(
 
     LaunchedEffect(state.operationError) {
         state.operationError?.let { message ->
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(
+                KluvsSnackbarVisuals(message = message, variant = SnackbarVariant.DANGER)
+            )
             viewModel.onConsumeOperationError()
         }
     }
@@ -119,6 +126,7 @@ fun BooksScreen(
                     onRefreshShelf = { viewModel.loadShelf(forceRefresh = true) },
                     onQueryChange = viewModel::onQueryChange,
                     onSearch = viewModel::search,
+                    onLoadMoreSearchResults = viewModel::loadMoreSearchResults,
                     onBookClick = { book ->
                         selectedBook = book
                         navController.navigate("detail/${book.id}")
@@ -144,7 +152,8 @@ fun BooksScreen(
         }
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackbar = { KluvsSnackbar(it) }
         )
     }
 }
@@ -157,6 +166,7 @@ fun BooksScreenContent(
     onRefreshShelf: () -> Unit = onRetryShelf,
     onQueryChange: (String) -> Unit = {},
     onSearch: (String) -> Unit = {},
+    onLoadMoreSearchResults: () -> Unit = {},
     onBookClick: (Book) -> Unit = {}
 ) {
     var view by remember { mutableStateOf(BooksView.Shelf) }
@@ -195,7 +205,8 @@ fun BooksScreenContent(
                     state = state,
                     onRetry = onRetryShelf,
                     onRefresh = onRefreshShelf,
-                    onBookClick = onBookClick
+                    onBookClick = onBookClick,
+                    onSearchBooks = { view = BooksView.Search }
                 )
             }
             BooksView.Search -> {
@@ -203,6 +214,7 @@ fun BooksScreenContent(
                     modifier = Modifier.weight(1f),
                     state = state,
                     onRetry = { onSearch(state.query) },
+                    onLoadMore = onLoadMoreSearchResults,
                     onBookClick = onBookClick
                 )
             }
@@ -216,7 +228,8 @@ private fun ShelfContent(
     state: BooksState,
     onRetry: () -> Unit,
     onRefresh: () -> Unit = onRetry,
-    onBookClick: (Book) -> Unit
+    onBookClick: (Book) -> Unit,
+    onSearchBooks: () -> Unit = {}
 ) {
     val shelfError = state.shelfError
     val screenState = when {
@@ -236,13 +249,12 @@ private fun ShelfContent(
             is ScreenState.Loading -> BooksShelfSkeleton(modifier = Modifier.fillMaxSize())
             is ScreenState.Error -> ErrorScreen(message = targetState.message, onRetry = onRetry)
             is ScreenState.Empty -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.no_books_shelved),
-                        style = KluvsTheme.typography.body.large,
-                        color = KluvsTheme.colors.contentMuted
-                    )
-                }
+                EmptyState(
+                    modifier = Modifier.fillMaxSize(),
+                    heading = "Nothing shelved yet.",
+                    body = "Search for a book and add it to Want to Read, Read, or Not Finished.",
+                    action = { SecondaryButton(text = "Search Books", onClick = onSearchBooks) },
+                )
             }
             is ScreenState.Content -> {
                 PullToRefreshContainer(
@@ -307,6 +319,7 @@ private fun ShelfSection(
         ) {
             items(entries, key = { it.book.id }) { entry ->
                 BookCard(
+                    modifier = Modifier.width(120.dp),
                     book = entry.book,
                     shelfSource = entry.source,
                     onClick = { onBookClick(entry.book) }
@@ -321,6 +334,7 @@ private fun SearchContent(
     modifier: Modifier = Modifier,
     state: BooksState,
     onRetry: () -> Unit,
+    onLoadMore: () -> Unit = {},
     onBookClick: (Book) -> Unit
 ) {
     val searchError = state.searchError
@@ -342,17 +356,43 @@ private fun SearchContent(
                 )
             }
             else -> {
+                val gridState = rememberLazyGridState()
+
+                LaunchedEffect(gridState, state.searchResults.size) {
+                    snapshotFlow {
+                        val layoutInfo = gridState.layoutInfo
+                        val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+                        lastVisibleIndex >= layoutInfo.totalItemsCount - 4
+                    }.collect { isNearEnd ->
+                        if (isNearEnd) onLoadMore()
+                    }
+                }
+
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 120.dp),
+                    state = gridState,
+                    columns = GridCells.Fixed(3),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     gridItems(state.searchResults, key = { it.id }) { book ->
                         BookCard(
+                            modifier = Modifier.fillMaxWidth(),
                             book = book,
                             onClick = { onBookClick(book) }
                         )
+                    }
+                    if (state.isLoadingMore) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                LoadingSpinner()
+                            }
+                        }
                     }
                 }
             }
@@ -362,34 +402,9 @@ private fun SearchContent(
 
 @Composable
 private fun SearchEmptyState(heading: String, body: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            modifier = Modifier.padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            StackedCoverPlaceholder()
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = heading,
-                    fontFamily = ebGaramond,
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 28.sp,
-                    color = KluvsTheme.colors.contentMuted
-                )
-                Text(
-                    text = body,
-                    style = KluvsTheme.typography.body.medium,
-                    color = KluvsTheme.colors.contentMuted,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
+    // Neither the "haven't searched yet" nor the "no matches" variant has a real destination
+    // to send the user to, so this carries no action.
+    EmptyState(modifier = Modifier.fillMaxSize(), heading = heading, body = body)
 }
 
 @Composable

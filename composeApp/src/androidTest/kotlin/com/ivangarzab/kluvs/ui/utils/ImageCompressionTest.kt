@@ -3,15 +3,15 @@ package com.ivangarzab.kluvs.ui.utils
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.ivangarzab.kluvs.ui.utils.calculateSampleSize
-import com.ivangarzab.kluvs.ui.utils.compressImage
-import com.ivangarzab.kluvs.ui.utils.scaleBitmap
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 /**
  * Instrumented tests for image compression functions.
@@ -139,6 +139,33 @@ class ImageCompressionTest {
         assertEquals(256, scaledBitmap.height)
 
         bitmap.recycle()
+    }
+
+    @Test
+    fun readAndCompressAvatar_validFileUri_returnsCompressedBytes() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val imageBytes = createTestBitmap(1024, 1024)
+        val file = File(context.cacheDir, "test-avatar.png").apply { writeBytes(imageBytes) }
+        val uri = Uri.fromFile(file)
+
+        val result = readAndCompressAvatar(context.contentResolver, uri)
+
+        assertTrue("Expected success but got: ${result.exceptionOrNull()}", result.isSuccess)
+        val compressedBytes = result.getOrThrow()
+        val resultBitmap = BitmapFactory.decodeByteArray(compressedBytes, 0, compressedBytes.size)
+        assertEquals(512, resultBitmap.width)
+        resultBitmap.recycle()
+        file.delete()
+    }
+
+    @Test
+    fun readAndCompressAvatar_unreadableUri_returnsFailure() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val uri = Uri.fromFile(File(context.cacheDir, "does-not-exist.png"))
+
+        val result = readAndCompressAvatar(context.contentResolver, uri)
+
+        assertTrue(result.isFailure)
     }
 
     @Test

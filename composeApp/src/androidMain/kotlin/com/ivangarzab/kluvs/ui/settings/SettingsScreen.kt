@@ -1,5 +1,8 @@
 package com.ivangarzab.kluvs.ui.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,16 +12,18 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -30,6 +35,9 @@ import com.ivangarzab.kluvs.settings.presentation.SettingsState
 import com.ivangarzab.kluvs.settings.presentation.SettingsViewModel
 import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
+import com.ivangarzab.kluvs.ui.utils.readAndCompressAvatar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -41,6 +49,18 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            readAndCompressAvatar(context.contentResolver, uri)
+                .onSuccess(viewModel::uploadAvatar)
+                .onFailure { viewModel.onAvatarPickFailed(it.message) }
+        }
+    }
 
     LaunchedEffect(userId) {
         viewModel.loadProfile(userId)
@@ -53,6 +73,15 @@ fun SettingsScreen(
         }
     }
 
+    LaunchedEffect(state.avatarError) {
+        state.avatarError?.let { error ->
+            snackbarHostState.showSnackbar(
+                KluvsSnackbarVisuals(message = error, variant = SnackbarVariant.DANGER)
+            )
+            viewModel.clearAvatarError()
+        }
+    }
+
     SettingsScreenContent(
         state = state,
         snackbarHostState = snackbarHostState,
@@ -60,6 +89,11 @@ fun SettingsScreen(
         onNameChanged = viewModel::onNameChanged,
         onHandleChanged = viewModel::onHandleChanged,
         onSaveProfile = viewModel::onSaveProfile,
+        onAvatarClick = {
+            imagePickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        },
     )
 }
 
@@ -72,6 +106,7 @@ fun SettingsScreenContent(
     onNameChanged: (String) -> Unit = {},
     onHandleChanged: (String) -> Unit = {},
     onSaveProfile: () -> Unit = {},
+    onAvatarClick: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -83,7 +118,7 @@ fun SettingsScreenContent(
                 onNavigateBack = onNavigateBack,
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState, snackbar = { KluvsSnackbar(it) }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -93,6 +128,10 @@ fun SettingsScreenContent(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             EditProfileSection(
+                avatarUrl = state.profile?.avatarUrl,
+                name = state.editedName,
+                isUploadingAvatar = state.isUploadingAvatar,
+                onAvatarClick = onAvatarClick,
                 editedName = state.editedName,
                 editedHandle = state.editedHandle,
                 hasChanges = state.hasChanges,
@@ -101,11 +140,6 @@ fun SettingsScreenContent(
                 onNameChanged = onNameChanged,
                 onHandleChanged = onHandleChanged,
                 onSaveProfile = onSaveProfile,
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(top = 12.dp),
-                color = KluvsTheme.colors.divider
             )
 
             LegalSection(context = context)

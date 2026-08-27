@@ -20,6 +20,10 @@ class AuthViewModel(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
+    companion object {
+        private val EMAIL_REGEX = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
+    }
+
     private val _state = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
     val state: StateFlow<AuthState> = _state.asStateFlow()
 
@@ -62,7 +66,7 @@ class AuthViewModel(
     fun validateAndSignIn() {
         val emailError = when {
             _uiState.value.emailField.isBlank() -> "Email is required"
-            !_uiState.value.emailField.contains("@") -> "Please enter a valid email"
+            !EMAIL_REGEX.matches(_uiState.value.emailField) -> "Please enter a valid email"
             else -> null
         }
 
@@ -83,7 +87,7 @@ class AuthViewModel(
     fun validateAndSignUp() {
         val emailError = when {
             _uiState.value.emailField.isBlank() -> "Email is required"
-            !_uiState.value.emailField.contains("@") -> "Please enter a valid email"
+            !EMAIL_REGEX.matches(_uiState.value.emailField) -> "Please enter a valid email"
             else -> null
         }
 
@@ -123,9 +127,15 @@ class AuthViewModel(
             _state.update { AuthState.Authenticated(user) }
             clearForm()
         }.onFailure { error ->
-            Bark.e("Sign up failed. Check email format and try again.", error)
-            _state.update {
-                AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+            if (error is AuthError.EmailConfirmationRequired) {
+                Bark.i("Sign up succeeded, pending email confirmation")
+                _state.update { AuthState.EmailConfirmationPending(uiState.value.emailField) }
+                clearForm()
+            } else {
+                Bark.e("Sign up failed. Check email format and try again.", error)
+                _state.update {
+                    AuthState.Error(error as? AuthError ?: AuthError.UnexpectedError)
+                }
             }
         }
     }
@@ -155,7 +165,7 @@ class AuthViewModel(
     fun sendPasswordResetEmail() {
         val emailError = when {
             _forgotPasswordState.value.emailField.isBlank() -> "Email is required"
-            !_forgotPasswordState.value.emailField.contains("@") -> "Please enter a valid email"
+            !EMAIL_REGEX.matches(_forgotPasswordState.value.emailField) -> "Please enter a valid email"
             else -> null
         }
 
@@ -253,6 +263,14 @@ class AuthViewModel(
     }
 
     /**
+     * Resets state to [AuthState.Unauthenticated].
+     * Used when the email confirmation sheet has been dismissed.
+     */
+    fun dismissEmailConfirmationSheet() {
+        _state.update { AuthState.Unauthenticated }
+    }
+
+    /**
      * Handles OAuth callback from deep link.
      * Should be called when the app receives an OAuth redirect.
      */
@@ -306,4 +324,6 @@ sealed class AuthState {
     data class Error(val error: AuthError) : AuthState()
     /** OAuth flow initiated - UI should open the URL in a browser */
     data class OAuthPending(val url: String) : AuthState()
+    /** Email sign up succeeded but requires email confirmation before a session is created */
+    data class EmailConfirmationPending(val email: String) : AuthState()
 }

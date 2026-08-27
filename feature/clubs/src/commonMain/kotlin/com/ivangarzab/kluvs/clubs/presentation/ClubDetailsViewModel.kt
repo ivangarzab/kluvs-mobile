@@ -3,6 +3,8 @@ package com.ivangarzab.kluvs.clubs.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.data.error.toAppError
+import com.ivangarzab.kluvs.presentation.error.toUserMessage
 import com.ivangarzab.kluvs.clubs.domain.ClearAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.CreateClubUseCase
 import com.ivangarzab.kluvs.clubs.domain.CreateDiscussionNoteUseCase
@@ -17,6 +19,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetAttendanceRosterUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
@@ -36,6 +39,7 @@ import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.JoinPolicy
 import com.ivangarzab.kluvs.model.ProgressType
 import com.ivangarzab.kluvs.model.Role
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +56,7 @@ class ClubDetailsViewModel(
     private val getActiveSession: GetActiveSessionUseCase,
     private val getClubMembers: GetClubMembersUseCase,
     private val getMemberClubsUseCase: GetMemberClubsUseCase,
+    private val getCurrentMemberId: GetCurrentMemberIdUseCase,
     private val createClubUseCase: CreateClubUseCase,
     private val updateClubUseCase: UpdateClubUseCase,
     private val updateJoinPolicyUseCase: UpdateJoinPolicyUseCase,
@@ -82,12 +87,15 @@ class ClubDetailsViewModel(
     val state: StateFlow<ClubDetailsState> = _state.asStateFlow()
 
     private var currentClubId: String? = null
+    private var currentUserId: String? = null
+    private var loadClubDataJob: Job? = null
 
     /**
      * Loads the user's clubs and displays the first club.
      * If the user has no clubs, sets state to show empty state.
      */
     fun loadUserClubs(userId: String, forceRefresh: Boolean = false) {
+        currentUserId = userId
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
@@ -113,7 +121,7 @@ class ClubDetailsViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: "Failed to load clubs"
+                            error = error.toAppError().toUserMessage()
                         )
                     }
                 }
@@ -129,7 +137,13 @@ class ClubDetailsViewModel(
     fun loadClubData(clubId: String, forceRefresh: Boolean = false) {
         currentClubId = clubId
 
-        viewModelScope.launch {
+        // Cancel any still-in-flight load for a previously-selected club — without this, a
+        // slower fetch for club A can resolve after the user has already navigated into club
+        // B and overwrite B's state with A's data (the exact "wrong club" bug this guards
+        // against). The `currentClubId != clubId` check below is defense-in-depth for the
+        // narrow window where cancellation races with completion.
+        loadClubDataJob?.cancel()
+        loadClubDataJob = viewModelScope.launch {
             // Reset state for subsequent calls
             _state.update {
                 it.copy(
@@ -138,14 +152,18 @@ class ClubDetailsViewModel(
                     currentClubDetails = null,
                     activeSession = null,
                     ownProgress = null,
-                    members = emptyList()
+                    members = emptyList(),
+                    currentMemberId = null
                 )
             }
 
-            // Launch all 3 UseCase calls in parallel
+            // Launch all UseCase calls in parallel
             val deferredDetails = async { getClubDetails(clubId, forceRefresh) }
             val deferredSession = async { getActiveSession(clubId, forceRefresh) }
             val deferredMembers = async { getClubMembers(clubId, forceRefresh) }
+            // Independent of the club roster fetch above on purpose — see
+            // GetCurrentMemberIdUseCase's doc for why this can't just be read off `members`.
+            val deferredMemberId = currentUserId?.let { uid -> async { getCurrentMemberId(uid, forceRefresh) } }
 
             // Await all results
             val detailsResult = deferredDetails.await()
@@ -158,20 +176,26 @@ class ClubDetailsViewModel(
                 getSessionProgressUseCase(session.sessionId, session.book.pageCount).getOrNull()
             }
 
+            // Like ownProgress, a failure here is non-blocking — membership-gated actions
+            // simply stay hidden rather than the whole club screen erroring out over it.
+            val currentMemberId = deferredMemberId?.await()?.getOrNull()
+
             // Aggregate errors
             val errors = listOfNotNull(
-                detailsResult.exceptionOrNull()?.message,
-                sessionResult.exceptionOrNull()?.message,
-                membersResult.exceptionOrNull()?.message
+                detailsResult.exceptionOrNull()?.toAppError()?.toUserMessage(),
+                sessionResult.exceptionOrNull()?.toAppError()?.toUserMessage(),
+                membersResult.exceptionOrNull()?.toAppError()?.toUserMessage()
             )
             val error = when {
                 errors.isEmpty() -> null
                 errors.distinct().size == 1 -> errors.first() // All errors are identical
-                else -> "Multiple errors occurred"
+                else -> "Multiple things went wrong. Please try again."
             }
             error?.let { e ->
                 Bark.e("Failed to fetch club details (ID: $clubId). Serving cached data if available.", Exception(e))
             } ?: Bark.i("Successfully loaded club details (ID: $clubId)")
+
+            if (currentClubId != clubId) return@launch
 
             // Update state with all results
             _state.update {
@@ -182,7 +206,8 @@ class ClubDetailsViewModel(
                     currentClubDetails = detailsResult.getOrNull(),
                     activeSession = sessionResult.getOrNull(),
                     ownProgress = ownProgress,
-                    members = membersResult.getOrNull() ?: emptyList()
+                    members = membersResult.getOrNull() ?: emptyList(),
+                    currentMemberId = currentMemberId
                 )
             }
         }
@@ -242,12 +267,44 @@ class ClubDetailsViewModel(
         }
     }
 
+    /**
+     * Deletes the current club. Unlike other mutations, this doesn't go through
+     * [launchMutation] — refreshing a club that was just deleted would just error out.
+     * Instead it signals [ClubDetailsState.deletedClubId] so the UI navigates back out of
+     * the now-gone club's detail screen.
+     */
     fun onDeleteClub() {
         val role = _state.value.userRole ?: return
         val clubId = currentClubId ?: return
-        launchMutation("Club deleted") {
+        viewModelScope.launch {
+            _state.update { it.copy(isOperationInProgress = true) }
             deleteClubUseCase(DeleteClubUseCase.Params(clubId), role)
+                .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isOperationInProgress = false,
+                            availableClubs = it.availableClubs.filterNot { club -> club.id == clubId },
+                            deletedClubId = clubId,
+                            operationResult = OperationResult.Success("Club deleted")
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Operation failed: Delete club. ${error.message}", error)
+                    _state.update {
+                        it.copy(
+                            isOperationInProgress = false,
+                            operationResult = OperationResult.Error(
+                                error.message ?: "An unexpected error occurred"
+                            )
+                        )
+                    }
+                }
         }
+    }
+
+    fun onConsumeDeletedClubId() {
+        _state.update { it.copy(deletedClubId = null) }
     }
 
     /**

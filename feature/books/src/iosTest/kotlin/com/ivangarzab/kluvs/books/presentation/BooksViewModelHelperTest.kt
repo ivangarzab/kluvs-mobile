@@ -9,6 +9,7 @@ import com.ivangarzab.kluvs.data.repositories.BookRepository
 import com.ivangarzab.kluvs.data.repositories.LikeRepository
 import com.ivangarzab.kluvs.data.repositories.ShelfRepository
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 import com.ivangarzab.kluvs.model.ShelfEntry
 import com.ivangarzab.kluvs.model.ShelfStatus
 import dev.mokkery.answering.returns
@@ -137,7 +138,8 @@ class BooksViewModelHelperTest {
     @Test
     fun `search forwards query to ViewModel`() = runTest {
         val books = listOf(Book(id = "42", title = "Project Hail Mary", author = "Andy Weir", isbn = null))
-        everySuspend { bookRepository.searchBooks("hail") } returns Result.success(books)
+        everySuspend { bookRepository.searchBooks("hail", 0) } returns
+            Result.success(BookSearchResult(books = books, total = 1))
 
         val receivedStates = mutableListOf<BooksState>()
         val closeable = helper.observeState { state -> receivedStates.add(state) }
@@ -145,6 +147,26 @@ class BooksViewModelHelperTest {
         helper.search("hail")
 
         assertEquals(books, receivedStates.last().searchResults)
+        closeable.close()
+    }
+
+    @Test
+    fun `loadMoreSearchResults forwards to ViewModel`() = runTest {
+        val firstPage = listOf(Book(id = "42", title = "Project Hail Mary", author = "Andy Weir", isbn = null))
+        val secondPage = listOf(Book(id = "43", title = "Dune", author = "Frank Herbert", isbn = null))
+        everySuspend { bookRepository.searchBooks("hail", 0) } returns
+            Result.success(BookSearchResult(books = firstPage, total = 2))
+        everySuspend { bookRepository.searchBooks("hail", 1) } returns
+            Result.success(BookSearchResult(books = secondPage, total = 2))
+
+        val receivedStates = mutableListOf<BooksState>()
+        val closeable = helper.observeState { state -> receivedStates.add(state) }
+
+        helper.onQueryChange("hail")
+        helper.search("hail")
+        helper.loadMoreSearchResults()
+
+        assertEquals(firstPage + secondPage, receivedStates.last().searchResults)
         closeable.close()
     }
 

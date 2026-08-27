@@ -40,7 +40,6 @@ fun BookCard(
 ) {
     Box(
         modifier = modifier
-            .width(120.dp)
             .clickable(onClick = onClick)
     ) {
         Column(
@@ -104,6 +103,7 @@ fun Preview_BookCard() = KluvsTheme {
             .background(color = KluvsTheme.colors.background)
     ) {
         BookCard(
+            modifier = Modifier.width(120.dp),
             book = Book(
                 id = "42",
                 title = "The Hobbit",

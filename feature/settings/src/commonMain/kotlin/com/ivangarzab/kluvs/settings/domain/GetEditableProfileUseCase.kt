@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.settings.domain
 
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.settings.presentation.EditableProfile
 
@@ -11,7 +12,8 @@ import com.ivangarzab.kluvs.settings.presentation.EditableProfile
  * a handle from the member's name if none is stored.
  */
 class GetEditableProfileUseCase(
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
+    private val avatarRepository: AvatarRepository
 ) {
     /**
      * Fetches the editable profile for the given user.
@@ -26,7 +28,8 @@ class GetEditableProfileUseCase(
             EditableProfile(
                 memberId = member.id,
                 name = member.name,
-                handle = handle
+                handle = handle,
+                avatarUrl = avatarRepository.getAvatarUrl(member.avatarPath)
             ).also {
                 Bark.i("Loaded editable profile (Name: ${member.name}, Handle: $handle)")
             }

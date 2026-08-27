@@ -14,6 +14,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetActiveSessionUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetAttendanceRosterUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubDetailsUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
+import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.clubs.domain.RemoveMemberUseCase
@@ -36,6 +37,7 @@ val clubsFeatureModule = module {
     factoryOf(::GetActiveSessionUseCase)
     factoryOf(::GetClubDetailsUseCase)
     factoryOf(::GetClubMembersUseCase)
+    factoryOf(::GetCurrentMemberIdUseCase)
     factoryOf(::GetMemberClubsUseCase)
     factoryOf(::SearchBooksUseCase)
     factoryOf(::GetAttendanceRosterUseCase)
@@ -74,6 +76,7 @@ val clubsFeatureModule = module {
             getActiveSession = get(),
             getClubMembers = get(),
             getMemberClubsUseCase = get(),
+            getCurrentMemberId = get(),
             createClubUseCase = get(),
             updateClubUseCase = get(),
             updateJoinPolicyUseCase = get(),

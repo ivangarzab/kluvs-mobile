@@ -1,8 +1,29 @@
 package com.ivangarzab.kluvs.ui.utils
 
+import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
+import com.ivangarzab.bark.Bark
 import java.io.ByteArrayOutputStream
+
+/**
+ * Reads the picked avatar [uri]'s bytes via [contentResolver] and compresses them.
+ *
+ * Kept outside Compose so the read/decode/compress work — and its failure modes (a revoked
+ * URI grant, an unreadable stream, a decode failure) — are plain, unit-testable logic rather
+ * than being buried inside a picker launcher callback.
+ */
+internal fun readAndCompressAvatar(contentResolver: ContentResolver, uri: Uri): Result<ByteArray> {
+    return try {
+        val inputStream = contentResolver.openInputStream(uri)
+            ?: return Result.failure(IllegalStateException("Could not open input stream for URI: $uri"))
+        Result.success(inputStream.use { compressImage(it.readBytes()) })
+    } catch (e: Exception) {
+        Bark.e("Failed to read/compress picked avatar image (URI: $uri)", e)
+        Result.failure(e)
+    }
+}
 
 /**
  * Compresses and resizes image to fit within constraints.
@@ -46,7 +67,7 @@ internal fun compressImage(
 
     do {
         val outputStream = ByteArrayOutputStream()
-        scaledBitmap.compress(Bitmap.CompressFormat.PNG, currentQuality, outputStream)
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, currentQuality, outputStream)
         outputBytes = outputStream.toByteArray()
         currentQuality -= 10
     } while (outputBytes.size > maxBytes && currentQuality > 10)

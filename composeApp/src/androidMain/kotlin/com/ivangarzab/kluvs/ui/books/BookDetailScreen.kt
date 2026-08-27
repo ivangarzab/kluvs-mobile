@@ -25,6 +25,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbar
+import com.ivangarzab.kluvs.designsystem.components.KluvsSnackbarVisuals
+import com.ivangarzab.kluvs.designsystem.components.SnackbarVariant
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -77,7 +80,9 @@ fun BookDetailScreen(
 
     LaunchedEffect(state.operationError) {
         state.operationError?.let { message ->
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(
+                KluvsSnackbarVisuals(message = message, variant = SnackbarVariant.DANGER)
+            )
             viewModel.onConsumeOperationError()
         }
     }
@@ -95,7 +100,8 @@ fun BookDetailScreen(
         )
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackbar = { KluvsSnackbar(it) }
         )
     }
 }
@@ -116,9 +122,7 @@ fun BookDetailScreenContent(
     val volumeInfo = state.enrichment?.volumeInfo
 
     Column(
-        modifier = modifier
-            .background(color = KluvsTheme.colors.background)
-            .verticalScroll(rememberScrollState())
+        modifier = modifier.background(color = KluvsTheme.colors.background)
     ) {
         TopAppBar(
             header = stringResource(R.string.book_eyebrow),
@@ -137,7 +141,10 @@ fun BookDetailScreenContent(
         }
 
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).padding(bottom = 32.dp),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // Cover header
@@ -242,6 +249,7 @@ fun BookDetailScreenContent(
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(authorBooks, key = { it.id }) { authorBook ->
                             BookCard(
+                                modifier = Modifier.width(120.dp),
                                 book = authorBook,
                                 onClick = { onNavigateToBook(authorBook) }
                             )

@@ -24,12 +24,15 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var activeSession: Shared.ActiveSessionDetails? = nil
     @Published var ownProgress: Shared.OwnProgressInfo? = nil
     @Published var members: [Shared.MemberListItemInfo] = []
+    @Published var currentMemberId: String? = nil
     @Published var userRole: Shared.Role? = nil
     @Published var discussionRosters: [String: Shared.AttendanceRoster] = [:]
     @Published var discussionNotes: [String: Shared.DiscussionNoteInfo] = [:]
     @Published var isOperationInProgress: Bool = false
     @Published var operationMessage: String? = nil
+    @Published var operationIsError: Bool = false
     @Published var createdClubId: String? = nil
+    @Published var deletedClubId: String? = nil
     /// ISO-8601 string for the active session's due date, or nil if none.
     @Published var sessionDueDateIso: String? = nil
 
@@ -58,12 +61,15 @@ class ClubDetailsViewModelWrapper: ObservableObject {
                 self.activeSession = state.activeSession
                 self.ownProgress = state.ownProgress
                 self.members = state.members
+                self.currentMemberId = state.currentMemberId
                 self.userRole = state.userRole
                 self.discussionRosters = state.discussionRosters
                 self.discussionNotes = state.discussionNotes
                 self.isOperationInProgress = state.isOperationInProgress
                 self.operationMessage = self.helper.operationResultMessage(result: state.operationResult)
+                self.operationIsError = self.helper.isOperationError(result: state.operationResult)
                 self.createdClubId = state.createdClubId
+                self.deletedClubId = state.deletedClubId
                 self.sessionDueDateIso = self.helper.localDateTimeToIso(dateTime: state.activeSession?.rawDueDate)
             }
         }
@@ -81,6 +87,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     // General tab
     func onUpdateClubName(_ newName: String) { helper.onUpdateClubName(newName: newName) }
     func onDeleteClub() { helper.onDeleteClub() }
+    func onConsumeDeletedClubId() { helper.onConsumeDeletedClubId() }
     func onUpdateJoinPolicy(_ joinPolicy: Shared.JoinPolicy) { helper.onUpdateJoinPolicy(joinPolicy: joinPolicy) }
     func onRotateInviteLink() { helper.onRotateInviteLink() }
 

@@ -52,6 +52,7 @@ class ClubDetailsViewModelHelper : KoinComponent {
     // General tab
     fun onUpdateClubName(newName: String) = viewModel.onUpdateClubName(newName)
     fun onDeleteClub() = viewModel.onDeleteClub()
+    fun onConsumeDeletedClubId() = viewModel.onConsumeDeletedClubId()
     fun onUpdateJoinPolicy(joinPolicy: JoinPolicy) = viewModel.onUpdateJoinPolicy(joinPolicy)
     fun onRotateInviteLink() = viewModel.onRotateInviteLink()
 
@@ -104,6 +105,9 @@ class ClubDetailsViewModelHelper : KoinComponent {
         is OperationResult.Error -> result.message
         null -> null
     }
+
+    /** Whether [result] is the failure case — Swift can't pattern-match the sealed class directly. */
+    fun isOperationError(result: OperationResult?): Boolean = result is OperationResult.Error
 
     // ── Date helpers ──────────────────────────────────────────────────────────
 

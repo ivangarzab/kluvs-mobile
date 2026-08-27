@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Three-zone modal shell — design-system "Modal" (see design-system/docs/modal.md): a header
 /// with an eyebrow label, free-form body content, and an optional footer. Reserved for edit/
@@ -86,6 +87,42 @@ public struct BottomSheetFooter: View {
     }
 }
 
+/// Publishes the on-screen keyboard's current height so a non-`.sheet` presentation (which gets
+/// none of the automatic keyboard avoidance a real `.sheet`/`Form` gets from its own hosting
+/// controller) can shift itself up manually. `keyboardWillChangeFrame`'s frame already accounts
+/// for the safe area the keyboard covers, so subtracting it from screen height gives the exact
+/// visible height, animated to match the keyboard's own show/hide timing.
+private final class KeyboardHeightObserver: ObservableObject {
+    @Published private(set) var height: CGFloat = 0
+
+    private var showObserver: NSObjectProtocol?
+    private var hideObserver: NSObjectProtocol?
+
+    init() {
+        showObserver = NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillChangeFrameNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            let newHeight = max(0, UIScreen.main.bounds.height - frame.origin.y)
+            withAnimation(.easeOut(duration: 0.25)) { self?.height = newHeight }
+        }
+        hideObserver = NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillHideNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            withAnimation(.easeOut(duration: 0.25)) { self?.height = 0 }
+        }
+    }
+
+    deinit {
+        if let showObserver { NotificationCenter.default.removeObserver(showObserver) }
+        if let hideObserver { NotificationCenter.default.removeObserver(hideObserver) }
+    }
+}
+
 /// Owns the slide-in/out animation and drag-to-dismiss gesture for `kluvsBottomSheet`. Has to be a
 /// real `View` (not inline in the modifier below) so its `@GestureState` drag offset and the
 /// `.animation(value:)` that drives the show/hide transition both live on a stable ancestor that
@@ -101,6 +138,11 @@ private struct DraggableBottomSheet<Content: View, Footer: View>: View {
     @ViewBuilder let footer: () -> Footer
 
     @GestureState private var dragTranslation: CGFloat = 0
+    // Being a fully custom overlay (not a real `.sheet`), this sheet gets none of the automatic
+    // keyboard-avoidance a `.sheet`/`Form` gets for free — an input field near the bottom of the
+    // sheet (e.g. Reading Progress's page/percent field) would otherwise sit right behind the
+    // keyboard with no way to see what's being typed.
+    @StateObject private var keyboard = KeyboardHeightObserver()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -117,7 +159,7 @@ private struct DraggableBottomSheet<Content: View, Footer: View>: View {
                             .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
                             .ignoresSafeArea(edges: .bottom)
                     )
-                    .offset(y: max(0, dragTranslation))
+                    .offset(y: max(0, dragTranslation) - keyboard.height)
                     .gesture(
                         DragGesture()
                             .updating($dragTranslation) { value, state, _ in

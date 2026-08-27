@@ -3,6 +3,7 @@ package com.ivangarzab.kluvs.data.repositories
 import com.ivangarzab.kluvs.data.local.source.BookLocalDataSource
 import com.ivangarzab.kluvs.data.remote.source.BookRemoteDataSource
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
@@ -43,30 +44,43 @@ class BookRepositoryTest {
 
     @Test
     fun `searchBooks success returns list of books`() = runTest {
-        everySuspend { remoteDataSource.searchBooks(any()) } returns Result.success(listOf(testBook))
+        everySuspend { remoteDataSource.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 1))
 
         val result = repository.searchBooks("hobbit")
 
         assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull()?.size)
-        assertEquals("The Hobbit", result.getOrNull()?.first()?.title)
-        verifySuspend { remoteDataSource.searchBooks("hobbit") }
+        assertEquals(1, result.getOrNull()?.books?.size)
+        assertEquals("The Hobbit", result.getOrNull()?.books?.first()?.title)
+        assertEquals(1, result.getOrNull()?.total)
+        verifySuspend { remoteDataSource.searchBooks("hobbit", 0) }
     }
 
     @Test
     fun `searchBooks returns empty list when no results`() = runTest {
-        everySuspend { remoteDataSource.searchBooks(any()) } returns Result.success(emptyList())
+        everySuspend { remoteDataSource.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = emptyList(), total = 0))
 
         val result = repository.searchBooks("xyzzy")
 
         assertTrue(result.isSuccess)
-        assertEquals(0, result.getOrNull()?.size)
+        assertEquals(0, result.getOrNull()?.books?.size)
+    }
+
+    @Test
+    fun `searchBooks passes offset through to the remote data source`() = runTest {
+        everySuspend { remoteDataSource.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 25))
+
+        repository.searchBooks("hobbit", offset = 10)
+
+        verifySuspend { remoteDataSource.searchBooks("hobbit", 10) }
     }
 
     @Test
     fun `searchBooks failure returns Result failure`() = runTest {
         val exception = Exception("Network error")
-        everySuspend { remoteDataSource.searchBooks(any()) } returns Result.failure(exception)
+        everySuspend { remoteDataSource.searchBooks(any(), any()) } returns Result.failure(exception)
 
         val result = repository.searchBooks("hobbit")
 
@@ -76,7 +90,8 @@ class BookRepositoryTest {
 
     @Test
     fun `searchBooks does not cache results`() = runTest {
-        everySuspend { remoteDataSource.searchBooks(any()) } returns Result.success(listOf(testBook))
+        everySuspend { remoteDataSource.searchBooks(any(), any()) } returns
+            Result.success(BookSearchResult(books = listOf(testBook), total = 1))
 
         repository.searchBooks("hobbit")
 

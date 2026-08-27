@@ -61,6 +61,7 @@ fun LoginScreen(
         is AuthState.Authenticated -> { /* No-op */ }
         is AuthState.OAuthPending -> LoadingScreen() // Show loading while browser opens
         is AuthState.Unauthenticated,
+        is AuthState.EmailConfirmationPending,
         is AuthState.Error -> {
             AuthFormContent(
                 modifier = modifier,

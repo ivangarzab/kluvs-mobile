@@ -1,25 +1,35 @@
 package com.ivangarzab.kluvs.ui.settings
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.ivangarzab.kluvs.R
+import com.ivangarzab.kluvs.designsystem.components.avatars.Avatar
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
+import com.ivangarzab.kluvs.designsystem.components.icons.Icon
+import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 
 @Composable
 fun EditProfileSection(
     modifier: Modifier = Modifier,
+    avatarUrl: String?,
+    name: String,
+    isUploadingAvatar: Boolean = false,
+    onAvatarClick: () -> Unit = {},
     editedName: String,
     editedHandle: String,
     hasChanges: Boolean,
@@ -35,6 +45,40 @@ fun EditProfileSection(
             style = KluvsTheme.typography.eyebrow,
             color = KluvsTheme.colors.contentMuted
         )
+
+        Spacer(Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier
+                .padding(bottom = 4.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Avatar(
+                name = name,
+                avatarUrl = avatarUrl,
+                size = 64.dp,
+                isOwn = true,
+                contentDescription = stringResource(R.string.profile_picture),
+                onClick = onAvatarClick,
+                isLoading = isUploadingAvatar
+            )
+
+            // Edit icon overlay
+            FloatingActionButton(
+                onClick = onAvatarClick,
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.BottomEnd),
+                containerColor = KluvsTheme.colors.accent,
+                contentColor = KluvsTheme.colors.onAccent,
+            ) {
+                Icon(
+                    type = IconType.Edit,
+                    contentDescription = stringResource(R.string.edit_profile_picture),
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
 
         Spacer(Modifier.height(12.dp))
 
@@ -80,6 +124,8 @@ fun EditProfileSection(
 @Composable
 fun Preview_EditProfileSection() = KluvsTheme {
     EditProfileSection(
+        avatarUrl = null,
+        name = "Alice",
         editedName = "Alice",
         editedHandle = "alice_reads",
         hasChanges = true,
@@ -95,6 +141,8 @@ fun Preview_EditProfileSection() = KluvsTheme {
 @Composable
 fun Preview_EditProfileSection_WithError() = KluvsTheme {
     EditProfileSection(
+        avatarUrl = null,
+        name = "Alice",
         editedName = "Alice",
         editedHandle = "invalid handle!",
         hasChanges = true,
