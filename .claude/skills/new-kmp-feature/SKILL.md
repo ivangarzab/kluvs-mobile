@@ -1,10 +1,13 @@
 ---
 name: new-kmp-feature
 description: >
-  Guided workflow for adding a new KMP feature to this project.
-  Auto-loads when planning or discussing a new screen, new feature module,
-  new ViewModel, or any new user-facing functionality that spans shared
-  and platform-specific code. Enforces the 4-phase phased approach.
+  Guided workflow for adding a brand-new KMP feature module to this project
+  (a new top-level screen/area with its own feature/{name} module and
+  ViewModel). Auto-loads when planning or discussing creating one of those
+  from scratch. Does NOT apply to modifying or extending an existing
+  screen/component within an already-existing feature module (e.g. adding
+  a field, search, or widget to an existing form) — that's a normal scoped
+  change, not a new feature. Enforces the 4-phase phased approach.
 allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
