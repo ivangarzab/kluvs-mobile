@@ -92,11 +92,23 @@ public struct BottomSheetFooter: View {
 /// controller) can shift itself up manually. `keyboardWillChangeFrame`'s frame already accounts
 /// for the safe area the keyboard covers, so subtracting it from screen height gives the exact
 /// visible height, animated to match the keyboard's own show/hide timing.
+///
+/// Reports height *above the home-indicator safe area*, not the raw keyboard height: the sheet's
+/// resting position (via `ZStack(alignment: .bottom)`, which respects the safe area even though
+/// only its background visually bleeds past it) already sits that inset above the true screen
+/// bottom. Subtracting the full raw keyboard height on top of that double-counts the inset,
+/// leaving a gap between the sheet and the keyboard equal to it.
 private final class KeyboardHeightObserver: ObservableObject {
     @Published private(set) var height: CGFloat = 0
 
     private var showObserver: NSObjectProtocol?
     private var hideObserver: NSObjectProtocol?
+
+    private var bottomSafeAreaInset: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first?.safeAreaInsets.bottom ?? 0
+    }
 
     init() {
         showObserver = NotificationCenter.default.addObserver(
@@ -104,9 +116,10 @@ private final class KeyboardHeightObserver: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-            let newHeight = max(0, UIScreen.main.bounds.height - frame.origin.y)
-            withAnimation(.easeOut(duration: 0.25)) { self?.height = newHeight }
+            guard let self, let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            let rawHeight = max(0, UIScreen.main.bounds.height - frame.origin.y)
+            let newHeight = max(0, rawHeight - self.bottomSafeAreaInset)
+            withAnimation(.easeOut(duration: 0.25)) { self.height = newHeight }
         }
         hideObserver = NotificationCenter.default.addObserver(
             forName: UIResponder.keyboardWillHideNotification,
@@ -174,6 +187,12 @@ private struct DraggableBottomSheet<Content: View, Footer: View>: View {
                     .transition(.move(edge: .bottom))
             }
         }
+        // SwiftUI auto-avoids the keyboard for any focused field by shifting this whole
+        // hierarchy up on its own, on top of the manual `keyboard.height` offset above —
+        // without opting out here, a focused field inside the sheet gets double-shifted
+        // (system avoidance + our own), which is what sent the sheet flying well past the
+        // keyboard instead of resting just above it. This is the single source of truth now.
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .animation(.easeOut(duration: 0.25), value: isPresented)
         .onChange(of: isPresented) { _, newValue in
             // Fires on any dismissal path (scrim tap, drag, or a caller setting isPresented
