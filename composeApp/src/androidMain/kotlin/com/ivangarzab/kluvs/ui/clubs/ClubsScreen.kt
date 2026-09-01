@@ -201,6 +201,11 @@ fun ClubsScreen(
                     onDeleteClub = viewModel::onDeleteClub,
                     onUpdateJoinPolicy = viewModel::onUpdateJoinPolicy,
                     onRotateInviteLink = viewModel::onRotateInviteLink,
+                    onBookSearchQueryChange = viewModel::onBookSearchQueryChange,
+                    onSearchBooks = viewModel::onSearchBooks,
+                    onSelectBook = viewModel::onSelectBook,
+                    onClearBook = viewModel::onClearSelectedBook,
+                    onResetBookSearch = viewModel::onResetBookSearch,
                     onCreateSession = viewModel::onCreateSession,
                     onUpdateSession = viewModel::onUpdateSession,
                     onEndSession = viewModel::onEndSession,
@@ -246,6 +251,11 @@ fun ClubsScreenContent(
     onDeleteClub: () -> Unit = {},
     onUpdateJoinPolicy: (JoinPolicy) -> Unit = {},
     onRotateInviteLink: () -> Unit = {},
+    onBookSearchQueryChange: (String) -> Unit = {},
+    onSearchBooks: (String) -> Unit = {},
+    onSelectBook: (Book) -> Unit = {},
+    onClearBook: () -> Unit = {},
+    onResetBookSearch: () -> Unit = {},
     onCreateSession: (Book, LocalDateTime?) -> Unit = { _, _ -> },
     onUpdateSession: (Book?, LocalDateTime?) -> Unit = { _, _ -> },
     onEndSession: () -> Unit = {},
@@ -452,7 +462,10 @@ fun ClubsScreenContent(
                                         onEditSession = { showEditSessionSheet = true },
                                         onEndSession = { showEndSessionDialog = true },
                                         onUpdateProgress = { showProgressSheet = true },
-                                        onCreateSession = { showCreateSessionSheet = true },
+                                        onCreateSession = {
+                                            onResetBookSearch()
+                                            showCreateSessionSheet = true
+                                        },
                                         onToggleParticipation = { isReading ->
                                             val currentMemberId = state.currentMemberId ?: return@OverviewTab
                                             onToggleParticipation(currentMemberId, isReading)
@@ -462,7 +475,10 @@ fun ClubsScreenContent(
                                         modifier = discussionsTabModifier,
                                         sessionDetails = state.activeSession,
                                         userRole = state.userRole,
-                                        onCreateSession = { showCreateSessionSheet = true },
+                                        onCreateSession = {
+                                            onResetBookSearch()
+                                            showCreateSessionSheet = true
+                                        },
                                         onCreateDiscussion = { showCreateDiscussionSheet = true },
                                         onEditDiscussion = { id -> editingDiscussionId = id },
                                         onDeleteDiscussion = { id -> deletingDiscussionId = id },
@@ -536,20 +552,33 @@ fun ClubsScreenContent(
 
                 if (showCreateSessionSheet) {
                     CreateSessionBottomSheet(
+                        bookSearchQuery = state.bookSearchQuery,
+                        bookSearchResults = state.bookSearchResults,
+                        selectedBook = state.selectedBook,
+                        isSearchingBooks = state.isSearchingBooks,
+                        isRegisteringBook = state.isRegisteringBook,
+                        bookSearchError = state.bookSearchError,
+                        onBookSearchQueryChange = onBookSearchQueryChange,
+                        onSearchBooks = onSearchBooks,
+                        onSelectBook = onSelectBook,
+                        onClearBook = onClearBook,
                         onSave = { book, dueDate ->
                             onCreateSession(book, dueDate)
+                            onResetBookSearch()
                             showCreateSessionSheet = false
                         },
-                        onDismiss = { showCreateSessionSheet = false }
+                        onDismiss = {
+                            onResetBookSearch()
+                            showCreateSessionSheet = false
+                        }
                     )
                 }
 
                 if (showEditSessionSheet) {
                     EditSessionBottomSheet(
-                        currentBook = state.activeSession?.book,
                         initialDueDate = state.activeSession?.rawDueDate,
-                        onSave = { book, dueDate ->
-                            onUpdateSession(book, dueDate)
+                        onSave = { dueDate ->
+                            onUpdateSession(null, dueDate)
                             showEditSessionSheet = false
                         },
                         onDismiss = { showEditSessionSheet = false }

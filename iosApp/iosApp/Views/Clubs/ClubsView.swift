@@ -166,12 +166,8 @@ private struct ClubDetailView: View {
     @State private var showDeleteClubAlert = false
     @State private var showCreateSessionSheet = false
     @State private var showEditSessionSheet = false
-    @State private var createSessionBookTitle = ""
-    @State private var createSessionBookAuthor = ""
     @State private var createSessionHasDueDate = false
     @State private var createSessionDueDate = Date()
-    @State private var editSessionBookTitle = ""
-    @State private var editSessionBookAuthor = ""
     @State private var editSessionHasDueDate = false
     @State private var editSessionDueDate = Date()
     @State private var showEndSessionAlert = false
@@ -201,8 +197,7 @@ private struct ClubDetailView: View {
     /// persistent overlay rather than a re-instantiated `.sheet()` presentation, its `@State`
     /// wouldn't otherwise reset between opens the way it used to for free.
     private func openCreateSession() {
-        createSessionBookTitle = ""
-        createSessionBookAuthor = ""
+        viewModel.onResetBookSearch()
         createSessionHasDueDate = false
         createSessionDueDate = Date()
         showCreateSessionSheet = true
@@ -236,9 +231,6 @@ private struct ClubDetailView: View {
     }
 
     private func openEditSession() {
-        let session = viewModel.activeSession
-        editSessionBookTitle = session?.book.title ?? ""
-        editSessionBookAuthor = session?.book.author ?? ""
         editSessionHasDueDate = viewModel.sessionDueDateIso != nil
         editSessionDueDate = viewModel.sessionDueDateIso?.toSwiftDate() ?? Date()
         showEditSessionSheet = true
@@ -430,57 +422,52 @@ private struct ClubDetailView: View {
         // Create session
         .kluvsBottomSheet(isPresented: $showCreateSessionSheet, header: "Create Session") {
             CreateSessionFields(
-                bookTitle: $createSessionBookTitle,
-                bookAuthor: $createSessionBookAuthor,
+                bookSearchQuery: Binding(
+                    get: { viewModel.bookSearchQuery },
+                    set: { viewModel.onBookSearchQueryChange($0) }
+                ),
+                bookSearchResults: viewModel.bookSearchResults,
+                selectedBook: viewModel.selectedBook,
+                isSearchingBooks: viewModel.isSearchingBooks,
+                isRegisteringBook: viewModel.isRegisteringBook,
+                bookSearchError: viewModel.bookSearchError,
+                onSearchBooks: { viewModel.onSearchBooks($0) },
+                onSelectBook: { viewModel.onSelectBook($0) },
+                onClearBook: { viewModel.onClearSelectedBook() },
                 hasDueDate: $createSessionHasDueDate,
                 dueDate: $createSessionDueDate
             )
         } footer: {
-            let trimmedTitle = createSessionBookTitle.trimmingCharacters(in: .whitespaces)
-            let trimmedAuthor = createSessionBookAuthor.trimmingCharacters(in: .whitespaces)
             BottomSheetFooter(
                 actionLabel: "Create",
                 onAction: {
-                    let book = Shared.Book(
-                        id: "", title: trimmedTitle, author: trimmedAuthor,
-                        edition: nil, year: nil, isbn: nil, pageCount: nil,
-                        imageUrl: nil, externalGoogleId: nil
-                    )
+                    guard let book = viewModel.selectedBook else { return }
                     let resolvedDueDateIso = createSessionHasDueDate ? createSessionDueDate.toIsoString() : nil
                     viewModel.onCreateSession(book: book, dueDateIso: resolvedDueDateIso)
+                    viewModel.onResetBookSearch()
                     showCreateSessionSheet = false
                 },
-                onCancel: { showCreateSessionSheet = false },
-                actionEnabled: !trimmedTitle.isEmpty && !trimmedAuthor.isEmpty
+                onCancel: {
+                    viewModel.onResetBookSearch()
+                    showCreateSessionSheet = false
+                },
+                actionEnabled: viewModel.selectedBook != nil
             )
         }
         // Edit session
         .kluvsBottomSheet(isPresented: $showEditSessionSheet, header: "Edit Session") {
             EditSessionFields(
-                bookTitle: $editSessionBookTitle,
-                bookAuthor: $editSessionBookAuthor,
                 hasDueDate: $editSessionHasDueDate,
                 dueDate: $editSessionDueDate
             )
         } footer: {
-            let trimmedTitle = editSessionBookTitle.trimmingCharacters(in: .whitespaces)
-            let trimmedAuthor = editSessionBookAuthor.trimmingCharacters(in: .whitespaces)
-            let hasChanges = trimmedTitle != (viewModel.activeSession?.book.title ?? "") ||
-                trimmedAuthor != (viewModel.activeSession?.book.author ?? "") ||
-                editSessionHasDueDate != (viewModel.sessionDueDateIso != nil) ||
+            let hasChanges = editSessionHasDueDate != (viewModel.sessionDueDateIso != nil) ||
                 (editSessionHasDueDate && editSessionDueDate != (viewModel.sessionDueDateIso?.toSwiftDate() ?? Date()))
             BottomSheetFooter(
                 actionLabel: "Save",
                 onAction: {
-                    let book: Shared.Book? = (!trimmedTitle.isEmpty && !trimmedAuthor.isEmpty)
-                        ? Shared.Book(
-                            id: "", title: trimmedTitle, author: trimmedAuthor,
-                            edition: nil, year: nil, isbn: nil, pageCount: nil,
-                            imageUrl: nil, externalGoogleId: nil
-                        )
-                        : nil
                     let resolvedDueDateIso = editSessionHasDueDate ? editSessionDueDate.toIsoString() : nil
-                    viewModel.onUpdateSession(book: book, dueDateIso: resolvedDueDateIso)
+                    viewModel.onUpdateSession(book: nil, dueDateIso: resolvedDueDateIso)
                     showEditSessionSheet = false
                 },
                 onCancel: { showEditSessionSheet = false },

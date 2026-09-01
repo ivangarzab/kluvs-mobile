@@ -18,8 +18,10 @@ import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
+import com.ivangarzab.kluvs.clubs.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.clubs.domain.RemoveMemberUseCase
 import com.ivangarzab.kluvs.clubs.domain.RotateInviteLinkUseCase
+import com.ivangarzab.kluvs.clubs.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.presentation.progress.SaveProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.SetAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.ToggleSessionParticipationUseCase
@@ -30,6 +32,7 @@ import com.ivangarzab.kluvs.clubs.domain.UpdateJoinPolicyUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateMemberRoleUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateSessionUseCase
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
+import com.ivangarzab.kluvs.data.repositories.BookRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.DiscussionAttendanceRepository
 import com.ivangarzab.kluvs.data.repositories.DiscussionNoteRepository
@@ -41,6 +44,7 @@ import com.ivangarzab.kluvs.model.AttendanceResponse
 import com.ivangarzab.kluvs.model.AttendanceRoster
 import com.ivangarzab.kluvs.model.AttendanceStatus
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.model.ClubMember
 import com.ivangarzab.kluvs.model.Discussion
@@ -91,6 +95,9 @@ class ClubDetailsViewModelTest {
     private lateinit var getClubMembers: GetClubMembersUseCase
     private lateinit var getMemberClubs: GetMemberClubsUseCase
     private lateinit var getCurrentMemberId: GetCurrentMemberIdUseCase
+    private lateinit var bookRepository: BookRepository
+    private lateinit var searchBooksUseCase: SearchBooksUseCase
+    private lateinit var registerBookUseCase: RegisterBookUseCase
     private lateinit var createClubUseCase: CreateClubUseCase
     private lateinit var updateClubUseCase: UpdateClubUseCase
     private lateinit var updateJoinPolicyUseCase: UpdateJoinPolicyUseCase
@@ -134,6 +141,7 @@ class ClubDetailsViewModelTest {
         discussionAttendanceRepository = mock<DiscussionAttendanceRepository>()
         discussionRepository = mock<DiscussionRepository>()
         discussionNoteRepository = mock<DiscussionNoteRepository>()
+        bookRepository = mock<BookRepository>()
 
         // Use REAL UseCases with mocked repositories
         getClubDetails = GetClubDetailsUseCase(clubRepository, formatDateTime)
@@ -141,6 +149,8 @@ class ClubDetailsViewModelTest {
         getClubMembers = GetClubMembersUseCase(clubRepository, avatarRepository)
         getMemberClubs = GetMemberClubsUseCase(memberRepository, clubRepository, avatarRepository)
         getCurrentMemberId = GetCurrentMemberIdUseCase(memberRepository)
+        searchBooksUseCase = SearchBooksUseCase(bookRepository)
+        registerBookUseCase = RegisterBookUseCase(bookRepository)
         createClubUseCase = CreateClubUseCase(clubRepository, memberRepository)
         updateClubUseCase = UpdateClubUseCase(clubRepository)
         updateJoinPolicyUseCase = UpdateJoinPolicyUseCase(clubRepository)
@@ -168,6 +178,7 @@ class ClubDetailsViewModelTest {
 
         viewModel = ClubDetailsViewModel(
             getClubDetails, getActiveSession, getClubMembers, getMemberClubs, getCurrentMemberId,
+            searchBooksUseCase, registerBookUseCase,
             createClubUseCase,
             updateClubUseCase, updateJoinPolicyUseCase, rotateInviteLinkUseCase,
             deleteClubUseCase, createSessionUseCase,
@@ -662,6 +673,103 @@ class ClubDetailsViewModelTest {
         viewModel.onConsumeOperationResult()
 
         assertNull(viewModel.state.value.operationResult)
+    }
+
+    @Test
+    fun `onBookSearchQueryChange updates query only`() = runTest {
+        viewModel.onBookSearchQueryChange("hobbit")
+
+        assertEquals("hobbit", viewModel.state.value.bookSearchQuery)
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+    }
+
+    @Test
+    fun `onSearchBooks with blank query clears results without calling repository`() = runTest {
+        viewModel.onSearchBooks("   ")
+
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+        assertFalse(viewModel.state.value.isSearchingBooks)
+        verifySuspend(VerifyMode.not) { bookRepository.searchBooks(any(), any()) }
+    }
+
+    @Test
+    fun `onSearchBooks success populates results`() = runTest {
+        val book = Book(id = "1", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.searchBooks("hobbit", any()) } returns
+            Result.success(BookSearchResult(books = listOf(book), total = 1))
+
+        viewModel.onSearchBooks("hobbit")
+
+        assertEquals(listOf(book), viewModel.state.value.bookSearchResults)
+        assertFalse(viewModel.state.value.isSearchingBooks)
+        assertNull(viewModel.state.value.bookSearchError)
+    }
+
+    @Test
+    fun `onSearchBooks failure sets error and clears results`() = runTest {
+        everySuspend { bookRepository.searchBooks("hobbit", any()) } returns
+            Result.failure(Exception("Network error"))
+
+        viewModel.onSearchBooks("hobbit")
+
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+        assertNotNull(viewModel.state.value.bookSearchError)
+    }
+
+    @Test
+    fun `onSelectBook registers book and stores the registered result`() = runTest {
+        val searchResult = Book(id = "", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        val registered = searchResult.copy(id = "42")
+        everySuspend { bookRepository.registerBook(searchResult) } returns Result.success(registered)
+
+        viewModel.onSelectBook(searchResult)
+
+        assertEquals(registered, viewModel.state.value.selectedBook)
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+        assertFalse(viewModel.state.value.isRegisteringBook)
+    }
+
+    @Test
+    fun `onSelectBook failure sets error without setting selectedBook`() = runTest {
+        val searchResult = Book(id = "", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.registerBook(searchResult) } returns Result.failure(Exception("Network error"))
+
+        viewModel.onSelectBook(searchResult)
+
+        assertNull(viewModel.state.value.selectedBook)
+        assertNotNull(viewModel.state.value.bookSearchError)
+    }
+
+    @Test
+    fun `onClearSelectedBook resets selection and query`() = runTest {
+        val registered = Book(id = "42", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.registerBook(any()) } returns Result.success(registered)
+        viewModel.onSelectBook(registered.copy(id = ""))
+
+        viewModel.onClearSelectedBook()
+
+        assertNull(viewModel.state.value.selectedBook)
+        assertEquals("", viewModel.state.value.bookSearchQuery)
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+    }
+
+    @Test
+    fun `onResetBookSearch clears all book search state`() = runTest {
+        val book = Book(id = "1", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.searchBooks("hobbit", any()) } returns
+            Result.success(BookSearchResult(books = listOf(book), total = 1))
+        viewModel.onBookSearchQueryChange("hobbit")
+        viewModel.onSearchBooks("hobbit")
+
+        viewModel.onResetBookSearch()
+
+        val state = viewModel.state.value
+        assertEquals("", state.bookSearchQuery)
+        assertTrue(state.bookSearchResults.isEmpty())
+        assertFalse(state.isSearchingBooks)
+        assertNull(state.bookSearchError)
+        assertNull(state.selectedBook)
+        assertFalse(state.isRegisteringBook)
     }
 
     @Test
