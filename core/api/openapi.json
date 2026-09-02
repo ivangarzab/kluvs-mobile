@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Kluvs API",
-    "version": "0.22.2",
+    "version": "0.23.0",
     "description": "Supabase Edge Functions API for managing book clubs."
   },
   "servers": [
@@ -285,7 +285,7 @@
       },
       "put": {
         "summary": "Update Member",
-        "description": "Update member details. Can update basic fields, add/remove club associations, update per-club roles, or add a member to a specific club via the `add_to_club` action. The `add_to_club` action is mutually exclusive with the other update paths — when present, only the club-add logic runs. It requires the caller to be an admin or owner of the target club.\n",
+        "description": "Update member details. Can update basic fields, add/remove club associations, update per-club roles (including transferring ownership — see `MemberAssignableRole`), or add a member to a specific club via the `add_to_club` action. The `add_to_club` action is mutually exclusive with the other update paths — when present, only the club-add logic runs. It requires the caller to be an admin or owner of the target club.\n",
         "tags": [
           "Member"
         ],
@@ -318,13 +318,13 @@
             }
           },
           "400": {
-            "description": "Invalid input — e.g. id is not a positive integer, clubs is not an array, one or more club IDs in `clubs` do not exist, club_roles is malformed or references an invalid/owner role, the member is not part of a club referenced in club_roles, or add_to_club is empty.\n"
+            "description": "Invalid input — e.g. id is not a positive integer, clubs is not an array, one or more club IDs in `clubs` do not exist, club_roles is malformed or references an invalid role, the member is not part of a club referenced in club_roles, assigning 'owner' to a member who is already that club's owner, or add_to_club is empty.\n"
           },
           "401": {
             "description": "Missing or invalid Authorization header (add_to_club only)"
           },
           "403": {
-            "description": "Caller is not an admin or owner of the target club (add_to_club only)"
+            "description": "Caller is not an admin or owner of the target club (add_to_club only), or is not the current owner of a club referenced in a club_roles ownership transfer.\n"
           },
           "404": {
             "description": "Member not found (target member for the update, or for add_to_club), or the club referenced by add_to_club does not exist.\n"
@@ -2887,9 +2887,10 @@
         "type": "string",
         "enum": [
           "admin",
-          "member"
+          "member",
+          "owner"
         ],
-        "description": "Valid roles assignable via club_roles (owner cannot be assigned or changed via this endpoint)."
+        "description": "Valid roles assignable via club_roles. Assigning \"owner\" transfers ownership: the caller must currently be the club's owner, the target must already be a member of the club, and the caller is demoted to \"admin\" as part of the same request."
       },
       "MemberClubRoles": {
         "type": "object",
