@@ -17,6 +17,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.clubs.domain.LeaveClubUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.clubs.domain.RemoveMemberUseCase
@@ -25,6 +26,7 @@ import com.ivangarzab.kluvs.clubs.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.presentation.progress.SaveProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.SetAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.ToggleSessionParticipationUseCase
+import com.ivangarzab.kluvs.clubs.domain.TransferOwnershipUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateClubUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionUseCase
@@ -111,6 +113,8 @@ class ClubDetailsViewModelTest {
     private lateinit var deleteDiscussionUseCase: DeleteDiscussionUseCase
     private lateinit var updateMemberRoleUseCase: UpdateMemberRoleUseCase
     private lateinit var removeMemberUseCase: RemoveMemberUseCase
+    private lateinit var leaveClubUseCase: LeaveClubUseCase
+    private lateinit var transferOwnershipUseCase: TransferOwnershipUseCase
     private lateinit var progressRepository: ProgressRepository
     private lateinit var getSessionProgressUseCase: GetSessionProgressUseCase
     private lateinit var saveProgressUseCase: SaveProgressUseCase
@@ -164,6 +168,8 @@ class ClubDetailsViewModelTest {
         deleteDiscussionUseCase = DeleteDiscussionUseCase(discussionRepository)
         updateMemberRoleUseCase = UpdateMemberRoleUseCase(memberRepository)
         removeMemberUseCase = RemoveMemberUseCase(memberRepository)
+        leaveClubUseCase = LeaveClubUseCase(memberRepository)
+        transferOwnershipUseCase = TransferOwnershipUseCase(memberRepository)
         getSessionProgressUseCase = GetSessionProgressUseCase(progressRepository)
         saveProgressUseCase = SaveProgressUseCase(progressRepository)
         finishSessionUseCase = FinishSessionUseCase(sessionRepository)
@@ -185,6 +191,7 @@ class ClubDetailsViewModelTest {
             updateSessionUseCase, deleteSessionUseCase, createDiscussionUseCase,
             updateDiscussionUseCase, deleteDiscussionUseCase,
             updateMemberRoleUseCase, removeMemberUseCase,
+            leaveClubUseCase, transferOwnershipUseCase,
             getSessionProgressUseCase, saveProgressUseCase, finishSessionUseCase,
             toggleSessionParticipationUseCase,
             getAttendanceRosterUseCase, setAttendanceUseCase, clearAttendanceUseCase,
@@ -602,6 +609,128 @@ class ClubDetailsViewModelTest {
         viewModel.onConsumeDeletedClubId()
 
         assertEquals(null, viewModel.state.value.deletedClubId)
+    }
+
+    @Test
+    fun `onLeaveClub sets leftClubId and removes the club from availableClubs on success`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.MEMBER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        // state.currentMemberId resolves via the generic getMemberByUserId(any(), any()) stub in
+        // setup(), which yields id "default-member-id" — that's the memberId LeaveClubUseCase acts on.
+        everySuspend { memberRepository.getMember("default-member-id", forceRefresh = true) } returns Result.success(
+            Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = listOf(club))
+        )
+        everySuspend { memberRepository.updateMember(memberId = "default-member-id", clubIds = emptyList()) } returns
+            Result.success(Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = emptyList()))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onLeaveClub()
+
+        val state = viewModel.state.value
+        assertEquals(clubId, state.leftClubId)
+        assertTrue(state.availableClubs.none { it.id == clubId })
+        assertIs<OperationResult.Success>(state.operationResult)
+    }
+
+    @Test
+    fun `onLeaveClub sets operationResult Error on failure`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.MEMBER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { memberRepository.getMember("default-member-id", forceRefresh = true) } returns
+            Result.failure(RuntimeException("Not found"))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onLeaveClub()
+
+        val state = viewModel.state.value
+        assertEquals(null, state.leftClubId)
+        assertIs<OperationResult.Error>(state.operationResult)
+    }
+
+    @Test
+    fun `onConsumeLeftClubId clears leftClubId`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.MEMBER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { memberRepository.getMember("default-member-id", forceRefresh = true) } returns Result.success(
+            Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = listOf(club))
+        )
+        everySuspend { memberRepository.updateMember(memberId = "default-member-id", clubIds = emptyList()) } returns
+            Result.success(Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = emptyList()))
+        viewModel.loadUserClubs("u1")
+        viewModel.onLeaveClub()
+
+        viewModel.onConsumeLeftClubId()
+
+        assertEquals(null, viewModel.state.value.leftClubId)
+    }
+
+    @Test
+    fun `onTransferOwnership sets operationResult Success on success`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.OWNER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { clubRepository.getClub(clubId, forceRefresh = true) } returns Result.success(club)
+        // currentOwnerId is state.currentMemberId, resolved to "default-member-id" per setup()'s
+        // generic getMemberByUserId(any(), any()) stub.
+        everySuspend {
+            memberRepository.updateMember(memberId = "m2", clubRoles = mapOf(clubId to "owner"))
+        } returns Result.success(Member(id = "m2", userId = "u2", name = "Bob", booksRead = 0))
+        everySuspend {
+            memberRepository.updateMember(memberId = "default-member-id", clubRoles = mapOf(clubId to "admin"))
+        } returns Result.success(Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onTransferOwnership("m2")
+
+        assertIs<OperationResult.Success>(viewModel.state.value.operationResult)
+    }
+
+    @Test
+    fun `onTransferOwnership sets operationResult Error on failure`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.OWNER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend {
+            memberRepository.updateMember(memberId = "m2", clubRoles = mapOf(clubId to "owner"))
+        } returns Result.failure(RuntimeException("Network error"))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onTransferOwnership("m2")
+
+        assertIs<OperationResult.Error>(viewModel.state.value.operationResult)
     }
 
     @Test
