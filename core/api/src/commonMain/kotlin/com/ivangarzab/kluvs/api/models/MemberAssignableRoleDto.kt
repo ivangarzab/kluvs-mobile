@@ -19,9 +19,9 @@ package com.ivangarzab.kluvs.api.models
 import kotlinx.serialization.*
 
 /**
- * Valid roles assignable via club_roles (owner cannot be assigned or changed via this endpoint).
+ * Valid roles assignable via club_roles. Assigning \"owner\" transfers ownership: the caller must currently be the club's owner, the target must already be a member of the club, and the caller is demoted to \"admin\" as part of the same request.
  *
- * Values: admin,member
+ * Values: admin,member,owner
  */
 @Serializable
 enum class MemberAssignableRoleDto(val value: kotlin.String) {
@@ -30,7 +30,10 @@ enum class MemberAssignableRoleDto(val value: kotlin.String) {
     admin("admin"),
 
     @SerialName(value = "member")
-    member("member");
+    member("member"),
+
+    @SerialName(value = "owner")
+    owner("owner");
 
     /**
      * Override [toString()] to avoid using the enum variable name as the value, and instead use
