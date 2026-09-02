@@ -187,6 +187,8 @@ private struct ClubDetailView: View {
     @State private var changingRoleMemberId: IDWrapper? = nil
     @State private var selectedRole: Shared.Role = .member
     @State private var removingMemberId: String? = nil
+    @State private var showLeaveClubAlert = false
+    @State private var transferOwnershipTargetId: String? = nil
 
     /// The current user's own memberId (needed for role/remove calls and the Overview tab's
     /// participation toggle) — resolved independently of the club's member roster, see
@@ -251,7 +253,7 @@ private struct ClubDetailView: View {
                 title: viewModel.clubDetails?.clubName,
                 onNavigateBack: { dismiss() }
             ) {
-                if viewModel.userRole == .owner || viewModel.userRole == .admin {
+                if viewModel.userRole != nil {
                     ActionMenu(items: {
                         var items = [
                             ActionMenuItem(label: "Share", action: { showShareClubSheet = true })
@@ -262,6 +264,8 @@ private struct ClubDetailView: View {
                                 showEditClubSheet = true
                             }))
                             items.append(ActionMenuItem(label: "Delete", action: { showDeleteClubAlert = true }, isDestructive: true))
+                        } else {
+                            items.append(ActionMenuItem(label: "Leave Club", action: { showLeaveClubAlert = true }, isDestructive: true))
                         }
                         return items
                     }())
@@ -345,6 +349,7 @@ private struct ClubDetailView: View {
                             changingRoleMemberId = IDWrapper(id: memberId)
                         },
                         onRemoveMember: { memberId in removingMemberId = memberId },
+                        onTransferOwnership: { memberId in transferOwnershipTargetId = memberId },
                         onInviteMember: { showShareClubSheet = true }
                     )
                     .tag(2)
@@ -417,6 +422,12 @@ private struct ClubDetailView: View {
             if newValue != nil {
                 dismiss()
                 viewModel.onConsumeDeletedClubId()
+            }
+        }
+        .onChange(of: viewModel.leftClubId) { _, newValue in
+            if newValue != nil {
+                dismiss()
+                viewModel.onConsumeLeftClubId()
             }
         }
         // Create session
@@ -652,6 +663,37 @@ private struct ClubDetailView: View {
                     viewModel.onRemoveMember(memberId: memberId, currentMemberId: mid)
                 }
                 removingMemberId = nil
+            }
+        )
+        // Leave club confirmation
+        .kluvsConfirmationDialog(
+            isPresented: $showLeaveClubAlert,
+            title: "Leave Club",
+            message: "Are you sure you want to leave \"\(viewModel.clubDetails?.clubName ?? "this club")\"? You'll need a new invite to rejoin.",
+            confirmLabel: "Leave",
+            isDestructive: true,
+            onConfirm: { viewModel.onLeaveClub() }
+        )
+        // Transfer ownership confirmation
+        .kluvsConfirmationDialog(
+            isPresented: Binding(
+                get: { transferOwnershipTargetId != nil },
+                set: { _ in }
+            ),
+            title: "Transfer Ownership",
+            message: {
+                let memberName = viewModel.members.first { $0.memberId == transferOwnershipTargetId }?.name ?? "this member"
+                let clubName = viewModel.clubDetails?.clubName ?? "this club"
+                return "Are you sure you want to make \(memberName) the new owner of \"\(clubName)\"? You'll become an Admin."
+            }(),
+            confirmLabel: "Transfer",
+            isDestructive: true,
+            onDismiss: { transferOwnershipTargetId = nil },
+            onConfirm: {
+                if let newOwnerId = transferOwnershipTargetId {
+                    viewModel.onTransferOwnership(newOwnerId: newOwnerId)
+                }
+                transferOwnershipTargetId = nil
             }
         )
     }

@@ -102,6 +102,9 @@ class ClubDetailsViewModelHelper : KoinComponent {
         viewModel.onUpdateMemberRole(memberId, currentMemberId, newRole)
     fun onRemoveMember(memberId: String, currentMemberId: String) =
         viewModel.onRemoveMember(memberId, currentMemberId)
+    fun onLeaveClub() = viewModel.onLeaveClub()
+    fun onConsumeLeftClubId() = viewModel.onConsumeLeftClubId()
+    fun onTransferOwnership(newOwnerId: String) = viewModel.onTransferOwnership(newOwnerId)
 
     // UI event consumption
     fun onConsumeOperationResult() = viewModel.onConsumeOperationResult()
