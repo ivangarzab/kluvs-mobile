@@ -27,13 +27,13 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Join-by-invite-token screen. Not reachable from any UI action today — "Join with a code"
- * inside the (already-authenticated) Clubs tab opens
- * [com.ivangarzab.kluvs.ui.clubs.JoinBottomSheet] in-place instead. This full screen is kept
- * registered at [com.ivangarzab.kluvs.ui.NavDestinations.JOIN] for the not-yet-built Android
- * App Links deep-link case — tapping a raw invite URL while signed out, which needs to land
- * somewhere before auth resolves and needs the [onNeedsSignIn] → Login handoff below, neither
- * of which a nested bottom sheet can do.
+ * Join-by-invite-token screen, reached by opening an invite App Link. "Join with a code" inside
+ * the (already-authenticated) Clubs tab opens [com.ivangarzab.kluvs.ui.clubs.JoinBottomSheet]
+ * in-place instead — a deep link needs to land somewhere before auth resolves and needs the
+ * [onNeedsSignIn] → Login handoff below, neither of which a nested bottom sheet can do.
+ *
+ * When [initialToken] is present the code is pre-filled and previewed immediately, so a
+ * recipient who tapped a link sees the club rather than an empty text field.
  *
  * The preview shows only the club name — [com.ivangarzab.kluvs.model.ClubPreview] has no
  * avatar/member-count yet (also a follow-up, needs a backend spec change).
@@ -41,12 +41,20 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun JoinScreen(
     modifier: Modifier = Modifier,
+    initialToken: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateToClub: (clubId: String) -> Unit,
     onNeedsSignIn: (token: String) -> Unit,
     viewModel: JoinViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(initialToken) {
+        if (!initialToken.isNullOrBlank()) {
+            viewModel.onTokenChanged(initialToken)
+            viewModel.previewInvite()
+        }
+    }
 
     LaunchedEffect(state.joinedClubId) {
         state.joinedClubId?.let { clubId ->

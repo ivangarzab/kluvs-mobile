@@ -2,16 +2,19 @@ import SwiftUI
 import Shared
 import DesignSystem
 
-/// Join-by-invite-token screen. Not reachable from any UI action today — "Join with a code"
+/// Join-by-invite-token screen, reached by opening an invite Universal Link. "Join with a code"
 /// inside the (already-authenticated) Clubs tab opens `JoinFields` in a local bottom sheet
-/// instead. This full screen is kept registered (`MainRoute.join`) for the not-yet-built iOS
-/// Universal Links deep-link case — tapping a raw invite URL while signed out, which needs to
-/// land somewhere before auth resolves and needs the `onNeedsSignIn` handoff below, neither of
-/// which a nested bottom sheet can do. Mirrors Android's `JoinScreen`.
+/// instead — a deep link needs to land somewhere before auth resolves and needs the
+/// `onNeedsSignIn` handoff below, neither of which a nested bottom sheet can do. Mirrors
+/// Android's `JoinScreen`.
+///
+/// When `initialToken` is present the code is pre-filled and previewed immediately, so a
+/// recipient who tapped a link sees the club rather than an empty text field.
 ///
 /// The preview shows only the club name — `Shared.ClubPreview` has no avatar/member-count yet
 /// (also a follow-up, needs a backend spec change).
 struct JoinView: View {
+    var initialToken: String? = nil
     let onNavigateToClub: (String) -> Void
     let onNeedsSignIn: (String) -> Void
 
@@ -75,6 +78,11 @@ struct JoinView: View {
         .padding(16)
         .background(KluvsTheme.colors.background)
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            guard let initialToken, !initialToken.isEmpty else { return }
+            viewModel.onTokenChanged(initialToken)
+            viewModel.previewInvite()
+        }
         .onChange(of: viewModel.joinedClubId) { _, newValue in
             if let clubId = newValue {
                 onNavigateToClub(clubId)

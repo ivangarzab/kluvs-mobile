@@ -25,6 +25,20 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="kluvs" android:host="auth" android:pathPrefix="/callback" />
             </intent-filter>
+            <!--
+                Club invite App Links. The host is flavor-derived (see composeApp/build.gradle.kts)
+                and must serve /.well-known/assetlinks.json listing this app's signing certificates,
+                or autoVerify fails and links open in the browser instead.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="${inviteLinkHost}"
+                    android:pathPrefix="/join/" />
+            </intent-filter>
         </activity>
     </application>
 

@@ -27,5 +27,19 @@ class PendingJoinCoordinatorHelper : KoinComponent {
         return Closeable { job.cancel() }
     }
 
+    /**
+     * iOS-friendly observation method for invite deep links awaiting navigation.
+     *
+     * Returns a [Closeable] that can be used to cancel the observation.
+     */
+    fun observeIncomingInviteToken(callback: (String?) -> Unit): Closeable {
+        val job = coordinator.incomingInviteToken.onEach { callback(it) }.launchIn(coroutineScope)
+        return Closeable { job.cancel() }
+    }
+
     fun setPendingToken(token: String) = coordinator.setPendingToken(token)
+
+    fun onInviteLinkOpened(url: String): Boolean = coordinator.onInviteLinkOpened(url)
+
+    fun onConsumeIncomingInviteToken() = coordinator.onConsumeIncomingInviteToken()
 }

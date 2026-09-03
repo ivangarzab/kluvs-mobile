@@ -25,6 +25,10 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.splashscreen)
             implementation(libs.androidx.browser)
+            // Declared directly (not leaned on transitively via koin-compose) because
+            // MainActivity uses koin-android's `by inject()` to grab PendingJoinCoordinator
+            // for deep link intents that arrive before any composition exists.
+            implementation(libs.koin.android)
         }
         androidInstrumentedTest.dependencies {
             implementation(libs.androidx.test.junit)
@@ -69,6 +73,13 @@ val keystoreProperties = Properties().apply {
 fun signingProp(propKey: String, envKey: String): String? =
     keystoreProperties.getProperty(propKey) ?: System.getenv(envKey)
 
+// The selected BuildKonfig flavor, which decides which Supabase project — and which web app
+// origin — this build points at. Declared here rather than next to the guards further down
+// because `android.defaultConfig` below needs it to pick the App Links host. Defaults to
+// "integration", matching core/network/build.gradle.kts.
+val buildkonfigFlavorProvider: Provider<String> =
+    providers.gradleProperty("buildkonfig.flavor").orElse("integration")
+
 android {
     namespace = "com.ivangarzab.kluvs"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -80,6 +91,16 @@ android {
         versionCode = 5
         versionName = "0.0.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Host this build claims for invite App Links (see AndroidManifest.xml). Keyed off the
+        // BuildKonfig flavor rather than the build type so the verified host can never disagree
+        // with InviteLink.build()'s origin — they are derived from the same switch.
+        //
+        // Deliberately one host per build, not both: minSdk is 24, and on pre-Android 12 devices
+        // a single unverifiable host fails App Links verification for the *whole* app — declaring
+        // the integration host in a production build would put prod invite links at risk.
+        manifestPlaceholders["inviteLinkHost"] =
+            if (buildkonfigFlavorProvider.get() == "production") "app.kluvs.com" else "app.kluvs.xyz"
     }
     packaging {
         resources {
@@ -167,9 +188,6 @@ dependencies {
 // automatic link between them — this check makes mismatched combinations fail the build
 // instead of shipping quietly wrong. `debug` is intentionally left unguarded: it defaults to
 // "integration" but can be manually pointed at "production" for local testing when needed.
-val buildkonfigFlavorProvider: Provider<String> =
-    providers.gradleProperty("buildkonfig.flavor").orElse("integration")
-
 tasks.matching { it.name in setOf("assembleRelease", "installRelease", "bundleRelease") }.configureEach {
     val flavorProvider = buildkonfigFlavorProvider
     doFirst {

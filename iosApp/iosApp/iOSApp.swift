@@ -12,11 +12,10 @@ struct iOSApp: App {
 
     var body: some Scene {
         WindowGroup {
+            // Incoming URLs (OAuth callbacks and invite Universal Links) are handled inside
+            // ContentView, which owns the coordinators they have to be routed through.
             ContentView()
                 .tint(.brandOrange)
-                .onOpenURL { url in
-                    OAuthCallbackHandler.shared.handleCallback(url)
-                }
         }
     }
     
