@@ -28,6 +28,8 @@ data class ClubDetailsState(
     val createdClubId: String? = null,
     /** ID of a just-deleted club, consumed by the UI to navigate back out of its detail screen. */
     val deletedClubId: String? = null,
+    /** ID of a club the signed-in member just left, consumed by the UI to navigate back out of its detail screen. */
+    val leftClubId: String? = null,
     /** Attendance rosters keyed by discussion ID, populated lazily as timeline rows are shown. */
     val discussionRosters: Map<String, AttendanceRoster> = emptyMap(),
     /** The signed-in member's notes keyed by discussion ID, populated lazily when a note sheet is opened. */

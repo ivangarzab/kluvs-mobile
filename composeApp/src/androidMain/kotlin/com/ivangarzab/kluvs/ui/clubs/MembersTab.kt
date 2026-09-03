@@ -46,6 +46,7 @@ fun MembersTab(
     userRole: Role? = null,
     onChangeRole: (memberId: String) -> Unit = {},
     onRemoveMember: (memberId: String) -> Unit = {},
+    onTransferOwnership: (memberId: String) -> Unit = {},
     onInviteMember: () -> Unit = {},
 ) {
     // Session participation lookup for the reading/skipping indicator
@@ -99,8 +100,10 @@ fun MembersTab(
                     isReading = readingByMemberId[member.memberId],
                     showAdminActions = isAdminOrAbove && (!isSelf || isOwner) && member.role != Role.OWNER,
                     showRemove = isOwner && !isSelf && member.role != Role.OWNER,
+                    showTransferOwnership = isOwner && !isSelf && member.role != Role.OWNER,
                     onChangeRole = { onChangeRole(member.memberId) },
-                    onRemove = { onRemoveMember(member.memberId) }
+                    onRemove = { onRemoveMember(member.memberId) },
+                    onTransferOwnership = { onTransferOwnership(member.memberId) }
                 )
                 if (index < members.size - 1) {
                     MemberDivider()

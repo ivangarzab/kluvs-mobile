@@ -33,6 +33,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var operationIsError: Bool = false
     @Published var createdClubId: String? = nil
     @Published var deletedClubId: String? = nil
+    @Published var leftClubId: String? = nil
     /// ISO-8601 string for the active session's due date, or nil if none.
     @Published var sessionDueDateIso: String? = nil
 
@@ -78,6 +79,7 @@ class ClubDetailsViewModelWrapper: ObservableObject {
                 self.operationIsError = self.helper.isOperationError(result: state.operationResult)
                 self.createdClubId = state.createdClubId
                 self.deletedClubId = state.deletedClubId
+                self.leftClubId = state.leftClubId
                 self.sessionDueDateIso = self.helper.localDateTimeToIso(dateTime: state.activeSession?.rawDueDate)
                 self.bookSearchQuery = state.bookSearchQuery
                 self.bookSearchResults = state.bookSearchResults
@@ -174,6 +176,9 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     func onRemoveMember(memberId: String, currentMemberId: String) {
         helper.onRemoveMember(memberId: memberId, currentMemberId: currentMemberId)
     }
+    func onLeaveClub() { helper.onLeaveClub() }
+    func onConsumeLeftClubId() { helper.onConsumeLeftClubId() }
+    func onTransferOwnership(newOwnerId: String) { helper.onTransferOwnership(newOwnerId: newOwnerId) }
 
     func onConsumeOperationResult() { helper.onConsumeOperationResult() }
 

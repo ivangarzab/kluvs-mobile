@@ -136,6 +136,14 @@ fun ClubsScreen(
         }
     }
 
+    // Navigate back out of a club the signed-in member just left, then consume the signal
+    LaunchedEffect(state.leftClubId) {
+        state.leftClubId?.let {
+            navController.popBackStack()
+            viewModel.onConsumeLeftClubId()
+        }
+    }
+
     // Navigate into a club opened from outside this tab (e.g. auto-join after sign-in)
     LaunchedEffect(initialClubId) {
         initialClubId?.let { clubId ->
@@ -226,7 +234,9 @@ fun ClubsScreen(
                     onRemoveMember = { memberId ->
                         val currentMemberId = state.currentMemberId ?: return@ClubsScreenContent
                         viewModel.onRemoveMember(memberId, currentMemberId)
-                    }
+                    },
+                    onLeaveClub = viewModel::onLeaveClub,
+                    onTransferOwnership = viewModel::onTransferOwnership
                 )
             }
         }
@@ -271,11 +281,14 @@ fun ClubsScreenContent(
     onDeleteDiscussionNote: (discussionId: String) -> Unit = {},
     onUpdateMemberRole: (memberId: String, newRole: Role) -> Unit = { _, _ -> },
     onRemoveMember: (memberId: String) -> Unit = {},
+    onLeaveClub: () -> Unit = {},
+    onTransferOwnership: (memberId: String) -> Unit = {},
 ) {
     // Sheet / dialog visibility state
     var showEditClubSheet by remember { mutableStateOf(false) }
     var showShareClubSheet by remember { mutableStateOf(false) }
     var showDeleteClubDialog by remember { mutableStateOf(false) }
+    var showLeaveClubDialog by remember { mutableStateOf(false) }
     var showCreateSessionSheet by remember { mutableStateOf(false) }
     var showEditSessionSheet by remember { mutableStateOf(false) }
     var showEndSessionDialog by remember { mutableStateOf(false) }
@@ -286,6 +299,7 @@ fun ClubsScreenContent(
     var openNoteDiscussionId by remember { mutableStateOf<String?>(null) }
     var changingRoleMemberId by remember { mutableStateOf<String?>(null) }
     var removingMemberId by remember { mutableStateOf<String?>(null) }
+    var transferOwnershipTargetId by remember { mutableStateOf<String?>(null) }
 
     val currentUserId = userId
 
@@ -349,7 +363,7 @@ fun ClubsScreenContent(
                         title = state.currentClubDetails?.clubName,
                         onNavigateBack = onNavigateBack,
                         action = {
-                            if (state.userRole == Role.OWNER || state.userRole == Role.ADMIN) {
+                            if (state.userRole != null) {
                                 val canManageClub = state.userRole == Role.OWNER
                                 ActionMenu(
                                     items = buildList {
@@ -365,6 +379,14 @@ fun ClubsScreenContent(
                                                 ActionMenuItem(
                                                     label = "Delete",
                                                     onClick = { showDeleteClubDialog = true },
+                                                    isDestructive = true
+                                                )
+                                            )
+                                        } else {
+                                            add(
+                                                ActionMenuItem(
+                                                    label = "Leave Club",
+                                                    onClick = { showLeaveClubDialog = true },
                                                     isDestructive = true
                                                 )
                                             )
@@ -495,6 +517,7 @@ fun ClubsScreenContent(
                                         userRole = state.userRole,
                                         onChangeRole = { memberId -> changingRoleMemberId = memberId },
                                         onRemoveMember = { memberId -> removingMemberId = memberId },
+                                        onTransferOwnership = { memberId -> transferOwnershipTargetId = memberId },
                                         onInviteMember = { showShareClubSheet = true }
                                     )
                                 }
@@ -545,6 +568,20 @@ fun ClubsScreenContent(
                             showDeleteClubDialog = false
                         },
                         onDismiss = { showDeleteClubDialog = false }
+                    )
+                }
+
+                if (showLeaveClubDialog) {
+                    ConfirmationDialog(
+                        title = "Leave Club",
+                        message = "Are you sure you want to leave \"${state.currentClubDetails?.clubName}\"? You'll need a new invite to rejoin.",
+                        confirmLabel = "Leave",
+                        isDestructive = true,
+                        onConfirm = {
+                            onLeaveClub()
+                            showLeaveClubDialog = false
+                        },
+                        onDismiss = { showLeaveClubDialog = false }
                     )
                 }
 
@@ -712,6 +749,21 @@ fun ClubsScreenContent(
                             removingMemberId = null
                         },
                         onDismiss = { removingMemberId = null }
+                    )
+                }
+
+                transferOwnershipTargetId?.let { memberId ->
+                    val member = state.members.find { it.memberId == memberId }
+                    ConfirmationDialog(
+                        title = "Transfer Ownership",
+                        message = "Make ${member?.name ?: "this member"} the new owner of \"${state.currentClubDetails?.clubName}\"? You'll be demoted to Admin.",
+                        confirmLabel = "Transfer",
+                        isDestructive = true,
+                        onConfirm = {
+                            onTransferOwnership(memberId)
+                            transferOwnershipTargetId = null
+                        },
+                        onDismiss = { transferOwnershipTargetId = null }
                     )
                 }
             }
