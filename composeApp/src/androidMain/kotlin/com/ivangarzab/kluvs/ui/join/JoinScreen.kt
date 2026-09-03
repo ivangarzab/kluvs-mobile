@@ -4,24 +4,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.ivangarzab.kluvs.R
 import com.ivangarzab.kluvs.join.presentation.JoinState
 import com.ivangarzab.kluvs.join.presentation.JoinViewModel
-import com.ivangarzab.kluvs.designsystem.components.buttons.IconButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.PrimaryButton
 import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
+import com.ivangarzab.kluvs.designsystem.components.appbars.TopAppBar
 import com.ivangarzab.kluvs.designsystem.components.fields.InputField
-import com.ivangarzab.kluvs.designsystem.components.icons.IconType
 import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
 import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import org.koin.compose.viewmodel.koinViewModel
@@ -89,58 +89,38 @@ private fun JoinScreenContent(
     onPreviewInvite: () -> Unit = {},
     onJoinClicked: () -> Unit = {},
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        IconButton(
-            type = IconType.ArrowBack,
-            contentDescription = stringResource(R.string.navigate_back),
-            onClick = onNavigateBack,
+    Column(modifier = modifier.fillMaxSize()) {
+        TopAppBar(
+            modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+            header = "Join a club",
+            onNavigateBack = onNavigateBack,
         )
 
-        Text(
-            text = "Join a club",
-            style = KluvsTheme.typography.headline.small,
-            color = KluvsTheme.colors.content
-        )
-
-        InputField(
-            value = state.tokenInput,
-            onValueChange = onTokenChanged,
-            label = "Invite code",
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        SecondaryButton(
-            text = "Preview",
-            onClick = onPreviewInvite,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = state.tokenInput.isNotBlank() && !state.isLoadingPreview
-        )
-
-        if (state.isLoadingPreview) {
-            LoadingSpinner()
-        }
-
-        state.previewError?.let { error ->
-            Text(
-                text = error,
-                style = KluvsTheme.typography.body.medium,
-                color = KluvsTheme.colors.danger
-            )
-        }
-
-        state.preview?.let { preview ->
-            Text(
-                text = preview.name,
-                style = KluvsTheme.typography.headline.small,
-                color = KluvsTheme.colors.content
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            InputField(
+                value = state.tokenInput,
+                onValueChange = onTokenChanged,
+                label = "Invite code",
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            state.joinError?.let { error ->
+            SecondaryButton(
+                text = "Preview",
+                onClick = onPreviewInvite,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = state.tokenInput.isNotBlank() && !state.isLoadingPreview
+            )
+
+            if (state.isLoadingPreview) {
+                LoadingSpinner()
+            }
+
+            state.previewError?.let { error ->
                 Text(
                     text = error,
                     style = KluvsTheme.typography.body.medium,
@@ -148,12 +128,28 @@ private fun JoinScreenContent(
                 )
             }
 
-            PrimaryButton(
-                text = if (state.isJoining) "Joining..." else "Join",
-                onClick = onJoinClicked,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isJoining
-            )
+            state.preview?.let { preview ->
+                Text(
+                    text = preview.name,
+                    style = KluvsTheme.typography.headline.small,
+                    color = KluvsTheme.colors.content
+                )
+
+                state.joinError?.let { error ->
+                    Text(
+                        text = error,
+                        style = KluvsTheme.typography.body.medium,
+                        color = KluvsTheme.colors.danger
+                    )
+                }
+
+                PrimaryButton(
+                    text = if (state.isJoining) "Joining…" else "Join",
+                    onClick = onJoinClicked,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !state.isJoining
+                )
+            }
         }
     }
 }

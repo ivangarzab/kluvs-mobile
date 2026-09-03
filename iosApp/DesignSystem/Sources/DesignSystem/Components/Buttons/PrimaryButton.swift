@@ -17,12 +17,24 @@ public struct PrimaryButton: View {
     let action: () -> Void
     var enabled: Bool
     var icon: IconType?
+    /// Stretches the button to the width offered by its container, the way Compose callers get
+    /// with `Modifier.fillMaxWidth()`. Opt-in because the background/border is drawn around the
+    /// label: an outer `.frame(maxWidth: .infinity)` widens only the tap target, leaving the
+    /// visible pill content-sized. Default false, so existing inline buttons are unaffected.
+    var fillWidth: Bool
 
-    public init(text: String, action: @escaping () -> Void, enabled: Bool = true, icon: IconType? = nil) {
+    public init(
+        text: String,
+        action: @escaping () -> Void,
+        enabled: Bool = true,
+        icon: IconType? = nil,
+        fillWidth: Bool = false
+    ) {
         self.text = text
         self.action = action
         self.enabled = enabled
         self.icon = icon
+        self.fillWidth = fillWidth
     }
 
     private var containerColor: Color {
@@ -45,6 +57,7 @@ public struct PrimaryButton: View {
             .foregroundColor(contentColor)
             .padding(.vertical, 12)
             .padding(.horizontal, 24)
+            .frame(maxWidth: fillWidth ? .infinity : nil)
             .background(containerColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
@@ -57,6 +70,7 @@ public struct PrimaryButton: View {
         PrimaryButton(text: "Continue", action: {})
         PrimaryButton(text: "Create Session", action: {}, icon: .add)
         PrimaryButton(text: "Continue", action: {}, enabled: false)
+        PrimaryButton(text: "Full Width", action: {}, fillWidth: true)
     }
     .padding()
 }

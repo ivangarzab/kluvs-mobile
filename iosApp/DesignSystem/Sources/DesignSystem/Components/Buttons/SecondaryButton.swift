@@ -10,11 +10,24 @@ public struct SecondaryButton: View {
     var enabled: Bool
     var buttonColor: Color
 
-    public init(text: String, action: @escaping () -> Void, enabled: Bool = true, buttonColor: Color = KluvsTheme.colors.accent) {
+    /// Stretches the button to the width offered by its container, the way Compose callers get
+    /// with `Modifier.fillMaxWidth()`. Opt-in because the background/border is drawn around the
+    /// label: an outer `.frame(maxWidth: .infinity)` widens only the tap target, leaving the
+    /// visible pill content-sized. Default false, so existing inline buttons are unaffected.
+    var fillWidth: Bool
+
+    public init(
+        text: String,
+        action: @escaping () -> Void,
+        enabled: Bool = true,
+        buttonColor: Color = KluvsTheme.colors.accent,
+        fillWidth: Bool = false
+    ) {
         self.text = text
         self.action = action
         self.enabled = enabled
         self.buttonColor = buttonColor
+        self.fillWidth = fillWidth
     }
 
     public var body: some View {
@@ -24,6 +37,7 @@ public struct SecondaryButton: View {
                 .foregroundColor(buttonColor)
                 .padding(.vertical, 12)
                 .padding(.horizontal, 24)
+                .frame(maxWidth: fillWidth ? .infinity : nil)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(buttonColor, lineWidth: 1)
@@ -38,6 +52,7 @@ public struct SecondaryButton: View {
     VStack(spacing: 12) {
         SecondaryButton(text: "Change Role", action: {})
         SecondaryButton(text: "Change Role", action: {}, enabled: false)
+        SecondaryButton(text: "Full Width", action: {}, fillWidth: true)
         SecondaryButton(text: "Delete club", action: {}, buttonColor: KluvsTheme.colors.danger)
     }
     .padding()

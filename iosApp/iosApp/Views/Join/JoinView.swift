@@ -22,62 +22,63 @@ struct JoinView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            IconButton(type: .back, contentDescription: "Back", action: { dismiss() })
+        VStack(alignment: .leading, spacing: 0) {
+            TopAppBar(header: "Join a club", onNavigateBack: { dismiss() })
 
-            Text("Join a club")
-                .kluvsStyle(KluvsTheme.typography.headline.small)
-                .foregroundColor(KluvsTheme.colors.content)
-
-            InputField(
-                label: "Invite code",
-                value: Binding(
-                    get: { viewModel.tokenInput },
-                    set: { viewModel.onTokenChanged($0) }
+            VStack(alignment: .leading, spacing: 16) {
+                InputField(
+                    label: "Invite code",
+                    value: Binding(
+                        get: { viewModel.tokenInput },
+                        set: { viewModel.onTokenChanged($0) }
+                    )
                 )
-            )
+                .frame(maxWidth: .infinity)
 
-            SecondaryButton(
-                text: "Preview",
-                action: { viewModel.previewInvite() },
-                enabled: !viewModel.tokenInput.trimmingCharacters(in: .whitespaces).isEmpty && !viewModel.isLoadingPreview
-            )
-            .frame(maxWidth: .infinity)
+                SecondaryButton(
+                    text: "Preview",
+                    action: { viewModel.previewInvite() },
+                    enabled: !viewModel.tokenInput.trimmingCharacters(in: .whitespaces).isEmpty && !viewModel.isLoadingPreview,
+                    fillWidth: true
+                )
 
-            if viewModel.isLoadingPreview {
-                LoadingSpinner()
-            }
+                if viewModel.isLoadingPreview {
+                    LoadingSpinner()
+                }
 
-            if let previewError = viewModel.previewError {
-                Text(previewError)
-                    .kluvsStyle(KluvsTheme.typography.body.medium)
-                    .foregroundColor(KluvsTheme.colors.danger)
-            }
-
-            if let preview = viewModel.preview {
-                Text(preview.name)
-                    .kluvsStyle(KluvsTheme.typography.headline.small)
-                    .foregroundColor(KluvsTheme.colors.content)
-
-                if let joinError = viewModel.joinError {
-                    Text(joinError)
+                if let previewError = viewModel.previewError {
+                    Text(previewError)
                         .kluvsStyle(KluvsTheme.typography.body.medium)
                         .foregroundColor(KluvsTheme.colors.danger)
                 }
 
-                PrimaryButton(
-                    text: viewModel.isJoining ? "Joining…" : "Join",
-                    action: { viewModel.onJoinClicked() },
-                    enabled: !viewModel.isJoining
-                )
-                .frame(maxWidth: .infinity)
-            }
+                if let preview = viewModel.preview {
+                    Text(preview.name)
+                        .kluvsStyle(KluvsTheme.typography.headline.small)
+                        .foregroundColor(KluvsTheme.colors.content)
 
-            Spacer()
+                    if let joinError = viewModel.joinError {
+                        Text(joinError)
+                            .kluvsStyle(KluvsTheme.typography.body.medium)
+                            .foregroundColor(KluvsTheme.colors.danger)
+                    }
+
+                    PrimaryButton(
+                        text: viewModel.isJoining ? "Joining…" : "Join",
+                        action: { viewModel.onJoinClicked() },
+                        enabled: !viewModel.isJoining,
+                        fillWidth: true
+                    )
+                }
+
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
         }
-        .padding(16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(KluvsTheme.colors.background)
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             guard let initialToken, !initialToken.isEmpty else { return }
             viewModel.onTokenChanged(initialToken)
