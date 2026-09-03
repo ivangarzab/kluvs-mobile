@@ -39,8 +39,10 @@ fun MemberListItem(
     isReading: Boolean? = null,
     showAdminActions: Boolean = false,
     showRemove: Boolean = false,
+    showTransferOwnership: Boolean = false,
     onChangeRole: () -> Unit = {},
     onRemove: () -> Unit = {},
+    onTransferOwnership: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -113,10 +115,11 @@ fun MemberListItem(
                     )
                 }
 
-                if (showAdminActions || showRemove) {
+                if (showAdminActions || showRemove || showTransferOwnership) {
                     ActionMenu(
                         items = buildList {
                             if (showAdminActions) add(ActionMenuItem(label = "Change Role", onClick = onChangeRole))
+                            if (showTransferOwnership) add(ActionMenuItem(label = "Make Owner", onClick = onTransferOwnership))
                             if (showRemove) add(ActionMenuItem(label = "Remove", onClick = onRemove, isDestructive = true))
                         },
                         contentDescription = "Member options"

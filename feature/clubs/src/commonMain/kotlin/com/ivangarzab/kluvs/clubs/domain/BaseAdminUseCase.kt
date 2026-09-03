@@ -32,5 +32,8 @@ abstract class BaseAdminUseCase<Params, T> {
 
         /** Roles that are allowed to perform admin-and-above operations. */
         internal val ADMIN_AND_ABOVE = setOf(Role.OWNER, Role.ADMIN)
+
+        /** Roles that are allowed to perform operations reserved for non-owners (e.g. leaving a club). */
+        internal val NOT_OWNER = setOf(Role.ADMIN, Role.MEMBER)
     }
 }

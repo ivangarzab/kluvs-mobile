@@ -17,12 +17,16 @@ import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.clubs.domain.LeaveClubUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
+import com.ivangarzab.kluvs.clubs.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.clubs.domain.RemoveMemberUseCase
 import com.ivangarzab.kluvs.clubs.domain.RotateInviteLinkUseCase
+import com.ivangarzab.kluvs.clubs.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.presentation.progress.SaveProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.SetAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.ToggleSessionParticipationUseCase
+import com.ivangarzab.kluvs.clubs.domain.TransferOwnershipUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateClubUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionUseCase
@@ -30,6 +34,7 @@ import com.ivangarzab.kluvs.clubs.domain.UpdateJoinPolicyUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateMemberRoleUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateSessionUseCase
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
+import com.ivangarzab.kluvs.data.repositories.BookRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.DiscussionAttendanceRepository
 import com.ivangarzab.kluvs.data.repositories.DiscussionNoteRepository
@@ -73,6 +78,7 @@ class ClubDetailsViewModelHelperTest {
     private lateinit var discussionRepository: DiscussionRepository
     private lateinit var discussionAttendanceRepository: DiscussionAttendanceRepository
     private lateinit var discussionNoteRepository: DiscussionNoteRepository
+    private lateinit var bookRepository: BookRepository
     private lateinit var viewModel: ClubDetailsViewModel
     private lateinit var testScope: CoroutineScope
     private lateinit var helper: ClubDetailsViewModelHelper
@@ -91,6 +97,7 @@ class ClubDetailsViewModelHelperTest {
         discussionRepository = mock<DiscussionRepository>()
         discussionAttendanceRepository = mock<DiscussionAttendanceRepository>()
         discussionNoteRepository = mock<DiscussionNoteRepository>()
+        bookRepository = mock<BookRepository>()
 
         // Create test scope
         testScope = CoroutineScope(testDispatcher + Job())
@@ -106,6 +113,8 @@ class ClubDetailsViewModelHelperTest {
         // Create real ViewModel with real use cases
         viewModel = ClubDetailsViewModel(
             getClubDetails, getActiveSession, getClubMembers, getMemberClubs, getCurrentMemberId,
+            searchBooksUseCase = SearchBooksUseCase(bookRepository),
+            registerBookUseCase = RegisterBookUseCase(bookRepository),
             createClubUseCase = CreateClubUseCase(clubRepository, memberRepository),
             updateClubUseCase = UpdateClubUseCase(clubRepository),
             updateJoinPolicyUseCase = UpdateJoinPolicyUseCase(clubRepository),
@@ -123,6 +132,8 @@ class ClubDetailsViewModelHelperTest {
             deleteDiscussionUseCase = DeleteDiscussionUseCase(discussionRepository),
             updateMemberRoleUseCase = UpdateMemberRoleUseCase(memberRepository),
             removeMemberUseCase = RemoveMemberUseCase(memberRepository),
+            leaveClubUseCase = LeaveClubUseCase(memberRepository),
+            transferOwnershipUseCase = TransferOwnershipUseCase(memberRepository),
             getAttendanceRosterUseCase = GetAttendanceRosterUseCase(discussionAttendanceRepository),
             setAttendanceUseCase = SetAttendanceUseCase(discussionAttendanceRepository),
             clearAttendanceUseCase = ClearAttendanceUseCase(discussionAttendanceRepository),

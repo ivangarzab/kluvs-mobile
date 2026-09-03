@@ -33,8 +33,17 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     @Published var operationIsError: Bool = false
     @Published var createdClubId: String? = nil
     @Published var deletedClubId: String? = nil
+    @Published var leftClubId: String? = nil
     /// ISO-8601 string for the active session's due date, or nil if none.
     @Published var sessionDueDateIso: String? = nil
+
+    // Book search — Create Session's book-selection field
+    @Published var bookSearchQuery: String = ""
+    @Published var bookSearchResults: [Shared.Book] = []
+    @Published var isSearchingBooks: Bool = false
+    @Published var bookSearchError: String? = nil
+    @Published var selectedBook: Shared.Book? = nil
+    @Published var isRegisteringBook: Bool = false
 
     private let helper: ClubDetailsViewModelHelper
     private var cancellables: [Shared.Closeable] = []
@@ -70,7 +79,14 @@ class ClubDetailsViewModelWrapper: ObservableObject {
                 self.operationIsError = self.helper.isOperationError(result: state.operationResult)
                 self.createdClubId = state.createdClubId
                 self.deletedClubId = state.deletedClubId
+                self.leftClubId = state.leftClubId
                 self.sessionDueDateIso = self.helper.localDateTimeToIso(dateTime: state.activeSession?.rawDueDate)
+                self.bookSearchQuery = state.bookSearchQuery
+                self.bookSearchResults = state.bookSearchResults
+                self.isSearchingBooks = state.isSearchingBooks
+                self.bookSearchError = state.bookSearchError
+                self.selectedBook = state.selectedBook
+                self.isRegisteringBook = state.isRegisteringBook
             }
         }
         cancellables.append(stateCancellable)
@@ -90,6 +106,13 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     func onConsumeDeletedClubId() { helper.onConsumeDeletedClubId() }
     func onUpdateJoinPolicy(_ joinPolicy: Shared.JoinPolicy) { helper.onUpdateJoinPolicy(joinPolicy: joinPolicy) }
     func onRotateInviteLink() { helper.onRotateInviteLink() }
+
+    // Session tab — book search
+    func onBookSearchQueryChange(_ query: String) { helper.onBookSearchQueryChange(query: query) }
+    func onSearchBooks(_ query: String) { helper.onSearchBooks(query: query) }
+    func onSelectBook(_ book: Shared.Book) { helper.onSelectBook(book: book) }
+    func onClearSelectedBook() { helper.onClearSelectedBook() }
+    func onResetBookSearch() { helper.onResetBookSearch() }
 
     // Session tab — dates passed as ISO strings
     func onCreateSession(book: Shared.Book, dueDateIso: String?) {
@@ -153,6 +176,9 @@ class ClubDetailsViewModelWrapper: ObservableObject {
     func onRemoveMember(memberId: String, currentMemberId: String) {
         helper.onRemoveMember(memberId: memberId, currentMemberId: currentMemberId)
     }
+    func onLeaveClub() { helper.onLeaveClub() }
+    func onConsumeLeftClubId() { helper.onConsumeLeftClubId() }
+    func onTransferOwnership(newOwnerId: String) { helper.onTransferOwnership(newOwnerId: newOwnerId) }
 
     func onConsumeOperationResult() { helper.onConsumeOperationResult() }
 

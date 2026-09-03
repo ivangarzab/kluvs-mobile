@@ -111,9 +111,23 @@ buildkonfig {
             sentryDns
         )
         buildConfigField(Type.BOOLEAN, "IS_DEBUG", "false")
+
+        // Origin of the web app that hosts shareable invite links (/join/<token>) and the
+        // .well-known association files backing App Links / Universal Links. Non-secret, so
+        // it lives here as a literal rather than coming from gradle.properties.
+        //
+        // This default is the integration origin on purpose: `buildkonfig.flavor` defaults to
+        // "integration" when unset (see core/network/build.gradle.kts), so an unflavored build
+        // gets the integration web app rather than failing to compile or, worse, silently
+        // pointing testers at production.
+        buildConfigField(Type.STRING, "WEB_APP_URL", "https://app.kluvs.xyz")
     }
     defaultConfigs("debug") {
         buildConfigField(Type.BOOLEAN, "IS_DEBUG", "true")
+    }
+
+    defaultConfigs("production") {
+        buildConfigField(Type.STRING, "WEB_APP_URL", "https://app.kluvs.com")
     }
 
 }

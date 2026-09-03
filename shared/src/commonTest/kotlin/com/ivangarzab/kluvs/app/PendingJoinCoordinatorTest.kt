@@ -23,6 +23,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -30,7 +32,8 @@ import kotlin.test.assertTrue
  * Tests for [PendingJoinCoordinator].
  *
  * Verifies auto-join only fires on the transition to [NavigationState.Authenticated]
- * while a pending invite token is set, and never on an unrelated auth-state emission.
+ * while a pending invite token is set, and never on an unrelated auth-state emission,
+ * plus the invite deep-link intake that feeds the Join screen.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PendingJoinCoordinatorTest {
@@ -150,5 +153,52 @@ class PendingJoinCoordinatorTest {
 
         assertEquals(1, results.size)
         job.cancel()
+    }
+
+    @Test
+    fun `invite deep link surfaces its token for navigation`() = runTest {
+        val coordinator = PendingJoinCoordinator(appCoordinator, joinRepository)
+
+        val handled = coordinator.onInviteLinkOpened("https://app.kluvs.com/join/token-1")
+
+        assertTrue(handled)
+        assertEquals("token-1", coordinator.incomingInviteToken.value)
+    }
+
+    @Test
+    fun `unrecognized deep link is reported unhandled and sets no token`() = runTest {
+        val coordinator = PendingJoinCoordinator(appCoordinator, joinRepository)
+
+        val handled = coordinator.onInviteLinkOpened("kluvs://auth/callback")
+
+        assertFalse(handled)
+        assertNull(coordinator.incomingInviteToken.value)
+    }
+
+    @Test
+    fun `an invite deep link does not auto-join on its own`() = runTest {
+        val coordinator = PendingJoinCoordinator(appCoordinator, joinRepository)
+        val results = mutableListOf<AutoJoinResult>()
+        val job = launch(testDispatcher) { coordinator.autoJoinResult.collect { results.add(it) } }
+
+        // The recipient must see the club preview and tap Join themselves — opening a link is
+        // not consent to join, so this must not short-circuit into the pending-token flow.
+        coordinator.onInviteLinkOpened("https://app.kluvs.com/join/token-1")
+        currentUserFlow.value = testUser
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(results.isEmpty())
+        verifySuspend(mode = VerifyMode.not) { joinRepository.joinClub(any()) }
+        job.cancel()
+    }
+
+    @Test
+    fun `consuming the incoming token clears it`() = runTest {
+        val coordinator = PendingJoinCoordinator(appCoordinator, joinRepository)
+        coordinator.onInviteLinkOpened("https://app.kluvs.com/join/token-1")
+
+        coordinator.onConsumeIncomingInviteToken()
+
+        assertNull(coordinator.incomingInviteToken.value)
     }
 }

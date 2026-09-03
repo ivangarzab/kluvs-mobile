@@ -2,6 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!--
+	    Club invite Universal Links. Both origins are listed because the bundle ID is identical
+	    across environments, so one install may be handed a link from either; iOS verifies each
+	    domain independently, so an unreachable one cannot break the other.
+	-->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:app.kluvs.com</string>
+		<string>applinks:app.kluvs.xyz</string>
+	</array>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>

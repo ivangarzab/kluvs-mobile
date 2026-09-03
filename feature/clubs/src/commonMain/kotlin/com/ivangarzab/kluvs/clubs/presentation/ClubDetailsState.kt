@@ -1,6 +1,7 @@
 package com.ivangarzab.kluvs.clubs.presentation
 
 import com.ivangarzab.kluvs.model.AttendanceRoster
+import com.ivangarzab.kluvs.model.Book
 import com.ivangarzab.kluvs.model.Role
 import com.ivangarzab.kluvs.presentation.progress.OwnProgressInfo
 
@@ -27,8 +28,18 @@ data class ClubDetailsState(
     val createdClubId: String? = null,
     /** ID of a just-deleted club, consumed by the UI to navigate back out of its detail screen. */
     val deletedClubId: String? = null,
+    /** ID of a club the signed-in member just left, consumed by the UI to navigate back out of its detail screen. */
+    val leftClubId: String? = null,
     /** Attendance rosters keyed by discussion ID, populated lazily as timeline rows are shown. */
     val discussionRosters: Map<String, AttendanceRoster> = emptyMap(),
     /** The signed-in member's notes keyed by discussion ID, populated lazily when a note sheet is opened. */
-    val discussionNotes: Map<String, DiscussionNoteInfo> = emptyMap()
+    val discussionNotes: Map<String, DiscussionNoteInfo> = emptyMap(),
+    /** Book search state for the Create Session sheet's book-selection field. */
+    val bookSearchQuery: String = "",
+    val bookSearchResults: List<Book> = emptyList(),
+    val isSearchingBooks: Boolean = false,
+    val bookSearchError: String? = null,
+    /** The book chosen (and registered, with a real server-assigned ID) for the session being created. */
+    val selectedBook: Book? = null,
+    val isRegisteringBook: Boolean = false
 )

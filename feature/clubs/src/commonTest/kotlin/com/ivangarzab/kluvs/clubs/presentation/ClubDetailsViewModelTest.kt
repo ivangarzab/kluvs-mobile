@@ -17,12 +17,16 @@ import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.clubs.domain.LeaveClubUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
+import com.ivangarzab.kluvs.clubs.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.clubs.domain.RemoveMemberUseCase
 import com.ivangarzab.kluvs.clubs.domain.RotateInviteLinkUseCase
+import com.ivangarzab.kluvs.clubs.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.presentation.progress.SaveProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.SetAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.ToggleSessionParticipationUseCase
+import com.ivangarzab.kluvs.clubs.domain.TransferOwnershipUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateClubUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionUseCase
@@ -30,6 +34,7 @@ import com.ivangarzab.kluvs.clubs.domain.UpdateJoinPolicyUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateMemberRoleUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateSessionUseCase
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
+import com.ivangarzab.kluvs.data.repositories.BookRepository
 import com.ivangarzab.kluvs.data.repositories.ClubRepository
 import com.ivangarzab.kluvs.data.repositories.DiscussionAttendanceRepository
 import com.ivangarzab.kluvs.data.repositories.DiscussionNoteRepository
@@ -41,6 +46,7 @@ import com.ivangarzab.kluvs.model.AttendanceResponse
 import com.ivangarzab.kluvs.model.AttendanceRoster
 import com.ivangarzab.kluvs.model.AttendanceStatus
 import com.ivangarzab.kluvs.model.Book
+import com.ivangarzab.kluvs.model.BookSearchResult
 import com.ivangarzab.kluvs.model.Club
 import com.ivangarzab.kluvs.model.ClubMember
 import com.ivangarzab.kluvs.model.Discussion
@@ -91,6 +97,9 @@ class ClubDetailsViewModelTest {
     private lateinit var getClubMembers: GetClubMembersUseCase
     private lateinit var getMemberClubs: GetMemberClubsUseCase
     private lateinit var getCurrentMemberId: GetCurrentMemberIdUseCase
+    private lateinit var bookRepository: BookRepository
+    private lateinit var searchBooksUseCase: SearchBooksUseCase
+    private lateinit var registerBookUseCase: RegisterBookUseCase
     private lateinit var createClubUseCase: CreateClubUseCase
     private lateinit var updateClubUseCase: UpdateClubUseCase
     private lateinit var updateJoinPolicyUseCase: UpdateJoinPolicyUseCase
@@ -104,6 +113,8 @@ class ClubDetailsViewModelTest {
     private lateinit var deleteDiscussionUseCase: DeleteDiscussionUseCase
     private lateinit var updateMemberRoleUseCase: UpdateMemberRoleUseCase
     private lateinit var removeMemberUseCase: RemoveMemberUseCase
+    private lateinit var leaveClubUseCase: LeaveClubUseCase
+    private lateinit var transferOwnershipUseCase: TransferOwnershipUseCase
     private lateinit var progressRepository: ProgressRepository
     private lateinit var getSessionProgressUseCase: GetSessionProgressUseCase
     private lateinit var saveProgressUseCase: SaveProgressUseCase
@@ -134,6 +145,7 @@ class ClubDetailsViewModelTest {
         discussionAttendanceRepository = mock<DiscussionAttendanceRepository>()
         discussionRepository = mock<DiscussionRepository>()
         discussionNoteRepository = mock<DiscussionNoteRepository>()
+        bookRepository = mock<BookRepository>()
 
         // Use REAL UseCases with mocked repositories
         getClubDetails = GetClubDetailsUseCase(clubRepository, formatDateTime)
@@ -141,6 +153,8 @@ class ClubDetailsViewModelTest {
         getClubMembers = GetClubMembersUseCase(clubRepository, avatarRepository)
         getMemberClubs = GetMemberClubsUseCase(memberRepository, clubRepository, avatarRepository)
         getCurrentMemberId = GetCurrentMemberIdUseCase(memberRepository)
+        searchBooksUseCase = SearchBooksUseCase(bookRepository)
+        registerBookUseCase = RegisterBookUseCase(bookRepository)
         createClubUseCase = CreateClubUseCase(clubRepository, memberRepository)
         updateClubUseCase = UpdateClubUseCase(clubRepository)
         updateJoinPolicyUseCase = UpdateJoinPolicyUseCase(clubRepository)
@@ -154,6 +168,8 @@ class ClubDetailsViewModelTest {
         deleteDiscussionUseCase = DeleteDiscussionUseCase(discussionRepository)
         updateMemberRoleUseCase = UpdateMemberRoleUseCase(memberRepository)
         removeMemberUseCase = RemoveMemberUseCase(memberRepository)
+        leaveClubUseCase = LeaveClubUseCase(memberRepository)
+        transferOwnershipUseCase = TransferOwnershipUseCase(memberRepository)
         getSessionProgressUseCase = GetSessionProgressUseCase(progressRepository)
         saveProgressUseCase = SaveProgressUseCase(progressRepository)
         finishSessionUseCase = FinishSessionUseCase(sessionRepository)
@@ -168,12 +184,14 @@ class ClubDetailsViewModelTest {
 
         viewModel = ClubDetailsViewModel(
             getClubDetails, getActiveSession, getClubMembers, getMemberClubs, getCurrentMemberId,
+            searchBooksUseCase, registerBookUseCase,
             createClubUseCase,
             updateClubUseCase, updateJoinPolicyUseCase, rotateInviteLinkUseCase,
             deleteClubUseCase, createSessionUseCase,
             updateSessionUseCase, deleteSessionUseCase, createDiscussionUseCase,
             updateDiscussionUseCase, deleteDiscussionUseCase,
             updateMemberRoleUseCase, removeMemberUseCase,
+            leaveClubUseCase, transferOwnershipUseCase,
             getSessionProgressUseCase, saveProgressUseCase, finishSessionUseCase,
             toggleSessionParticipationUseCase,
             getAttendanceRosterUseCase, setAttendanceUseCase, clearAttendanceUseCase,
@@ -594,6 +612,128 @@ class ClubDetailsViewModelTest {
     }
 
     @Test
+    fun `onLeaveClub sets leftClubId and removes the club from availableClubs on success`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.MEMBER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        // state.currentMemberId resolves via the generic getMemberByUserId(any(), any()) stub in
+        // setup(), which yields id "default-member-id" — that's the memberId LeaveClubUseCase acts on.
+        everySuspend { memberRepository.getMember("default-member-id", forceRefresh = true) } returns Result.success(
+            Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = listOf(club))
+        )
+        everySuspend { memberRepository.updateMember(memberId = "default-member-id", clubIds = emptyList()) } returns
+            Result.success(Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = emptyList()))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onLeaveClub()
+
+        val state = viewModel.state.value
+        assertEquals(clubId, state.leftClubId)
+        assertTrue(state.availableClubs.none { it.id == clubId })
+        assertIs<OperationResult.Success>(state.operationResult)
+    }
+
+    @Test
+    fun `onLeaveClub sets operationResult Error on failure`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.MEMBER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { memberRepository.getMember("default-member-id", forceRefresh = true) } returns
+            Result.failure(RuntimeException("Not found"))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onLeaveClub()
+
+        val state = viewModel.state.value
+        assertEquals(null, state.leftClubId)
+        assertIs<OperationResult.Error>(state.operationResult)
+    }
+
+    @Test
+    fun `onConsumeLeftClubId clears leftClubId`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.MEMBER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { memberRepository.getMember("default-member-id", forceRefresh = true) } returns Result.success(
+            Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = listOf(club))
+        )
+        everySuspend { memberRepository.updateMember(memberId = "default-member-id", clubIds = emptyList()) } returns
+            Result.success(Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0, clubs = emptyList()))
+        viewModel.loadUserClubs("u1")
+        viewModel.onLeaveClub()
+
+        viewModel.onConsumeLeftClubId()
+
+        assertEquals(null, viewModel.state.value.leftClubId)
+    }
+
+    @Test
+    fun `onTransferOwnership sets operationResult Success on success`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.OWNER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend { clubRepository.getClub(clubId, forceRefresh = true) } returns Result.success(club)
+        // currentOwnerId is state.currentMemberId, resolved to "default-member-id" per setup()'s
+        // generic getMemberByUserId(any(), any()) stub.
+        everySuspend {
+            memberRepository.updateMember(memberId = "m2", clubRoles = mapOf(clubId to "owner"))
+        } returns Result.success(Member(id = "m2", userId = "u2", name = "Bob", booksRead = 0))
+        everySuspend {
+            memberRepository.updateMember(memberId = "default-member-id", clubRoles = mapOf(clubId to "admin"))
+        } returns Result.success(Member(id = "default-member-id", userId = "u1", name = "Current User", booksRead = 0))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onTransferOwnership("m2")
+
+        assertIs<OperationResult.Success>(viewModel.state.value.operationResult)
+    }
+
+    @Test
+    fun `onTransferOwnership sets operationResult Error on failure`() = runTest {
+        val clubId = "club-1"
+        val club = Club(
+            id = clubId, name = "Some Club", serverId = null, discordChannel = null,
+            members = emptyList(), activeSession = null, pastSessions = emptyList(),
+            shameList = emptyList(), role = Role.OWNER
+        )
+        val member = Member(id = "m1", userId = "u1", name = "Alice", booksRead = 0, clubs = listOf(club))
+        everySuspend { memberRepository.getMemberByUserId("u1", forceRefresh = true) } returns Result.success(member)
+        everySuspend { clubRepository.getClub(clubId) } returns Result.success(club)
+        everySuspend {
+            memberRepository.updateMember(memberId = "m2", clubRoles = mapOf(clubId to "owner"))
+        } returns Result.failure(RuntimeException("Network error"))
+        viewModel.loadUserClubs("u1")
+
+        viewModel.onTransferOwnership("m2")
+
+        assertIs<OperationResult.Error>(viewModel.state.value.operationResult)
+    }
+
+    @Test
     fun `onUpdateClubName sets operationResult Success on success`() = runTest {
         val clubId = "club-1"
         val updatedClub = Club(
@@ -662,6 +802,103 @@ class ClubDetailsViewModelTest {
         viewModel.onConsumeOperationResult()
 
         assertNull(viewModel.state.value.operationResult)
+    }
+
+    @Test
+    fun `onBookSearchQueryChange updates query only`() = runTest {
+        viewModel.onBookSearchQueryChange("hobbit")
+
+        assertEquals("hobbit", viewModel.state.value.bookSearchQuery)
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+    }
+
+    @Test
+    fun `onSearchBooks with blank query clears results without calling repository`() = runTest {
+        viewModel.onSearchBooks("   ")
+
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+        assertFalse(viewModel.state.value.isSearchingBooks)
+        verifySuspend(VerifyMode.not) { bookRepository.searchBooks(any(), any()) }
+    }
+
+    @Test
+    fun `onSearchBooks success populates results`() = runTest {
+        val book = Book(id = "1", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.searchBooks("hobbit", any()) } returns
+            Result.success(BookSearchResult(books = listOf(book), total = 1))
+
+        viewModel.onSearchBooks("hobbit")
+
+        assertEquals(listOf(book), viewModel.state.value.bookSearchResults)
+        assertFalse(viewModel.state.value.isSearchingBooks)
+        assertNull(viewModel.state.value.bookSearchError)
+    }
+
+    @Test
+    fun `onSearchBooks failure sets error and clears results`() = runTest {
+        everySuspend { bookRepository.searchBooks("hobbit", any()) } returns
+            Result.failure(Exception("Network error"))
+
+        viewModel.onSearchBooks("hobbit")
+
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+        assertNotNull(viewModel.state.value.bookSearchError)
+    }
+
+    @Test
+    fun `onSelectBook registers book and stores the registered result`() = runTest {
+        val searchResult = Book(id = "", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        val registered = searchResult.copy(id = "42")
+        everySuspend { bookRepository.registerBook(searchResult) } returns Result.success(registered)
+
+        viewModel.onSelectBook(searchResult)
+
+        assertEquals(registered, viewModel.state.value.selectedBook)
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+        assertFalse(viewModel.state.value.isRegisteringBook)
+    }
+
+    @Test
+    fun `onSelectBook failure sets error without setting selectedBook`() = runTest {
+        val searchResult = Book(id = "", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.registerBook(searchResult) } returns Result.failure(Exception("Network error"))
+
+        viewModel.onSelectBook(searchResult)
+
+        assertNull(viewModel.state.value.selectedBook)
+        assertNotNull(viewModel.state.value.bookSearchError)
+    }
+
+    @Test
+    fun `onClearSelectedBook resets selection and query`() = runTest {
+        val registered = Book(id = "42", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.registerBook(any()) } returns Result.success(registered)
+        viewModel.onSelectBook(registered.copy(id = ""))
+
+        viewModel.onClearSelectedBook()
+
+        assertNull(viewModel.state.value.selectedBook)
+        assertEquals("", viewModel.state.value.bookSearchQuery)
+        assertTrue(viewModel.state.value.bookSearchResults.isEmpty())
+    }
+
+    @Test
+    fun `onResetBookSearch clears all book search state`() = runTest {
+        val book = Book(id = "1", title = "The Hobbit", author = "J.R.R. Tolkien", isbn = null)
+        everySuspend { bookRepository.searchBooks("hobbit", any()) } returns
+            Result.success(BookSearchResult(books = listOf(book), total = 1))
+        viewModel.onBookSearchQueryChange("hobbit")
+        viewModel.onSearchBooks("hobbit")
+
+        viewModel.onResetBookSearch()
+
+        val state = viewModel.state.value
+        assertEquals("", state.bookSearchQuery)
+        assertTrue(state.bookSearchResults.isEmpty())
+        assertFalse(state.isSearchingBooks)
+        assertNull(state.bookSearchError)
+        assertNull(state.selectedBook)
+        assertFalse(state.isRegisteringBook)
     }
 
     @Test

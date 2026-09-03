@@ -9,6 +9,7 @@ struct MembersTab: View {
     var userRole: Shared.Role? = nil
     var onChangeRole: (String) -> Void = { _ in }
     var onRemoveMember: (String) -> Void = { _ in }
+    var onTransferOwnership: (String) -> Void = { _ in }
     var onInviteMember: () -> Void = {}
 
     private var isAdminOrAbove: Bool { userRole == .owner || userRole == .admin }
@@ -68,8 +69,10 @@ struct MembersTab: View {
                 isReading: readingByMemberId[member.memberId],
                 showAdminActions: isAdminOrAbove && (!isSelf || isOwner) && member.role != .owner,
                 showRemove: isOwner && !isSelf && member.role != .owner,
+                showTransferOwnership: isOwner && !isSelf && member.role != .owner,
                 onChangeRole: { onChangeRole(member.memberId) },
-                onRemove: { onRemoveMember(member.memberId) }
+                onRemove: { onRemoveMember(member.memberId) },
+                onTransferOwnership: { onTransferOwnership(member.memberId) }
             )
 
             if index < members.count - 1 {
@@ -87,8 +90,10 @@ private struct MemberListItem: View {
     var isReading: Bool? = nil
     var showAdminActions: Bool = false
     var showRemove: Bool = false
+    var showTransferOwnership: Bool = false
     var onChangeRole: () -> Void = {}
     var onRemove: () -> Void = {}
+    var onTransferOwnership: () -> Void = {}
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
@@ -128,11 +133,14 @@ private struct MemberListItem: View {
                         .frame(width: 16, height: 16)
                         .padding(8)
                     }
-                    if showAdminActions || showRemove {
+                    if showAdminActions || showRemove || showTransferOwnership {
                         ActionMenu(items: {
                             var items: [ActionMenuItem] = []
                             if showAdminActions {
                                 items.append(ActionMenuItem(label: "Change Role", action: onChangeRole))
+                            }
+                            if showTransferOwnership {
+                                items.append(ActionMenuItem(label: "Make Owner", action: onTransferOwnership))
                             }
                             if showRemove {
                                 items.append(ActionMenuItem(label: "Remove", action: onRemove, isDestructive: true))

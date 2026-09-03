@@ -56,6 +56,13 @@ class ClubDetailsViewModelHelper : KoinComponent {
     fun onUpdateJoinPolicy(joinPolicy: JoinPolicy) = viewModel.onUpdateJoinPolicy(joinPolicy)
     fun onRotateInviteLink() = viewModel.onRotateInviteLink()
 
+    // Session tab — book search
+    fun onBookSearchQueryChange(query: String) = viewModel.onBookSearchQueryChange(query)
+    fun onSearchBooks(query: String) = viewModel.onSearchBooks(query)
+    fun onSelectBook(book: Book) = viewModel.onSelectBook(book)
+    fun onClearSelectedBook() = viewModel.onClearSelectedBook()
+    fun onResetBookSearch() = viewModel.onResetBookSearch()
+
     // Session tab — dates passed as ISO strings to avoid LocalDateTime in Swift
     fun onCreateSession(book: Book, dueDateIso: String?) =
         viewModel.onCreateSession(book, dueDateIso?.toLocalDateTime())
@@ -95,6 +102,9 @@ class ClubDetailsViewModelHelper : KoinComponent {
         viewModel.onUpdateMemberRole(memberId, currentMemberId, newRole)
     fun onRemoveMember(memberId: String, currentMemberId: String) =
         viewModel.onRemoveMember(memberId, currentMemberId)
+    fun onLeaveClub() = viewModel.onLeaveClub()
+    fun onConsumeLeftClubId() = viewModel.onConsumeLeftClubId()
+    fun onTransferOwnership(newOwnerId: String) = viewModel.onTransferOwnership(newOwnerId)
 
     // UI event consumption
     fun onConsumeOperationResult() = viewModel.onConsumeOperationResult()
