@@ -1,0 +1,15 @@
+default_platform(:android)
+
+platform :android do
+  desc "Upload an already-built, already-signed AAB to the Play Console internal testing track"
+  lane :deploy_internal do |options|
+    upload_to_play_store(
+      track: "internal",
+      aab: options[:aab_path],
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    )
+  end
+end

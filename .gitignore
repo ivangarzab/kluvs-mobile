@@ -9,6 +9,8 @@ sentry.properties
 keystore.properties
 *.jks
 *.keystore
+play-store-key.json
+fastlane/report.xml
 .idea
 .DS_Store
 captures

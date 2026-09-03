@@ -81,3 +81,40 @@ jobs:
           draft: false
           prerelease: false
           files: release-bundle/*.aab
+
+  upload-to-play-store:
+    name: Upload to Play Console (internal track)
+    needs: build-signed-bundle
+    runs-on: ubuntu-latest
+    env:
+      PLAY_STORE_JSON_KEY_FILE: ${{ github.workspace }}/play-store-key.json
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Download Bundle Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-bundle
+          path: release-bundle
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Create Play Store Service Account File
+        run: echo '${{ secrets.PLAY_STORE_JSON_KEY }}' > "$PLAY_STORE_JSON_KEY_FILE"
+
+      - name: Resolve AAB Path
+        id: aab
+        run: echo "path=$(ls release-bundle/*.aab)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to Play Console
+        run: bundle exec fastlane deploy_internal aab_path:${{ steps.aab.outputs.path }}
+
+      - name: Cleanup Credentials
+        if: always()
+        run: rm -f "$PLAY_STORE_JSON_KEY_FILE"
