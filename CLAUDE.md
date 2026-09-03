@@ -231,7 +231,7 @@ kluvs-mobile/
 
 Each module has its own `README.md` with detailed documentation (not all modules have one yet — `shared/README.md` is the most complete example to follow).
 
-**Note on `feature/join`:** the full-screen `JoinScreen`/`JoinView` route (`NavDestinations.JOIN`) is registered but not reachable from any in-app UI action or deep link today. Real "join with a code" UX goes through `JoinBottomSheet` inside the authenticated Clubs tab. If deep-link handling for raw `https://kluvs.com/join/{token}` invite URLs is in scope for Beta, that's an open gap, not an existing bug.
+**Note on `feature/join`:** the full-screen `JoinScreen`/`JoinView` route (`NavDestinations.JOIN`) is reachable only by opening an invite deep link — an App Link (Android) or Universal Link (iOS) on `app.kluvs.com` / `app.kluvs.xyz`. Typing a code by hand goes through `JoinBottomSheet` inside the authenticated Clubs tab instead. Invite URLs are built and parsed exclusively by `InviteLink` in `:shared`; never hardcode the web origin at a call site, and note that `https://kluvs.com/join/{token}` is *not* a valid invite URL — that is the marketing domain, which has no such route.
 
 ### Data Layer Architecture
 

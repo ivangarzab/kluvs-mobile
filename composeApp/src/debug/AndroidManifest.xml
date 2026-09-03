@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Debug-only: claim BOTH web origins for invite App Links, rather than just the one the
+    build's flavor points at (see composeApp/build.gradle.kts). Lets a single debug build open
+    links from either environment — the link's host decides which app opens, the build's flavor
+    decides which backend answers, and the two are independent.
+
+    Deliberately not applied to `staging`/`release`. From Android 12 each host is verified
+    independently, but below it (minSdk is 24) a single unfetchable host fails verification for
+    every host in the app — so a shipping build that claimed an unreachable origin would break
+    production invite links on older devices. A debug build carries no such risk.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name=".ui.MainActivity">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="app.kluvs.com" android:pathPrefix="/join/" />
+                <data android:scheme="https" android:host="app.kluvs.xyz" android:pathPrefix="/join/" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

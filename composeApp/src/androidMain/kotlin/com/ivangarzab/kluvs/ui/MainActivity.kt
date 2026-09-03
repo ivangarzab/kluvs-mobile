@@ -26,7 +26,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ivangarzab.bark.Bark
 import com.ivangarzab.kluvs.app.AppCoordinator
 import com.ivangarzab.kluvs.app.AutoJoinResult
@@ -37,16 +39,22 @@ import com.ivangarzab.kluvs.ui.auth.LoginScreen
 import com.ivangarzab.kluvs.ui.auth.SignupScreen
 import com.ivangarzab.kluvs.ui.join.JoinScreen
 import com.ivangarzab.kluvs.ui.settings.SettingsScreen
+import org.koin.android.ext.android.inject
 import org.koin.compose.viewmodel.koinViewModel
 
 class MainActivity : ComponentActivity() {
+
+    // Same singleton the NavHost observes — injected here because intents arrive at the
+    // Activity, potentially before any composition exists to receive them.
+    private val pendingJoinCoordinator: PendingJoinCoordinator by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        // Handle OAuth callback if app was launched via deep link
-        handleOAuthIntent(intent)
+        // Handle OAuth callback or invite link if app was launched via deep link
+        handleDeepLinkIntent(intent)
 
         setContent {
             KluvsTheme {
@@ -63,17 +71,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // Expand once we have more intents/deeplinks to handle
-        handleOAuthIntent(intent)
+        handleDeepLinkIntent(intent)
     }
 
-    private fun handleOAuthIntent(intent: Intent?) {
+    private fun handleDeepLinkIntent(intent: Intent?) {
         val uri = intent?.data ?: return
 
         if (uri.scheme == "kluvs" && uri.host == "auth" && uri.path == "/callback") {
             Bark.d("Processing OAuth callback from deep link")
             OAuthCallbackHandler.handleCallback(uri.toString())
+            return
         }
+
+        // Invite links are routed through the coordinator rather than navigated to directly:
+        // this can run before auth (and the NavHost) has resolved, and the token must survive
+        // the navigation reset that every auth-state transition triggers.
+        if (pendingJoinCoordinator.onInviteLinkOpened(uri.toString())) return
+
+        Bark.d("Ignoring unrecognized deep link")
     }
 }
 
@@ -95,8 +110,11 @@ fun MainNavHost(
     LaunchedEffect(navState) {
         when (navState) {
             is NavigationState.Unauthenticated -> {
-                // Only navigate if not already on login
-                if (navController.currentDestination?.route != NavDestinations.LOGIN) {
+                // Only navigate if not already on login — and never off the Join screen, which
+                // is a legitimate signed-out destination when it was opened from an invite link.
+                // The recipient previews the club there first and hands off to Login themselves
+                // via onNeedsSignIn; yanking them to Login here would lose the invite entirely.
+                if (navController.currentDestination?.route !in NavDestinations.UNAUTHENTICATED_ROUTES) {
                     navController.navigate(NavDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -119,6 +137,21 @@ fun MainNavHost(
                 // Do nothing - show splash/loading
             }
         }
+    }
+
+    val incomingInviteToken by pendingJoinCoordinator.incomingInviteToken.collectAsState()
+
+    // Deep-linked invite: wait for auth to resolve (the effect above resets the back stack on
+    // every auth transition, so navigating sooner would just get undone), then open Join with
+    // the token pre-filled. Works signed in or out — JoinScreen handles both.
+    LaunchedEffect(incomingInviteToken, navState) {
+        val token = incomingInviteToken ?: return@LaunchedEffect
+        if (navState is NavigationState.Initializing) return@LaunchedEffect
+
+        navController.navigate(NavDestinations.joinRoute(token)) {
+            launchSingleTop = true
+        }
+        pendingJoinCoordinator.onConsumeIncomingInviteToken()
     }
 
     LaunchedEffect(Unit) {
@@ -176,15 +209,24 @@ fun MainNavHost(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            // "Join with a code" from inside the Clubs tab now opens JoinBottomSheet in-place
-            // instead of navigating here — this route has no current entry point. It's kept
-            // registered for the not-yet-built Android App Links deep-link case (tapping a raw
-            // invite URL while signed out, per JoinScreen's own doc comment): that flow needs a
-            // full screen it can land on before auth even resolves, plus the needsSignIn→Login
-            // handoff below, neither of which fits a bottom sheet nested inside the (already
-            // authenticated) Clubs tab.
-            composable(NavDestinations.JOIN) {
+            // Reached only from an invite App Link (see handleDeepLinkIntent). "Join with a
+            // code" from inside the Clubs tab opens JoinBottomSheet in-place instead — a deep
+            // link needs a full screen it can land on before auth resolves, plus the
+            // needsSignIn→Login handoff below, neither of which fits a bottom sheet nested
+            // inside the (already authenticated) Clubs tab.
+            composable(
+                route = NavDestinations.JOIN_ROUTE,
+                arguments = listOf(
+                    navArgument(NavDestinations.JOIN_TOKEN_ARG) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) { backStackEntry ->
                 JoinScreen(
+                    initialToken = backStackEntry.arguments
+                        ?.getString(NavDestinations.JOIN_TOKEN_ARG),
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToClub = { clubId ->
                         autoJoinedClubId = clubId
@@ -214,7 +256,22 @@ object NavDestinations {
     const val SETTINGS = "settings"
     const val SETTINGS_ROUTE = "$SETTINGS/{userId}"
     const val JOIN = "join"
+    const val JOIN_TOKEN_ARG = "token"
+    const val JOIN_ROUTE = "$JOIN?$JOIN_TOKEN_ARG={$JOIN_TOKEN_ARG}"
+
+    /** Route to the Join screen with [token] pre-filled from an invite deep link. */
+    fun joinRoute(token: String): String = "$JOIN?$JOIN_TOKEN_ARG=$token"
 
     /** Routes reachable while [NavigationState.Authenticated] — not just [MAIN] itself. */
-    val AUTHENTICATED_ROUTES = setOf(MAIN, SETTINGS_ROUTE, JOIN)
+    val AUTHENTICATED_ROUTES = setOf(MAIN, SETTINGS_ROUTE, JOIN_ROUTE)
+
+    /**
+     * Routes reachable while [NavigationState.Unauthenticated]. [JOIN_ROUTE] is here because an
+     * invite link can be opened by someone who has never signed in — they preview the club
+     * first, then get routed to auth by their own action.
+     *
+     * [SIGNUP] is deliberately absent, preserving existing behavior: it gets reset to [LOGIN]
+     * on an auth-state emission just as it did before this set existed.
+     */
+    val UNAUTHENTICATED_ROUTES = setOf(LOGIN, JOIN_ROUTE)
 }

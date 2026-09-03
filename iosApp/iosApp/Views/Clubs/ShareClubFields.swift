@@ -2,9 +2,6 @@ import SwiftUI
 import Shared
 import DesignSystem
 
-/// Web app domain used to build shareable invite links — mobile does not yet handle this URL via deep link.
-private let webAppDomain = "https://kluvs.com"
-
 /// Share Club sheet body — presented via `.kluvsBottomSheet` at the call site (`ClubsView`), not
 /// as its own `View` wrapping a `.sheet`. Mirrors web's `ShareClubModal`: "Who can join?" segmented
 /// control (`ToggleControl`, matching web's Private/Invite Link pill row exactly, rather than
@@ -32,7 +29,7 @@ struct ShareClubFields: View {
     }
 
     private var inviteUrl: String? {
-        inviteToken.map { "\(webAppDomain)/join/\($0)" }
+        inviteToken.map { InviteLink.shared.build(token: $0) }
     }
 
     var body: some View {

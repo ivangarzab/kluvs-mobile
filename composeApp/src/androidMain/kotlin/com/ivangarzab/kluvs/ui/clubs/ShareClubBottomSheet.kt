@@ -27,6 +27,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.ivangarzab.kluvs.app.InviteLink
 import com.ivangarzab.kluvs.designsystem.components.buttons.SecondaryButton
 import com.ivangarzab.kluvs.designsystem.components.controls.ToggleControl
 import com.ivangarzab.kluvs.designsystem.components.loading.LoadingSpinner
@@ -35,9 +36,6 @@ import com.ivangarzab.kluvs.designsystem.theme.KluvsTheme
 import com.ivangarzab.kluvs.model.JoinPolicy
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-/** Web app domain used to build shareable invite links — mobile does not yet handle this URL via deep link. */
-private const val WEB_APP_DOMAIN = "https://kluvs.com"
 
 /**
  * Bottom sheet for managing a club's invite link. Checked kluvs-frontend's ShareClubModal.tsx as
@@ -66,7 +64,7 @@ fun ShareClubBottomSheet(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val isInviteActive = joinPolicy == JoinPolicy.INVITE_LINK && inviteToken != null
-    val inviteUrl = inviteToken?.let { "$WEB_APP_DOMAIN/join/$it" }
+    val inviteUrl = inviteToken?.let { InviteLink.build(it) }
     var copied by remember { mutableStateOf(false) }
 
     BottomSheet(
