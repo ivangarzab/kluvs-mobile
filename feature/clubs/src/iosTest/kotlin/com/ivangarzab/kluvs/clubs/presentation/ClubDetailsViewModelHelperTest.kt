@@ -17,6 +17,7 @@ import com.ivangarzab.kluvs.clubs.domain.GetClubMembersUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetCurrentMemberIdUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.GetMemberClubsUseCase
+import com.ivangarzab.kluvs.clubs.domain.LeaveClubUseCase
 import com.ivangarzab.kluvs.presentation.progress.GetSessionProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.RegisterBookUseCase
 import com.ivangarzab.kluvs.clubs.domain.RemoveMemberUseCase
@@ -25,6 +26,7 @@ import com.ivangarzab.kluvs.clubs.domain.SearchBooksUseCase
 import com.ivangarzab.kluvs.presentation.progress.SaveProgressUseCase
 import com.ivangarzab.kluvs.clubs.domain.SetAttendanceUseCase
 import com.ivangarzab.kluvs.clubs.domain.ToggleSessionParticipationUseCase
+import com.ivangarzab.kluvs.clubs.domain.TransferOwnershipUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateClubUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionNoteUseCase
 import com.ivangarzab.kluvs.clubs.domain.UpdateDiscussionUseCase
@@ -130,6 +132,8 @@ class ClubDetailsViewModelHelperTest {
             deleteDiscussionUseCase = DeleteDiscussionUseCase(discussionRepository),
             updateMemberRoleUseCase = UpdateMemberRoleUseCase(memberRepository),
             removeMemberUseCase = RemoveMemberUseCase(memberRepository),
+            leaveClubUseCase = LeaveClubUseCase(memberRepository),
+            transferOwnershipUseCase = TransferOwnershipUseCase(memberRepository),
             getAttendanceRosterUseCase = GetAttendanceRosterUseCase(discussionAttendanceRepository),
             setAttendanceUseCase = SetAttendanceUseCase(discussionAttendanceRepository),
             clearAttendanceUseCase = ClearAttendanceUseCase(discussionAttendanceRepository),
