@@ -41,7 +41,7 @@ class SettingsViewModelTest {
     private val memberId = "member-123"
     private val userId = "user-456"
     private val name = "Alice"
-    private val handle = "alice_reads"
+    private val handle = "alice-reads"
 
     private val testMember = Member(
         id = memberId,
