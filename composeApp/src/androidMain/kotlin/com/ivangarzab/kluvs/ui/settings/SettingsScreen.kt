@@ -82,6 +82,20 @@ fun SettingsScreen(
         }
     }
 
+    LaunchedEffect(state.changePasswordSuccess) {
+        if (state.changePasswordSuccess) {
+            // Close the sheet before awaiting the snackbar — showSnackbar suspends until it
+            // auto-dismisses, so doing this after would leave the sheet open the whole time.
+            // isChangePasswordSheetOpen isn't this effect's key, so clearing it here doesn't
+            // cancel the coroutine — but changePasswordSuccess IS the key, so it must stay
+            // untouched until after showSnackbar returns, or the recomposition it triggers
+            // would cancel the in-flight snackbar before it's shown.
+            viewModel.onChangePasswordSheetDismissed()
+            snackbarHostState.showSnackbar(context.getString(R.string.password_updated))
+            viewModel.onDismissChangePasswordSuccess()
+        }
+    }
+
     SettingsScreenContent(
         state = state,
         snackbarHostState = snackbarHostState,
@@ -94,6 +108,11 @@ fun SettingsScreen(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
         },
+        onChangePasswordClick = viewModel::onChangePasswordSheetOpened,
+        onChangePasswordSheetDismiss = viewModel::onChangePasswordSheetDismissed,
+        onNewPasswordFieldChange = viewModel::onNewPasswordFieldChanged,
+        onConfirmPasswordFieldChange = viewModel::onConfirmPasswordFieldChanged,
+        onSubmitChangePassword = viewModel::onSubmitChangePassword,
     )
 }
 
@@ -107,6 +126,11 @@ fun SettingsScreenContent(
     onHandleChanged: (String) -> Unit = {},
     onSaveProfile: () -> Unit = {},
     onAvatarClick: () -> Unit = {},
+    onChangePasswordClick: () -> Unit = {},
+    onChangePasswordSheetDismiss: () -> Unit = {},
+    onNewPasswordFieldChange: (String) -> Unit = {},
+    onConfirmPasswordFieldChange: (String) -> Unit = {},
+    onSubmitChangePassword: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -143,9 +167,21 @@ fun SettingsScreenContent(
                 onSaveProfile = onSaveProfile,
             )
 
+            AccountSection(onChangePasswordClick = onChangePasswordClick)
+
             LegalSection(context = context)
 
             AboutSection()
+        }
+
+        if (state.isChangePasswordSheetOpen) {
+            ChangePasswordSheet(
+                state = state,
+                onNewPasswordFieldChange = onNewPasswordFieldChange,
+                onConfirmPasswordFieldChange = onConfirmPasswordFieldChange,
+                onSubmit = onSubmitChangePassword,
+                onDismiss = onChangePasswordSheetDismiss,
+            )
         }
     }
 }

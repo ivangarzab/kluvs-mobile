@@ -3,8 +3,10 @@ package com.ivangarzab.kluvs.settings.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.auth.domain.AuthError
 import com.ivangarzab.kluvs.data.error.toAppError
 import com.ivangarzab.kluvs.presentation.error.toUserMessage
+import com.ivangarzab.kluvs.settings.domain.ChangePasswordUseCase
 import com.ivangarzab.kluvs.settings.domain.GetEditableProfileUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateUserProfileUseCase
@@ -22,7 +24,8 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val getEditableProfile: GetEditableProfileUseCase,
     private val updateUserProfile: UpdateUserProfileUseCase,
-    private val updateAvatarUseCase: UpdateAvatarUseCase
+    private val updateAvatarUseCase: UpdateAvatarUseCase,
+    private val changePasswordUseCase: ChangePasswordUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -157,6 +160,83 @@ class SettingsViewModel(
 
     fun clearAvatarError() {
         _state.update { it.copy(avatarError = null) }
+    }
+
+    fun onChangePasswordSheetOpened() {
+        _state.update { it.copy(isChangePasswordSheetOpen = true) }
+    }
+
+    fun onChangePasswordSheetDismissed() {
+        _state.update {
+            it.copy(
+                isChangePasswordSheetOpen = false,
+                newPasswordField = "",
+                confirmPasswordField = "",
+                newPasswordError = null,
+                confirmPasswordError = null,
+                changePasswordGeneralError = null
+            )
+        }
+    }
+
+    fun onNewPasswordFieldChanged(value: String) {
+        _state.update { it.copy(newPasswordField = value, newPasswordError = null) }
+    }
+
+    fun onConfirmPasswordFieldChanged(value: String) {
+        _state.update { it.copy(confirmPasswordField = value, confirmPasswordError = null) }
+    }
+
+    fun onSubmitChangePassword() {
+        val state = _state.value
+        if (state.isChangingPassword) return
+
+        val newPasswordError = when {
+            state.newPasswordField.isBlank() -> "Password is required"
+            state.newPasswordField.length < 6 -> "Password must be at least 6 characters"
+            else -> null
+        }
+        val confirmPasswordError = when {
+            state.newPasswordField != state.confirmPasswordField -> "Passwords must match"
+            else -> null
+        }
+
+        if (newPasswordError != null || confirmPasswordError != null) {
+            _state.update {
+                it.copy(newPasswordError = newPasswordError, confirmPasswordError = confirmPasswordError)
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _state.update { it.copy(isChangingPassword = true, changePasswordGeneralError = null) }
+
+            changePasswordUseCase(state.newPasswordField)
+                .onSuccess {
+                    Bark.i("Password changed successfully")
+                    _state.update {
+                        it.copy(
+                            isChangingPassword = false,
+                            changePasswordSuccess = true,
+                            newPasswordField = "",
+                            confirmPasswordField = ""
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Bark.e("Failed to change password.", error)
+                    _state.update {
+                        it.copy(
+                            isChangingPassword = false,
+                            changePasswordGeneralError = (error as? AuthError) ?: AuthError.UnexpectedError
+                        )
+                    }
+                }
+        }
+    }
+
+    fun onDismissChangePasswordSuccess() {
+        _state.update { it.copy(changePasswordSuccess = false) }
     }
 
     private fun computeHasChanges(state: SettingsState): Boolean {

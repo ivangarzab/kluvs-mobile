@@ -199,6 +199,20 @@ class AuthServiceImpl(
         }
     }
 
+    override suspend fun updatePassword(newPassword: String) {
+        Bark.v("Password update initiated")
+
+        try {
+            auth.updateUser {
+                password = newPassword
+            }
+            Bark.i("Password updated")
+        } catch (e: Exception) {
+            Bark.e("Password update failed. User may need to retry.", e)
+            throw e
+        }
+    }
+
     override suspend fun signOut() {
         Bark.v("Sign out initiated")
 

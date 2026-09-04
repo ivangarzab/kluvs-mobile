@@ -253,6 +253,36 @@ class AuthRepositoryImplTest {
         assertEquals(AuthError.UserNotFound, result.exceptionOrNull())
     }
 
+    // ========== Change Password Tests ==========
+
+    @Test
+    fun `changePassword succeeds`() = runTest {
+        // Given
+        val newPassword = "newSecurePassword123"
+        everySuspend { authService.updatePassword(newPassword) } returns Unit
+
+        // When
+        val result = repository.changePassword(newPassword)
+
+        // Then
+        assertTrue(result.isSuccess)
+        verifySuspend { authService.updatePassword(newPassword) }
+    }
+
+    @Test
+    fun `changePassword fails and returns weak password error`() = runTest {
+        // Given
+        val newPassword = "short"
+        everySuspend { authService.updatePassword(newPassword) } throws Exception("Password should be at least 6 characters")
+
+        // When
+        val result = repository.changePassword(newPassword)
+
+        // Then
+        assertTrue(result.isFailure)
+        assertEquals(AuthError.WeakPassword, result.exceptionOrNull())
+    }
+
     // ========== Refresh Session Tests ==========
 
     @Test

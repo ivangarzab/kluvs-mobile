@@ -1,9 +1,12 @@
 package com.ivangarzab.kluvs.settings.presentation
 
+import com.ivangarzab.kluvs.auth.domain.AuthError
+import com.ivangarzab.kluvs.auth.domain.AuthRepository
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
 import com.ivangarzab.kluvs.model.AppError
 import com.ivangarzab.kluvs.model.Member
+import com.ivangarzab.kluvs.settings.domain.ChangePasswordUseCase
 import com.ivangarzab.kluvs.settings.domain.GetEditableProfileUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateUserProfileUseCase
@@ -31,9 +34,11 @@ class SettingsViewModelTest {
 
     private lateinit var memberRepository: MemberRepository
     private lateinit var avatarRepository: AvatarRepository
+    private lateinit var authRepository: AuthRepository
     private lateinit var getEditableProfile: GetEditableProfileUseCase
     private lateinit var updateUserProfile: UpdateUserProfileUseCase
     private lateinit var updateAvatarUseCase: UpdateAvatarUseCase
+    private lateinit var changePasswordUseCase: ChangePasswordUseCase
     private lateinit var viewModel: SettingsViewModel
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -62,10 +67,12 @@ class SettingsViewModelTest {
         Dispatchers.setMain(testDispatcher)
         memberRepository = mock<MemberRepository>()
         avatarRepository = mock<AvatarRepository>()
+        authRepository = mock<AuthRepository>()
         getEditableProfile = GetEditableProfileUseCase(memberRepository, avatarRepository)
         updateUserProfile = UpdateUserProfileUseCase(memberRepository)
         updateAvatarUseCase = UpdateAvatarUseCase(avatarRepository, memberRepository)
-        viewModel = SettingsViewModel(getEditableProfile, updateUserProfile, updateAvatarUseCase)
+        changePasswordUseCase = ChangePasswordUseCase(authRepository)
+        viewModel = SettingsViewModel(getEditableProfile, updateUserProfile, updateAvatarUseCase, changePasswordUseCase)
         every { avatarRepository.getAvatarUrl(null) } returns null
     }
 
@@ -426,5 +433,109 @@ class SettingsViewModelTest {
 
         // Then
         assertNull(viewModel.state.value.avatarError)
+    }
+
+    // ========================================
+    // CHANGE PASSWORD
+    // ========================================
+
+    @Test
+    fun `onSubmitChangePassword with valid matching passwords succeeds`() = runTest {
+        // Given
+        everySuspend { authRepository.changePassword("newSecurePass123") } returns Result.success(Unit)
+        viewModel.onNewPasswordFieldChanged("newSecurePass123")
+        viewModel.onConfirmPasswordFieldChanged("newSecurePass123")
+
+        // When
+        viewModel.onSubmitChangePassword()
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isChangingPassword)
+        assertTrue(state.changePasswordSuccess)
+        assertNull(state.changePasswordGeneralError)
+        assertEquals("", state.newPasswordField)
+        assertEquals("", state.confirmPasswordField)
+    }
+
+    @Test
+    fun `onSubmitChangePassword with blank password sets newPasswordError and does not call repository`() = runTest {
+        // Given
+        viewModel.onNewPasswordFieldChanged("")
+        viewModel.onConfirmPasswordFieldChanged("")
+
+        // When
+        viewModel.onSubmitChangePassword()
+
+        // Then
+        val state = viewModel.state.value
+        assertTrue(state.newPasswordError != null)
+        assertFalse(state.isChangingPassword)
+        assertFalse(state.changePasswordSuccess)
+    }
+
+    @Test
+    fun `onSubmitChangePassword with too-short password sets newPasswordError`() = runTest {
+        // Given
+        viewModel.onNewPasswordFieldChanged("abc")
+        viewModel.onConfirmPasswordFieldChanged("abc")
+
+        // When
+        viewModel.onSubmitChangePassword()
+
+        // Then
+        assertTrue(viewModel.state.value.newPasswordError != null)
+    }
+
+    @Test
+    fun `onSubmitChangePassword with mismatched confirmation sets confirmPasswordError`() = runTest {
+        // Given
+        viewModel.onNewPasswordFieldChanged("newSecurePass123")
+        viewModel.onConfirmPasswordFieldChanged("somethingElse123")
+
+        // When
+        viewModel.onSubmitChangePassword()
+
+        // Then
+        assertTrue(viewModel.state.value.confirmPasswordError != null)
+    }
+
+    @Test
+    fun `onSubmitChangePassword surfaces repository AuthError as changePasswordGeneralError`() = runTest {
+        // Given
+        everySuspend { authRepository.changePassword("newSecurePass123") } returns Result.failure(AuthError.WeakPassword)
+        viewModel.onNewPasswordFieldChanged("newSecurePass123")
+        viewModel.onConfirmPasswordFieldChanged("newSecurePass123")
+
+        // When
+        viewModel.onSubmitChangePassword()
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isChangingPassword)
+        assertFalse(state.changePasswordSuccess)
+        assertEquals(AuthError.WeakPassword, state.changePasswordGeneralError)
+    }
+
+    @Test
+    fun `onChangePasswordSheetDismissed resets change password fields and errors`() = runTest {
+        // Given
+        viewModel.onChangePasswordSheetOpened()
+        viewModel.onNewPasswordFieldChanged("abc")
+        viewModel.onConfirmPasswordFieldChanged("abc")
+        viewModel.onSubmitChangePassword()
+        assertTrue(viewModel.state.value.newPasswordError != null)
+
+        // When
+        viewModel.onChangePasswordSheetDismissed()
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isChangePasswordSheetOpen)
+        assertEquals("", state.newPasswordField)
+        assertEquals("", state.confirmPasswordField)
+        assertNull(state.newPasswordError)
+        assertNull(state.confirmPasswordError)
+        assertNull(state.changePasswordGeneralError)
     }
 }
