@@ -3,6 +3,8 @@ package com.ivangarzab.kluvs.settings.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivangarzab.bark.Bark
+import com.ivangarzab.kluvs.data.error.toAppError
+import com.ivangarzab.kluvs.presentation.error.toUserMessage
 import com.ivangarzab.kluvs.settings.domain.GetEditableProfileUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateAvatarUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateUserProfileUseCase
@@ -59,18 +61,30 @@ class SettingsViewModel(
         }
     }
 
+    /**
+     * Case is a soft transform — uppercase input is silently lowercased as the user types, since
+     * the backend's handle format is lowercase-only. Any other out-of-charset character (e.g.
+     * underscore, accented letters) is kept as typed and surfaced as [SettingsState.handleError]
+     * instead, so the user sees exactly what they typed and why it's rejected. Full structural
+     * validation (segment/hyphen rules, length) happens in [UpdateUserProfileUseCase] on save —
+     * only the server can authoritatively confirm the handle is free.
+     */
     fun onHandleChanged(handle: String) {
+        val lowered = handle.lowercase()
+        val handleError = if (HANDLE_CHARSET_REGEX.matches(lowered)) {
+            null
+        } else {
+            "Handles can only contain lowercase letters, numbers, and hyphens"
+        }
         _state.update { state ->
-            state.copy(
-                editedHandle = handle,
-                hasChanges = computeHasChanges(state.copy(editedHandle = handle))
-            )
+            val updated = state.copy(editedHandle = lowered, handleError = handleError)
+            updated.copy(hasChanges = computeHasChanges(updated))
         }
     }
 
     fun onSaveProfile() {
         val state = _state.value
-        if (state.isSaving) return
+        if (state.isSaving || state.handleError != null) return
         val profile = state.profile ?: return
 
         viewModelScope.launch {
@@ -89,7 +103,12 @@ class SettingsViewModel(
                     }
                 }
                 .onFailure { error ->
-                    _state.update { it.copy(isSaving = false, saveError = error.message) }
+                    // Covers the 409 "handle already taken" case — AppError.Conflict carries the
+                    // backend's own clean, human-readable detail via toUserMessage().
+                    Bark.e("Failed to save profile (Member ID: ${profile.memberId}).", error)
+                    _state.update {
+                        it.copy(isSaving = false, saveError = error.toAppError().toUserMessage())
+                    }
                 }
         }
     }
@@ -143,5 +162,12 @@ class SettingsViewModel(
     private fun computeHasChanges(state: SettingsState): Boolean {
         val profile = state.profile ?: return false
         return state.editedName != profile.name || state.editedHandle != profile.handle
+    }
+
+    companion object {
+        // Charset-only check for live typing feedback — lowercase letters, digits, and hyphens.
+        // Full structural validation (segment/hyphen placement, length) is enforced at save time
+        // by UpdateUserProfileUseCase's HANDLE_REGEX, which matches the backend exactly.
+        private val HANDLE_CHARSET_REGEX = Regex("^[a-z0-9-]*$")
     }
 }

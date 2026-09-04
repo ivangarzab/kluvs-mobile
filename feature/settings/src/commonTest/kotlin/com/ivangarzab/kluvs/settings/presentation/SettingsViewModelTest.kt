@@ -2,6 +2,7 @@ package com.ivangarzab.kluvs.settings.presentation
 
 import com.ivangarzab.kluvs.data.repositories.AvatarRepository
 import com.ivangarzab.kluvs.data.repositories.MemberRepository
+import com.ivangarzab.kluvs.model.AppError
 import com.ivangarzab.kluvs.model.Member
 import com.ivangarzab.kluvs.settings.domain.GetEditableProfileUseCase
 import com.ivangarzab.kluvs.settings.domain.UpdateAvatarUseCase
@@ -135,10 +136,40 @@ class SettingsViewModelTest {
         viewModel.loadProfile(userId)
 
         // When
+        viewModel.onHandleChanged("bob-reads")
+
+        // Then
+        assertEquals("bob-reads", viewModel.state.value.editedHandle)
+        assertNull(viewModel.state.value.handleError)
+    }
+
+    @Test
+    fun `onHandleChanged lowercases uppercase input silently`() = runTest {
+        // Given: profile loaded — uppercase is a soft transform, not a rejected character.
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        viewModel.loadProfile(userId)
+
+        // When
+        viewModel.onHandleChanged("BobReads")
+
+        // Then
+        assertEquals("bobreads", viewModel.state.value.editedHandle)
+        assertNull(viewModel.state.value.handleError)
+    }
+
+    @Test
+    fun `onHandleChanged with underscore sets handleError without stripping it`() = runTest {
+        // Given: profile loaded — out-of-charset characters are kept as typed and flagged with
+        // an inline error, not silently transformed like case is.
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        viewModel.loadProfile(userId)
+
+        // When
         viewModel.onHandleChanged("bob_reads")
 
         // Then
         assertEquals("bob_reads", viewModel.state.value.editedHandle)
+        assertTrue(viewModel.state.value.handleError != null)
     }
 
     // ========================================
@@ -179,7 +210,7 @@ class SettingsViewModelTest {
         viewModel.loadProfile(userId)
 
         // When
-        viewModel.onHandleChanged("bob_reads")
+        viewModel.onHandleChanged("bob-reads")
 
         // Then
         assertTrue(viewModel.state.value.hasChanges)
@@ -209,11 +240,13 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `onSaveProfile with invalid handle sets saveError`() = runTest {
-        // Given: profile loaded and user enters invalid handle
+    fun `onSaveProfile with handle that fails full format validation sets saveError`() = runTest {
+        // Given: profile loaded and user enters a handle that passes the inline charset check
+        // (letters, digits, hyphens only) but fails the UseCase's full structural/length
+        // validation — only the round trip through UpdateUserProfileUseCase catches this.
         everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
         viewModel.loadProfile(userId)
-        viewModel.onHandleChanged("invalid handle!")
+        viewModel.onHandleChanged("a")
 
         // When
         viewModel.onSaveProfile()
@@ -223,6 +256,45 @@ class SettingsViewModelTest {
         assertFalse(state.isSaving)
         assertFalse(state.saveSuccess)
         assertTrue(state.saveError != null)
+    }
+
+    @Test
+    fun `onSaveProfile is a no-op when handleError is set`() = runTest {
+        // Given: profile loaded and user enters a handle with an out-of-charset character —
+        // the inline validation error should block the save round trip entirely.
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        viewModel.loadProfile(userId)
+        viewModel.onHandleChanged("bob_reads")
+        assertTrue(viewModel.state.value.handleError != null)
+
+        // When
+        viewModel.onSaveProfile()
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isSaving)
+        assertFalse(state.saveSuccess)
+        assertNull(state.saveError)
+    }
+
+    @Test
+    fun `onSaveProfile surfaces a friendly message on 409 conflict`() = runTest {
+        // Given: profile loaded and the server rejects the save because the handle is taken
+        everySuspend { memberRepository.getMemberByUserId(userId) } returns Result.success(testMember)
+        everySuspend {
+            memberRepository.updateMember(any(), any(), any(), any(), any(), any(), any())
+        } returns Result.failure(AppError.Conflict("That handle is already taken"))
+        viewModel.loadProfile(userId)
+        viewModel.onHandleChanged("taken-handle")
+
+        // When
+        viewModel.onSaveProfile()
+
+        // Then
+        val state = viewModel.state.value
+        assertFalse(state.isSaving)
+        assertFalse(state.saveSuccess)
+        assertEquals("That handle is already taken", state.saveError)
     }
 
     @Test

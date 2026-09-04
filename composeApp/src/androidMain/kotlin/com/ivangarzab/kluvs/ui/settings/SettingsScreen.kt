@@ -134,6 +134,7 @@ fun SettingsScreenContent(
                 onAvatarClick = onAvatarClick,
                 editedName = state.editedName,
                 editedHandle = state.editedHandle,
+                handleError = state.handleError,
                 hasChanges = state.hasChanges,
                 isSaving = state.isSaving,
                 saveError = state.saveError,
@@ -155,9 +156,9 @@ fun Preview_SettingsScreen() = KluvsTheme {
     SettingsScreenContent(
         state = SettingsState(
             isLoading = false,
-            profile = EditableProfile(memberId = "1", name = "Alice", handle = "alice_reads"),
+            profile = EditableProfile(memberId = "1", name = "Alice", handle = "alice-reads"),
             editedName = "Alice",
-            editedHandle = "alice_reads",
+            editedHandle = "alice-reads",
             hasChanges = false,
         )
     )
@@ -169,9 +170,9 @@ fun Preview_SettingsScreen_WithChanges() = KluvsTheme {
     SettingsScreenContent(
         state = SettingsState(
             isLoading = false,
-            profile = EditableProfile(memberId = "1", name = "Alice", handle = "alice_reads"),
+            profile = EditableProfile(memberId = "1", name = "Alice", handle = "alice-reads"),
             editedName = "Alice Updated",
-            editedHandle = "alice_reads",
+            editedHandle = "alice-reads",
             hasChanges = true,
         )
     )
