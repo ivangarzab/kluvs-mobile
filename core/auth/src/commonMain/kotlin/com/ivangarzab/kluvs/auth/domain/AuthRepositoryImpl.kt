@@ -200,6 +200,19 @@ class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun changePassword(newPassword: String): Result<Unit> {
+        Bark.v("Password change requested")
+
+        return try {
+            authService.updatePassword(newPassword)
+            Bark.i("Password changed successfully")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Bark.e("Password change failed. User may need to retry.", e)
+            Result.failure(e.toAuthError())
+        }
+    }
+
     override suspend fun signOut(): Result<Unit> {
         Bark.v("Sign out initiated")
 

@@ -77,6 +77,17 @@ interface AuthService {
     suspend fun resetPasswordForEmail(email: String)
 
     /**
+     * Updates the password of the currently authenticated user.
+     *
+     * Requires a valid active session — unlike [resetPasswordForEmail], this does not send an
+     * email; it applies the change immediately using the current session's access token.
+     *
+     * @param newPassword The new password to set
+     * @throws Exception if the update fails (e.g., weak password, no active session)
+     */
+    suspend fun updatePassword(newPassword: String)
+
+    /**
      * Signs out the current user.
      *
      * Invalidates the current session on the server.

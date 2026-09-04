@@ -1,5 +1,7 @@
 package com.ivangarzab.kluvs.settings.presentation
 
+import com.ivangarzab.kluvs.auth.domain.AuthError
+
 data class SettingsState(
     val isLoading: Boolean = true,
     val error: String? = null,
@@ -17,5 +19,14 @@ data class SettingsState(
     val hasChanges: Boolean = false,
     // Avatar upload state
     val isUploadingAvatar: Boolean = false,
-    val avatarError: String? = null
+    val avatarError: String? = null,
+    // Change password sheet state
+    val isChangePasswordSheetOpen: Boolean = false,
+    val newPasswordField: String = "",
+    val confirmPasswordField: String = "",
+    val newPasswordError: String? = null,
+    val confirmPasswordError: String? = null,
+    val isChangingPassword: Boolean = false,
+    val changePasswordGeneralError: AuthError? = null,
+    val changePasswordSuccess: Boolean = false
 )

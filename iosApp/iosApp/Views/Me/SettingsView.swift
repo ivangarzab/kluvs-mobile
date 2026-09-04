@@ -7,6 +7,7 @@ struct SettingsView: View {
     let userId: String
     @StateObject private var viewModel = SettingsViewModelWrapper()
     @State private var showSaveSuccess = false
+    @State private var showChangePasswordSuccess = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -41,6 +42,8 @@ struct SettingsView: View {
                         onSaveProfile: { viewModel.onSaveProfile() }
                     )
 
+                    AccountSection(onChangePasswordClick: { viewModel.onChangePasswordSheetOpened() })
+
                     LegalSection()
 
                     AboutSection()
@@ -60,10 +63,25 @@ struct SettingsView: View {
                 viewModel.onDismissSaveSuccess()
             }
         }
+        .onChange(of: viewModel.changePasswordSuccess) { success in
+            if success {
+                // Close the sheet before the toast appears, matching Android's ordering —
+                // otherwise the sheet would stay open while the toast is visible.
+                viewModel.onChangePasswordSheetDismissed()
+                showChangePasswordSuccess = true
+                viewModel.onDismissChangePasswordSuccess()
+            }
+        }
         .overlay(alignment: .bottom) {
             if showSaveSuccess {
                 SaveSuccessToast {
                     showSaveSuccess = false
+                }
+                .padding()
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            } else if showChangePasswordSuccess {
+                SaveSuccessToast(message: String(localized: "password_updated")) {
+                    showChangePasswordSuccess = false
                 }
                 .padding()
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -76,7 +94,15 @@ struct SettingsView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: showSaveSuccess)
+        .animation(.easeInOut(duration: 0.3), value: showChangePasswordSuccess)
         .animation(.easeInOut(duration: 0.3), value: viewModel.avatarError)
+        .changePasswordSheet(
+            isPresented: Binding(
+                get: { viewModel.isChangePasswordSheetOpen },
+                set: { if !$0 { viewModel.onChangePasswordSheetDismissed() } }
+            ),
+            viewModel: viewModel
+        )
     }
 }
 
@@ -167,6 +193,45 @@ struct EditProfileSection: View {
             .padding(.top, 4)
         }
         .padding(.vertical, 12)
+    }
+}
+
+// MARK: - Account Section
+
+struct AccountSection: View {
+    let onChangePasswordClick: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(String(localized: "account_title").uppercased())
+                .kluvsStyle(KluvsTheme.typography.eyebrow)
+                .foregroundColor(KluvsTheme.colors.contentMuted)
+                .padding(.bottom, 8)
+
+            AccountRow(label: String(localized: "change_password"), action: onChangePasswordClick)
+            Divider().overlay(KluvsTheme.colors.divider)
+        }
+        .padding(.vertical, 12)
+    }
+}
+
+private struct AccountRow: View {
+    let label: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(label)
+                    .kluvsStyle(KluvsTheme.typography.body.large)
+                    .foregroundColor(KluvsTheme.colors.accent)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(KluvsTheme.colors.contentMuted)
+            }
+            .padding(.vertical, 12)
+        }
     }
 }
 
@@ -267,11 +332,12 @@ struct AboutSection: View {
 // MARK: - Save Success Toast
 
 private struct SaveSuccessToast: View {
+    var message: String = String(localized: "save_success")
     let onDismiss: () -> Void
 
     var body: some View {
         HStack {
-            Text(String(localized: "save_success"))
+            Text(message)
                 .font(.body)
                 .foregroundColor(.white)
                 .lineLimit(2)
