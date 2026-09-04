@@ -37,6 +37,7 @@ struct SettingsView: View {
                         hasChanges: viewModel.hasChanges,
                         isSaving: viewModel.isSaving,
                         saveError: viewModel.saveError,
+                        handleError: viewModel.handleError,
                         onSaveProfile: { viewModel.onSaveProfile() }
                     )
 
@@ -91,6 +92,7 @@ struct EditProfileSection: View {
     let hasChanges: Bool
     let isSaving: Bool
     let saveError: String?
+    let handleError: String?
     let onSaveProfile: () -> Void
 
     @State private var selectedItem: PhotosPickerItem? = nil
@@ -147,7 +149,7 @@ struct EditProfileSection: View {
 
             InputField(label: String(localized: "label_name"), value: $editedName)
 
-            InputField(label: String(localized: "label_handle"), value: $editedHandle, prefix: "@")
+            InputField(label: String(localized: "label_handle"), value: $editedHandle, prefix: "@", error: handleError)
 
             if let saveError = saveError {
                 Text(saveError)
@@ -159,7 +161,7 @@ struct EditProfileSection: View {
             PrimaryButton(
                 text: isSaving ? String(localized: "button_save") + "…" : String(localized: "button_save"),
                 action: onSaveProfile,
-                enabled: hasChanges && !isSaving
+                enabled: hasChanges && !isSaving && handleError == nil
             )
             .frame(maxWidth: .infinity)
             .padding(.top, 4)

@@ -15,6 +15,7 @@ class SettingsViewModelWrapper: ObservableObject {
     @Published var editedHandle: String = ""
     @Published var isSaving: Bool = false
     @Published var saveError: String? = nil
+    @Published var handleError: String? = nil
     @Published var saveSuccess: Bool = false
     @Published var hasChanges: Bool = false
     @Published var isUploadingAvatar: Bool = false
@@ -39,6 +40,7 @@ class SettingsViewModelWrapper: ObservableObject {
                 self.editedHandle = state.editedHandle
                 self.isSaving = state.isSaving
                 self.saveError = state.saveError
+                self.handleError = state.handleError
                 self.saveSuccess = state.saveSuccess
                 self.hasChanges = state.hasChanges
                 self.isUploadingAvatar = state.isUploadingAvatar
